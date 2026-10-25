@@ -6,6 +6,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
@@ -71,5 +72,20 @@ class HrTreeSecurityTest {
                 .andExpect(status().isForbidden());
         verify(entityAutoService, never()).execute(
                 org.mockito.ArgumentMatchers.eq("createEmplPositionType"), anyMap());
+    }
+
+    @Test
+    void ac44_readOnlyUserCannotMutateCatalogServicesWithoutPermissionMainAction() throws Exception {
+        mockMvc.perform(post("/api/humanres/services/createBenefitType")
+                        .contentType("application/json")
+                        .content("{\"benefitTypeId\":\"AC44_BENEFIT\"}")
+                        .with(httpBasic("view", "view")))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/humanres/services/deleteBenefitType")
+                        .contentType("application/json")
+                        .content("{\"benefitTypeId\":\"AC44_BENEFIT\"}")
+                        .with(httpBasic("view", "view")))
+                .andExpect(status().isForbidden());
+        verify(entityAutoService, never()).execute(anyString(), anyMap());
     }
 }

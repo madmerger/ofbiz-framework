@@ -4,3 +4,6 @@ spring:
     username: ${HUMANRES_DB_USERNAME:humanres}
     password: ${HUMANRES_DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate

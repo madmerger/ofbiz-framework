@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -114,7 +115,7 @@ public class SecurityConfiguration {
             if (parts.length > 4) {
                 String serviceName = parts[4];
                 String permission = ServiceCatalog.find(serviceName)
-                        .map(ServiceCatalog.ServiceDefinition::permissionMainAction)
+                        .map(SecurityConfiguration::catalogServiceAction)
                         .orElseGet(() -> simpleServiceAction(serviceName));
                 return new AuthorizationDecision(permission == null
                         || hasAny(authorities, "HUMANRES_" + permission, HUMANRES_ADMIN));
@@ -128,6 +129,19 @@ public class SecurityConfiguration {
             return new AuthorizationDecision(hasAny(authorities, "HUMANRES_CREATE", HUMANRES_ADMIN));
         }
         return new AuthorizationDecision(true);
+    }
+
+    private static String catalogServiceAction(ServiceCatalog.ServiceDefinition definition) {
+        if (definition.permissionMainAction() != null) {
+            return definition.permissionMainAction();
+        }
+        return switch (definition.invoke().toLowerCase(Locale.ROOT)) {
+            case "create" -> "CREATE";
+            case "update" -> "UPDATE";
+            case "delete" -> "DELETE";
+            case "expire" -> "UPDATE";
+            default -> null;
+        };
     }
 
     private static String simpleServiceAction(String serviceName) {

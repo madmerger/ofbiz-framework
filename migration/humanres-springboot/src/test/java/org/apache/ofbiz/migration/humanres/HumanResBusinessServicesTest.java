@@ -16,6 +16,7 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,6 +35,9 @@ class HumanResBusinessServicesTest {
 
     @Autowired
     private EntityRegistry entityRegistry;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @MockitoSpyBean
     private PartyPort partyPort;
@@ -249,6 +253,29 @@ class HumanResBusinessServicesTest {
         assertEquals("AC27_CHILD", created.get("partyId"));
         businessServices.execute("removeInternalOrg", Map.of(
                 "parentpartyId", "AC27_PARENT", "partyId", "AC27_CHILD"));
+    }
+
+    @Test
+    void ac27_internalOrganizationRemovalUsesRelationshipRoleKeys() {
+        Timestamp fromDate = Timestamp.valueOf("2026-03-01 00:00:00");
+        partyPort.createRelationship(
+                "AC27_ROLE_PARENT", "AC27_ROLE_CHILD", "GROUP_ROLLUP",
+                "INTERNAL_ORGANIZATIO", "INTERNAL_ORGANIZATIO", null, fromDate);
+        partyPort.createRelationship(
+                "AC27_ROLE_PARENT", "AC27_ROLE_CHILD", "GROUP_ROLLUP",
+                "OTHER_ROLE_FROM", "OTHER_ROLE_TO", null, fromDate);
+
+        businessServices.execute("removeInternalOrg", Map.of(
+                "parentpartyId", "AC27_ROLE_PARENT", "partyId", "AC27_ROLE_CHILD"));
+
+        List<String> remainingRoles = entityManager.createQuery(
+                        "select relation.roleTypeIdFrom from LocalPartyRelationship relation "
+                                + "where relation.partyIdFrom = :from and relation.partyIdTo = :to",
+                        String.class)
+                .setParameter("from", "AC27_ROLE_PARENT")
+                .setParameter("to", "AC27_ROLE_CHILD")
+                .getResultList();
+        assertEquals(List.of("OTHER_ROLE_FROM"), remainingRoles);
     }
 
     @Test

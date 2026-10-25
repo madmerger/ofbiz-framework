@@ -19,16 +19,17 @@ public class PartyRelationshipRecord {
     @Id
     @Column(name = "PARTY_ID_TO", length = 20)
     String partyIdTo;
-    @Id
     @Column(name = "PARTY_RELATIONSHIP_TYPE_ID", length = 20)
     String partyRelationshipTypeId;
     @Id
-    @Column(name = "FROM_DATE")
-    Timestamp fromDate;
     @Column(name = "ROLE_TYPE_ID_FROM", length = 20)
     String roleTypeIdFrom;
+    @Id
     @Column(name = "ROLE_TYPE_ID_TO", length = 20)
     String roleTypeIdTo;
+    @Id
+    @Column(name = "FROM_DATE")
+    Timestamp fromDate;
     @Column(name = "RELATIONSHIP_NAME", length = 100)
     String relationshipName;
     @Column(name = "THRU_DATE")
@@ -63,7 +64,8 @@ public class PartyRelationshipRecord {
         private static final long serialVersionUID = 1L;
         public String partyIdFrom;
         public String partyIdTo;
-        public String partyRelationshipTypeId;
+        public String roleTypeIdFrom;
+        public String roleTypeIdTo;
         public Timestamp fromDate;
 
         public Key() {}
@@ -73,13 +75,14 @@ public class PartyRelationshipRecord {
             return other instanceof Key key
                     && Objects.equals(partyIdFrom, key.partyIdFrom)
                     && Objects.equals(partyIdTo, key.partyIdTo)
-                    && Objects.equals(partyRelationshipTypeId, key.partyRelationshipTypeId)
+                    && Objects.equals(roleTypeIdFrom, key.roleTypeIdFrom)
+                    && Objects.equals(roleTypeIdTo, key.roleTypeIdTo)
                     && Objects.equals(fromDate, key.fromDate);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(partyIdFrom, partyIdTo, partyRelationshipTypeId, fromDate);
+            return Objects.hash(partyIdFrom, partyIdTo, roleTypeIdFrom, roleTypeIdTo, fromDate);
         }
     }
 }

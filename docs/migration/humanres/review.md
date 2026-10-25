@@ -4,7 +4,7 @@
 
 | 検証 | コマンド | 結果 |
 | --- | --- | --- |
-| Spring Boot モジュールの全テスト | `./gradlew :migration:humanres-springboot:test` | **154 件 pass / 0 fail / 0 skip**（EntityAutoAcceptanceTest 136、HrTreeSecurityTest 5、HumanResBusinessServicesTest 12、PostgresSmokeTest 1） |
+| Spring Boot モジュールの全テスト | `./gradlew :migration:humanres-springboot:test` | **156 件 pass / 0 fail / 0 skip**（EntityAutoAcceptanceTest 136、HrTreeSecurityTest 6、HumanResBusinessServicesTest 13、PostgresSmokeTest 1） |
 | PostgreSQL（Testcontainers） | 上に含まれる | 1 件 pass（skip なし） |
 | 棚卸しツール・生成器 | `python3 -m unittest discover -s migration/tools -p 'test_*.py'` | 6 件 pass |
 | 既存 OFBiz テスト（回帰） | `./gradlew test --tests 'org.apache.ofbiz.humanres.HumanResEventsTest'` | 3 件 pass |
@@ -33,7 +33,7 @@
 | AC-41 | PASS | `ac41_missingHumanResAuthorityIsRejectedBeforeTreeLookup`（既存テスト 2 の再現） |
 | AC-42 | PASS | `ac42_authorizedHumanResViewReachesTreeService`（既存テスト 3 の再現） |
 | AC-43 | PASS | `ac43_humanResAuthorityWithoutOfbtoolsBaseGateIsRejected` |
-| AC-44 | PASS | `ac44_missingPerServiceActionIsRejectedBeforeEntityAutoDispatch` |
+| AC-44 | PASS | `ac44_missingPerServiceActionIsRejectedBeforeEntityAutoDispatch` + permissionMainAction 未定義の create/delete 拒否と未 dispatch の検証 |
 | AC-45 | PASS | `ac45_localProfileUsesEnvironmentSuppliedPassword`。リポジトリに平文の認証情報なし |
 
 ## 3. 旧 OFBiz 版との挙動差分
@@ -47,9 +47,12 @@
 | B-05 | 認証 | OFBiz の UserLogin / セッション / 外部ログインキー | HTTP Basic（stateless）、インメモリユーザ | 全体移行時に OIDC 等へ置き換え |
 | B-06 | エラーメッセージの文言 | UiLabels でローカライズ | 英語固定のキー（`ServiceValueFound` 等） | i18n は未対応 |
 | B-07 | ECA / SECA | humanres に独自の ECA は無いが、呼び出し先の party サービスなどの SECA は動く | アダプタは SECA を実行しない | 全体移行時に party 側の移行で吸収 |
+| B-08 | permission-service 未定義の entity-auto サービス | 認証＋base-permission(VIEW) のみで実行可能 | invoke 種別に応じた HUMANRES_CREATE/UPDATE/DELETE を要求 | セキュリティ強化のための意図的差分 |
 
 ## 4. 既知の制約・未対応項目
 
+- 本番運用では TLS 終端（HTTPS）必須。HTTP Basic は平文 HTTP では資格情報が露出する。
+- HUMANRES_VIEW で給与履歴等の全エンティティを参照可能（OFBiz 画面と同等）。フィールド/エンティティ単位の閲覧制御は全体移行時に設計。
 - Widget / FTL / メニュー / Lookup 画面（UI）は未移植。
 - 105 本ある「画面のみ」のリクエストは `GET /entities/{EntityName}` に一般化した。画面固有の結合（view-entity の一部や `FindEmployee.ftl` の検索条件）は未実装。view-entity 5 本は JPA 化していない。
 - アダプタの local 実装は最小限のカラムだけ（PARTY / PERSON / PARTY_ROLE / PARTY_RELATIONSHIP / WORK_EFFORT / RATE_AMOUNT など）。party の `createPersonRoleAndContactMechs` のうち連絡先（ContactMech）作成は未実装。
