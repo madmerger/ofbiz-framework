@@ -75,9 +75,6 @@ public class LocalPartyAdapter implements PartyPort {
         List<PartyRelationshipRecord> matches = entityManager.createQuery(
                         "select relation from LocalPartyRelationship relation "
                                 + "where relation.partyIdFrom = :from and relation.partyIdTo = :to "
-                                + "and relation.partyRelationshipTypeId = 'GROUP_ROLLUP' "
-                                + "and relation.roleTypeIdFrom = 'INTERNAL_ORGANIZATIO' "
-                                + "and relation.roleTypeIdTo = 'INTERNAL_ORGANIZATIO' "
                                 + "order by relation.fromDate desc",
                         PartyRelationshipRecord.class)
                 .setParameter("from", partyIdFrom)

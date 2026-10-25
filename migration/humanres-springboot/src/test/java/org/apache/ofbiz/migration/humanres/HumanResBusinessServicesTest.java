@@ -3,6 +3,7 @@ package org.apache.ofbiz.migration.humanres;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import jakarta.persistence.EntityManager;
+import org.apache.ofbiz.migration.humanres.adapter.local.model.PartyRelationshipRecord;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -256,26 +258,35 @@ class HumanResBusinessServicesTest {
     }
 
     @Test
-    void ac27_internalOrganizationRemovalUsesRelationshipRoleKeys() {
-        Timestamp fromDate = Timestamp.valueOf("2026-03-01 00:00:00");
+    void ac27_internalOrganizationRemovalDeletesFirstRelationshipByPartyOrder() {
+        Timestamp firstFromDate = Timestamp.valueOf("2026-03-02 00:00:00");
+        Timestamp remainingFromDate = Timestamp.valueOf("2026-03-01 00:00:00");
         partyPort.createRelationship(
                 "AC27_ROLE_PARENT", "AC27_ROLE_CHILD", "GROUP_ROLLUP",
-                "INTERNAL_ORGANIZATIO", "INTERNAL_ORGANIZATIO", null, fromDate);
+                "OTHER_ROLE_FROM", "OTHER_ROLE_TO", null, firstFromDate);
         partyPort.createRelationship(
                 "AC27_ROLE_PARENT", "AC27_ROLE_CHILD", "GROUP_ROLLUP",
-                "OTHER_ROLE_FROM", "OTHER_ROLE_TO", null, fromDate);
+                "INTERNAL_ORGANIZATIO", "INTERNAL_ORGANIZATIO", null, remainingFromDate);
 
         businessServices.execute("removeInternalOrg", Map.of(
                 "parentpartyId", "AC27_ROLE_PARENT", "partyId", "AC27_ROLE_CHILD"));
 
-        List<String> remainingRoles = entityManager.createQuery(
-                        "select relation.roleTypeIdFrom from LocalPartyRelationship relation "
-                                + "where relation.partyIdFrom = :from and relation.partyIdTo = :to",
-                        String.class)
-                .setParameter("from", "AC27_ROLE_PARENT")
-                .setParameter("to", "AC27_ROLE_CHILD")
-                .getResultList();
-        assertEquals(List.of("OTHER_ROLE_FROM"), remainingRoles);
+        PartyRelationshipRecord.Key removed = new PartyRelationshipRecord.Key();
+        removed.partyIdFrom = "AC27_ROLE_PARENT";
+        removed.partyIdTo = "AC27_ROLE_CHILD";
+        removed.roleTypeIdFrom = "OTHER_ROLE_FROM";
+        removed.roleTypeIdTo = "OTHER_ROLE_TO";
+        removed.fromDate = firstFromDate;
+
+        PartyRelationshipRecord.Key remaining = new PartyRelationshipRecord.Key();
+        remaining.partyIdFrom = "AC27_ROLE_PARENT";
+        remaining.partyIdTo = "AC27_ROLE_CHILD";
+        remaining.roleTypeIdFrom = "INTERNAL_ORGANIZATIO";
+        remaining.roleTypeIdTo = "INTERNAL_ORGANIZATIO";
+        remaining.fromDate = remainingFromDate;
+
+        assertNull(entityManager.find(PartyRelationshipRecord.class, removed));
+        assertNotNull(entityManager.find(PartyRelationshipRecord.class, remaining));
     }
 
     @Test
