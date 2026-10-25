@@ -2,6 +2,7 @@ package org.apache.ofbiz.migration.humanres;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -74,13 +75,13 @@ class EntityAutoAcceptanceTest {
 
     @Test
     void ac11_sequenceIdsAndSubSequencesFollowOfbizShape() {
-        Map<String, Object> position = entityAutoService.createEntity("EmplPosition", Map.of(
+        Map<String, Object> position = entityAutoService.execute("createEmplPosition", Map.of(
                 "emplPositionTypeId", "AC11_TYPE", "statusId", "EMPL_POS_ACTIVE"));
         String positionId = String.valueOf(position.get("emplPositionId"));
         org.junit.jupiter.api.Assertions.assertTrue(positionId.matches("\\d+"));
         org.junit.jupiter.api.Assertions.assertTrue(Long.parseLong(positionId) >= 10000);
 
-        Map<String, Object> item = entityAutoService.createEntity("PerfReviewItem", Map.of(
+        Map<String, Object> item = entityAutoService.execute("createPerfReviewItem", Map.of(
                 "employeePartyId", "AC11_EMP", "employeeRoleTypeId", "EMPLOYEE", "perfReviewId", "AC11_REVIEW"));
         assertEquals("00001", item.get("perfReviewItemSeqId"));
     }
@@ -90,6 +91,33 @@ class EntityAutoAcceptanceTest {
         Map<String, Object> created = entityAutoService.createEntity("EmplPositionReportingStruct", Map.of(
                 "emplPositionIdManagedBy", "AC12_A", "emplPositionIdReportingTo", "AC12_B"));
         assertNotNull(created.get("fromDate"));
+    }
+
+    @Test
+    void ac12_nonPrimaryFromDateIsNotDefaulted() {
+        entityAutoService.execute("createUnemploymentClaim", Map.of(
+                "unemploymentClaimId", "AC12_NO_FROM_DATE"));
+        Object claim = entityAutoService.findEntity(
+                "UnemploymentClaim", Map.of("unemploymentClaimId", "AC12_NO_FROM_DATE"));
+        assertNull(entityRegistry.get(claim, "fromDate"));
+    }
+
+    @Test
+    void ac11_missingRequiredInPrimaryKeyIsNotGenerated() {
+        HumanResException error = assertThrows(
+                HumanResException.class,
+                () -> entityAutoService.execute("createTrainingTypes", Map.of("description", "AC11 training")));
+        assertEquals(400, error.getStatus().value());
+        assertEquals("Missing required IN parameter: trainingClassTypeId", error.getMessage());
+    }
+
+    @Test
+    void ac11_inPrimaryKeyIsNotGeneratedAsSubSequence() {
+        HumanResException error = assertThrows(
+                HumanResException.class,
+                () -> entityAutoService.execute("createSalaryStep", Map.of("payGradeId", "AC11_GRADE")));
+        assertEquals(400, error.getStatus().value());
+        assertEquals("Missing primary-key parameter: salaryStepSeqId", error.getMessage());
     }
 
     @Test

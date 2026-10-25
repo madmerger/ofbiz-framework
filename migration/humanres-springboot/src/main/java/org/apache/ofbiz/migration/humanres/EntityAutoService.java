@@ -62,7 +62,6 @@ public class EntityAutoService {
         Object entity = entityRegistry.newEntity(entityClass);
         setProvidedFields(entity, entityClass, input, Set.of());
         setDefaultFromDate(entity, entityClass);
-        assignGeneratedKeys(entityName, entity, entityClass, input);
         ensureCompletePrimaryKey(entityName, entity, entityClass);
         if (entityRegistry.findByPrimaryKey(entityName, keyValues(entity, entityClass)) != null) {
             throw HumanResException.conflict("ServiceValueFound");
@@ -126,7 +125,7 @@ public class EntityAutoService {
         Map<String, ServiceCatalog.ParamDefinition> params = paramsByName(definition);
         setProvidedFields(entity, entityClass, input, Set.of(), params);
         setDefaultFromDate(entity, entityClass);
-        assignGeneratedKeys(definition.entity(), entity, entityClass, input);
+        assignGeneratedKeys(definition, entity, entityClass);
         validateRequiredInputs(definition, input, entityClass);
         ensureCompletePrimaryKey(definition.entity(), entity, entityClass);
         if (entityRegistry.findByPrimaryKey(definition.entity(), keyValues(entity, entityClass)) != null) {
@@ -187,7 +186,7 @@ public class EntityAutoService {
             }
             if (definition.invoke().equalsIgnoreCase("create")
                     && primaryKeys.contains(param.name())
-                    && isGeneratedOnCreate(param.name(), primaryKeys)) {
+                    && isGeneratedOnCreate(definition, param.name(), primaryKeys, input)) {
                 continue;
             }
             if (definition.invoke().equalsIgnoreCase("create")
@@ -229,26 +228,34 @@ public class EntityAutoService {
     }
 
     private void setDefaultFromDate(Object entity, Class<?> entityClass) {
-        if (entityRegistry.hasProperty(entityClass, "fromDate")
+        if (entityRegistry.primaryKeyNames(entityClass).contains("fromDate")
+                && entityRegistry.hasProperty(entityClass, "fromDate")
                 && entityRegistry.get(entity, "fromDate") == null) {
             entityRegistry.set(entity, "fromDate", EntityRegistry.now());
         }
     }
 
     private void assignGeneratedKeys(
-            String entityName, Object entity, Class<?> entityClass, Map<String, ?> input) {
+            ServiceCatalog.ServiceDefinition definition, Object entity, Class<?> entityClass) {
         List<String> primaryKeys = entityRegistry.primaryKeyNames(entityClass);
-        for (String name : primaryKeys) {
-            if (entityRegistry.get(entity, name) != null) {
-                continue;
-            }
-            if (primaryKeys.size() == 1 && name.endsWith("Id")
+        Map<String, ServiceCatalog.ParamDefinition> params = paramsByName(definition);
+        if (primaryKeys.size() == 1) {
+            String name = primaryKeys.get(0);
+            ServiceCatalog.ParamDefinition param = params.get(name);
+            if (param != null
+                    && (param.mode().equalsIgnoreCase("OUT")
+                            || param.mode().equalsIgnoreCase("INOUT")
+                                    && !present(entityRegistry.get(entity, name)))
+                    && name.endsWith("Id")
                     && entityRegistry.propertyType(entityClass, name) == String.class) {
-                entityRegistry.set(entity, name, sequenceService.nextId(entityName));
-            } else if (name.endsWith("SeqId")
-                    && entityRegistry.propertyType(entityClass, name) == String.class) {
-                entityRegistry.set(entity, name, sequenceService.nextSubSequence(entityName, name, input));
+                entityRegistry.set(entity, name, sequenceService.nextId(definition.entity()));
             }
+            return;
+        }
+        String sequenceField = subSequenceField(entity, entityClass, primaryKeys, params);
+        if (sequenceField != null) {
+            entityRegistry.set(entity, sequenceField, sequenceService.nextSubSequence(
+                    definition.entity(), sequenceField, keyValues(entity, entityClass)));
         }
     }
 
@@ -331,8 +338,52 @@ public class EntityAutoService {
         return value != null && !value.toString().isBlank();
     }
 
-    private static boolean isGeneratedOnCreate(String name, Set<String> primaryKeys) {
-        return (primaryKeys.size() == 1 && name.endsWith("Id"))
-                || name.endsWith("SeqId");
+    private boolean isGeneratedOnCreate(
+            ServiceCatalog.ServiceDefinition definition,
+            String name,
+            Set<String> primaryKeys,
+            Map<String, ?> input) {
+        if (!primaryKeys.contains(name)) {
+            return false;
+        }
+        ServiceCatalog.ParamDefinition param = paramsByName(definition).get(name);
+        if (param == null) {
+            return false;
+        }
+        if (primaryKeys.size() != 1) {
+            return false;
+        }
+        return param.mode().equalsIgnoreCase("OUT")
+                || param.mode().equalsIgnoreCase("INOUT") && !present(input.get(name));
+    }
+
+    private String subSequenceField(
+            Object entity,
+            Class<?> entityClass,
+            List<String> primaryKeys,
+            Map<String, ServiceCatalog.ParamDefinition> params) {
+        if (primaryKeys.size() < 2) {
+            return null;
+        }
+        String sequenceField = null;
+        for (String name : primaryKeys) {
+            ServiceCatalog.ParamDefinition param = params.get(name);
+            if (param == null) {
+                return null;
+            }
+            if (param.mode().equalsIgnoreCase("OUT")) {
+                if (sequenceField != null || !name.endsWith("SeqId")) {
+                    return null;
+                }
+                sequenceField = name;
+            } else if (!param.mode().equalsIgnoreCase("IN")) {
+                return null;
+            }
+            if (entity != null && entityClass != null && !name.equals(sequenceField)
+                    && !present(entityRegistry.get(entity, name))) {
+                return null;
+            }
+        }
+        return sequenceField;
     }
 }

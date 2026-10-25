@@ -24,6 +24,7 @@ public class HumanResBusinessServices {
             "createInternalOrg", "removeInternalOrg", "createPublicHoliday");
     private final EntityAutoService entityAutoService;
     private final EntityRegistry entityRegistry;
+    private final SequenceService sequenceService;
     private final PartyPort partyPort;
     private final WorkEffortPort workEffortPort;
     private final AccountingPort accountingPort;
@@ -32,12 +33,14 @@ public class HumanResBusinessServices {
     public HumanResBusinessServices(
             EntityAutoService entityAutoService,
             EntityRegistry entityRegistry,
+            SequenceService sequenceService,
             PartyPort partyPort,
             WorkEffortPort workEffortPort,
             AccountingPort accountingPort,
             HumanResTreeService treeService) {
         this.entityAutoService = entityAutoService;
         this.entityRegistry = entityRegistry;
+        this.sequenceService = sequenceService;
         this.partyPort = partyPort;
         this.workEffortPort = workEffortPort;
         this.accountingPort = accountingPort;
@@ -186,7 +189,9 @@ public class HumanResBusinessServices {
     }
 
     private Map<String, Object> createTraining(Map<String, ?> input, boolean apply) {
-        Map<String, Object> request = entityAutoService.createEntity("TrainingRequest", input);
+        Map<String, Object> requestInput = new HashMap<>(input);
+        requestInput.put("trainingRequestId", sequenceService.nextId("TrainingRequest"));
+        Map<String, Object> request = entityAutoService.createEntity("TrainingRequest", requestInput);
         Map<String, Object> training = new HashMap<>(input);
         training.put("trainingRequestId", request.get("trainingRequestId"));
         if (apply && input.get("workEffortName") != null) {
