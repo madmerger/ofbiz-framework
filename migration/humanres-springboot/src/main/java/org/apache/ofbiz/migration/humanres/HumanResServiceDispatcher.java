@@ -1,0 +1,64 @@
+package org.apache.ofbiz.migration.humanres;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import org.apache.ofbiz.migration.humanres.generated.ServiceCatalog;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class HumanResServiceDispatcher {
+    private final EntityAutoService entityAutoService;
+    private final HumanResBusinessServices businessServices;
+
+    public HumanResServiceDispatcher(
+            EntityAutoService entityAutoService, HumanResBusinessServices businessServices) {
+        this.entityAutoService = entityAutoService;
+        this.businessServices = businessServices;
+    }
+
+    @Transactional
+    public Map<String, Object> execute(String serviceName, Map<String, ?> input) {
+        if (ServiceCatalog.find(serviceName).isPresent()) {
+            return entityAutoService.execute(serviceName, input);
+        }
+        if (businessServices.supports(serviceName)) {
+            return businessServices.execute(serviceName, input);
+        }
+        throw HumanResException.notFound("Unknown service: " + serviceName);
+    }
+
+    @Transactional
+    public List<Map<String, Object>> executeMulti(String serviceName, List<Map<String, Object>> rows) {
+        if (!ServiceCatalog.find(serviceName).isPresent() && !businessServices.supports(serviceName)) {
+            throw HumanResException.notFound("Unknown service: " + serviceName);
+        }
+        List<Map<String, Object>> results = new ArrayList<>();
+        List<Map<String, Object>> errors = new ArrayList<>();
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        for (int index = 0; index < rows.size(); index++) {
+            try {
+                results.add(execute(serviceName, rows.get(index)));
+            } catch (HumanResException exception) {
+                status = exception.getStatus().is4xxClientError() ? exception.getStatus() : HttpStatus.BAD_REQUEST;
+                Map<String, Object> rowError = new LinkedHashMap<>();
+                rowError.put("index", index);
+                rowError.put("errorMessage", exception.getMessage());
+                rowError.put("status", status.value());
+                errors.add(rowError);
+            }
+        }
+        if (!errors.isEmpty()) {
+            throw new MultiServiceException(status, errors);
+        }
+        return results;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getHrTree(String partyId) {
+        return businessServices.getHrTree(partyId);
+    }
+}

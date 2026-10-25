@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:humanres-local;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+humanres:
+  security:
+    users:
+      - username: admin
+        password: ${HUMANRES_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+          - OFBTOOLS_ADMIN
+          - HUMANRES_VIEW
+          - HUMANRES_ADMIN
+          - HUMANRES_CREATE
+          - HUMANRES_UPDATE
+          - HUMANRES_DELETE
+      - username: nohumanres
+        password: ${HUMANRES_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+      - username: readonly
+        password: ${HUMANRES_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+          - HUMANRES_VIEW
