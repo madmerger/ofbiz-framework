@@ -1,46 +1,59 @@
-# HumanRes Spring Boot pilot acceptance review
+# humanres Spring Boot パイロット レビュー / テスト結果
 
-Acceptance criteria are taken from §11 of `spec.md`. The spec defines only the IDs listed below; gaps in numbering are intentional.
+## 1. 実行結果
 
-Test command:
+| 検証 | コマンド | 結果 |
+| --- | --- | --- |
+| Spring Boot モジュールの全テスト | `./gradlew :migration:humanres-springboot:test` | **154 件 pass / 0 fail / 0 skip**（EntityAutoAcceptanceTest 136、HrTreeSecurityTest 5、HumanResBusinessServicesTest 12、PostgresSmokeTest 1） |
+| PostgreSQL（Testcontainers） | 上に含まれる | 1 件 pass（skip なし） |
+| 棚卸しツール・生成器 | `python3 -m unittest discover -s migration/tools -p 'test_*.py'` | 6 件 pass |
+| 既存 OFBiz テスト（回帰） | `./gradlew test --tests 'org.apache.ofbiz.humanres.HumanResEventsTest'` | 3 件 pass |
+| 静的解析 | `./gradlew checkstyleMain checkstyleTest codenarcMain codenarcTest` | BUILD SUCCESSFUL |
+| 起動と疎通 | `HUMANRES_DEMO_PASSWORD=... ./migration/humanres-springboot/run-local.sh` + curl | health 200 / hr-tree（admin）200 / HUMANRES 権限なし 403 / 未認証 401 / create・update・expire 200 / multi の失敗時 400 → ロールバック確認（GET 404） |
 
-```sh
-/home/ubuntu/.gradle/gradle-9.8.2/bin/gradle --no-daemon :migration:humanres-springboot:test
-```
+## 2. 受け入れ基準の判定（spec §11）
 
-Result: **151 tests, 0 failures, 1 skipped**. The skipped test is the PostgreSQL Testcontainers smoke test; see AC-04.
-
-| AC | Result | Evidence |
+| AC | 判定 | テスト |
 | --- | --- | --- |
 | AC-01 | PASS | `EntityAutoAcceptanceTest.ac01_allInventoryEntitiesAreMapped` |
-| AC-02 | PASS | `EntityAutoAcceptanceTest.ac02_generatedEntityReceivesAllStampColumns` |
-| AC-03 | PASS | Final diff review found no changes under `applications/`, `framework/`, or `plugins/`; root `settings.gradle` contains only the D1-allowed module include. |
-| AC-04 | PARTIAL | H2 startup and CRUD are covered by the module tests and local-profile smoke. `PostgresSmokeTest.ac04_postgresSchemaAndCrudSmoke` covers PostgreSQL create/read/update/delete but is skipped: Docker daemon minimum API is 1.40, while Testcontainers 1.21.3's client requests API 1.32 (`client version 1.32 is too old. Minimum supported API version is 1.40`). PostgreSQL behavior is not verified. |
-| AC-10 | PASS | Parameterized `EntityAutoAcceptanceTest.ac10_generatedCatalogMatchesInventory` checks all 121 entity-auto service catalog entries against the inventory. |
-| AC-11 | PASS | `EntityAutoAcceptanceTest.ac11_sequenceIdsAndSubSequencesFollowOfbizShape` |
-| AC-12 | PASS | `EntityAutoAcceptanceTest.ac12_missingFromDateDefaultsToNow` |
-| AC-13 | PASS | `EntityAutoAcceptanceTest.ac13_duplicateCreateReturnsConflict` |
-| AC-14 | PASS | `EntityAutoAcceptanceTest.ac14_requiredAndMissingEntityErrorsAreDistinct` |
-| AC-15 | PASS | `EntityAutoAcceptanceTest.ac15_updatesOnlyProvidedFields` |
-| AC-16 | PASS | `EntityAutoAcceptanceTest.ac16_rejectsStatusTransitionWithoutStatusValidChange` |
-| AC-17 | PASS | `EntityAutoAcceptanceTest.ac17_expireAndDeleteAreDistinctOperations` |
-| AC-18 | PASS | `EntityAutoAcceptanceTest.ac18_deniesDangerousText` |
-| AC-20 | PASS | `HumanResBusinessServicesTest.ac20_createEmploymentCreatesEmploymentAndPayHistoryAtomically` checks successful creation and a duplicate PayHistory failure rolling back Employment. |
-| AC-21 | PASS | `HumanResBusinessServicesTest.ac21_updatePayHistoryChangesExistingPayRecord` covers comments-only update and changed-amount expire/recreate. |
-| AC-22 | PASS | `HumanResBusinessServicesTest.ac22_reportingStructCannotReportToItself` |
-| AC-23 | PASS | `HumanResBusinessServicesTest.ac23_createEmployeeUsesPartyAdapter` checks returned party ID and employment relationship creation. |
-| AC-24 | PASS | `HumanResBusinessServicesTest.ac24_positionTypeRateUpdateAndDeleteExpireRowsAndCallAccountingPort` |
-| AC-25 | PASS | `HumanResBusinessServicesTest.ac25_currentEmploymentDataReturnsExpectedShape` seeds employment, benefit, position, and fulfillment data and checks returned data and accounting rates. |
-| AC-26 | PASS | `HumanResBusinessServicesTest.ac26_applyTrainingCreatesRequestAndPersonTraining` checks both apply and assign paths create `PersonTraining` rows. |
-| AC-27 | PASS | `HumanResBusinessServicesTest.ac27_internalOrganizationCanBeCreatedAndRemoved` |
-| AC-28 | PASS | `HumanResBusinessServicesTest.ac28_publicHolidayRejectsDuplicateStartDate` checks duplicate rejection and the `WorkEffortPort` call. |
-| AC-29 | PASS | `HumanResBusinessServicesTest.ac29_treeIncludesChildrenAndActivePositionsButExcludesInactiveAndExpired` checks organization/position nodes, inactive/expired filtering, and occupant nodes. |
-| AC-30 | PASS | `HumanResBusinessServicesTest.ac30_multiServiceFailureRollsBackEarlierRows` |
-| AC-40 | PASS | `HrTreeSecurityTest.ac40_anonymousIsRejectedBeforeTreeLookup` returns 401 before tree lookup. |
-| AC-41 | PASS | `HrTreeSecurityTest.ac41_missingHumanResAuthorityIsRejectedBeforeTreeLookup` returns 403 before tree lookup. |
-| AC-42 | PASS | `HrTreeSecurityTest.ac42_authorizedHumanResViewReachesTreeService` |
-| AC-43 | PASS | `HrTreeSecurityTest.ac43_humanResAuthorityWithoutOfbtoolsBaseGateIsRejected` |
-| AC-44 | PASS | `HrTreeSecurityTest.ac44_missingPerServiceActionIsRejectedBeforeEntityAutoDispatch` |
-| AC-45 | PASS | `EntityAutoAcceptanceTest.ac45_localProfileUsesEnvironmentSuppliedPassword`; final source review found no committed plaintext password or database credential. |
+| AC-02 | PASS | `ac02_generatedEntityReceivesAllStampColumns` |
+| AC-03 | PASS | `git diff trunk -- applications framework plugins` が空。ルートの変更は `settings.gradle` の include 1 行のみ |
+| AC-04 | PASS | H2: 全テスト。PostgreSQL: `PostgresSmokeTest.ac04_postgresSchemaAndCrudSmoke` |
+| AC-10 | PASS | `ac10_generatedCatalogMatchesInventory`（121 パラメタライズ） |
+| AC-11 | PASS | `ac11_sequenceIdsAndSubSequencesFollowOfbizShape`（PerfReviewItem のサブシーケンスを含む） |
+| AC-12 | PASS | `ac12_missingFromDateDefaultsToNow` + PK でない fromDate の回帰テスト |
+| AC-13 | PASS | `ac13_duplicateCreateReturnsConflict` |
+| AC-14 | PASS | `ac14_requiredAndMissingEntityErrorsAreDistinct` + 必須 IN の PK（TrainingClassType / SalaryStep） |
+| AC-15 | PASS | `ac15_updatesOnlyProvidedFields` |
+| AC-16 | PASS | `ac16_rejectsStatusTransitionWithoutStatusValidChange` |
+| AC-17 | PASS | `ac17_expireAndDeleteAreDistinctOperations` |
+| AC-18 | PASS | `ac18_deniesDangerousText` |
+| AC-20〜30 | PASS | `HumanResBusinessServicesTest.ac20_*` 〜 `ac30_*`（各 1 件。AC-20 と AC-30 はロールバックも検証） |
+| AC-40 | PASS | `HrTreeSecurityTest.ac40_anonymousIsRejectedBeforeTreeLookup`（既存テスト 1 の再現。ツリーサービスが呼ばれないことを verify） |
+| AC-41 | PASS | `ac41_missingHumanResAuthorityIsRejectedBeforeTreeLookup`（既存テスト 2 の再現） |
+| AC-42 | PASS | `ac42_authorizedHumanResViewReachesTreeService`（既存テスト 3 の再現） |
+| AC-43 | PASS | `ac43_humanResAuthorityWithoutOfbtoolsBaseGateIsRejected` |
+| AC-44 | PASS | `ac44_missingPerServiceActionIsRejectedBeforeEntityAutoDispatch` |
+| AC-45 | PASS | `ac45_localProfileUsesEnvironmentSuppliedPassword`。リポジトリに平文の認証情報なし |
 
-The three local curl cases reproducing the legacy tree security behavior also passed: anonymous 401, authenticated user without HumanRes permission 403, and authorized admin 200.
+## 3. 旧 OFBiz 版との挙動差分
+
+| # | 差分 | OFBiz | Spring Boot 版 | 影響と方針 |
+| --- | --- | --- | --- | --- |
+| B-01 | 権限が無いときの応答 | `getHRChild`: 403 + `error`。未ログインはログイン画面へリダイレクト | 未認証は 401、権限不足は 403（JSON） | API 化に伴う意図的な差分 |
+| B-02 | エラーの表現 | `_ERROR_MESSAGE_` + 同じ画面を再描画 | HTTP ステータス（400/404/409）+ `{"responseMessage":"error","errorMessage":...}` | 同上 |
+| B-03 | 入出力の形式 | フォーム POST、画面（HTML） | JSON。日付は ISO-8601 | 同上 |
+| B-04 | 画面 | Widget / FTL の 121 screens | 無し（API のみ） | UI は別途再構築（PLAYBOOK §4.4） |
+| B-05 | 認証 | OFBiz の UserLogin / セッション / 外部ログインキー | HTTP Basic（stateless）、インメモリユーザ | 全体移行時に OIDC 等へ置き換え |
+| B-06 | エラーメッセージの文言 | UiLabels でローカライズ | 英語固定のキー（`ServiceValueFound` 等） | i18n は未対応 |
+| B-07 | ECA / SECA | humanres に独自の ECA は無いが、呼び出し先の party サービスなどの SECA は動く | アダプタは SECA を実行しない | 全体移行時に party 側の移行で吸収 |
+
+## 4. 既知の制約・未対応項目
+
+- Widget / FTL / メニュー / Lookup 画面（UI）は未移植。
+- 105 本ある「画面のみ」のリクエストは `GET /entities/{EntityName}` に一般化した。画面固有の結合（view-entity の一部や `FindEmployee.ftl` の検索条件）は未実装。view-entity 5 本は JPA 化していない。
+- アダプタの local 実装は最小限のカラムだけ（PARTY / PERSON / PARTY_ROLE / PARTY_RELATIONSHIP / WORK_EFFORT / RATE_AMOUNT など）。party の `createPersonRoleAndContactMechs` のうち連絡先（ContactMech）作成は未実装。
+- `isValidText` 相当の deny-list は OFBiz と同じ部分一致のため、普通の文に含まれる語（system / include 等）も拒否してしまう（OFBiz と同じ挙動）。
+- スキーマ生成は Hibernate `ddl-auto`。本番では Flyway 等で既存 OFBiz スキーマとの差分を管理する必要がある。
+- 実データの入った OFBiz DB に対する並行稼働の検証（同じ DB を新旧両方から読み書きする）は未実施。
+- `SEQUENCE_VALUE_ITEM` を OFBiz と共有して採番すると、OFBiz 側の bank（キャッシュ採番）と衝突する恐れがある。並行稼働時は採番を片方に寄せる必要がある。
