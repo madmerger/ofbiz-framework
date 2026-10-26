@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.jayway.jsonpath.JsonPath;
 import jakarta.persistence.EntityManager;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
@@ -151,47 +152,49 @@ class EntityAutoAcceptanceTest {
 
     @Test
     void ac05_crudOverHttpForMarketingCampaign() throws Exception {
-        mockMvc.perform(post("/api/marketing/services/createMarketingCampaign")
+        String id = JsonPath.read(mockMvc.perform(post("/api/marketing/services/createMarketingCampaign")
                         .with(httpBasic("admin", "admin"))
                         .contentType("application/json")
-                        .content("{\"marketingCampaignId\":\"AC05\",\"campaignName\":\"秋キャンペーン\"}"))
-                .andExpect(status().isOk());
+                        .content("{\"campaignName\":\"秋キャンペーン\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(), "$.marketingCampaignId");
         mockMvc.perform(get("/api/marketing/entities/MarketingCampaign/one")
                         .with(httpBasic("readonly", "readonly"))
-                        .param("marketingCampaignId", "AC05"))
+                        .param("marketingCampaignId", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.campaignName").value("秋キャンペーン"));
         mockMvc.perform(post("/api/marketing/services/updateMarketingCampaign")
                         .with(httpBasic("marketer", "marketer"))
                         .contentType("application/json")
-                        .content("{\"marketingCampaignId\":\"AC05\",\"campaignName\":\"冬キャンペーン\"}"))
+                        .content("{\"marketingCampaignId\":\"" + id + "\",\"campaignName\":\"冬キャンペーン\"}"))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/api/marketing/entities/MarketingCampaign")
                         .with(httpBasic("readonly", "readonly"))
-                        .param("marketingCampaignId", "AC05"))
+                        .param("marketingCampaignId", id))
                 .andExpect(jsonPath("$[0].campaignName").value("冬キャンペーン"));
         mockMvc.perform(post("/api/marketing/services/deleteMarketingCampaign")
                         .with(httpBasic("marketer", "marketer"))
                         .contentType("application/json")
-                        .content("{\"marketingCampaignId\":\"AC05\"}"))
+                        .content("{\"marketingCampaignId\":\"" + id + "\"}"))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/api/marketing/entities/MarketingCampaign")
                         .with(httpBasic("readonly", "readonly"))
-                        .param("marketingCampaignId", "AC05"))
+                        .param("marketingCampaignId", id))
                 .andExpect(jsonPath("$.length()").value(0));
     }
 
     @Test
     void ac06_updateRejectsUndeclaredField() throws Exception {
-        mockMvc.perform(post("/api/marketing/services/createMarketingCampaign")
+        String id = JsonPath.read(mockMvc.perform(post("/api/marketing/services/createMarketingCampaign")
                         .with(httpBasic("admin", "admin"))
                         .contentType("application/json")
-                        .content("{\"marketingCampaignId\":\"AC06\"}"))
-                .andExpect(status().isOk());
+                        .content("{\"campaignName\":\"AC06\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(), "$.marketingCampaignId");
         mockMvc.perform(post("/api/marketing/services/updateMarketingCampaign")
                         .with(httpBasic("admin", "admin"))
                         .contentType("application/json")
-                        .content("{\"marketingCampaignId\":\"AC06\",\"notAField\":\"x\"}"))
+                        .content("{\"marketingCampaignId\":\"" + id + "\",\"notAField\":\"x\"}"))
                 .andExpect(status().isBadRequest());
     }
 

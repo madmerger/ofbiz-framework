@@ -92,27 +92,27 @@ class MarketingSecurityTest {
 
     @Test
     void sec06_multiFailureIs409AndRollsBackEveryItem() throws Exception {
-        mockMvc.perform(post("/api/marketing/services/createMarketingCampaign/multi")
+        mockMvc.perform(post("/api/marketing/services/createContactListType/multi")
                         .with(httpBasic("marketer", "marketer"))
                         .contentType("application/json")
-                        .content("[{\"marketingCampaignId\":\"MULTI_A\"},{\"marketingCampaignId\":\"MULTI_B\"},"
-                                + "{\"marketingCampaignId\":\"MULTI_A\"}]"))
+                        .content("[{\"contactListTypeId\":\"MULTI_A\"},{\"contactListTypeId\":\"MULTI_B\"},"
+                                + "{\"contactListTypeId\":\"MULTI_A\"}]"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.rolledBack").value(true))
                 .andExpect(jsonPath("$.errors[0].index").value(2));
         for (String id : List.of("MULTI_A", "MULTI_B")) {
-            mockMvc.perform(get("/api/marketing/entities/MarketingCampaign")
+            mockMvc.perform(get("/api/marketing/entities/ContactListType")
                             .with(httpBasic("readonly", "readonly"))
-                            .param("marketingCampaignId", id))
+                            .param("contactListTypeId", id))
                     .andExpect(jsonPath("$.length()").value(0));
         }
-        mockMvc.perform(post("/api/marketing/services/createMarketingCampaign/multi")
+        mockMvc.perform(post("/api/marketing/services/createContactListType/multi")
                         .with(httpBasic("marketer", "marketer"))
                         .contentType("application/json")
-                        .content("[{\"marketingCampaignId\":\"MULTI_C\"},{\"marketingCampaignId\":\"MULTI_D\"}]"))
+                        .content("[{\"contactListTypeId\":\"MULTI_C\"},{\"contactListTypeId\":\"MULTI_D\"}]"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2));
         Assertions.assertNotNull(entityRegistry.findByPrimaryKey(
-                entityRegistry.entityClass("MarketingCampaign"), Map.of("marketingCampaignId", "MULTI_D")));
+                entityRegistry.entityClass("ContactListType"), Map.of("contactListTypeId", "MULTI_D")));
     }
 }

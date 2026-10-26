@@ -34,11 +34,11 @@ public class MarketingHandlerRegistrar {
                 contactLists::unsubscribeContactListPartyContachMech);
         simple.add("updatePartyEmailContactListParty", "UPDATE", contactLists::updatePartyEmailContactListParty);
         simple.add("createContactListPartyStatus", "CREATE", contactLists::createContactListPartyStatus);
-        simple.add("sendContactListPartyVerifyEmail", "VIEW", contactLists::sendContactListPartyVerifyEmail);
-        simple.add("sendContactListPartySubscribeEmail", "VIEW", contactLists::sendContactListPartySubscribeEmail);
-        simple.add("sendContactListPartyUnSubscribeVerifyEmail", "VIEW",
+        simple.add("sendContactListPartyVerifyEmail", "UPDATE", contactLists::sendContactListPartyVerifyEmail);
+        simple.add("sendContactListPartySubscribeEmail", "UPDATE", contactLists::sendContactListPartySubscribeEmail);
+        simple.add("sendContactListPartyUnSubscribeVerifyEmail", "UPDATE",
                 contactLists::sendContactListPartyUnSubscribeVerifyEmail);
-        simple.add("sendContactListPartyUnSubscribeEmail", "VIEW", contactLists::sendContactListPartyUnSubscribeEmail);
+        simple.add("sendContactListPartyUnSubscribeEmail", "UPDATE", contactLists::sendContactListPartyUnSubscribeEmail);
         simple.add("optOutOfListFromCommEvent", "UPDATE", misc::optOutOfListFromCommEvent);
         simple.add("updateContactListCommStatus", "UPDATE", misc::updateContactListCommStatus);
         simple.add("updateCommStatusFromCommEvent", "UPDATE", misc::updateCommStatusFromCommEvent);

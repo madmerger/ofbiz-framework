@@ -89,9 +89,11 @@ class MarketingServicesTest {
     @Test
     void flow01_campaignContactListSubscribeAndUnsubscribe() {
         storeEmailSettings("FLOW_STORE", "FLOW_WS");
-        run("createMarketingCampaign", Map.of("marketingCampaignId", "FLOW_MC", "campaignName", "新製品"));
+        String campaignId = (String) run("createMarketingCampaign", Map.of("campaignName", "新製品"))
+                .get("marketingCampaignId");
+        assertNotNull(campaignId);
         run("createContactList", Map.of("contactListId", "FLOW_CL", "contactListName", "ニュースレター",
-                "contactMechTypeId", "EMAIL_ADDRESS", "marketingCampaignId", "FLOW_MC",
+                "contactMechTypeId", "EMAIL_ADDRESS", "marketingCampaignId", campaignId,
                 "verifyEmailFrom", "noreply@example.com", "verifyEmailScreen", "component://marketing/verify",
                 "verifyEmailSubject", "確認", "verifyEmailWebSiteId", "FLOW_WS"));
 

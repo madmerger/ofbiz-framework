@@ -45,16 +45,16 @@ class PostgresSmokeTest {
     @Test
     void postgresCampaignContactListAndSignUpSmoke() {
         MarketingTestSupport.loginAdmin();
-        MarketingTestSupport.run(dispatcher, "createMarketingCampaign",
-                Map.of("marketingCampaignId", "PG_MC", "campaignName", "PostgreSQL"));
+        String campaignId = (String) MarketingTestSupport.run(dispatcher, "createMarketingCampaign",
+                Map.of("campaignName", "PostgreSQL")).get("marketingCampaignId");
         MarketingTestSupport.run(dispatcher, "createContactList", Map.of(
-                "contactListId", "PG_CL", "contactMechTypeId", "EMAIL_ADDRESS", "marketingCampaignId", "PG_MC"));
+                "contactListId", "PG_CL", "contactMechTypeId", "EMAIL_ADDRESS", "marketingCampaignId", campaignId));
         Map<String, Object> signUp = MarketingTestSupport.run(dispatcher, "signUpForContactList",
                 Map.of("contactListId", "PG_CL", "email", "pg@example.com"));
         assertEquals("CLPT_PENDING", signUp.get("statusId"));
-        MarketingTestSupport.run(dispatcher, "deleteMarketingCampaign", Map.of("marketingCampaignId", "PG_MC"));
+        MarketingTestSupport.run(dispatcher, "deleteMarketingCampaign", Map.of("marketingCampaignId", campaignId));
         MigrationException missing = assertThrows(MigrationException.class, () -> MarketingTestSupport.run(
-                dispatcher, "updateMarketingCampaign", Map.of("marketingCampaignId", "PG_MC", "campaignName", "x")));
+                dispatcher, "updateMarketingCampaign", Map.of("marketingCampaignId", campaignId, "campaignName", "x")));
         assertEquals(404, missing.getStatus().value());
     }
 }
