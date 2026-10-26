@@ -66,6 +66,7 @@ API は `POST /api/commonext/services/{serviceName}`。entity-auto の追加サ�
 PostgreSQL 運用では `COMMONEXT_DB_URL`、`COMMONEXT_DB_USERNAME`、
 `COMMONEXT_DB_PASSWORD` と `COMMONEXT_ADMIN_PASSWORD` を環境変数に設定する。
 admin の password は環境変数から渡し、共通基盤が起動時に BCrypt 化する。
+`COMMONEXT_ADMIN_PASSWORD` は `{` で始めてはならない。該当する値では password を表示せず起動時に失敗する。
 実値を設定ファイルやリポジトリに保存しない。権限は local profile の admin と同じ。
 
 ## 4. REST 面

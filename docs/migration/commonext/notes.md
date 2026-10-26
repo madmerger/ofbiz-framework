@@ -32,7 +32,7 @@
 - generator は `migration/tools/ofbiz2spring.py` を build-time に実行し、NoteData を含む base entity と全 component の `entitymodel*.xml` を渡して extension を解決する。CommonExt の service definition だけを catalog 入力にし、generated `ServiceCatalog` directory だけを sourceSet に加える。エンティティは datamodel と重複させず、生成物はコミットしない。
 - Maven Central の HTTP 429 が発生した場合は、環境固有の mirror を `~/.gradle/init.d/mirror.gradle` に置く。リポジトリへ認証や VM 固有 URL を含めない。
 - `run-local.sh` は `MIGRATION_DEMO_PASSWORD` を要求し、`local` profile で 8080 を起動する。Swagger UI / OpenAPI はこの profile のみ有効。
-- `postgres` profile は `COMMONEXT_DB_URL`、`COMMONEXT_DB_USERNAME`、`COMMONEXT_DB_PASSWORD` と `COMMONEXT_ADMIN_PASSWORD` を環境変数で指定する。admin password は共通基盤が起動時に BCrypt 化するため、実値を設定ファイルやリポジトリに保存しない。admin 権限は local profile と同じ。HTTPS 必須、Swagger 無効。`MIGRATION_SECURITY_TRUSTED_PROXIES` の未指定値 `a^` はプロキシを信頼しない。
+- `postgres` profile は `COMMONEXT_DB_URL`、`COMMONEXT_DB_USERNAME`、`COMMONEXT_DB_PASSWORD` と `COMMONEXT_ADMIN_PASSWORD` を環境変数で指定する。admin password は `{` で始めてはならず、違反時は password 値を表示せず起動時に失敗する。共通基盤が起動時に BCrypt 化するため、実値を設定ファイルやリポジトリに保存しない。admin 権限は local profile と同じ。HTTPS 必須、Swagger 無効。`MIGRATION_SECURITY_TRUSTED_PROXIES` の未指定値 `a^` はプロキシを信頼しない。
 - base config の HTTPS 既定値は true のまま保持し、`local` と H2 test profile は false を明示する。PostgreSQL deployment profile は HTTPS を true にする。HTTPS テストは profile default を上書きして検証する。
 
 ## 4. 調査上の不一致

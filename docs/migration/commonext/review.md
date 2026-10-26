@@ -4,7 +4,7 @@
 
 | 検証 | 結果 |
 | --- | --- |
-| CommonExt Spring Boot テスト | 成功: 37件（`CommonextHttpsTest` 1、`CommonextSecurityTest` 10、`EntityAutoAcceptanceTest` 3、`MultiRollbackTest` 2、`PostgresSmokeTest` 2、`SystemInfoNoteServiceTest` 19）。失敗・skip なし |
+| CommonExt Spring Boot テスト | 成功: 39件（`CommonextHttpsTest` 1、`CommonextSecurityTest` 10、`EntityAutoAcceptanceTest` 3、`MultiRollbackTest` 2、`PostgresAdminPasswordValidatorTest` 2、`PostgresSmokeTest` 2、`SystemInfoNoteServiceTest` 19）。失敗・skip なし |
 | module Checkstyle (`checkstyleMain`, `checkstyleTest`) | 成功。生成 `ServiceCatalog` はコンパイル対象のまま Checkstyle 対象外 |
 | root `checkstyleMain codenarcMain` | 実行不能。root `runtimeClasspath` の `ical4j:1.0-rc4-atlassian-12` と `activiti-juel-jakarta:8.1.0` が Maven Central の HTTP 429 で取得不可。Google Maven Central mirror も両 artifact が HTTP 404。root build は `No hooks found` でも失敗 |
 | pre-commit | `Checkstyle` / `RuboCop` hook ID の小文字修正を含む。初回の Docker Hub HTTP 429 は承認済み手順で `mirror.gcr.io` から pull/tag して解消し、hook は迂回せず実行 |
