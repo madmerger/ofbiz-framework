@@ -124,6 +124,11 @@ public final class ContentSimpleServices {
         Object response = null;
         if ("Y".equals(store.get(survey, "allowUpdate")) && !ContentEntityStore.isEmpty(input.get("surveyResponseId"))) {
             response = store.findOne("SurveyResponse", Map.of("surveyResponseId", input.get("surveyResponseId")));
+            // 他の Survey や他人の回答は更新させない
+            if (response != null && (!surveyId.equals(store.get(response, "surveyId"))
+                    || !java.util.Objects.equals(store.get(response, "partyId"), ContentEntityStore.isEmpty(partyId) ? null : partyId))) {
+                throw new MigrationException(HttpStatus.FORBIDDEN, "ContentSurveyResponseNotOwned");
+            }
         }
         if (response == null) {
             Map<String, Object> values = new LinkedHashMap<>(input);

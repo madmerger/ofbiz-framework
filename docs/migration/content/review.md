@@ -4,7 +4,7 @@
 
 | 検証 | コマンド | 結果 |
 | --- | --- | --- |
-| Spring Boot モジュールの全テスト | `./gradlew :migration:content-springboot:test` | **199 件 pass / 0 fail / 0 skip**（EntityAutoAcceptanceTest 180、ContentMainFlowTest 4、ContentSimpleServicesTest 5、ContentSecurityTest 7、ContentProfileTest 2、PostgresSmokeTest 1） |
+| Spring Boot モジュールの全テスト | `./gradlew :migration:content-springboot:test` | **201 件 pass / 0 fail / 0 skip**（EntityAutoAcceptanceTest 180、ContentMainFlowTest 5、ContentSimpleServicesTest 6、ContentSecurityTest 7、ContentProfileTest 2、PostgresSmokeTest 1） |
 | PostgreSQL（Testcontainers 1.21.4、postgres:16-alpine） | 上に含まれる | 1 件 pass（skip なし） |
 | 静的解析 | `./gradlew :migration:content-springboot:checkstyleMain :migration:content-springboot:checkstyleTest` | BUILD SUCCESSFUL（ルートの `config/checkstyle/checkstyle.xml` を適用。Groovy ソースはないため CodeNarc の対象なし） |
 | 起動と疎通 | `CONTENT_DEMO_PASSWORD=... ./migration/content-springboot/run-local.sh` + `cases.json` を curl で実行 | health UP、CONTENT-E2E-01〜26 すべて期待どおり |
@@ -49,6 +49,7 @@
 | D-09 | 検証メソッドは OFBiz `UtilValidate` の簡易版（Luhn、日付 yyyy-MM-dd、メール、URL、数値） | framework に依存しない |
 | D-10 | `/multi` の失敗は重複を含めば 409、それ以外は 400（OFBiz は画面へエラー表示） | API 化 |
 | D-11 | `getContent` の `view` は `ContentDataResourceView` を Java で結合して再現（キャッシュなし） | view-entity は未 JPA 化 |
+| D-13 | `createSurveyResponse` の更新（allowUpdate）は同じ Survey・同じ partyId の回答だけを許可（OFBiz は所属を確認しない）。`createContent` / `updateTextContent` は servicedef で OUT の `serviceName` / `customMethodId` を入力から受け付けない | Devin Review のセキュリティ指摘への対応 |
 | D-12 | `createSurveyMultiResp` / `createSurveyMultiRespColumn` は handler でサブシーケンス採番（共通の entity-auto は `*SeqId` 名のみ対象） | OFBiz と同じ採番結果にするため |
 
 ## 4. 既知の制約

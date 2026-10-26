@@ -73,6 +73,8 @@ public final class ContentFlowServices {
                 input -> createWithSubSequence("SurveyMultiResp", "surveyMultiRespId", input, "surveyId"));
         registry.registerHandler(C, "createSurveyMultiRespColumn", "CREATE",
                 input -> createWithSubSequence("SurveyMultiRespColumn", "surveyMultiRespColId", input, "surveyId", "surveyMultiRespId"));
+        registry.registerHandler(C, "createSurveyQuestionOption", "CREATE",
+                input -> createWithSubSequence("SurveyQuestionOption", "surveyOptionSeqId", input, "surveyQuestionId"));
     }
 
     /** DataServicesScript.groovy#createDataResource（+ SECA createDataResourceRole / ensurePartyRole）。 */
@@ -157,6 +159,9 @@ public final class ContentFlowServices {
     /** entity-auto createContent + override default-value（DOCUMENT / CTNT_IN_PROGRESS）と作成者・作成日時。 */
     public Map<String, Object> createContent(Map<String, Object> input) {
         Map<String, Object> values = store.filterFields("Content", input);
+        // servicedef で OUT 指定（描画サービスの指定は入力から受け付けない）
+        values.remove("serviceName");
+        values.remove("customMethodId");
         values.putIfAbsent("contentTypeId", "DOCUMENT");
         values.putIfAbsent("statusId", "CTNT_IN_PROGRESS");
         String user = ContentEntityStore.currentUserLoginId();
@@ -189,9 +194,13 @@ public final class ContentFlowServices {
         Map<String, Object> context = new LinkedHashMap<>(input);
         context.putIfAbsent("dataResourceId", store.get(content, "dataResourceId"));
         updateDataText(context);
-        Map<String, Object> contentValues = new LinkedHashMap<>(input);
-        contentValues.remove("dataResourceId");
-        contentValues.remove("dataResourceTypeId");
+        Map<String, Object> contentValues = new LinkedHashMap<>();
+        // updateContent の IN 属性だけを反映する（serviceName / customMethodId は OUT のため除外）
+        catalog.require("updateContent").params().stream()
+                .filter(param -> "IN".equalsIgnoreCase(param.mode()) || "INOUT".equalsIgnoreCase(param.mode()))
+                .filter(param -> input.containsKey(param.name()))
+                .forEach(param -> contentValues.put(param.name(), input.get(param.name())));
+        contentValues.put("dataResourceId", context.get("dataResourceId"));
         contentValues.put("lastModifiedByUserLogin", ContentEntityStore.currentUserLoginId());
         contentValues.put("lastModifiedDate", ContentEntityStore.now());
         Map<String, Object> result = new LinkedHashMap<>(store.store(content, contentValues));
@@ -258,6 +267,12 @@ public final class ContentFlowServices {
         Map<String, Object> values = new LinkedHashMap<>(input);
         if (ContentEntityStore.isEmpty(values.get("contentName"))) {
             values.put("contentName", store.get(dataResource, "dataResourceName"));
+        }
+        if (ContentEntityStore.isEmpty(values.get("statusId"))) {
+            values.put("statusId", "CTNT_INITIAL_DRAFT");
+        }
+        if (ContentEntityStore.isEmpty(values.get("mimeTypeId"))) {
+            values.put("mimeTypeId", store.get(dataResource, "mimeTypeId"));
         }
         return ContentSimpleServices.result("contentId", createContent(values).get("contentId"));
     }

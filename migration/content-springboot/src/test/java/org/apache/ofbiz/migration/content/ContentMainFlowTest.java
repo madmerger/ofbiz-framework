@@ -123,6 +123,38 @@ class ContentMainFlowTest extends ContentApiTestSupport {
     }
 
     @Test
+    void ac24ReviewRegressions() throws Exception {
+        String ftl = body(call("admin", "createDataResource", Map.of("dataResourceTypeId", "ELECTRONIC_TEXT",
+                "dataTemplateTypeId", "FTL"))).get("dataResourceId").asText();
+        call("editor", "updateDataResourceAndText", Map.of("dataResourceId", ftl, "dataTemplateTypeId", "NONE"))
+                .andExpect(status().isForbidden());
+
+        JsonNode created = body(call("editor", "createTextContent", Map.of("contentName", "AC24", "textData", "old",
+                "serviceName", "evilService", "customMethodId", "EVIL")));
+        String contentId = created.get("contentId").asText();
+        entities("readonly", "Content", Map.of("contentId", contentId))
+                .andExpect(jsonPath("$[0].serviceName").isEmpty())
+                .andExpect(jsonPath("$[0].customMethodId").isEmpty());
+        String other = body(call("editor", "createDataResourceAndText", Map.of("dataResourceTypeId", "ELECTRONIC_TEXT",
+                "textData", "new"))).get("dataResourceId").asText();
+        call("editor", "updateTextContent", Map.of("contentId", contentId, "dataResourceId", other,
+                "dataResourceTypeId", "ELECTRONIC_TEXT", "textData", "switched", "serviceName", "evilService"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dataResourceId").value(other))
+                .andExpect(jsonPath("$.serviceName").isEmpty());
+        call("readonly", "getElectronicText", Map.of("contentId", contentId))
+                .andExpect(jsonPath("$.textData").value("switched"));
+
+        String dr = body(call("editor", "createDataResource", Map.of("dataResourceTypeId", "SHORT_TEXT",
+                "mimeTypeId", "text/plain"))).get("dataResourceId").asText();
+        String fromDr = body(call("editor", "createContentFromDataResource", Map.of("dataResourceId", dr)))
+                .get("contentId").asText();
+        entities("readonly", "Content", Map.of("contentId", fromDr))
+                .andExpect(jsonPath("$[0].statusId").value("CTNT_INITIAL_DRAFT"))
+                .andExpect(jsonPath("$[0].mimeTypeId").value("text/plain"));
+    }
+
+    @Test
     void ac23TemplateDataResourceRequiresSuperPermission() throws Exception {
         call("editor", "createDataResource", Map.of("dataResourceTypeId", "ELECTRONIC_TEXT", "dataTemplateTypeId", "FTL"))
                 .andExpect(status().isForbidden());

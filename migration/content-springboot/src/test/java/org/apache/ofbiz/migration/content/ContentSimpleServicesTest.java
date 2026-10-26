@@ -96,6 +96,28 @@ class ContentSimpleServicesTest extends ContentApiTestSupport {
     }
 
     @Test
+    void ac35SurveyResponseCannotBeOverwrittenByAnotherParty() throws Exception {
+        String surveyId = body(call("editor", "createSurvey", Map.of("surveyName", "AC35", "isAnonymous", "N",
+                "allowMultiple", "Y", "allowUpdate", "Y"))).get("surveyId").asText();
+        String q = body(call("editor", "createSurveyQuestion", Map.of("surveyQuestionTypeId", "TEXT_SHORT",
+                "question", "Q", "surveyId", surveyId))).get("surveyQuestionId").asText();
+        String responseId = body(call("editor", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "AC35_A",
+                "answers", Map.of(q, "A")))).get("surveyResponseId").asText();
+        call("editor", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "AC35_B",
+                "surveyResponseId", responseId, "answers", Map.of(q, "B")))
+                .andExpect(status().isForbidden());
+        call("editor", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "AC35_A",
+                "surveyResponseId", responseId, "answers", Map.of(q, "A2")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.surveyResponseId").value(responseId));
+        String questionId = body(call("editor", "createSurveyQuestion", Map.of("surveyQuestionTypeId", "OPTION",
+                "question", "選択"))).get("surveyQuestionId").asText();
+        call("editor", "createSurveyQuestionOption", Map.of("surveyQuestionId", questionId, "description", "はい"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.surveyOptionSeqId").value("00001"));
+    }
+
+    @Test
     void ac33WebSiteServices() throws Exception {
         call("admin", "createWebSite", Map.of("webSiteId", "AC33_SITE", "siteName", "AC33 サイト")).andExpect(status().isOk());
         call("admin", "createWebSiteContentType", Map.of("webSiteContentTypeId", "AC33_TYPE", "description", "トップ"))
