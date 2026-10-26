@@ -70,16 +70,72 @@ class SimpleServicesAcceptanceTest {
     }
 
     @Test
-    void ac03_createBomAssocRejectsCircularBoms() {
-        Timestamp firstDate = new Timestamp(System.currentTimeMillis());
+    void ac03_createBomAssocDetectsCyclesAndAllowsDiamondsAndDateVersions() {
+        Timestamp firstDate = Timestamp.from(Instant.parse("2020-01-01T00:00:00Z"));
+        String type = "MANUF_COMPONENT";
         call("createBOMAssoc", Map.of(
-                "productId", "MFG_FG", "productIdTo", "MFG_RAW1",
-                "productAssocTypeId", "MANUF_COMPONENT", "fromDate", firstDate));
-        MigrationException cycle = assertThrows(MigrationException.class, () -> call("createBOMAssoc", Map.of(
-                "productId", "MFG_RAW1", "productIdTo", "MFG_FG",
-                "productAssocTypeId", "MANUF_COMPONENT",
-                "fromDate", new Timestamp(firstDate.getTime() + 1))));
-        assertEquals(400, cycle.getStatus().value());
+                "productId", "AC03_CYCLE_A", "productIdTo", "AC03_CYCLE_B",
+                "productAssocTypeId", type, "fromDate", firstDate));
+        MigrationException reverseCycle = assertThrows(MigrationException.class, () -> call("createBOMAssoc", Map.of(
+                "productId", "AC03_CYCLE_B", "productIdTo", "AC03_CYCLE_A",
+                "productAssocTypeId", type, "fromDate", firstDate)));
+        assertEquals(400, reverseCycle.getStatus().value());
+
+        call("createBOMAssoc", Map.of(
+                "productId", "AC03_CHAIN_A", "productIdTo", "AC03_CHAIN_B",
+                "productAssocTypeId", type, "fromDate", firstDate));
+        call("createBOMAssoc", Map.of(
+                "productId", "AC03_CHAIN_B", "productIdTo", "AC03_CHAIN_C",
+                "productAssocTypeId", type, "fromDate", firstDate));
+        MigrationException multiHopCycle = assertThrows(MigrationException.class, () -> call("createBOMAssoc", Map.of(
+                "productId", "AC03_CHAIN_C", "productIdTo", "AC03_CHAIN_A",
+                "productAssocTypeId", type, "fromDate", firstDate)));
+        assertEquals(400, multiHopCycle.getStatus().value());
+
+        call("createBOMAssoc", Map.of(
+                "productId", "AC03_DIAMOND_A", "productIdTo", "AC03_DIAMOND_C",
+                "productAssocTypeId", type, "fromDate", firstDate));
+        call("createBOMAssoc", Map.of(
+                "productId", "AC03_DIAMOND_C", "productIdTo", "AC03_DIAMOND_B",
+                "productAssocTypeId", type, "fromDate", firstDate));
+        call("createBOMAssoc", Map.of(
+                "productId", "AC03_DIAMOND_A", "productIdTo", "AC03_DIAMOND_B",
+                "productAssocTypeId", type, "fromDate", firstDate));
+        assertTrue(productsContains("AC03_DIAMOND_A", "AC03_DIAMOND_B", firstDate));
+
+        call("createBOMAssoc", Map.of(
+                "productId", "AC03_VERSION_A", "productIdTo", "AC03_VERSION_B",
+                "productAssocTypeId", type, "fromDate", firstDate));
+        Timestamp secondDate = Timestamp.from(Instant.parse("2020-01-02T00:00:00Z"));
+        call("createBOMAssoc", Map.of(
+                "productId", "AC03_VERSION_A", "productIdTo", "AC03_VERSION_B",
+                "productAssocTypeId", type, "fromDate", secondDate));
+        assertEquals(2, entities.findByEquality(entities.entityClass("ProductAssoc"), Map.of(
+                "productId", "AC03_VERSION_A", "productIdTo", "AC03_VERSION_B",
+                "productAssocTypeId", type)).size());
+    }
+
+    @Test
+    void ac03_searchDuplicatedAncestorReturnsTheAssociationOrEmpty() {
+        Timestamp fromDate = Timestamp.from(Instant.parse("2020-01-01T00:00:00Z"));
+        Map<String, Object> association = call("createBOMAssoc", Map.of(
+                "productId", "AC03_SEARCH_A", "productIdTo", "AC03_SEARCH_B",
+                "productAssocTypeId", "MANUF_COMPONENT", "fromDate", fromDate));
+
+        Map<String, Object> duplicate = call("searchDuplicatedAncestor", Map.of(
+                "productId", "AC03_SEARCH_B", "productIdTo", "AC03_SEARCH_A",
+                "productAssocTypeId", "MANUF_COMPONENT", "fromDate", fromDate));
+        @SuppressWarnings("unchecked")
+        Map<String, Object> duplicatedAssociation = (Map<String, Object>) duplicate.get("duplicatedProductAssoc");
+        assertEquals(association.get("productId"), duplicatedAssociation.get("productId"));
+        assertEquals(association.get("productIdTo"), duplicatedAssociation.get("productIdTo"));
+        assertEquals(association.get("productAssocTypeId"), duplicatedAssociation.get("productAssocTypeId"));
+        assertEquals(association.get("fromDate"), duplicatedAssociation.get("fromDate"));
+
+        Map<String, Object> notFound = call("searchDuplicatedAncestor", Map.of(
+                "productId", "AC03_SEARCH_ISOLATED", "productIdTo", "AC03_SEARCH_A",
+                "productAssocTypeId", "MANUF_COMPONENT", "fromDate", fromDate));
+        assertEquals(Map.of(), notFound.get("duplicatedProductAssoc"));
     }
 
     @Test

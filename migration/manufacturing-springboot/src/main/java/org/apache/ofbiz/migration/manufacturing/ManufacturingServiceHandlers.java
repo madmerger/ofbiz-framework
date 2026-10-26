@@ -133,7 +133,7 @@ public class ManufacturingServiceHandlers {
         if (products.findProductAssoc(keys) != null) {
             throw new MigrationException(HttpStatus.CONFLICT, "ServiceValueFound");
         }
-        if (isAncestor(productId, componentId, type, fromDate)) {
+        if (findDuplicatedAncestor(productId, componentId, type, fromDate) != null) {
             throw badRequest("ManufacturingDuplicatedComponentInBOM: " + productId + " " + componentId);
         }
         Map<String, Object> values = new LinkedHashMap<>();
@@ -173,11 +173,13 @@ public class ManufacturingServiceHandlers {
             if (input.get("thruDate") != null) {
                 values.put("thruDate", timestamp(input.get("thruDate")));
             }
+            Timestamp fromDate = timestamp(values.get("fromDate"));
+            Timestamp effectiveDate = fromDate == null ? now : fromDate;
             if (!destination.equals(values.get("productIdTo"))
                     && products.findProductAssoc(assocKeys(destination, text(values.get("productIdTo")),
                             text(values.get("productAssocTypeId")), timestamp(values.get("fromDate")))) == null
-                    && !isAncestor(destination, text(values.get("productIdTo")),
-                            text(values.get("productAssocTypeId")), timestamp(values.get("fromDate")))) {
+                    && findDuplicatedAncestor(destination, text(values.get("productIdTo")),
+                            text(values.get("productAssocTypeId")), effectiveDate) == null) {
                 products.createProductAssoc(values);
                 copied++;
             }
@@ -255,34 +257,49 @@ public class ManufacturingServiceHandlers {
         if (date == null) {
             date = Timestamp.from(Instant.now());
         }
-        Map<String, Object> duplicated = isAncestor(component, product, type, date)
-                ? Map.of("productId", product, "productIdTo", component) : Map.of();
-        return Map.of("duplicatedProductAssoc", duplicated);
+        Map<String, Object> duplicated = findDuplicatedAncestor(product, component, type, date);
+        return Map.of("duplicatedProductAssoc", duplicated == null ? Map.of() : duplicated);
     }
 
-    private boolean isAncestor(String start, String target, String type, Timestamp date) {
-        Deque<String> pending = new ArrayDeque<>();
-        Set<String> visited = new java.util.HashSet<>();
-        pending.add(start);
-        while (!pending.isEmpty()) {
-            String current = pending.removeFirst();
-            if (!visited.add(current)) {
+    private Map<String, Object> findDuplicatedAncestor(String productId, String productIdTo,
+                                                       String type, Timestamp date) {
+        Set<String> productIdKeys = new java.util.HashSet<>();
+        Deque<String> productsToVisit = new ArrayDeque<>();
+        productsToVisit.add(productIdTo);
+        while (!productsToVisit.isEmpty()) {
+            String currentProductId = productsToVisit.removeFirst();
+            if (!productIdKeys.add(currentProductId)) {
                 continue;
             }
-            for (Map<String, Object> parent : products.findProductAssocs(
-                    Map.of("productIdTo", current, "productAssocTypeId", type))) {
-                Timestamp from = timestamp(parent.get("fromDate"));
-                Timestamp thru = timestamp(parent.get("thruDate"));
-                if ((from == null || !from.after(date)) && (thru == null || thru.after(date))) {
-                    String parentId = text(parent.get("productId"));
-                    if (target.equals(parentId)) {
-                        return true;
-                    }
-                    pending.addLast(parentId);
+            for (Map<String, Object> child : products.findProductAssocs(
+                    Map.of("productId", currentProductId, "productAssocTypeId", type))) {
+                if (activeOn(child, date)) {
+                    productsToVisit.addLast(text(child.get("productIdTo")));
                 }
             }
         }
-        return false;
+
+        Set<String> visitedAncestors = new java.util.HashSet<>();
+        Deque<String> ancestorsToVisit = new ArrayDeque<>();
+        ancestorsToVisit.add(productId);
+        while (!ancestorsToVisit.isEmpty()) {
+            String currentProductId = ancestorsToVisit.removeFirst();
+            if (!visitedAncestors.add(currentProductId)) {
+                continue;
+            }
+            for (Map<String, Object> parent : products.findProductAssocs(
+                    Map.of("productIdTo", currentProductId, "productAssocTypeId", type))) {
+                if (!activeOn(parent, date)) {
+                    continue;
+                }
+                String parentProductId = text(parent.get("productId"));
+                if (productIdKeys.contains(parentProductId)) {
+                    return parent;
+                }
+                ancestorsToVisit.addLast(parentProductId);
+            }
+        }
+        return null;
     }
 
     private Map<String, Object> getProductRouting(Map<String, Object> input) {
