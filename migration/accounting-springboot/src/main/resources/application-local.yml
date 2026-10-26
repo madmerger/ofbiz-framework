@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:accounting-local;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+migration:
+  security:
+    require-https: false
+    users:
+      - username: acct-admin
+        authorities: [OFBTOOLS_VIEW, OFBTOOLS_ADMIN, ACCOUNTING_VIEW, ACCOUNTING_ADMIN, ACCOUNTING_CREATE, ACCOUNTING_UPDATE, ACCOUNTING_DELETE, ACCOUNTING_SENSITIVE_VIEW]
+      - username: acct-clerk
+        authorities: [OFBTOOLS_VIEW, ACCOUNTING_VIEW, ACCOUNTING_CREATE, ACCOUNTING_UPDATE]
+      - username: acct-viewer
+        authorities: [OFBTOOLS_VIEW, ACCOUNTING_VIEW]
+      - username: acct-sensitive
+        authorities: [OFBTOOLS_VIEW, ACCOUNTING_VIEW, ACCOUNTING_SENSITIVE_VIEW]
+      - username: acct-nobase
+        authorities: [ACCOUNTING_VIEW, ACCOUNTING_CREATE, ACCOUNTING_UPDATE]
