@@ -1,0 +1,476 @@
+{
+  "component": "accounting",
+  "baseUrl": "http://localhost:8080",
+  "profile": "local",
+  "notes": "ユーザーのパスワードは環境変数 MIGRATION_DEMO_PASSWORD（画面・レポートに表示しない）。${...} は前ケースの応答値で置換する。サーバ起動直後の状態から ID 順に実行する。",
+  "cases": [
+    {
+      "id": "ACCOUNTING-E2E-01",
+      "name": "未認証は 401",
+      "section": "認証",
+      "request": {
+        "method": "GET",
+        "path": "/api/accounting/entities/Invoice",
+        "user": null,
+        "body": null
+      },
+      "expected": {
+        "status": 401
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-02",
+      "name": "base-permission 不足（OFBTOOLS のみ）は 403",
+      "section": "権限",
+      "request": {
+        "method": "GET",
+        "path": "/api/accounting/entities/Invoice",
+        "user": "acct-nobase",
+        "body": null
+      },
+      "expected": {
+        "status": 403
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-03",
+      "name": "閲覧専用ユーザーの請求書作成は 403",
+      "section": "権限",
+      "request": {
+        "method": "POST",
+        "path": "/api/accounting/services/createInvoiceForOrder",
+        "user": "acct-viewer",
+        "body": {
+          "orderId": "MIG_DEMO_ORDER"
+        }
+      },
+      "expected": {
+        "status": 403
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-04",
+      "name": "機密エンティティ CreditCard: 閲覧専用ユーザーは 403",
+      "section": "機密エンティティ",
+      "request": {
+        "method": "GET",
+        "path": "/api/accounting/entities/CreditCard/one?paymentMethodId=MIG_DEMO_PM",
+        "user": "acct-viewer",
+        "body": null
+      },
+      "expected": {
+        "status": 403
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-05",
+      "name": "機密エンティティ CreditCard: 専用権限ありは 200（カード番号はマスク）",
+      "section": "機密エンティティ",
+      "request": {
+        "method": "GET",
+        "path": "/api/accounting/entities/CreditCard/one?paymentMethodId=MIG_DEMO_PM",
+        "user": "acct-sensitive",
+        "body": null
+      },
+      "expected": {
+        "status": 200,
+        "body": {
+          "paymentMethodId": "MIG_DEMO_PM",
+          "cardNumber": "[REDACTED]"
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-06",
+      "name": "entity-auto 作成 createPaymentGroupType",
+      "section": "entity-auto CRUD",
+      "request": {
+        "method": "POST",
+        "path": "/api/accounting/services/createPaymentGroupType",
+        "user": "acct-clerk",
+        "body": {
+          "paymentGroupTypeId": "E2E_PG_TYPE",
+          "description": "E2E 作成"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "body": {
+          "paymentGroupTypeId": "E2E_PG_TYPE"
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-07",
+      "name": "entity-auto 取得 PaymentGroupType",
+      "section": "entity-auto CRUD",
+      "request": {
+        "method": "GET",
+        "path": "/api/accounting/entities/PaymentGroupType/one?paymentGroupTypeId=E2E_PG_TYPE",
+        "user": "acct-clerk",
+        "body": null
+      },
+      "expected": {
+        "status": 200,
+        "body": {
+          "description": "E2E 作成"
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-08",
+      "name": "entity-auto 更新 updatePaymentGroupType",
+      "section": "entity-auto CRUD",
+      "request": {
+        "method": "POST",
+        "path": "/api/accounting/services/updatePaymentGroupType",
+        "user": "acct-clerk",
+        "body": {
+          "paymentGroupTypeId": "E2E_PG_TYPE",
+          "description": "E2E 更新"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "followUp": {
+          "method": "GET",
+          "path": "/api/accounting/entities/PaymentGroupType/one?paymentGroupTypeId=E2E_PG_TYPE",
+          "status": 200,
+          "body": {
+            "description": "E2E 更新"
+          }
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-09",
+      "name": "entity-auto 削除 deletePaymentGroupType",
+      "section": "entity-auto CRUD",
+      "request": {
+        "method": "POST",
+        "path": "/api/accounting/services/deletePaymentGroupType",
+        "user": "acct-clerk",
+        "body": {
+          "paymentGroupTypeId": "E2E_PG_TYPE"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "followUp": {
+          "method": "GET",
+          "path": "/api/accounting/entities/PaymentGroupType/one?paymentGroupTypeId=E2E_PG_TYPE",
+          "status": 404
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-10",
+      "name": "主要フロー1 受注から請求書作成 createInvoiceForOrder",
+      "section": "主要フロー",
+      "request": {
+        "method": "POST",
+        "path": "/api/accounting/services/createInvoiceForOrder",
+        "user": "acct-clerk",
+        "body": {
+          "orderId": "MIG_DEMO_ORDER"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "body": {
+          "invoiceId": "<採番値 → ${invoiceId}>"
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-11",
+      "name": "主要フロー2 請求書合計 getInvoiceTotal",
+      "section": "主要フロー",
+      "request": {
+        "method": "POST",
+        "path": "/api/accounting/services/getInvoiceTotal",
+        "user": "acct-clerk",
+        "body": {
+          "invoiceId": "${invoiceId}"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "body": {
+          "invoiceTotal": 30.0
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-12",
+      "name": "主要フロー3 請求書承認 setInvoiceStatus → INVOICE_APPROVED",
+      "section": "主要フロー",
+      "request": {
+        "method": "POST",
+        "path": "/api/accounting/services/setInvoiceStatus",
+        "user": "acct-clerk",
+        "body": {
+          "invoiceId": "${invoiceId}",
+          "statusId": "INVOICE_APPROVED"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "body": {
+          "oldStatusId": "INVOICE_IN_PROCESS"
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-13",
+      "name": "主要フロー4 入金作成 createPayment（30.00, PMNT_RECEIVED）",
+      "section": "主要フロー",
+      "request": {
+        "method": "POST",
+        "path": "/api/accounting/services/createPayment",
+        "user": "acct-clerk",
+        "body": {
+          "paymentTypeId": "CUSTOMER_PAYMENT",
+          "paymentMethodTypeId": "CREDIT_CARD",
+          "paymentMethodId": "MIG_DEMO_PM",
+          "partyIdFrom": "MIG_DEMO_CUSTOMER",
+          "partyIdTo": "MIG_DEMO_VENDOR",
+          "currencyUomId": "USD",
+          "amount": "30.00",
+          "statusId": "PMNT_RECEIVED"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "body": {
+          "paymentId": "<採番値 → ${paymentId}>"
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-14",
+      "name": "主要フロー5 消込 createPaymentApplication",
+      "section": "主要フロー",
+      "request": {
+        "method": "POST",
+        "path": "/api/accounting/services/createPaymentApplication",
+        "user": "acct-clerk",
+        "body": {
+          "invoiceId": "${invoiceId}",
+          "paymentId": "${paymentId}"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "body": {
+          "amountApplied": 30.0
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-15",
+      "name": "主要フロー6 未消込額 getInvoiceNotApplied = 0",
+      "section": "主要フロー",
+      "request": {
+        "method": "POST",
+        "path": "/api/accounting/services/getInvoiceNotApplied",
+        "user": "acct-clerk",
+        "body": {
+          "invoiceId": "${invoiceId}"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "body": {
+          "notApplied": 0.0
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-16",
+      "name": "主要フロー7 READY 遷移で INVOICE_PAID へ自動遷移",
+      "section": "主要フロー",
+      "request": {
+        "method": "POST",
+        "path": "/api/accounting/services/setInvoiceStatus",
+        "user": "acct-clerk",
+        "body": {
+          "invoiceId": "${invoiceId}",
+          "statusId": "INVOICE_READY"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "followUp": {
+          "method": "GET",
+          "path": "/api/accounting/entities/Invoice/one?invoiceId=${invoiceId}",
+          "status": 200,
+          "body": {
+            "statusId": "INVOICE_PAID"
+          }
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-17",
+      "name": "simple 代表1 acctgInvoicePermissionCheck（clerk は UPDATE 可）",
+      "section": "simple サービス",
+      "request": {
+        "method": "POST",
+        "path": "/api/accounting/services/acctgInvoicePermissionCheck",
+        "user": "acct-clerk",
+        "body": {
+          "mainAction": "UPDATE"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "body": {
+          "hasPermission": true
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-18",
+      "name": "simple 代表1 acctgInvoicePermissionCheck（viewer は UPDATE 不可）",
+      "section": "simple サービス",
+      "request": {
+        "method": "POST",
+        "path": "/api/accounting/services/acctgInvoicePermissionCheck",
+        "user": "acct-viewer",
+        "body": {
+          "mainAction": "UPDATE"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "body": {
+          "hasPermission": false
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-19",
+      "name": "simple 代表2 createPaymentGroupMember（入金を支払グループに追加）",
+      "section": "simple サービス",
+      "request": {
+        "method": "POST",
+        "path": "/api/accounting/services/createPaymentGroupMember",
+        "user": "acct-clerk",
+        "body": {
+          "paymentGroupId": "${paymentGroupId}",
+          "paymentId": "${paymentId}"
+        },
+        "setup": {
+          "method": "POST",
+          "path": "/api/accounting/services/createPaymentGroup",
+          "user": "acct-clerk",
+          "body": {
+            "paymentGroupTypeId": "BATCH_PAYMENT",
+            "paymentGroupName": "E2E グループ"
+          },
+          "capture": {
+            "paymentGroupId": "$.paymentGroupId"
+          }
+        }
+      },
+      "expected": {
+        "status": 200,
+        "followUp": {
+          "method": "GET",
+          "path": "/api/accounting/entities/PaymentGroupMember?paymentGroupId=${paymentGroupId}",
+          "status": 200,
+          "body": "paymentId=${paymentId} の行が 1 件"
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-20",
+      "name": "multi: 重複を含む一括作成は 409",
+      "section": "multi",
+      "request": {
+        "method": "POST",
+        "path": "/api/accounting/services/createInvoice/multi",
+        "user": "acct-clerk",
+        "body": [
+          {
+            "invoiceId": "E2E_ROLLBACK_A",
+            "invoiceTypeId": "SALES_INVOICE"
+          },
+          {
+            "invoiceId": "E2E_ROLLBACK_B",
+            "invoiceTypeId": "SALES_INVOICE"
+          },
+          {
+            "invoiceId": "${invoiceId}",
+            "invoiceTypeId": "SALES_INVOICE"
+          }
+        ]
+      },
+      "expected": {
+        "status": 409,
+        "body": {
+          "responseMessage": "error",
+          "errors": "ServiceValueFound を含む"
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-21",
+      "name": "multi: 全件ロールバック（先行 2 件も残らない）",
+      "section": "multi",
+      "request": {
+        "method": "GET",
+        "path": "/api/accounting/entities/Invoice/one?invoiceId=E2E_ROLLBACK_A",
+        "user": "acct-clerk",
+        "body": null
+      },
+      "expected": {
+        "status": 404,
+        "followUp": {
+          "method": "GET",
+          "path": "/api/accounting/entities/Invoice/one?invoiceId=E2E_ROLLBACK_B",
+          "status": 404
+        }
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-22",
+      "name": "請求書承認で売上仕訳が自動作成",
+      "section": "GL 自動仕訳",
+      "request": {
+        "method": "GET",
+        "path": "/api/accounting/entities/AcctgTrans?invoiceId=${invoiceId}&acctgTransTypeId=SALES_INVOICE",
+        "user": "acct-clerk",
+        "body": null
+      },
+      "expected": {
+        "status": 200,
+        "body": "acctgTransTypeId=SALES_INVOICE の行が 1 件"
+      }
+    },
+    {
+      "id": "ACCOUNTING-E2E-23",
+      "name": "売上仕訳の借方・貸方が一致",
+      "section": "GL 自動仕訳",
+      "request": {
+        "method": "GET",
+        "path": "/api/accounting/entities/AcctgTransEntry?acctgTransId=${acctgTransId}",
+        "user": "acct-clerk",
+        "body": null
+      },
+      "setup": {
+        "method": "GET",
+        "path": "/api/accounting/entities/AcctgTrans?invoiceId=${invoiceId}&acctgTransTypeId=SALES_INVOICE",
+        "user": "acct-clerk",
+        "capture": {
+          "acctgTransId": "$[0].acctgTransId"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "body": "借方（debitCreditFlag=D）の amount 合計 = 貸方（C）の amount 合計 = 30"
+      }
+    }
+  ]
+}
