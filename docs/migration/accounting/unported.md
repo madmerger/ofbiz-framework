@@ -10,10 +10,10 @@
 | entity-auto | 386 | AccountingCatalogRegistrar に登録 |
 | groovy | 88 | 未移植 |
 | java | 109 | 未移植 |
-| simple 合計 | 93 | 一部のみ実装 |
-| simple: PermissionServices | 13 | AccountingPermissionHandlers に実装 |
-| simple: GL 自動仕訳除外 | 20 | 意図的に未登録 |
-| simple: その他未移植 | 60 | 未移植 |
+| simple 合計 | 93 | 73本を移植、GL自動仕訳20本を意図的に除外 |
+| simple: 移植済み | 73 | FinAccount 27、GL 19、Permission 13、AcctgTrans 8、PaymentMethod 5、GatewayConfig 1 |
+| simple: GL 自動仕訳除外 | 20 | 意図的に未登録・404 |
+
 | group | 10 | 未移植 |
 | interface | 19 | 未移植 |
 | view-entity | 40 | 未移植（JPA view 化なし） |
@@ -227,74 +227,11 @@
 | `updatePartyTaxAuthInfo` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/tax/TaxAuthorityServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `createCustomerTaxAuthInfo` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/tax/TaxAuthorityServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 
-## simple サービス（GL 自動仕訳以外）
+## simple サービス（未移植の GL 自動仕訳 20 本のみ）
 
-PermissionServices.xml の13本のみ実装。その他60本はまだ未移植であり、呼び出し可能な実装として登録していない。
+その他の simple サービス73本は Java handler として移植済み。servicedef 由来の期待集合で登録を検証し、以下20本は未登録・404とする。
 
-| service name | engine | location | 理由 |
-| --- | --- | --- | --- |
-| `createFinAccount` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `updateFinAccount` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `updateFinAccountBalancesFromTrans` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `updateFinAccountBalancesFromAuth` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `createFinAccountTrans` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `createFinAccountRole` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `createFinAccountAuth` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `expireFinAccountAuth` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `setFinAccountTransStatus` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `updatePaymentOnFinAccTransStatusSetToCancel` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `getFinAccountTransListAndTotals` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `getFinAccountTransRunningTotalAndBalances` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `reconcileFinAccountTrans` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `reconcileAdjustmentFinAcctgTrans` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `reconcileDepositFinAcctgTrans` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `reconcileWithdrawalFinAcctgTrans` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `getReconciliationClosingBalance` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `depositWithdrawPayments` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `expirePaymentAssociationsOnFinAccountTransCancel` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `createPaymentAndFinAccountTrans` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `getTransactionTotalByGlReconcileId` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `assignGlRecToFinAccTrans` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `removeFinAccountTransFromReconciliation` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `isGlReconciliationReconciled` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `cancelBankReconciliation` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `getAssociatedAcctgTransEntriesWithFinAccountTrans` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `autoFinAccountReconciliation` | simple | `component://accounting/minilang/finaccount/FinAccountServices.xml` | simple-method 未移植 |
-| `quickCreateAcctgTransAndEntries` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `calculateGlJournalTrialBalance` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `postGlJournal` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `updateGlReconciliationLastModified` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `createGlReconciliationEntry` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `completeAcctgTransEntries` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `checkAcctgTransPosted` | simple | `component://accounting/minilang/ledger/AcctgTransServices.xml` | simple-method 未移植 |
-| `createAcctgTransEntry` | simple | `component://accounting/minilang/ledger/AcctgTransServices.xml` | simple-method 未移植 |
-| `updateAcctgTransEntry` | simple | `component://accounting/minilang/ledger/AcctgTransServices.xml` | simple-method 未移植 |
-| `deleteAcctgTransEntry` | simple | `component://accounting/minilang/ledger/AcctgTransServices.xml` | simple-method 未移植 |
-| `createAcctgTransAndEntries` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `calculateAcctgTransTrialBalance` | simple | `component://accounting/minilang/ledger/AcctgTransServices.xml` | simple-method 未移植 |
-| `postAcctgTrans` | simple | `component://accounting/minilang/ledger/AcctgTransServices.xml` | simple-method 未移植 |
-| `closeFinancialTimePeriod` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `computeGlAccountBalanceForTimePeriod` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `computeAndStoreGlAccountHistoryBalance` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `prepareIncomeStatement` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `getGlAccountFromAccountType` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `getInventoryItemOwner` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `copyAcctgTransAndEntries` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `getAcctgTransEntriesAndTransTotal` | simple | `component://accounting/minilang/ledger/AcctgTransServices.xml` | simple-method 未移植 |
-| `calculateGlAccountTrialBalance` | simple | `component://accounting/minilang/ledger/AcctgTransServices.xml` | simple-method 未移植 |
-| `updateGlAccountCategoryMember` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `createGlAcctCatMemFromCostCenters` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `getGlAcctgAndAmountPercentage` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `getInventoryValuationList` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `setGlReconciliationStatus` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | simple-method 未移植 |
-| `updatePaymentGatewayConfigType` | simple | `component://accounting/minilang/payment/PaymentGatewayConfigServices.xml` | simple-method 未移植 |
-| `setPaymentMethodAddress` | simple | `component://accounting/minilang/payment/PaymentMethodServices.xml` | simple-method 未移植 |
-| `updatePaymentMethodAddress` | simple | `component://accounting/minilang/payment/PaymentMethodServices.xml` | simple-method 未移植 |
-| `createPayPalPaymentMethod` | simple | `component://accounting/minilang/payment/PaymentMethodServices.xml` | simple-method 未移植 |
-| `createPaymentGroupMember` | simple | `component://accounting/minilang/payment/PaymentMethodServices.xml` | simple-method 未移植 |
-| `expirePaymentGroupMember` | simple | `component://accounting/minilang/payment/PaymentMethodServices.xml` | simple-method 未移植 |
-
-## GL 自動仕訳 simple 20 本（意図的除外）
+### GL 自動仕訳 simple 20 本（意図的除外）
 
 GL 自動仕訳・転記は未移植 Java/Groovy 呼び出しや会計ポスティング副作用を含むため、handler を登録せず API は404とする。
 
@@ -1179,3 +1116,7 @@ GL 自動仕訳・転記は未移植 Java/Groovy 呼び出しや会計ポステ�
 - 主要 invoice/payment flow: party invoice prefix と個別採番、承認時 payment application matching/capture、order adjustments/billing account/contact-mech/shipment/payment-preference/fees、GL posting/reversal、purchase/return order。
 - 未移植 simple services: 下流の GL 自動仕訳・未移植 Java/Groovy・他コンポーネント service 呼出しは実行していない。
 - 再請求: 未請求数量のない受注は追加請求を生成しない。
+- `updatePaymentMethodAddress`: 住所履歴更新を委譲する未移植の `createUpdatePaymentMethodAndCreditCard` Java service 呼び出しのみを省略。PaymentMethod address の他の各 simple handler は実装済み。
+- `GeneralLedgerServices.xml`: 為替レート取得と通貨換算、`GROUP_ROLLUP` 親組織への集計、未移植 GL 自動仕訳サービス呼び出しは省略。期間締めに伴う自動仕訳・一部の account posting configuration／error journal 分岐も未移植。
+- `AcctgTransServices.xml`: 外貨換算、関連組織の `GROUP_ROLLUP` 集計、posting configuration に基づく自動仕訳と error journal の生成は省略。
+- `FinAccountServices.xml`: `getFinAccountTransRunningTotalAndBalances` が呼ぶ未移植 Groovy `getPartyAccountingPreferences` は実行せず、`PartyAcctgPreference` の直接参照で基準通貨を選ぶ（locale による OFBiz 通貨書式は未移植）。`depositWithdrawPayments` の `checkAndCreateBatchForValidPayments` 呼び出しは未移植のため、`groupInOneTransaction=Y` でも PaymentGroup の作成は行わない。`updatePayment` Groovy service 呼び出しは Payment の FinAccountTrans 関連付けのみを直接更新し、service 固有の処理/ECA は実行しない。`postFinAccountTransToGl` の GL 自動仕訳と外貨換算は省略した。

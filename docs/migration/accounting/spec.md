@@ -17,11 +17,32 @@
 | Entity API / entity-auto | entity-auto の登録と CRUD、Entity API | entity-auto 対象エンティティ |
 | Invoice | 請求作成・明細・受注請求・状態履歴・合計・消込残高 | Invoice, InvoiceItem, InvoiceStatus |
 | Payment | 入金・支払、状態遷移、PaymentApplication | Payment, PaymentApplication |
-| Financial account / ledger | 現行の entity-auto と一部の権限判定 | FinAccount, AcctgTrans 等 |
+| Financial account / ledger | Financial Account、勘定科目、取引、期間締め、照合 | FinAccount, AcctgTrans 等 |
 
-主要な手書き請求／支払サービスは `createInvoice`, `setInvoiceStatus`, `createInvoiceItem`, `createInvoiceForOrder`, `checkInvoicePaymentApplications`, `getInvoiceTotal`, `getInvoiceItemTotal`, `getInvoiceNotApplied`, `getInvoiceApplied`, `createPayment`, `createPaymentApplication`, `setPaymentStatus`。`getInvoice*` のうち合計・残高は OFBiz ではサービスではなく `InvoiceWorker` のメソッドを API handler として公開する。
+主要な手書きサービス12件: `createInvoice`, `setInvoiceStatus`, `createInvoiceItem`, `createInvoiceForOrder`, `checkInvoicePaymentApplications`, `getInvoiceTotal`, `getInvoiceItemTotal`, `getInvoiceNotApplied`, `getInvoiceApplied`, `createPayment`, `createPaymentApplication`, `setPaymentStatus`。`getInvoice*` のうち合計・残高は OFBiz ではサービスではなく `InvoiceWorker` のメソッドを API handler として公開する。
 
-simple-method サービスは、現在 `AccountingPermissionHandlers` の13権限サービスを移植している。Task B の目標である73本のうち残り60本は未移植であり、GL 自動仕訳20本は意図的に除外する。実態は `unported.md` を参照。
+simple-method の手書き移植73件:
+
+| クラス | 件数 | サービス |
+| --- | ---: | --- |
+| `FinAccountServiceHandlers` | 27 | `createFinAccount`, `updateFinAccount`, `updateFinAccountBalancesFromTrans`, `updateFinAccountBalancesFromAuth`, `createFinAccountTrans`, `createFinAccountRole`, `createFinAccountAuth`, `expireFinAccountAuth`, `setFinAccountTransStatus`, `updatePaymentOnFinAccTransStatusSetToCancel`, `getFinAccountTransListAndTotals`, `getFinAccountTransRunningTotalAndBalances`, `reconcileFinAccountTrans`, `reconcileAdjustmentFinAcctgTrans`, `reconcileDepositFinAcctgTrans`, `reconcileWithdrawalFinAcctgTrans`, `getReconciliationClosingBalance`, `depositWithdrawPayments`, `expirePaymentAssociationsOnFinAccountTransCancel`, `createPaymentAndFinAccountTrans`, `getTransactionTotalByGlReconcileId`, `assignGlRecToFinAccTrans`, `removeFinAccountTransFromReconciliation`, `isGlReconciliationReconciled`, `cancelBankReconciliation`, `getAssociatedAcctgTransEntriesWithFinAccountTrans`, `autoFinAccountReconciliation` |
+| `GeneralLedgerServiceHandlers` | 19 | `quickCreateAcctgTransAndEntries`, `calculateGlJournalTrialBalance`, `postGlJournal`, `updateGlReconciliationLastModified`, `createGlReconciliationEntry`, `completeAcctgTransEntries`, `createAcctgTransAndEntries`, `closeFinancialTimePeriod`, `computeGlAccountBalanceForTimePeriod`, `computeAndStoreGlAccountHistoryBalance`, `prepareIncomeStatement`, `getGlAccountFromAccountType`, `getInventoryItemOwner`, `copyAcctgTransAndEntries`, `updateGlAccountCategoryMember`, `createGlAcctCatMemFromCostCenters`, `getGlAcctgAndAmountPercentage`, `getInventoryValuationList`, `setGlReconciliationStatus` |
+| `AccountingPermissionHandlers` | 13 | `acctgAgreementPermissionCheck`, `acctgBasePermissionCheck`, `acctgBillingAcctCheck`, `acctgCommissionPermissionCheck`, `acctgCostPermissionCheck`, `acctgFinAcctPermissionCheck`, `acctgFxPermissionCheck`, `acctgInvoicePermissionCheck`, `acctgPrefPermissionCheck`, `acctgTransactionPermissionCheck`, `basicGeneralLedgerPermissionCheck`, `fixedAssetPermissionCheck`, `acctgPaymentPermissionCheck` |
+| `AcctgTransServiceHandlers` | 8 | `checkAcctgTransPosted`, `createAcctgTransEntry`, `updateAcctgTransEntry`, `deleteAcctgTransEntry`, `getAcctgTransEntriesAndTransTotal`, `calculateAcctgTransTrialBalance`, `postAcctgTrans`, `calculateGlAccountTrialBalance` |
+| `PaymentMethodServiceHandlers` | 5 | `setPaymentMethodAddress`, `updatePaymentMethodAddress`, `createPayPalPaymentMethod`, `createPaymentGroupMember`, `expirePaymentGroupMember` |
+| `PaymentGatewayConfigServiceHandlers` | 1 | `updatePaymentGatewayConfigType` |
+
+GL自動仕訳のsimple 20件は意図的に未登録として404を返す。権限は、FinAccountの明示的な`acctgFinAcctPermissionCheck`でCREATE/UPDATEを照合し、その他はservicedefのpermission-service/main-actionまたはinvoke既定アクションに従う。FinAccount handlerは機密result entityを指定する。共通の割当表と除外理由は `unported.md` を参照。
+
+### 手書きサービスの権限割当
+
+| サービス群 | 権限 |
+| --- | --- |
+| FinAccount 27件 | 明示的な `acctgFinAcctPermissionCheck` は servicedef の `main-action` を適用: CREATE は `createFinAccount`, `createFinAccountTrans`, `createFinAccountRole`, `createFinAccountAuth`, `depositWithdrawPayments`、UPDATE は `updateFinAccount`, `setFinAccountTransStatus`, `reconcileFinAccountTrans`, `assignGlRecToFinAccTrans`, `removeFinAccountTransFromReconciliation`, `cancelBankReconciliation`。他の mutation は `ACCOUNTING_CREATE` / `ACCOUNTING_UPDATE`、読取6件は `ACCOUNTING_VIEW`。`createPaymentAndFinAccountTrans` は `ACCOUNTING_CREATE`。全27 handlerに機密な `FinAccount` / `FinAccountTrans` / `FinAccountAuth` / `FinAccountRole` を `sensitiveResultEntity` として設定し、`ACCOUNTING_SENSITIVE_VIEW` または `ACCOUNTING_ADMIN` も必須とする。 |
+| GeneralLedger 19件 | `basicGeneralLedgerPermissionCheck` は `ACCOUNTING_{CREATE,UPDATE,DELETE,VIEW}`。`acctgTransactionPermissionCheck` を指定する `createAcctgTransAndEntries` / `completeAcctgTransEntries` は `ACCTG_ATX_CREATE` / `ACCTG_ATX_UPDATE`。 |
+| AcctgTrans 8件 | `acctgTransactionPermissionCheck` の `main-action` に従い `ACCTG_ATX_CREATE` / `ACCTG_ATX_UPDATE` / `ACCTG_ATX_DELETE`。permission-service のない読取系は `ACCOUNTING_VIEW`。 |
+| PermissionServices 13件 | `mainAction` を受け、`ACCOUNTING_*`、`ACCOUNTING_ROLE_*`、`ACCOUNTING_COMM_*`、`ACCOUNTING_FX_*`、`ACCTG_PREF_*`、`ACCTG_ATX_*` authorityから `hasPermission` / `failMessage` を返す。`ADMIN` は該当actionを包含する。 |
+| PaymentMethod 5件 / GatewayConfig 1件 | servicedefに個別permission-serviceがないため、handlerのCREATE/UPDATE/VIEW actionで `ACCOUNTING_*` を要求。機密entityのhandlerには `sensitiveResultEntity` も適用。 |
 
 ## 3. API と画面方針
 
@@ -33,7 +54,7 @@ simple-method サービスは、現在 `AccountingPermissionHandlers` の13権�
 ## 4. セキュリティ
 
 - `migration.security.component: accounting`。base permission は `OFBTOOLS` と `ACCOUNTING`、action prefix は `ACCOUNTING`。
-- `extra-entities` は手書き handler、デモデータ、テストに必要な次の19件に限定する: `StatusItem`, `StatusValidChange`, `Party`, `PartyRole`, `OrderHeader`, `OrderRole`, `OrderItem`, `OrderItemBilling`, `Product`, `ProductStore`, `Invoice`, `InvoiceItem`, `InvoiceStatus`, `InvoiceItemTypeMap`, `Payment`, `PaymentApplication`, `PaymentMethod`, `PaymentMethodType`, `CreditCard`。
+- `extra-entities` は手書き handler、デモデータ、テストに必要な次の32件に限定する: `StatusItem`, `StatusValidChange`, `Party`, `PartyRole`, `OrderHeader`, `OrderRole`, `OrderItem`, `OrderItemBilling`, `Product`, `ProductStore`, `Invoice`, `InvoiceItem`, `InvoiceStatus`, `InvoiceItemTypeMap`, `Payment`, `PaymentApplication`, `PaymentMethod`, `PaymentMethodType`, `CreditCard`, `PartyRelationship`, `PartyGroup`, `ProductGlAccount`, `ProductCategoryGlAccount`, `ProductCategoryMember`, `FinAccount`, `FinAccountStatus`, `FinAccountTrans`, `FinAccountAuth`, `FinAccountRole`, `GlReconciliation`, `GlReconciliationEntry`, `PaymentGroupMember`。
 - 機密 Entity は14件: `PaymentMethod`, `CreditCard`, `EftAccount`, `CheckAccount`, `GiftCard`, `PayPalPaymentMethod`, `FinAccount`, `FinAccountTrans`, `FinAccountAuth`, `FinAccountRole`, `PaymentGatewayResponse`, `PaymentGatewayRespMsg`, `PaymentGatewayConfig`, `PaymentGatewayConfigType`。資格情報・カード番号・金融口座・ゲートウェイ応答／設定を含む範囲として選定した。
 - `Payment` と `Invoice` は金額・会計記録であり、カード番号や認証情報を持たないため、機密 Entity ではなく通常の `ACCOUNTING` 権限で保護する。`CreditCardTypeGlAccount` は機密値を含まないため除外する。Accounting の entity/service 定義には `ValueLinkKey` および payroll 名の Entity はない。
 - CreditCard の `cardNumber` は `[REDACTED]` で返す。機密 Entity の参照・サービス処理には sensitive 権限を要求する。
@@ -50,6 +71,8 @@ simple-method サービスは、現在 `AccountingPermissionHandlers` の13権�
 
 既存テスト: `AccountingCatalogTest`, `AccountingFlowTest`, `AccountingSecurityTest`, `HttpsSecurityTest`, `PostgresSmokeTest`, `SpringdocProfileTest`。Testcontainers PostgreSQL は `postgres:16-alpine` を使用する。
 
+simpleサービスは `GeneralLedgerServicesTest`, `FinAccountServicesTest`, `AcctgTransServicesTest`, `PaymentMethodServicesTest`, `PaymentGatewayConfigServicesTest` でサービス名を表示するケースとして検証する。PermissionServices 13件は `AccountingSecurityTest.permissionServicesAreRegisteredAndReflectTheCallersAuthorities` で各サービスの応答を確認する。
+
 | AC | 基準 | 対応テスト |
 | --- | --- | --- |
 | AC-01 | servicedef 由来の entity-auto 386件が一致・登録される | `AccountingCatalogTest` |
@@ -59,7 +82,7 @@ simple-method サービスは、現在 `AccountingPermissionHandlers` の13権�
 | AC-05 | 不正遷移・過剰消込・再請求と multi rollback | `AccountingFlowTest` |
 | AC-06 | local/test HTTP、postgres HTTPS、Swagger local-only | `HttpsSecurityTest`, `SpringdocProfileTest` |
 | AC-07 | PostgreSQL で schema と CRUD が動作する | `PostgresSmokeTest` |
-| AC-08 | simple-method 73件が登録され、除外GL 20件は未登録 | **未達**。現在の simple 登録は権限判定13件のみ |
+| AC-08 | simple-method 73件が登録され、除外GL 20件は未登録 | `AccountingCatalogTest.simpleServicesMatchTheServicedefRegistrationScope` |
 
 主要な受入れ基準の実行状況は `review.md` に記録する。
 

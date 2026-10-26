@@ -5,15 +5,20 @@
 | 検証 | 結果 |
 | --- | --- |
 | Task B `./gradlew :migration:accounting-springboot:check --console=plain` | **BUILD SUCCESSFUL** |
-| `AccountingCatalogTest` | 388 pass / 0 fail / 0 skip |
+| `AccountingCatalogTest` | 500 pass / 0 fail / 0 skip |
 | `AccountingFlowTest` | 3 pass / 0 fail / 0 skip |
 | `AccountingSecurityTest` | 3 pass / 0 fail / 0 skip |
+| `AcctgTransServicesTest` | 10 pass / 0 fail / 0 skip |
+| `FinAccountServicesTest` | 31 pass / 0 fail / 0 skip |
+| `GeneralLedgerServicesTest` | 28 pass / 0 fail / 0 skip |
+| `PaymentGatewayConfigServicesTest` | 1 pass / 0 fail / 0 skip |
+| `PaymentMethodServicesTest` | 7 pass / 0 fail / 0 skip |
 | `HttpsSecurityTest` / `PostgresSmokeTest` / `SpringdocProfileTest` | 各1 pass / 0 fail / 0 skip |
-| 合計 | **397 pass / 0 fail / 0 skip** |
-| local bootRun / Swagger / clerk flow | Task A で確認済み。Task B 変更後は未再実施 |
+| 合計 | **586 pass / 0 fail / 0 skip** |
+| local bootRun と `cases.json` の E2E 予行 | ID順に21/21ケースが期待どおり。予行後にサーバ停止を確認 |
 | inventory 再生成 | service 705、entity-auto 386、request 551、entity 147、指定 accounting entitymodel のview-entity 37 |
 
-entity-auto CRUD acceptance は77件実行、54件スキップ（CRUD三つ組不足23、型・桁・integrity制約22、validation／required依存9）。この文書作成時点で Task B のsimple-method 73本移植は未完了であり、受入れ済みとは扱わない。
+entity-auto CRUD acceptance は77件実行、54件スキップ（CRUD三つ組不足23、型・桁・integrity制約22、validation／required依存9）。simple-handlerの登録・404検証とサービス別テストはこの集計とは別に実施した。
 
 ## 2. OFBiz との差分と既知の制約
 
@@ -23,7 +28,8 @@ entity-auto CRUD acceptance は77件実行、54件スキップ（CRUD三つ組�
 - `createInvoiceForOrder`: adjustments、billing account、contact-mech、shipment grouping、payment-preference auto-application、fees は未移植。
 - 請求／支払: GL transaction creation、posting、reversal は未移植。
 - 注文請求: `SALES_ORDER` のみ。purchase order / return order は未移植。未請求数量のない再請求は新しい invoice を作らない。
-- Task B の73 simple servicesのうち、現在の実装はPermissionServices.xmlの13件。残る60件の移植および各正常系・負系テストは未完了。GL関連20件は意図的除外。
+- Accounting の simple service は73件を移植し、全件にサービス別の正常系テストを用意した。GL自動仕訳20件は意図的に未登録とし、servicedef由来の期待集合テストで登録対象73件と未登録・404対象20件を確認する。
+- `unported.md` の省略分岐節に、PaymentMethod住所更新の未移植Java呼出し、GL/AcctgTransの外貨換算・GROUP_ROLLUP・posting設定とerror journal、FinAccountの未移植Groovy／支払バッチ／GL呼出しの省略を記載。
 - Widget、FTL、view-entity はSpring APIに移植しない。全一覧は `unported.md`。
 - ECA/SECA engine は実装していないため、OFBizの暗黙のイベント連鎖は発生しない。
 
