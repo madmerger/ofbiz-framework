@@ -1,3 +1,21 @@
+/*******************************************************************************
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *******************************************************************************/
 package org.apache.ofbiz.migration.marketing;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,6 +41,9 @@ import org.apache.ofbiz.migration.datamodel.entity.ContactListCommStatus;
 import org.apache.ofbiz.migration.datamodel.entity.ContactListParty;
 import org.apache.ofbiz.migration.datamodel.entity.ContactListPartyStatus;
 import org.apache.ofbiz.migration.datamodel.entity.Party;
+import org.apache.ofbiz.migration.datamodel.entity.PartyContactMechPurpose;
+import org.apache.ofbiz.migration.datamodel.entity.PartyRelationship;
+import org.apache.ofbiz.migration.datamodel.entity.Person;
 import org.apache.ofbiz.migration.datamodel.entity.ProductStoreEmailSetting;
 import org.apache.ofbiz.migration.datamodel.entity.ReturnHeader;
 import org.apache.ofbiz.migration.datamodel.entity.ReturnItem;
@@ -30,8 +51,10 @@ import org.apache.ofbiz.migration.datamodel.entity.SalesForecastHistory;
 import org.apache.ofbiz.migration.datamodel.entity.SegmentGroupRole;
 import org.apache.ofbiz.migration.datamodel.entity.TrackingCodeOrder;
 import org.apache.ofbiz.migration.datamodel.entity.TrackingCodeOrderReturn;
+import org.apache.ofbiz.migration.datamodel.entity.UserLogin;
 import org.apache.ofbiz.migration.datamodel.entity.WebSite;
 import org.apache.ofbiz.migration.marketing.adapter.LocalMailStubAdapter;
+import org.apache.ofbiz.migration.marketing.port.MailPort;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -123,6 +146,8 @@ class MarketingServicesTest {
 
         Map<String, Object> done = run("updateContactListParty", Map.of("contactListId", "FLOW_CL",
                 "partyId", "_NA_", "fromDate", fromDate, "statusId", "CLPT_UNSUBSCRIBED"));
+        assertEquals(400, assertThrows(MigrationException.class,
+                () -> run("updateContactListPartyNoUserLogin", accept)).getStatus().value());
         assertEquals("CLPT_UNSUBSCRIBED", done.get("statusId"));
         assertTrue(mail.sentMails().stream().anyMatch(m -> "UNSUB_CONT_LIST_NOTI".equals(m.emailType())));
         assertEquals(List.of("CLPT_PENDING", "CLPT_ACCEPTED", "CLPT_UNSUBS_PENDING", "CLPT_UNSUBSCRIBED"),
@@ -230,6 +255,8 @@ class MarketingServicesTest {
                 "select t from TrackingCodeOrderReturn t where t.returnId = 'RET1'", TrackingCodeOrderReturn.class)
                 .getSingleResult();
         assertEquals("TC1", created.getTrackingCodeId());
+        assertEquals("PARTNER_MGD", created.getTrackingCodeTypeId());
+        assertEquals("N", created.getHasExported());
         assertEquals(404, assertThrows(MigrationException.class,
                 () -> run("createTrackingCodeOrderReturns", Map.of("returnId", "NONE"))).getStatus().value());
 
@@ -252,6 +279,13 @@ class MarketingServicesTest {
                 "emailContactMechIdTo", a.get("contactMechId")));
         assertEquals(a.get("partyId"), merged.get("partyId"));
         assertEquals("PARTY_DISABLED", entityManager.find(Party.class, b.get("partyId")).getStatusId());
+        List<PartyContactMechPurpose> purposes = entityManager.createQuery(
+                "select p from PartyContactMechPurpose p where p.partyId = ?1", PartyContactMechPurpose.class)
+                .setParameter(1, a.get("partyId")).getResultList();
+        assertTrue(purposes.stream().anyMatch(p -> p.getContactMechId().equals(b.get("contactMechId"))
+                && "PRIMARY_EMAIL".equals(p.getContactMechPurposeTypeId()) && p.getThruDate() == null));
+        assertTrue(purposes.stream().filter(p -> p.getContactMechId().equals(a.get("contactMechId")))
+                .allMatch(p -> p.getThruDate() != null));
 
         String forecastId = (String) run("createSalesForecast",
                 Map.of("organizationPartyId", "ORG", "quotaAmount", "1000")).get("salesForecastId");
@@ -272,6 +306,33 @@ class MarketingServicesTest {
                 Map.of("salesOpportunityId", "OPP1", "roleTypeId", "LEAD")).get("partyId"));
         assertNull(run("findPartyInSalesOpportunityRole",
                 Map.of("salesOpportunityId", "OPP1", "roleTypeId", "OTHER")).get("partyId"));
+    }
+
+    @Test
+    void simple05_createContactRelatesToLoginPartyAndIgnoresUndeclaredPersonFields() {
+        transactions.executeWithoutResult(status -> {
+            UserLogin login = new UserLogin();
+            login.setUserLoginId("contactowner");
+            login.setPartyId("OWNER_PARTY");
+            entityManager.persist(login);
+        });
+        MarketingTestSupport.loginAs("contactowner", "OFBTOOLS_VIEW", "MARKETING_VIEW", "MARKETING_ADMIN");
+        String partyId = (String) run("createContact", Map.of("firstName", "C", "lastName", "Owner",
+                "oldMaritalStatusEnumId", "IGNORED")).get("partyId");
+        assertNull(entityManager.find(Person.class, partyId).getOldMaritalStatusEnumId());
+        assertEquals(1, entityManager.createQuery("select r from PartyRelationship r where r.partyIdFrom = ?1"
+                        + " and r.partyIdTo = ?2 and r.partyRelationshipTypeId = 'CONTACT_REL'", PartyRelationship.class)
+                .setParameter(1, "OWNER_PARTY").setParameter(2, partyId).getResultList().size());
+    }
+
+    @Test
+    void simple06_mailStubKeepsOnlyLatestRequests() {
+        for (int i = 0; i < 150; i++) {
+            mail.sendMailFromScreen(new MailPort.MailRequest("T" + i, "to@example.com", "from@example.com",
+                    "s", "screen", null, null, Map.of()));
+        }
+        assertEquals(100, mail.sentMails().size());
+        assertEquals("T149", mail.sentMails().get(99).emailType());
     }
 
     private Map<String, Object> run(String service, Map<String, ?> input) {
