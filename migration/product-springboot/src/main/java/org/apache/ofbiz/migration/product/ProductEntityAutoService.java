@@ -25,34 +25,21 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.ofbiz.migration.common.EntityAutoService;
 import org.apache.ofbiz.migration.common.EntityRegistry;
-import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.SequenceService;
 import org.apache.ofbiz.migration.common.ServiceHandlerRegistry;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 
 @Component
 final class ProductEntityAutoService {
-    private static final int MAX_SUB_SEQUENCE_ATTEMPTS = 3;
     private final EntityAutoService delegate;
     private final EntityRegistry entities;
     private final SequenceService sequences;
-    private final TransactionTemplate transactionTemplate;
 
     ProductEntityAutoService(
-            EntityAutoService delegate,
-            EntityRegistry entities,
-            SequenceService sequences,
-            PlatformTransactionManager transactionManager) {
+            EntityAutoService delegate, EntityRegistry entities, SequenceService sequences) {
         this.delegate = delegate;
         this.entities = entities;
         this.sequences = sequences;
-        transactionTemplate = new TransactionTemplate(transactionManager);
-        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
     Map<String, Object> execute(
@@ -70,9 +57,12 @@ final class ProductEntityAutoService {
         if (primaryKeys.size() <= 1 || generated.isEmpty()) {
             return delegate.execute(definition, input);
         }
+        Map<String, Object> adaptedInput = new LinkedHashMap<>(input);
         List<ServiceHandlerRegistry.ParamDefinition> adaptedParams = new ArrayList<>();
         for (ServiceHandlerRegistry.ParamDefinition param : definition.params()) {
             if (generated.stream().anyMatch(candidate -> candidate.name().equals(param.name()))) {
+                adaptedInput.put(
+                        param.name(), sequences.nextSubSequence(definition.entity(), input, param.name()));
                 adaptedParams.add(new ServiceHandlerRegistry.ParamDefinition(
                         param.name(), "IN", param.optional(), param.type()));
             } else {
@@ -82,42 +72,6 @@ final class ProductEntityAutoService {
         ServiceHandlerRegistry.ServiceDefinition adapted = new ServiceHandlerRegistry.ServiceDefinition(
                 definition.name(), definition.entity(), definition.invoke(),
                 definition.permissionMainAction(), adaptedParams);
-        for (int attempt = 0; attempt < MAX_SUB_SEQUENCE_ATTEMPTS; attempt++) {
-            try {
-                return transactionTemplate.execute(status -> {
-                    Map<String, Object> attemptInput = new LinkedHashMap<>(input);
-                    for (ServiceHandlerRegistry.ParamDefinition param : generated) {
-                        attemptInput.put(
-                                param.name(), sequences.nextSubSequence(definition.entity(), input, param.name()));
-                    }
-                    return delegate.execute(adapted, attemptInput);
-                });
-            } catch (RuntimeException exception) {
-                if (!isDuplicateConflict(exception)) {
-                    throw exception;
-                }
-                if (attempt == MAX_SUB_SEQUENCE_ATTEMPTS - 1) {
-                    if (exception instanceof MigrationException migrationException) {
-                        throw migrationException;
-                    }
-                    throw new MigrationException(HttpStatus.CONFLICT, "ServiceValueFound");
-                }
-            }
-        }
-        throw new IllegalStateException("Sub-sequence attempts exhausted");
-    }
-
-    private static boolean isDuplicateConflict(Throwable exception) {
-        for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
-            if (cause instanceof DataIntegrityViolationException) {
-                return true;
-            }
-            if (cause instanceof MigrationException migrationException
-                    && migrationException.getStatus() == HttpStatus.CONFLICT
-                    && "ServiceValueFound".equals(migrationException.getMessage())) {
-                return true;
-            }
-        }
-        return false;
+        return delegate.execute(adapted, adaptedInput);
     }
 }
