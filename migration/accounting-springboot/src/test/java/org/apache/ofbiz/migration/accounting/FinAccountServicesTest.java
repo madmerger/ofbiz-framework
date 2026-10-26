@@ -18,7 +18,9 @@
 package org.apache.ofbiz.migration.accounting;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -65,6 +67,31 @@ class FinAccountServicesTest {
     }
 
     @Test
+    void createFinAccountRoleCanBeRetrievedThroughTheEntityApi() throws Exception {
+        persistAccount("MIG_FA_ROLE");
+        Instant beforeCreate = Instant.now();
+        postService("createFinAccountRole", "{\"finAccountId\":\"MIG_FA_ROLE\","
+                + "\"partyId\":\"MIG_DEMO_CUSTOMER\",\"roleTypeId\":\"OWNER\"}")
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/accounting/entities/FinAccountRole")
+                        .with(httpBasic("acct-admin", "test"))
+                        .param("finAccountId", "MIG_FA_ROLE")
+                        .param("partyId", "MIG_DEMO_CUSTOMER")
+                        .param("roleTypeId", "OWNER"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].finAccountId").value("MIG_FA_ROLE"))
+                .andExpect(jsonPath("$[0].partyId").value("MIG_DEMO_CUSTOMER"))
+                .andExpect(jsonPath("$[0].roleTypeId").value("OWNER"))
+                .andExpect(jsonPath("$[0].fromDate").isNotEmpty());
+        Object role = entities.findByEquality(entities.entityClass("FinAccountRole"), Map.of(
+                "finAccountId", "MIG_FA_ROLE", "partyId", "MIG_DEMO_CUSTOMER", "roleTypeId", "OWNER")).get(0);
+        Instant fromDate = ((Timestamp) entities.get(role, "fromDate")).toInstant();
+        assertFalse(fromDate.isBefore(beforeCreate));
+        assertFalse(fromDate.isAfter(Instant.now()));
+    }
+
+    @Test
     void updateFinAccountPersistsChangedFields() throws Exception {
         persistAccount("MIG_FA_UPDATE");
         postService("updateFinAccount", "{\"finAccountId\":\"MIG_FA_UPDATE\",\"finAccountName\":\"Updated\"}")
@@ -83,12 +110,69 @@ class FinAccountServicesTest {
         Object trans = entities.findByEquality(entities.entityClass("FinAccountTrans"),
                 Map.of("finAccountId", "MIG_FA_TRANS")).get(0);
         assertEquals("FINACT_TRNS_APPROVED", entities.get(trans, "statusId"));
-        String id = entities.get(trans, "finAccountTransId").toString();
-        postService("updateFinAccountBalancesFromTrans", "{\"finAccountTransId\":\"" + id + "\"}")
-                .andExpect(status().isOk());
         Object account = entities.findByEquality(entities.entityClass("FinAccount"),
                 Map.of("finAccountId", "MIG_FA_TRANS")).get(0);
         assertEquals(new java.math.BigDecimal("12.50"), entities.get(account, "actualBalance"));
+        assertEquals(new java.math.BigDecimal("12.50"), entities.get(account, "availableBalance"));
+    }
+
+    @Test
+    void createFinAccountAuthRecalculatesAvailableBalance() throws Exception {
+        persistAccount("MIG_FA_AUTH_ECA");
+        postService("createFinAccountAuth", "{\"finAccountId\":\"MIG_FA_AUTH_ECA\",\"amount\":3.00}")
+                .andExpect(status().isOk()).andExpect(jsonPath("$.finAccountAuthId").exists());
+        Object account = entities.findByEquality(entities.entityClass("FinAccount"),
+                Map.of("finAccountId", "MIG_FA_AUTH_ECA")).get(0);
+        assertEquals(new BigDecimal("0.00"), entities.get(account, "actualBalance"));
+        assertEquals(new BigDecimal("-3.00"), entities.get(account, "availableBalance"));
+    }
+
+    @Test
+    void cancelingFinAccountTransRecalculatesBalance() throws Exception {
+        persistAccount("MIG_FA_CANCEL");
+        persistTransaction("MIG_FA_CANCEL", "MIG_FA_CANCEL_TX", "DEPOSIT", "FINACT_TRNS_APPROVED", "9.00");
+        postService("updateFinAccountBalancesFromTrans", "{\"finAccountTransId\":\"MIG_FA_CANCEL_TX\"}")
+                .andExpect(status().isOk());
+        persistValidStatusChange("FINACT_TRNS_APPROVED", "FINACT_TRNS_CANCELED");
+        Object account = entities.findByEquality(entities.entityClass("FinAccount"),
+                Map.of("finAccountId", "MIG_FA_CANCEL")).get(0);
+        assertEquals(new BigDecimal("9.00"), entities.get(account, "actualBalance"));
+
+        postService("setFinAccountTransStatus", "{\"finAccountTransId\":\"MIG_FA_CANCEL_TX\","
+                + "\"statusId\":\"FINACT_TRNS_CANCELED\"}")
+                .andExpect(status().isOk()).andExpect(jsonPath("$.oldStatusId").value("FINACT_TRNS_APPROVED"));
+
+        assertEquals(new BigDecimal("0.00"), entities.get(account, "actualBalance"));
+        assertEquals(new BigDecimal("0.00"), entities.get(account, "availableBalance"));
+    }
+
+    @Test
+    void transactionListAndBalancesIncludeMoreThanOneHundredTransactions() throws Exception {
+        persistAccount("MIG_FA_MANY");
+        for (int index = 1; index <= 101; index++) {
+            Object trans = entities.newEntity(entities.entityClass("FinAccountTrans"));
+            entities.set(trans, "finAccountTransId", "MIG_FAM_" + String.format("%03d", index));
+            entities.set(trans, "finAccountId", "MIG_FA_MANY");
+            entities.set(trans, "finAccountTransTypeId", "DEPOSIT");
+            entities.set(trans, "statusId", "FINACT_TRNS_APPROVED");
+            entities.set(trans, "amount", new BigDecimal("1.00"));
+            entityManager.persist(trans);
+        }
+        entityManager.flush();
+
+        postService("getFinAccountTransListAndTotals", "{\"finAccountId\":\"MIG_FA_MANY\"}")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.finAccountTransList.length()").value(101))
+                .andExpect(jsonPath("$.grandTotal").value(101.00))
+                .andExpect(jsonPath("$.approvedGrandTotal").value(101.00))
+                .andExpect(jsonPath("$.totalApprovedTransactions").value(101));
+        postService("updateFinAccountBalancesFromTrans", "{\"finAccountTransId\":\"MIG_FAM_001\"}")
+                .andExpect(status().isOk());
+
+        Object account = entities.findByEquality(entities.entityClass("FinAccount"),
+                Map.of("finAccountId", "MIG_FA_MANY")).get(0);
+        assertEquals(new BigDecimal("101.00"), entities.get(account, "actualBalance"));
+        assertEquals(new BigDecimal("101.00"), entities.get(account, "availableBalance"));
     }
 
     @Test

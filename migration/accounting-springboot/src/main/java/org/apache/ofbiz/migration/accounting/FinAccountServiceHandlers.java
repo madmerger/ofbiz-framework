@@ -186,15 +186,24 @@ public class FinAccountServiceHandlers {
         entities.set(trans, "performedByPartyId", currentUserPartyId());
         entities.set(trans, "amount", round(amount));
         entityManager.persist(trans);
+        if ("FINACT_TRNS_APPROVED".equals(entities.get(trans, "statusId"))) {
+            updateBalancesFromTrans(Map.of("finAccountTransId", id));
+        }
         return Map.of("finAccountTransId", id);
     }
 
     /** Migrated from applications/accounting/minilang/finaccount/FinAccountServices.xml:196. */
     private Map<String, Object> createFinAccountRole(Map<String, Object> input) {
-        Object account = requiredOne("FinAccount", "finAccountId", input);
+        String accountId = required(input, "finAccountId");
+        String partyId = required(input, "partyId");
+        String roleTypeId = required(input, "roleTypeId");
+        Object account = requiredOne("FinAccount", "finAccountId", Map.of("finAccountId", accountId));
         requireActiveForTransaction(account);
         Object role = newEntity("FinAccountRole");
         copy(role, input, Set.of());
+        entities.set(role, "finAccountId", accountId);
+        entities.set(role, "partyId", partyId);
+        entities.set(role, "roleTypeId", roleTypeId);
         entities.set(role, "fromDate", input.getOrDefault("fromDate", now()));
         entityManager.persist(role);
         return Map.of();
@@ -212,6 +221,7 @@ public class FinAccountServiceHandlers {
         entities.set(auth, "fromDate", input.getOrDefault("fromDate", now()));
         entities.set(auth, "amount", round(amount));
         entityManager.persist(auth);
+        updateBalancesFromAuth(Map.of("finAccountAuthId", id));
         return Map.of("finAccountAuthId", id);
     }
 
@@ -256,6 +266,13 @@ public class FinAccountServiceHandlers {
             }
             entities.set(trans, "statusId", newStatus);
         }
+        if ("FINACT_TRNS_CANCELED".equals(newStatus)) {
+            Map<String, Object> canceledTrans = Map.of(
+                    "finAccountTransId", entities.get(trans, "finAccountTransId"));
+            expirePaymentAssociationsOnFinAccountTransCancel(canceledTrans);
+            updatePaymentOnFinAccTransStatusSetToCancel(canceledTrans);
+            updateBalancesFromTrans(canceledTrans);
+        }
         return Map.of("oldStatusId", oldStatus);
     }
 
@@ -271,7 +288,7 @@ public class FinAccountServiceHandlers {
     /** Migrated from applications/accounting/minilang/finaccount/FinAccountServices.xml:500. */
     private Map<String, Object> getFinAccountTransListAndTotals(Map<String, Object> input) {
         String accountId = required(input, "finAccountId");
-        List<?> all = entities.findByEquality(entities.entityClass("FinAccountTrans"), Map.of("finAccountId", accountId));
+        List<?> all = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("FinAccountTrans"), Map.of("finAccountId", accountId));
         List<?> matched = all.stream().filter(value -> matchesTransaction(value, input)).sorted(
                 Comparator.comparing(value -> date(entities.get(value, "transactionDate")),
                         Comparator.nullsFirst(Comparator.naturalOrder()))).toList();
@@ -448,7 +465,7 @@ public class FinAccountServiceHandlers {
         String id = required(input, "glReconciliationId");
         Object rec = requiredOne("GlReconciliation", "glReconciliationId", input);
         BigDecimal total = decimal(entities.get(rec, "reconciledBalance"));
-        for (Object trans : entities.findByEquality(
+        for (Object trans : AccountingEntityQueries.findByEquality(entityManager,
                 entities.entityClass("FinAccountTrans"), Map.of("glReconciliationId", id))) {
             total = total.add(signedAmount(trans));
         }
@@ -487,7 +504,7 @@ public class FinAccountServiceHandlers {
     /** Migrated from applications/accounting/minilang/finaccount/FinAccountServices.xml:1003. */
     private Map<String, Object> isGlReconciliationReconciled(Map<String, Object> input) {
         String id = required(input, "glReconciliationId");
-        List<?> transactions = entities.findByEquality(
+        List<?> transactions = AccountingEntityQueries.findByEquality(entityManager,
                 entities.entityClass("FinAccountTrans"), Map.of("glReconciliationId", id));
         boolean reconciled = transactions.stream()
                 .noneMatch(trans -> "FINACT_TRNS_CREATED".equals(entities.get(trans, "statusId")));
@@ -497,7 +514,7 @@ public class FinAccountServiceHandlers {
     /** Migrated from applications/accounting/minilang/finaccount/FinAccountServices.xml:1024. */
     private Map<String, Object> cancelBankReconciliation(Map<String, Object> input) {
         String id = required(input, "glReconciliationId");
-        for (Object trans : entities.findByEquality(entities.entityClass("FinAccountTrans"),
+        for (Object trans : AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("FinAccountTrans"),
                 Map.of("glReconciliationId", id, "statusId", "FINACT_TRNS_CREATED"))) {
             entities.set(trans, "glReconciliationId", null);
         }
@@ -511,9 +528,9 @@ public class FinAccountServiceHandlers {
                 .map(payment -> text(entities.get(payment, "paymentId"))).toList();
         List<Object> rows = new ArrayList<>();
         for (String paymentId : paymentIds) {
-            for (Object accountingTransaction : entities.findByEquality(
+            for (Object accountingTransaction : AccountingEntityQueries.findByEquality(entityManager,
                     entities.entityClass("AcctgTrans"), Map.of("paymentId", paymentId))) {
-                for (Object entry : entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+                for (Object entry : AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTransEntry"),
                         Map.of("acctgTransId", entities.get(accountingTransaction, "acctgTransId")))) {
                     Map<String, Object> row = new LinkedHashMap<>(entities.toMap(accountingTransaction));
                     row.putAll(entities.toMap(entry));
@@ -530,7 +547,7 @@ public class FinAccountServiceHandlers {
         Timestamp start = Timestamp.from(today.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
         Timestamp end = Timestamp.from(today.plusDays(1).atStartOfDay()
                 .minusNanos(1).atZone(ZoneId.systemDefault()).toInstant());
-        List<?> reconciliations = entities.findByEquality(
+        List<?> reconciliations = AccountingEntityQueries.findByEquality(entityManager,
                 entities.entityClass("GlReconciliation"), Map.of("statusId", "GLREC_CREATED"));
         for (Object reconciliation : reconciliations) {
             Date date = date(entities.get(reconciliation, "reconciledDate"));
@@ -538,7 +555,7 @@ public class FinAccountServiceHandlers {
                 continue;
             }
             String recId = text(entities.get(reconciliation, "glReconciliationId"));
-            for (Object trans : entities.findByEquality(
+            for (Object trans : AccountingEntityQueries.findByEquality(entityManager,
                     entities.entityClass("FinAccountTrans"), Map.of("glReconciliationId", recId))) {
                 Map<String, Object> reconcileInput = new LinkedHashMap<>();
                 reconcileInput.put("finAccountTransId", entities.get(trans, "finAccountTransId"));
@@ -558,7 +575,7 @@ public class FinAccountServiceHandlers {
         for (Object payment : paymentsFor(trans)) {
             String id = text(entities.get(payment, "paymentId"));
             Date today = new Date();
-            Object member = entities.findByEquality(entities.entityClass("PaymentGroupMember"),
+            Object member = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("PaymentGroupMember"),
                     Map.of("paymentId", id)).stream()
                     .filter(candidate -> {
                         Date from = date(entities.get(candidate, "fromDate"));
@@ -646,7 +663,7 @@ public class FinAccountServiceHandlers {
     private void recalculateBalances(String accountId) {
         Object account = requiredOne("FinAccount", "finAccountId", Map.of("finAccountId", accountId));
         BigDecimal actual = BigDecimal.ZERO;
-        List<?> transactions = entities.findByEquality(
+        List<?> transactions = AccountingEntityQueries.findByEquality(entityManager,
                 entities.entityClass("FinAccountTrans"), Map.of("finAccountId", accountId));
         for (Object trans : transactions) {
             if (!"FINACT_TRNS_APPROVED".equals(entities.get(trans, "statusId"))) {
@@ -659,7 +676,7 @@ public class FinAccountServiceHandlers {
         }
         actual = round(actual);
         BigDecimal available = actual;
-        for (Object auth : entities.findByEquality(
+        for (Object auth : AccountingEntityQueries.findByEquality(entityManager,
                 entities.entityClass("FinAccountAuth"), Map.of("finAccountId", accountId))) {
             Date from = date(entities.get(auth, "fromDate"));
             Date thru = date(entities.get(auth, "thruDate"));
@@ -753,7 +770,7 @@ public class FinAccountServiceHandlers {
             Object payment = one("Payment", Map.of("paymentId", paymentId));
             return payment == null ? List.of() : List.of(payment);
         }
-        return new ArrayList<>(entities.findByEquality(
+        return new ArrayList<>(AccountingEntityQueries.findByEquality(entityManager,
                 entities.entityClass("Payment"), Map.of("finAccountTransId", entities.get(trans, "finAccountTransId"))));
     }
 
@@ -771,7 +788,7 @@ public class FinAccountServiceHandlers {
     }
 
     private List<?> accountingTransactionsFor(Object trans) {
-        return entities.findByEquality(entities.entityClass("AcctgTrans"),
+        return AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTrans"),
                 Map.of("finAccountTransId", entities.get(trans, "finAccountTransId")));
     }
 
@@ -784,7 +801,7 @@ public class FinAccountServiceHandlers {
 
     private void markEntriesReconciled(Object transaction, String reconciliationId) {
         String transactionId = text(entities.get(transaction, "acctgTransId"));
-        for (Object entry : entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+        for (Object entry : AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTransEntry"),
                 Map.of("acctgTransId", transactionId))) {
             Map<String, Object> input = new LinkedHashMap<>();
             input.put("acctgTransId", transactionId);
@@ -808,7 +825,7 @@ public class FinAccountServiceHandlers {
                 Map.of("finAccountId", entities.get(finAccountTrans, "finAccountId")));
         for (Object payment : payments) {
             String paymentId = text(entities.get(payment, "paymentId"));
-            List<?> paymentTransactions = entities.findByEquality(entities.entityClass("AcctgTrans"),
+            List<?> paymentTransactions = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTrans"),
                     Map.of("paymentId", paymentId));
             for (Object source : paymentTransactions) {
                 if ("PAYMENT_APPL".equals(entities.get(source, "acctgTransTypeId"))) {
@@ -819,7 +836,7 @@ public class FinAccountServiceHandlers {
                 BigDecimal accountAmount = BigDecimal.ZERO;
                 Object partyId = null;
                 Object organizationId = null;
-                for (Object entry : entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+                for (Object entry : AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTransEntry"),
                         Map.of("acctgTransId", entities.get(source, "acctgTransId")))) {
                     String flag = text(entities.get(entry, "debitCreditFlag"));
                     if (deposit && "D".equals(flag) || !deposit && "C".equals(flag)) {
@@ -864,7 +881,7 @@ public class FinAccountServiceHandlers {
                 if (createdId == null) {
                     continue;
                 }
-                for (Object entry : entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+                for (Object entry : AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTransEntry"),
                         Map.of("acctgTransId", createdId))) {
                     Map<String, Object> reconciliationEntry = new LinkedHashMap<>();
                     reconciliationEntry.put("acctgTransId", createdId);
