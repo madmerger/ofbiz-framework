@@ -60,6 +60,8 @@ migration:
       - PaymentMethod
       - PaymentMethodType
       - CreditCard
+      - PartyRelationship
+      - PartyGroup
     sensitive-entities:
       - PaymentMethod
       - CreditCard

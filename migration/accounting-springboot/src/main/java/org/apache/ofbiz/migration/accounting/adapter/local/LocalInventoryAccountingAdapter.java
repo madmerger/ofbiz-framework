@@ -58,9 +58,17 @@ public class LocalInventoryAccountingAdapter implements InventoryAccountingPort 
 
     @Override
     public List<Map<String, Object>> findProductInventoryItems() {
-        return entityManager.createQuery("select item from ProductInventoryItem item", Object.class)
-                .setMaxResults(10000).getResultList()
-                .stream().map(entities::toMap).toList();
+        return entityManager.createQuery("select item from InventoryItem item", Object.class)
+                .setMaxResults(10000).getResultList().stream().map(item -> {
+                    Map<String, Object> values = entities.toMap(item);
+                    Object productId = values.get("productId");
+                    Object product = productId == null ? null : entities.findByPrimaryKey(
+                            entities.entityClass("Product"), Map.of("productId", productId));
+                    if (product != null) {
+                        values.put("primaryProductCategoryId", entities.get(product, "primaryProductCategoryId"));
+                    }
+                    return values;
+                }).toList();
     }
 
     @Override

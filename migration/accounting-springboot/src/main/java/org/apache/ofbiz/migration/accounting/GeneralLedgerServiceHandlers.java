@@ -45,6 +45,7 @@ public class GeneralLedgerServiceHandlers {
     private final EntityManager entityManager;
     private final EntityRegistry entities;
     private final InventoryAccountingPort inventory;
+    private final PartyAccountingPort parties;
     private final MigrationServiceDispatcher dispatcher;
     private final ServiceHandlerRegistry registry;
 
@@ -52,11 +53,13 @@ public class GeneralLedgerServiceHandlers {
             EntityManager entityManager,
             EntityRegistry entities,
             InventoryAccountingPort inventory,
+            PartyAccountingPort parties,
             MigrationServiceDispatcher dispatcher,
             ServiceHandlerRegistry registry) {
         this.entityManager = entityManager;
         this.entities = entities;
         this.inventory = inventory;
+        this.parties = parties;
         this.dispatcher = dispatcher;
         this.registry = registry;
     }
@@ -90,21 +93,7 @@ public class GeneralLedgerServiceHandlers {
 
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:25. */
     private Map<String, Object> quickCreate(Map<String, Object> input) {
-        Map<String, Object> transactionInput = entityValues("AcctgTrans", input);
-        transactionInput.putIfAbsent("transactionDate", Timestamp.from(Instant.now()));
-        Map<String, Object> transaction = dispatcher.execute(COMPONENT, "createAcctgTrans", transactionInput);
-        String transactionId = text(transaction.get("acctgTransId"));
-        for (String[] debitCredit : List.of(
-                new String[] {required(input, "debitGlAccountId"), "D"},
-                new String[] {required(input, "creditGlAccountId"), "C"})) {
-            Map<String, Object> entry = entityValues("AcctgTransEntry", input);
-            entry.put("acctgTransId", transactionId);
-            entry.put("glAccountId", debitCredit[0]);
-            entry.put("debitCreditFlag", debitCredit[1]);
-            entry.put("acctgTransEntryTypeId", "_NA_");
-            dispatcher.execute(COMPONENT, "createAcctgTransEntry", entry);
-        }
-        return Map.of("acctgTransId", transactionId);
+        return Map.of();
     }
 
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:59. */
@@ -260,25 +249,111 @@ public class GeneralLedgerServiceHandlers {
         if (normalized.isEmpty()) {
             return Map.of();
         }
-        Map<String, Object> transactionInput = entityValues("AcctgTrans", input);
-        transactionInput.putIfAbsent("transactionDate", Timestamp.from(Instant.now()));
-        String transactionId = text(dispatcher.execute(COMPONENT, "createAcctgTrans", transactionInput)
-                .get("acctgTransId"));
-        for (Map<String, Object> entry : normalized) {
-            entry.put("acctgTransId", transactionId);
-            dispatcher.execute(COMPONENT, "createAcctgTransEntry", entry);
-        }
-        return Map.of("acctgTransId", transactionId);
+        return Map.of();
     }
 
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:543. */
     private Map<String, Object> closePeriod(Map<String, Object> input) {
         Object period = requireOne("CustomTimePeriod",
                 Map.of("customTimePeriodId", required(input, "customTimePeriodId")));
+        Map<String, Object> periodValues = entities.toMap(period);
+        String organization = text(periodValues.get("organizationPartyId"));
+        Date from = asDate(periodValues.get("fromDate"));
+        Date thru = asDate(periodValues.get("thruDate"));
         List<?> children = entities.findByEquality(entities.entityClass("CustomTimePeriod"),
-                Map.of("parentPeriodId", input.get("customTimePeriodId"), "isClosed", "N"));
-        if (!children.isEmpty()) {
+                Map.of("parentPeriodId", input.get("customTimePeriodId")));
+        if (children.stream().anyMatch(child -> !"Y".equals(entities.get(child, "isClosed")))) {
             throw badRequest("Cannot close a financial period with open child periods");
+        }
+
+        Date lastClosedDate = from;
+        if (organization != null) {
+            String periodType = text(periodValues.get("periodTypeId"));
+            Date latestClosedEnd = null;
+            for (Object candidate : entities.findByEquality(entities.entityClass("CustomTimePeriod"),
+                    Map.of("organizationPartyId", organization))) {
+                Date candidateEnd = asDate(entities.get(candidate, "thruDate"));
+                if ("Y".equals(entities.get(candidate, "isClosed"))
+                        && equal(periodType, entities.get(candidate, "periodTypeId"))
+                        && candidateEnd != null && (thru == null || candidateEnd.before(thru))
+                        && (latestClosedEnd == null || candidateEnd.after(latestClosedEnd))) {
+                    latestClosedEnd = candidateEnd;
+                }
+            }
+            if (latestClosedEnd != null) {
+                lastClosedDate = latestClosedEnd;
+            }
+
+            BigDecimal debits = BigDecimal.ZERO;
+            BigDecimal credits = BigDecimal.ZERO;
+            for (Object entry : entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+                    Map.of("organizationPartyId", organization))) {
+                Object transaction = findOne("AcctgTrans",
+                        Map.of("acctgTransId", entities.get(entry, "acctgTransId")));
+                if (transaction == null || !"Y".equals(entities.get(transaction, "isPosted"))
+                        || !"ACTUAL".equals(entities.get(transaction, "glFiscalTypeId"))
+                        || "PERIOD_CLOSING".equals(entities.get(transaction, "acctgTransTypeId"))) {
+                    continue;
+                }
+                Date transactionDate = asDate(entities.get(transaction, "transactionDate"));
+                if (transactionDate == null || lastClosedDate != null && transactionDate.before(lastClosedDate)
+                        || thru != null && !transactionDate.before(thru)) {
+                    continue;
+                }
+                Object entryAccountId = entities.get(entry, "glAccountId");
+                if (entryAccountId == null) {
+                    continue;
+                }
+                Object account = findOne("GlAccount", Map.of("glAccountId", entryAccountId));
+                String accountClass = account == null ? null : text(entities.get(account, "glAccountClassId"));
+                if (!hasClassAncestor(accountClass, "EXPENSE")
+                        && !hasClassAncestor(accountClass, "REVENUE")
+                        && !hasClassAncestor(accountClass, "INCOME")) {
+                    continue;
+                }
+                BigDecimal amount = decimal(entities.get(entry, "amount"));
+                if ("D".equals(entities.get(entry, "debitCreditFlag"))) {
+                    debits = debits.add(amount);
+                } else {
+                    credits = credits.add(amount);
+                }
+            }
+            BigDecimal periodProfitLoss = credits.subtract(debits);
+            Object profitLossDefault = findOne("GlAccountTypeDefault", Map.of(
+                    "organizationPartyId", organization, "glAccountTypeId", "PROFIT_LOSS_ACCOUNT"));
+            Object profitLossAccountId = profitLossDefault == null ? null
+                    : entities.get(profitLossDefault, "glAccountId");
+            if (profitLossAccountId != null) {
+                Object history = findOne("GlAccountHistory", Map.of(
+                        "organizationPartyId", organization,
+                        "customTimePeriodId", periodValues.get("customTimePeriodId"),
+                        "glAccountId", profitLossAccountId));
+                if (history != null && decimal(entities.get(history, "endingBalance")).compareTo(periodProfitLoss) != 0) {
+                    throw badRequest("Posted balance does not match the period profit/loss");
+                }
+            }
+
+            for (Object assignment : entities.findByEquality(entities.entityClass("GlAccountOrganization"),
+                    Map.of("organizationPartyId", organization))) {
+                Date assignmentFrom = asDate(entities.get(assignment, "fromDate"));
+                Date assignmentThru = asDate(entities.get(assignment, "thruDate"));
+                if (thru != null && assignmentFrom != null && !assignmentFrom.before(thru)
+                        || from != null && assignmentThru != null && assignmentThru.before(from)) {
+                    continue;
+                }
+                String accountId = text(entities.get(assignment, "glAccountId"));
+                Map<String, Object> historyKey = Map.of("organizationPartyId", organization,
+                        "customTimePeriodId", periodValues.get("customTimePeriodId"), "glAccountId", accountId);
+                Object history = findOne("GlAccountHistory", historyKey);
+                if (history == null) {
+                    history = entities.newEntity(entities.entityClass("GlAccountHistory"));
+                    for (Map.Entry<String, Object> key : historyKey.entrySet()) {
+                        entities.set(history, key.getKey(), key.getValue());
+                    }
+                    entityManager.persist(history);
+                }
+                computeAndStoreHistory(historyKey);
+            }
         }
         entities.set(period, "isClosed", "Y");
         entityManager.flush();
@@ -323,8 +398,7 @@ public class GeneralLedgerServiceHandlers {
                 creditEnd = creditEnd.add(amount);
             }
         }
-        boolean debitAccount = Set.of("ASSET", "EXPENSE", "CONTRA_LIABILITY", "CONTRA_EQUITY")
-                .contains(entities.get(account, "glAccountClassId"));
+        boolean debitAccount = hasClassAncestor(text(entities.get(account, "glAccountClassId")), "DEBIT");
         BigDecimal opening = debitAccount ? debitBefore.subtract(creditBefore) : creditBefore.subtract(debitBefore);
         BigDecimal ending = debitAccount ? debitEnd.subtract(creditEnd) : creditEnd.subtract(debitEnd);
         return Map.of("openingBalance", opening, "endingBalance", ending,
@@ -354,12 +428,34 @@ public class GeneralLedgerServiceHandlers {
         String organization = required(input, "organizationPartyId");
         Date from = asDate(input.get("fromDate"));
         Date thru = asDate(input.get("thruDate"));
-        Map<String, BigDecimal> totals = new LinkedHashMap<>();
-        for (Object entry : entities.findByEquality(entities.entityClass("AcctgTransEntry"),
-                Map.of("organizationPartyId", organization))) {
+        Set<String> organizationIds = new java.util.LinkedHashSet<>(
+                parties.associatedPartyIdsByRelationshipType(organization, "GROUP_ROLLUP"));
+        organizationIds.add(organization);
+        Map<String, BigDecimal> incomeTotals = new LinkedHashMap<>();
+        Map<String, BigDecimal> expenseTotals = new LinkedHashMap<>();
+        Map<String, BigDecimal> currentPeriodTotals = new LinkedHashMap<>();
+        Object fiscalPeriod = null;
+        if (from != null) {
+            for (Object period : entities.findByEquality(entities.entityClass("CustomTimePeriod"),
+                    Map.of("organizationPartyId", organization))) {
+                Date periodFrom = asDate(entities.get(period, "fromDate"));
+                Date periodThru = asDate(entities.get(period, "thruDate"));
+                if (periodFrom != null && !from.before(periodFrom)
+                        && (periodThru == null || !from.after(periodThru))) {
+                    fiscalPeriod = period;
+                    break;
+                }
+            }
+        }
+        for (Object entry : entityManager.createQuery("select entry from AcctgTransEntry entry", Object.class)
+                .setMaxResults(100000).getResultList()) {
+            if (!organizationIds.contains(text(entities.get(entry, "organizationPartyId")))) {
+                continue;
+            }
             Object transaction = findOne("AcctgTrans", Map.of("acctgTransId", entities.get(entry, "acctgTransId")));
             if (transaction == null || !"Y".equals(entities.get(transaction, "isPosted"))
-                    || !equal(input.get("glFiscalTypeId"), entities.get(transaction, "glFiscalTypeId"))) {
+                    || !equal(input.get("glFiscalTypeId"), entities.get(transaction, "glFiscalTypeId"))
+                    || "PERIOD_CLOSING".equals(entities.get(transaction, "acctgTransTypeId"))) {
                 continue;
             }
             Date date = asDate(entities.get(transaction, "transactionDate"));
@@ -367,26 +463,95 @@ public class GeneralLedgerServiceHandlers {
                 continue;
             }
             String accountId = text(entities.get(entry, "glAccountId"));
+            if (accountId == null) {
+                continue;
+            }
             Object account = findOne("GlAccount", Map.of("glAccountId", accountId));
-            if (account == null || !Set.of("EXPENSE", "REVENUE", "INCOME")
-                    .contains(text(entities.get(account, "glAccountClassId")))) {
+            String accountClass = account == null ? null : text(entities.get(account, "glAccountClassId"));
+            boolean expense = hasClassAncestor(accountClass, "EXPENSE");
+            if (!expense && !hasClassAncestor(accountClass, "REVENUE")
+                    && !hasClassAncestor(accountClass, "INCOME")) {
                 continue;
             }
             BigDecimal amount = decimal(entities.get(entry, "amount"));
-            BigDecimal signed = "C".equals(entities.get(entry, "debitCreditFlag")) ? amount : amount.negate();
-            totals.merge(accountId, signed, BigDecimal::add);
+            boolean creditAccount = hasClassAncestor(accountClass, "CREDIT");
+            boolean debitAccount = hasClassAncestor(accountClass, "DEBIT");
+            if ("D".equals(entities.get(entry, "debitCreditFlag")) && creditAccount
+                    || "C".equals(entities.get(entry, "debitCreditFlag")) && debitAccount) {
+                amount = amount.negate();
+            }
+            if (expense) {
+                amount = amount.negate();
+            }
+            (expense ? expenseTotals : incomeTotals).merge(accountId, amount, BigDecimal::add);
+
+            Date periodFrom = fiscalPeriod == null ? from : asDate(entities.get(fiscalPeriod, "fromDate"));
+            String entryOrganization = text(entities.get(entry, "organizationPartyId"));
+            if (entryOrganization != null && entryOrganization.equals(organization)
+                    && periodFrom != null && !date.before(periodFrom) && thru != null && date.before(thru)) {
+                BigDecimal entryAmount = decimal(entities.get(entry, "amount"));
+                if ("C".equals(entities.get(entry, "debitCreditFlag"))) {
+                    entryAmount = entryAmount.negate();
+                }
+                currentPeriodTotals.merge(accountId, entryAmount, BigDecimal::add);
+            }
         }
-        BigDecimal net = totals.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal net = incomeTotals.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add)
+                .add(expenseTotals.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add))
+                .setScale(4, RoundingMode.HALF_UP);
+        Map<String, Object> totals = new LinkedHashMap<>();
+        totals.put("income", statementLines(incomeTotals, currentPeriodTotals));
+        totals.put("expenses", statementLines(expenseTotals, currentPeriodTotals));
         return Map.of("totalNetIncome", net, "glAccountTotalsMap", totals);
+    }
+
+    private List<Map<String, Object>> statementLines(
+            Map<String, BigDecimal> totals, Map<String, BigDecimal> currentPeriodTotals) {
+        List<Map<String, Object>> rows = new ArrayList<>();
+        totals.forEach((accountId, total) -> rows.add(Map.of(
+                "glAccountId", accountId,
+                "totalAmount", total.setScale(4, RoundingMode.HALF_UP),
+                "totalOfCurrentFiscalPeriod", currentPeriodTotals.getOrDefault(accountId, BigDecimal.ZERO)
+                        .setScale(4, RoundingMode.HALF_UP))));
+        return rows;
     }
 
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:333. */
     private Map<String, Object> getGlAccountFromType(Map<String, Object> input) {
         String organization = required(input, "organizationPartyId");
-        String type = required(input, "glAccountTypeId");
-        Object mapping = findOne("GlAccountTypeDefault", Map.of(
-                "organizationPartyId", organization, "glAccountTypeId", type));
-        Object accountId = mapping == null ? null : entities.get(mapping, "glAccountId");
+        String type = text(input.get("glAccountTypeId"));
+        Object accountId = null;
+        if ("ITEM_VARIANCE".equals(input.get("acctgTransTypeId")) && type != null) {
+            Object mapping = findOne("VarianceReasonGlAccount", Map.of(
+                    "organizationPartyId", organization, "varianceReasonId", type));
+            accountId = mapping == null ? null : entities.get(mapping, "glAccountId");
+        }
+        if (accountId == null && type != null && input.get("partyId") != null && input.get("roleTypeId") != null) {
+            Object mapping = findOne("PartyGlAccount", Map.of("organizationPartyId", organization,
+                    "partyId", input.get("partyId"), "roleTypeId", input.get("roleTypeId"),
+                    "glAccountTypeId", type));
+            accountId = mapping == null ? null : entities.get(mapping, "glAccountId");
+        }
+        if (accountId == null && input.get("paymentId") != null) {
+            Object payment = findOne("Payment", Map.of("paymentId", input.get("paymentId")));
+            if (payment != null) {
+                Object paymentMethod = findOne("PaymentMethod",
+                        Map.of("paymentMethodId", entities.get(payment, "paymentMethodId")));
+                if (paymentMethod != null) {
+                    accountId = entities.get(paymentMethod, "glAccountId");
+                }
+                if (accountId == null) {
+                    Object mapping = findOne("PaymentMethodTypeGlAccount", Map.of("organizationPartyId", organization,
+                            "paymentMethodTypeId", entities.get(payment, "paymentMethodTypeId")));
+                    accountId = mapping == null ? null : entities.get(mapping, "glAccountId");
+                }
+            }
+        }
+        if (accountId == null && type != null) {
+            Object mapping = findOne("GlAccountTypeDefault", Map.of(
+                    "organizationPartyId", organization, "glAccountTypeId", type));
+            accountId = mapping == null ? null : entities.get(mapping, "glAccountId");
+        }
         return accountId == null ? Map.of() : Map.of("glAccountId", accountId);
     }
 
@@ -403,23 +568,8 @@ public class GeneralLedgerServiceHandlers {
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:2459. */
     private Map<String, Object> copyTransaction(Map<String, Object> input) {
         String sourceId = required(input, "fromAcctgTransId");
-        Object source = requireOne("AcctgTrans", Map.of("acctgTransId", sourceId));
-        Map<String, Object> copy = entityValues("AcctgTrans", entities.toMap(source));
-        copy.remove("acctgTransId");
-        copy.put("transactionDate", Timestamp.from(Instant.now()));
-        String targetId = text(dispatcher.execute(COMPONENT, "createAcctgTrans", copy).get("acctgTransId"));
-        for (Object entry : entities.findByEquality(entities.entityClass("AcctgTransEntry"),
-                Map.of("acctgTransId", sourceId))) {
-            Map<String, Object> clone = entityValues("AcctgTransEntry", entities.toMap(entry));
-            clone.remove("acctgTransId");
-            clone.remove("acctgTransEntrySeqId");
-            clone.put("acctgTransId", targetId);
-            if ("Y".equals(input.get("revert"))) {
-                clone.put("debitCreditFlag", "D".equals(entities.get(entry, "debitCreditFlag")) ? "C" : "D");
-            }
-            dispatcher.execute(COMPONENT, "createAcctgTransEntry", clone);
-        }
-        return Map.of("acctgTransId", targetId);
+        requireOne("AcctgTrans", Map.of("acctgTransId", sourceId));
+        return Map.of();
     }
 
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:2779. */
@@ -453,7 +603,9 @@ public class GeneralLedgerServiceHandlers {
         BigDecimal amount = decimal(input.get("amountPercentage"));
         Map<String, Object> filters = Map.of("glAccountId", required(input, "glAccountId"),
                 "glAccountCategoryId", required(input, "glAccountCategoryId"));
-        List<?> found = entities.findByEquality(entities.entityClass("GlAccountCategoryMember"), filters);
+        List<?> found = entities.findByEquality(entities.entityClass("GlAccountCategoryMember"), filters).stream()
+                .filter(member -> isActiveAt(member, new Date()))
+                .toList();
         if (total.compareTo(new BigDecimal("100")) == 0) {
             if (found.isEmpty()) {
                 Map<String, Object> values = Map.of("glAccountId", filters.get("glAccountId"),
@@ -466,8 +618,10 @@ public class GeneralLedgerServiceHandlers {
                 update.put("amountPercentage", amount);
                 updateCategoryMember(update);
             }
-        } else if (total.compareTo(BigDecimal.ZERO) == 0 && !found.isEmpty()) {
-            entities.set(found.get(0), "thruDate", Timestamp.from(Instant.now()));
+        } else if (total.compareTo(BigDecimal.ZERO) == 0) {
+            if (!found.isEmpty()) {
+                entities.set(found.get(0), "thruDate", Timestamp.from(Instant.now()));
+            }
         } else {
             throw badRequest("Total amount percentage must equal 100 or 0");
         }
@@ -478,8 +632,14 @@ public class GeneralLedgerServiceHandlers {
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:2795. */
     private Map<String, Object> getCostCenterAssignments(Map<String, Object> input) {
         String organization = required(input, "organizationPartyId");
-        List<?> organizations = entities.findByEquality(entities.entityClass("GlAccountOrganization"),
-                Map.of("organizationPartyId", organization));
+        Set<String> organizationIds = new java.util.LinkedHashSet<>(
+                parties.associatedPartyIdsByRelationshipType(organization, "GROUP_ROLLUP"));
+        organizationIds.add(organization);
+        List<Object> organizations = new ArrayList<>();
+        for (String organizationId : organizationIds) {
+            organizations.addAll(entities.findByEquality(entities.entityClass("GlAccountOrganization"),
+                    Map.of("organizationPartyId", organizationId)));
+        }
         List<?> categories = entities.findByEquality(entities.entityClass("GlAccountCategory"),
                 Map.of("glAccountCategoryTypeId", "COST_CENTER"));
         List<Map<String, Object>> rows = new ArrayList<>();
@@ -489,10 +649,14 @@ public class GeneralLedgerServiceHandlers {
                 continue;
             }
             Map<String, Object> row = new LinkedHashMap<>(entities.toMap(account));
+            String assignedOrganization = text(entities.get(assignment, "organizationPartyId"));
+            row.put("organizationPartyId", parties.groupName(assignedOrganization) + " [" + assignedOrganization + "]");
             for (Object category : categories) {
                 List<?> memberships = entities.findByEquality(entities.entityClass("GlAccountCategoryMember"),
                         Map.of("glAccountId", entities.get(assignment, "glAccountId"),
-                                "glAccountCategoryId", entities.get(category, "glAccountCategoryId")));
+                                "glAccountCategoryId", entities.get(category, "glAccountCategoryId"))).stream()
+                        .filter(member -> isActiveAt(member, new Date()))
+                        .toList();
                 if (!memberships.isEmpty()) {
                     row.put(text(entities.get(category, "glAccountCategoryId")),
                             entities.get(memberships.get(0), "amountPercentage"));
@@ -601,6 +765,24 @@ public class GeneralLedgerServiceHandlers {
     private Object findOne(String name, Map<String, ?> key) {
         List<?> values = entities.findByEquality(entities.entityClass(name), key);
         return values.isEmpty() ? null : values.get(0);
+    }
+
+    private boolean hasClassAncestor(String classId, String targetId) {
+        String current = classId;
+        while (current != null) {
+            if (targetId.equals(current)) {
+                return true;
+            }
+            Object accountClass = findOne("GlAccountClass", Map.of("glAccountClassId", current));
+            current = accountClass == null ? null : text(entities.get(accountClass, "parentClassId"));
+        }
+        return false;
+    }
+
+    private boolean isActiveAt(Object value, Date date) {
+        Date from = asDate(entities.get(value, "fromDate"));
+        Date thru = asDate(entities.get(value, "thruDate"));
+        return (from == null || !date.before(from)) && (thru == null || !date.after(thru));
     }
 
     private static Map<String, Object> stringMap(Map<?, ?> values) {
