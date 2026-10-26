@@ -17,12 +17,14 @@
  *******************************************************************************/
 package org.apache.ofbiz.migration.accounting;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -44,6 +46,11 @@ class AccountingFlowTest {
         MvcResult create = postService("createInvoiceForOrder", "{\"orderId\":\"MIG_DEMO_ORDER\"}")
                 .andExpect(status().isOk()).andReturn();
         String invoiceId = json(create, "$.invoiceId");
+        postService("getInvoiceTotal", "{\"invoiceId\":\"" + invoiceId + "\"}")
+                .andExpect(status().isOk()).andExpect(jsonPath("$.invoiceTotal").value(30.00));
+        postService("getInvoiceItemTotal", "{\"invoiceId\":\"" + invoiceId
+                + "\",\"invoiceItemSeqId\":\"00001\"}")
+                .andExpect(status().isOk()).andExpect(jsonPath("$.invoiceItemTotal").value(10.00));
         postService("setInvoiceStatus", "{\"invoiceId\":\"" + invoiceId
                 + "\",\"statusId\":\"INVOICE_APPROVED\"}").andExpect(status().isOk());
         MvcResult payment = postService("createPayment", "{\"paymentTypeId\":\"CUSTOMER_PAYMENT\","
@@ -83,6 +90,10 @@ class AccountingFlowTest {
         postService("createPaymentApplication", "{\"invoiceId\":\"" + invoiceId
                 + "\",\"paymentId\":\"" + json(payment, "$.paymentId")
                 + "\",\"amountApplied\":\"1.01\"}").andExpect(status().isBadRequest());
+        postService("setPaymentStatus", "{\"paymentId\":\"" + json(payment, "$.paymentId")
+                + "\",\"statusId\":\"NOT_A_STATUS\"}").andExpect(status().isBadRequest());
+        postService("createPaymentApplication", "{\"invoiceId\":null,\"paymentId\":\"MISSING_PAYMENT\"}")
+                .andExpect(status().isBadRequest());
         mockMvc.perform(post("/api/accounting/services/createInvoice/multi")
                         .with(httpBasic("acct-clerk", "test"))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -93,6 +104,26 @@ class AccountingFlowTest {
         mockMvc.perform(get("/api/accounting/entities/Invoice/one?invoiceId=ROLLBACK_A")
                         .with(httpBasic("acct-clerk", "test")))
                 .andExpect(status().isNotFound());
+        mockMvc.perform(post("/api/accounting/services/createInvoice/multi")
+                        .with(httpBasic("acct-clerk", "test"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[{\"invoiceId\":\"ROLLBACK_C\",\"invoiceTypeId\":\"SALES_INVOICE\"},"
+                                + "{\"invoiceId\":\"ROLLBACK_D\"}]"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(get("/api/accounting/entities/Invoice/one?invoiceId=ROLLBACK_C")
+                        .with(httpBasic("acct-clerk", "test")))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void viewerCannotCreateOrderInvoiceAndDoesNotReachInvoiceRepository() throws Exception {
+        int before = invoiceCount();
+        mockMvc.perform(post("/api/accounting/services/createInvoiceForOrder")
+                        .with(httpBasic("acct-viewer", "test"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"orderId\":\"MIG_DEMO_ORDER\"}"))
+                .andExpect(status().isForbidden());
+        assertEquals(before, invoiceCount());
     }
 
     private org.springframework.test.web.servlet.ResultActions postService(String name, String body)
@@ -104,5 +135,12 @@ class AccountingFlowTest {
 
     private static String json(MvcResult result, String expression) throws Exception {
         return com.jayway.jsonpath.JsonPath.read(result.getResponse().getContentAsString(), expression);
+    }
+
+    private int invoiceCount() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/accounting/entities/Invoice")
+                        .with(httpBasic("acct-admin", "test")))
+                .andExpect(status().isOk()).andReturn();
+        return ((List<?>) com.jayway.jsonpath.JsonPath.read(result.getResponse().getContentAsString(), "$")).size();
     }
 }

@@ -261,8 +261,14 @@ public class AccountingServiceHandlers {
      * Migrated from applications/accounting/src/main/java/org/apache/ofbiz/accounting/invoice/InvoiceWorker.java:109.
      */
     private Map<String, Object> getInvoiceItemTotal(Map<String, Object> input) {
-        Object invoice = requireEntity("Invoice", "invoiceId", input);
-        return Map.of("invoiceItemTotal", invoiceTotal(invoice));
+        String invoiceId = required(input, "invoiceId");
+        String invoiceItemSeqId = required(input, "invoiceItemSeqId");
+        Object invoiceItem = findOne("InvoiceItem", Map.of(
+                "invoiceId", invoiceId, "invoiceItemSeqId", invoiceItemSeqId));
+        if (invoiceItem == null) {
+            throw new MigrationException(HttpStatus.NOT_FOUND, "Invoice item not found");
+        }
+        return Map.of("invoiceItemTotal", invoiceItemTotal(invoiceItem));
     }
 
     /**
@@ -303,11 +309,12 @@ public class AccountingServiceHandlers {
      * Migrated from applications/accounting/src/main/groovy/org/apache/ofbiz/accounting/payment/PaymentServices.groovy:726.
      */
     private Map<String, Object> createPaymentApplication(Map<String, Object> input) {
-        require(input.containsKey("invoiceId") || input.containsKey("billingAccountId")
-                        || input.containsKey("taxAuthGeoId") || input.containsKey("toPaymentId"),
+        String invoiceId = nonBlank(input.get("invoiceId"));
+        require(invoiceId != null || nonBlank(input.get("billingAccountId")) != null
+                        || nonBlank(input.get("taxAuthGeoId")) != null || nonBlank(input.get("toPaymentId")) != null,
                 "Payment application target is required");
         Object payment = requireEntity("Payment", "paymentId", input);
-        Object invoice = input.containsKey("invoiceId") ? requireEntity("Invoice", "invoiceId", input) : null;
+        Object invoice = invoiceId == null ? null : requireEntity("Invoice", "invoiceId", input);
         BigDecimal paymentAvailable = paymentNotApplied(text(value(payment, "paymentId")));
         BigDecimal invoiceAvailable = BigDecimal.ZERO;
         if (invoice != null) {
@@ -377,6 +384,12 @@ public class AccountingServiceHandlers {
                         ? BigDecimal.ONE : money(value(item, "quantity"))))
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal invoiceItemTotal(Object invoiceItem) {
+        BigDecimal quantity = value(invoiceItem, "quantity") == null
+                ? BigDecimal.ONE : money(value(invoiceItem, "quantity"));
+        return quantity.multiply(money(value(invoiceItem, "amount"))).setScale(2, RoundingMode.HALF_UP);
     }
 
     private BigDecimal invoiceApplied(String invoiceId) {
@@ -508,6 +521,11 @@ public class AccountingServiceHandlers {
 
     private static String text(Object value) {
         return value == null ? null : value.toString();
+    }
+
+    private static String nonBlank(Object value) {
+        String result = text(value);
+        return result == null || result.isBlank() ? null : result;
     }
 
     private static BigDecimal money(Object value) {

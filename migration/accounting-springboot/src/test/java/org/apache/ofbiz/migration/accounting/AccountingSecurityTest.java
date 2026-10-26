@@ -20,8 +20,10 @@ package org.apache.ofbiz.migration.accounting;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -52,6 +54,33 @@ class AccountingSecurityTest {
                         + "?paymentGatewayConfigId=MIG_VIEWER_CONFIG")
                         .with(httpBasic("acct-admin", "test")))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void permissionServicesAreRegisteredAndReflectTheCallersAuthorities() throws Exception {
+        List<String> permissionServices = List.of(
+                "acctgAgreementPermissionCheck", "acctgBasePermissionCheck", "acctgBillingAcctCheck",
+                "acctgCommissionPermissionCheck", "acctgCostPermissionCheck", "acctgFinAcctPermissionCheck",
+                "acctgFxPermissionCheck", "acctgInvoicePermissionCheck", "acctgPrefPermissionCheck",
+                "acctgTransactionPermissionCheck", "basicGeneralLedgerPermissionCheck",
+                "fixedAssetPermissionCheck", "acctgPaymentPermissionCheck");
+        for (String service : permissionServices) {
+            mockMvc.perform(post("/api/accounting/services/" + service)
+                            .with(httpBasic("acct-viewer", "test"))
+                            .contentType("application/json")
+                            .content("{\"mainAction\":\"VIEW\"}"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.hasPermission").exists());
+        }
+        mockMvc.perform(post("/api/accounting/services/acctgBasePermissionCheck")
+                        .with(httpBasic("acct-viewer", "test"))
+                        .contentType("application/json").content("{\"mainAction\":\"VIEW\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.hasPermission").value(true));
+        mockMvc.perform(post("/api/accounting/services/acctgCommissionPermissionCheck")
+                        .with(httpBasic("acct-viewer", "test"))
+                        .contentType("application/json").content("{\"mainAction\":\"VIEW\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.hasPermission").value(false))
+                .andExpect(jsonPath("$.failMessage").exists());
     }
 
     @Test
