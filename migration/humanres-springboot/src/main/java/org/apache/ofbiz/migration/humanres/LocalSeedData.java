@@ -47,6 +47,7 @@ public class LocalSeedData implements CommandLineRunner {
         entityAutoService.createEntity("EmplPositionType", Map.of(
                 "emplPositionTypeId", "DEMO_HR", "description", "Human Resources"));
         Map<String, Object> position = entityAutoService.createEntity("EmplPosition", Map.of(
+                "emplPositionId", "DEMO_POSITION",
                 "partyId", "DEMO_DEPT",
                 "emplPositionTypeId", "DEMO_HR",
                 "statusId", "EMPL_POS_ACTIVE",

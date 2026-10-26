@@ -8,6 +8,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.apache.ofbiz.migration.humanres.generated.ServiceCatalog;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,6 +54,14 @@ public class SecurityConfiguration {
     }
 
     @Bean
+    OpenAPI humanResOpenApi() {
+        return new OpenAPI()
+                .components(new Components().addSecuritySchemes("basicAuth",
+                        new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("basic")))
+                .addSecurityItem(new SecurityRequirement().addList("basicAuth"));
+    }
+
+    @Bean
     UserDetailsService humanResUserDetailsService(
             HumanResSecurityProperties properties, PasswordEncoder passwordEncoder) {
         List<UserDetails> users = new ArrayList<>();
@@ -84,6 +96,8 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/humanres/**"))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**")
+                        .permitAll()
                         .requestMatchers("/api/humanres/**").access(this::authorizeHumanResRequest)
                         .anyRequest().permitAll())
                 .httpBasic(Customizer.withDefaults())

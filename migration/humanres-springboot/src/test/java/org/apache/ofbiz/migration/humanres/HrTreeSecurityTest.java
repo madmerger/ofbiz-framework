@@ -1,12 +1,15 @@
 package org.apache.ofbiz.migration.humanres;
 
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
@@ -27,6 +30,20 @@ class HrTreeSecurityTest {
 
     @MockitoSpyBean
     private EntityAutoService entityAutoService;
+
+    @Test
+    void ac46_swaggerDocsArePublicAndHumanResApiRemainsProtected() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("/api/humanres/hr-tree")))
+                .andExpect(content().string(containsString("\"basicAuth\"")))
+                .andExpect(jsonPath("$.components.securitySchemes.basicAuth.type").value("http"))
+                .andExpect(jsonPath("$.components.securitySchemes.basicAuth.scheme").value("basic"))
+                .andExpect(jsonPath("$.security[0].basicAuth").isArray());
+        mockMvc.perform(get("/api/humanres/hr-tree").param("partyId", "Company"))
+                .andExpect(status().isUnauthorized());
+        verify(partyPort, never()).isPartyGroup(anyString());
+    }
 
     @Test
     void ac40_anonymousIsRejectedBeforeTreeLookup() throws Exception {
