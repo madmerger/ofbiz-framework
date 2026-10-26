@@ -128,7 +128,7 @@ public class ProductEntityAutoRegistration {
         return output;
     }
 
-    void checkShipmentStatus(String permissionService, Map<String, Object> input) {
+    public void checkShipmentStatus(String permissionService, Map<String, Object> input) {
         String fromStatusId = switch (permissionService == null ? "" : permissionService) {
             case "checkCanChangeShipmentStatusPacked" -> "SHIPMENT_PACKED";
             case "checkCanChangeShipmentStatusShipped" -> "SHIPMENT_SHIPPED";
