@@ -1,3 +1,21 @@
+/*******************************************************************************
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *******************************************************************************/
 package org.apache.ofbiz.migration.marketing.service;
 
 import java.sql.Timestamp;
@@ -30,6 +48,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class MarketingMiscServices {
+
+    private static final String PARTNER_MANAGED = "PARTNER_MGD";
 
     private final MarketingData data;
     private final CommunicationEventPort communicationEvents;
@@ -164,7 +184,7 @@ public class MarketingMiscServices {
             }
             TrackingCodeOrder source = trackingCodeOrder.get();
             Map<String, Object> keys = Map.of("returnId", returnId, "orderId", line.orderId(),
-                    "trackingCodeTypeId", source.getTrackingCodeTypeId());
+                    "trackingCodeTypeId", PARTNER_MANAGED);
             if (data.one(TrackingCodeOrderReturn.class, keys).isPresent()) {
                 continue;
             }
@@ -172,12 +192,12 @@ public class MarketingMiscServices {
             row.setReturnId(returnId);
             row.setOrderId(line.orderId());
             row.setOrderItemSeqId(line.orderItemSeqId());
-            row.setTrackingCodeTypeId(source.getTrackingCodeTypeId());
+            row.setTrackingCodeTypeId(PARTNER_MANAGED);
             row.setTrackingCodeId(source.getTrackingCodeId());
             row.setIsBillable(source.getIsBillable());
             row.setSiteId(source.getSiteId());
-            row.setHasExported(source.getHasExported());
-            row.setAffiliateReferredTimeStamp(source.getAffiliateReferredTimeStamp());
+            row.setHasExported("N");
+            row.setAffiliateReferredTimeStamp(MarketingData.now());
             data.persist(row);
             created++;
         }
