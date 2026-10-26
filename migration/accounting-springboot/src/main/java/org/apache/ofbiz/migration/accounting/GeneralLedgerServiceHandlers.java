@@ -120,7 +120,7 @@ public class GeneralLedgerServiceHandlers {
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:59. */
     private Map<String, Object> calculateJournal(Map<String, Object> input) {
         String journalId = required(input, "glJournalId");
-        List<?> transactions = entities.findByEquality(
+        List<?> transactions = AccountingEntityQueries.findByEquality(entityManager,
                 entities.entityClass("AcctgTrans"), Map.of("glJournalId", journalId));
         BigDecimal debit = BigDecimal.ZERO;
         BigDecimal credit = BigDecimal.ZERO;
@@ -145,7 +145,7 @@ public class GeneralLedgerServiceHandlers {
         if (decimal(totals.get("debitCreditDifference")).compareTo(BigDecimal.ZERO) != 0) {
             throw badRequest("GL journal trial balance failed");
         }
-        List<?> transactions = entities.findByEquality(
+        List<?> transactions = AccountingEntityQueries.findByEquality(entityManager,
                 entities.entityClass("AcctgTrans"), Map.of("glJournalId", journalId));
         for (Object transaction : transactions) {
             if (!"Y".equals(entities.get(transaction, "isPosted"))) {
@@ -198,7 +198,7 @@ public class GeneralLedgerServiceHandlers {
         if ("Y".equals(entities.get(transaction, "isPosted"))) {
             throw badRequest("Accounting transaction has already been posted");
         }
-        List<?> entries = entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+        List<?> entries = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTransEntry"),
                 Map.of("acctgTransId", input.get("acctgTransId")));
         int completed = 0;
         for (Object entry : entries) {
@@ -241,7 +241,7 @@ public class GeneralLedgerServiceHandlers {
             }
             Map<String, Object> entry = stringMap(map);
             String organization = required(entry, "organizationPartyId");
-            List<?> roles = entities.findByEquality(entities.entityClass("PartyRole"),
+            List<?> roles = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("PartyRole"),
                     Map.of("partyId", organization, "roleTypeId", "INTERNAL_ORGANIZATIO"));
             if (roles.isEmpty()) {
                 continue;
@@ -303,7 +303,7 @@ public class GeneralLedgerServiceHandlers {
         String organization = text(periodValues.get("organizationPartyId"));
         Date from = asDate(periodValues.get("fromDate"));
         Date thru = asDate(periodValues.get("thruDate"));
-        List<?> children = entities.findByEquality(entities.entityClass("CustomTimePeriod"),
+        List<?> children = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("CustomTimePeriod"),
                 Map.of("parentPeriodId", input.get("customTimePeriodId")));
         if (children.stream().anyMatch(child -> !"Y".equals(entities.get(child, "isClosed")))) {
             throw badRequest("Cannot close a financial period with open child periods");
@@ -313,7 +313,7 @@ public class GeneralLedgerServiceHandlers {
         if (organization != null) {
             String periodType = text(periodValues.get("periodTypeId"));
             Date latestClosedEnd = null;
-            for (Object candidate : entities.findByEquality(entities.entityClass("CustomTimePeriod"),
+            for (Object candidate : AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("CustomTimePeriod"),
                     Map.of("organizationPartyId", organization))) {
                 Date candidateEnd = asDate(entities.get(candidate, "thruDate"));
                 if ("Y".equals(entities.get(candidate, "isClosed"))
@@ -329,7 +329,7 @@ public class GeneralLedgerServiceHandlers {
 
             BigDecimal debits = BigDecimal.ZERO;
             BigDecimal credits = BigDecimal.ZERO;
-            for (Object entry : entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+            for (Object entry : AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTransEntry"),
                     Map.of("organizationPartyId", organization))) {
                 Object transaction = findOne("AcctgTrans",
                         Map.of("acctgTransId", entities.get(entry, "acctgTransId")));
@@ -376,7 +376,7 @@ public class GeneralLedgerServiceHandlers {
                 }
             }
 
-            for (Object assignment : entities.findByEquality(entities.entityClass("GlAccountOrganization"),
+            for (Object assignment : AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("GlAccountOrganization"),
                     Map.of("organizationPartyId", organization))) {
                 Date assignmentFrom = asDate(entities.get(assignment, "fromDate"));
                 Date assignmentThru = asDate(entities.get(assignment, "thruDate"));
@@ -414,7 +414,7 @@ public class GeneralLedgerServiceHandlers {
         BigDecimal creditBefore = BigDecimal.ZERO;
         BigDecimal debitEnd = BigDecimal.ZERO;
         BigDecimal creditEnd = BigDecimal.ZERO;
-        for (Object entry : entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+        for (Object entry : AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTransEntry"),
                 Map.of("organizationPartyId", required(input, "organizationPartyId"),
                         "glAccountId", required(input, "glAccountId")))) {
             Object transaction = findOne("AcctgTrans", Map.of("acctgTransId", entities.get(entry, "acctgTransId")));
@@ -479,7 +479,7 @@ public class GeneralLedgerServiceHandlers {
         Map<String, BigDecimal> currentPeriodTotals = new LinkedHashMap<>();
         Object fiscalPeriod = null;
         if (from != null) {
-            for (Object period : entities.findByEquality(entities.entityClass("CustomTimePeriod"),
+            for (Object period : AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("CustomTimePeriod"),
                     Map.of("organizationPartyId", organization))) {
                 Date periodFrom = asDate(entities.get(period, "fromDate"));
                 Date periodThru = asDate(entities.get(period, "thruDate"));
@@ -571,7 +571,7 @@ public class GeneralLedgerServiceHandlers {
         }
         if (accountId == null && "DEPRECIATION".equals(input.get("acctgTransTypeId"))
                 && text(input.get("fixedAssetId")) != null) {
-            List<?> mappings = entities.findByEquality(entities.entityClass("FixedAssetTypeGlAccount"),
+            List<?> mappings = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("FixedAssetTypeGlAccount"),
                     Map.of("fixedAssetId", input.get("fixedAssetId"), "organizationPartyId", organization));
             Object mapping = mappings.isEmpty() ? null : mappings.get(0);
             if (mapping == null) {
@@ -579,7 +579,7 @@ public class GeneralLedgerServiceHandlers {
                 String fixedAssetTypeId = fixedAsset == null ? null
                         : text(entities.get(fixedAsset, "fixedAssetTypeId"));
                 if (fixedAssetTypeId != null) {
-                    mappings = entities.findByEquality(entities.entityClass("FixedAssetTypeGlAccount"),
+                    mappings = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("FixedAssetTypeGlAccount"),
                                     Map.of("fixedAssetId", "_NA_", "organizationPartyId", organization)).stream()
                             .filter(candidate -> fixedAssetTypeId.equals(entities.get(candidate, "fixedAssetTypeId"))
                                     || "_NA_".equals(entities.get(candidate, "fixedAssetTypeId")))
@@ -702,7 +702,7 @@ public class GeneralLedgerServiceHandlers {
         header.remove("lastModifiedByUserLogin");
         header.put("transactionDate", Timestamp.from(Instant.now()));
         String transactionId = createTransactionHeader(header);
-        List<?> entries = entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+        List<?> entries = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTransEntry"),
                 Map.of("acctgTransId", sourceId));
         boolean revert = "Y".equals(input.get("revert"));
         for (Object entry : entries) {
@@ -780,7 +780,7 @@ public class GeneralLedgerServiceHandlers {
         BigDecimal amount = decimal(input.get("amountPercentage"));
         Map<String, Object> filters = Map.of("glAccountId", required(input, "glAccountId"),
                 "glAccountCategoryId", required(input, "glAccountCategoryId"));
-        List<?> found = entities.findByEquality(entities.entityClass("GlAccountCategoryMember"), filters).stream()
+        List<?> found = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("GlAccountCategoryMember"), filters).stream()
                 .filter(member -> isActiveAt(member, new Date()))
                 .toList();
         if (total.compareTo(new BigDecimal("100")) == 0) {
@@ -814,10 +814,10 @@ public class GeneralLedgerServiceHandlers {
         organizationIds.add(organization);
         List<Object> organizations = new ArrayList<>();
         for (String organizationId : organizationIds) {
-            organizations.addAll(entities.findByEquality(entities.entityClass("GlAccountOrganization"),
+            organizations.addAll(AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("GlAccountOrganization"),
                     Map.of("organizationPartyId", organizationId)));
         }
-        List<?> categories = entities.findByEquality(entities.entityClass("GlAccountCategory"),
+        List<?> categories = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("GlAccountCategory"),
                 Map.of("glAccountCategoryTypeId", "COST_CENTER"));
         List<Map<String, Object>> rows = new ArrayList<>();
         for (Object assignment : organizations) {
@@ -829,7 +829,7 @@ public class GeneralLedgerServiceHandlers {
             String assignedOrganization = text(entities.get(assignment, "organizationPartyId"));
             row.put("organizationPartyId", parties.groupName(assignedOrganization) + " [" + assignedOrganization + "]");
             for (Object category : categories) {
-                List<?> memberships = entities.findByEquality(entities.entityClass("GlAccountCategoryMember"),
+                List<?> memberships = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("GlAccountCategoryMember"),
                         Map.of("glAccountId", entities.get(assignment, "glAccountId"),
                                 "glAccountCategoryId", entities.get(category, "glAccountCategoryId"))).stream()
                         .filter(member -> isActiveAt(member, new Date()))
@@ -898,7 +898,7 @@ public class GeneralLedgerServiceHandlers {
         String oldStatus = text(entities.get(reconciliation, "statusId"));
         String newStatus = required(input, "statusId");
         if (!newStatus.equals(oldStatus)) {
-            List<?> changes = entities.findByEquality(entities.entityClass("StatusValidChange"),
+            List<?> changes = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("StatusValidChange"),
                     Map.of("statusId", oldStatus, "statusIdTo", newStatus));
             if (changes.isEmpty()) {
                 throw badRequest("Invalid status change from " + oldStatus + " to " + newStatus);
@@ -940,7 +940,7 @@ public class GeneralLedgerServiceHandlers {
     }
 
     private Object findOne(String name, Map<String, ?> key) {
-        List<?> values = entities.findByEquality(entities.entityClass(name), key);
+        List<?> values = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass(name), key);
         return values.isEmpty() ? null : values.get(0);
     }
 

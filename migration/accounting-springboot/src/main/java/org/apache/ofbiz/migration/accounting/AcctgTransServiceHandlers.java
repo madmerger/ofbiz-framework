@@ -175,7 +175,7 @@ public class AcctgTransServiceHandlers {
      */
     private Map<String, Object> calculateAcctgTransTrialBalance(Map<String, Object> input) {
         String transactionId = key(input, "acctgTransId");
-        List<?> entries = entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+        List<?> entries = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTransEntry"),
                 Map.of("acctgTransId", transactionId));
         BigDecimal debit = BigDecimal.ZERO;
         BigDecimal credit = BigDecimal.ZERO;
@@ -213,7 +213,7 @@ public class AcctgTransServiceHandlers {
                 || (credit.signum() == 0 && debit.signum() != 0)) {
             throw badRequest("Accounting transaction trial balance failed");
         }
-        List<?> entries = new ArrayList<>(entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+        List<?> entries = new ArrayList<>(AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTransEntry"),
                 Map.of("acctgTransId", transactionId)));
         entries = entries.stream().sorted(Comparator.comparing(
                 entry -> text(entities.get(entry, "acctgTransEntrySeqId")))).toList();
@@ -253,7 +253,7 @@ public class AcctgTransServiceHandlers {
     private Map<String, Object> getAcctgTransEntriesAndTransTotal(Map<String, Object> input) {
         String organizationPartyId = key(input, "organizationPartyId");
         String glAccountId = key(input, "glAccountId");
-        List<?> entries = entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+        List<?> entries = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTransEntry"),
                 Map.of("organizationPartyId", organizationPartyId, "glAccountId", glAccountId));
         Date start = asDate(input.get("customTimePeriodStartDate"));
         Date end = asDate(input.get("customTimePeriodEndDate"));
@@ -308,7 +308,7 @@ public class AcctgTransServiceHandlers {
      */
     private Map<String, Object> calculateGlAccountTrialBalance(Map<String, Object> input) {
         String glAccountId = key(input, "glAccountId");
-        List<?> entries = entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+        List<?> entries = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTransEntry"),
                 Map.of("glAccountId", glAccountId));
         Date start = asDate(input.get("fromDate"));
         Date end = asDate(input.get("thruDate"));
@@ -347,7 +347,7 @@ public class AcctgTransServiceHandlers {
         if (transactionDate == null) {
             return false;
         }
-        List<?> periods = entities.findByEquality(entities.entityClass("CustomTimePeriod"),
+        List<?> periods = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("CustomTimePeriod"),
                 Map.of("organizationPartyId", organizationPartyId));
         for (Object period : periods) {
             String type = text(entities.get(period, "periodTypeId"));
@@ -387,7 +387,7 @@ public class AcctgTransServiceHandlers {
     }
 
     private Object findOne(String entityName, Map<String, ?> key) {
-        List<?> matches = entities.findByEquality(entities.entityClass(entityName), key);
+        List<?> matches = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass(entityName), key);
         return matches.isEmpty() ? null : matches.get(0);
     }
 

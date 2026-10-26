@@ -17,12 +17,14 @@
  *******************************************************************************/
 package org.apache.ofbiz.migration.accounting.adapter.local;
 
+import jakarta.persistence.EntityManager;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.ofbiz.migration.accounting.AccountingEntityQueries;
 import org.apache.ofbiz.migration.accounting.PartyAccountingPort;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.springframework.stereotype.Repository;
@@ -32,9 +34,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class LocalPartyAccountingAdapter implements PartyAccountingPort {
     private final EntityRegistry entities;
+    private final EntityManager entityManager;
 
-    public LocalPartyAccountingAdapter(EntityRegistry entities) {
+    public LocalPartyAccountingAdapter(EntityRegistry entities, EntityManager entityManager) {
         this.entities = entities;
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -44,7 +48,7 @@ public class LocalPartyAccountingAdapter implements PartyAccountingPort {
         pending.add(partyId);
         while (!pending.isEmpty()) {
             String current = pending.removeFirst();
-            for (Object relationship : entities.findByEquality(entities.entityClass("PartyRelationship"),
+            for (Object relationship : AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("PartyRelationship"),
                     Map.of("partyIdFrom", current, "partyRelationshipTypeId", relationshipTypeId))) {
                 String next = entities.get(relationship, "partyIdTo").toString();
                 if (associated.add(next)) {

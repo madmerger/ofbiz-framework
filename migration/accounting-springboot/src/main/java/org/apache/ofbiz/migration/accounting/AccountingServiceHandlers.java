@@ -470,12 +470,12 @@ public class AccountingServiceHandlers {
     }
 
     private Object findOne(String entityName, Map<String, ?> filters) {
-        List<?> matches = entities.findByEquality(entities.entityClass(entityName), filters);
+        List<?> matches = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass(entityName), filters);
         return matches.isEmpty() ? null : matches.get(0);
     }
 
     private List<?> find(String entityName, Map<String, ?> filters) {
-        return entities.findByEquality(entities.entityClass(entityName), filters);
+        return AccountingEntityQueries.findByEquality(entityManager, entities.entityClass(entityName), filters);
     }
 
     private Object newEntity(String entityName) {

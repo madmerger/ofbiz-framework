@@ -9,12 +9,12 @@
 | `AccountingFlowTest` | 3 pass / 0 fail / 0 skip |
 | `AccountingSecurityTest` | 3 pass / 0 fail / 0 skip |
 | `AcctgTransServicesTest` | 10 pass / 0 fail / 0 skip |
-| `FinAccountServicesTest` | 31 pass / 0 fail / 0 skip |
+| `FinAccountServicesTest` | 35 pass / 0 fail / 0 skip |
 | `GeneralLedgerServicesTest` | 28 pass / 0 fail / 0 skip |
 | `PaymentGatewayConfigServicesTest` | 1 pass / 0 fail / 0 skip |
 | `PaymentMethodServicesTest` | 7 pass / 0 fail / 0 skip |
 | `HttpsSecurityTest` / `PostgresSmokeTest` / `SpringdocProfileTest` | 各1 pass / 0 fail / 0 skip |
-| 合計 | **586 pass / 0 fail / 0 skip** |
+| 合計 | **590 pass / 0 fail / 0 skip** |
 | local bootRun と `cases.json` の E2E 予行 | ID順に21/21ケースが期待どおり。予行後にサーバ停止を確認 |
 | inventory 再生成 | service 705、entity-auto 386、request 551、entity 147、指定 accounting entitymodel のview-entity 37 |
 
@@ -31,7 +31,7 @@ entity-auto CRUD acceptance は77件実行、54件スキップ（CRUD三つ組�
 - Accounting の simple service は73件を移植し、全件にサービス別の正常系テストを用意した。GL自動仕訳20件は意図的に未登録とし、servicedef由来の期待集合テストで登録対象73件と未登録・404対象20件を確認する。
 - `unported.md` の省略分岐節に、PaymentMethod住所更新の未移植Java呼出し、GL/AcctgTransの外貨換算・GROUP_ROLLUP・posting設定とerror journal、FinAccountの未移植Groovy／支払バッチ／GL呼出しの省略を記載。
 - Widget、FTL、view-entity はSpring APIに移植しない。全一覧は `unported.md`。
-- ECA/SECA engine は実装していないため、OFBizの暗黙のイベント連鎖は発生しない。
+- ECA/SECA engine は実装していない。FinAccount の残高を更新するコンポーネント内 ECA は移植したが、それ以外の暗黙のイベント連鎖は発生しない。
 
 ## 3. セキュリティ選定
 
@@ -45,4 +45,5 @@ Tomcat trusted proxy の既定値をlocalを含むAccounting profileで `a^` と
 
 - generated ServiceCatalog に `permission-service` 名と `main-action` を保持し、handler/EntityAutoを通じて共通permission dispatchで適用できるようにする。
 - sensitive entity の read/create/update に対する統一契約と、呼出し元identityに応じた操作権限のテスト可能なAPIを整備する。
+- `EntityRegistry.findByEquality` の100件上限により一覧・集計結果が欠落しうる。共通基盤に上限なし検索または明示的なページング契約を追加する（Accounting ではモジュール内の無制限 Criteria 検索で補完）。
 - 上記提案のために共通基盤ソースは変更していない。

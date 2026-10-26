@@ -22,6 +22,7 @@ import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import org.apache.ofbiz.migration.accounting.AccountingEntityQueries;
 import org.apache.ofbiz.migration.accounting.OrderPort;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.springframework.stereotype.Repository;
@@ -94,7 +95,7 @@ public class LocalOrderAdapter implements OrderPort {
     }
 
     private List<Map<String, Object>> find(String entityName, Map<String, ?> filters) {
-        return entities.findByEquality(entities.entityClass(entityName), filters).stream()
+        return AccountingEntityQueries.findByEquality(entityManager, entities.entityClass(entityName), filters).stream()
                 .map(entities::toMap)
                 .toList();
     }

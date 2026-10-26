@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.apache.ofbiz.migration.accounting.AccountingEntityQueries;
 import org.apache.ofbiz.migration.accounting.InventoryAccountingPort;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.springframework.stereotype.Repository;
@@ -75,7 +76,7 @@ public class LocalInventoryAccountingAdapter implements InventoryAccountingPort 
     public BigDecimal averageCost(Map<String, Object> inventoryItem) {
         Object ownerPartyId = inventoryItem.get("ownerPartyId");
         if (ownerPartyId != null) {
-            List<?> costs = entities.findByEquality(entities.entityClass("ProductAverageCost"), Map.of(
+            List<?> costs = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("ProductAverageCost"), Map.of(
                     "productAverageCostTypeId", "SIMPLE_AVG_COST",
                     "organizationPartyId", ownerPartyId,
                     "productId", inventoryItem.get("productId"),

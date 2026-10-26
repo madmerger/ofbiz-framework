@@ -66,7 +66,7 @@ public class PaymentGatewayConfigServiceHandlers {
             }
             primaryKey.put(key, value);
         }
-        List<?> matches = entities.findByEquality(entityType, primaryKey);
+        List<?> matches = AccountingEntityQueries.findByEquality(entityManager, entityType, primaryKey);
         if (matches.isEmpty()) {
             throw new MigrationException(HttpStatus.NOT_FOUND, ENTITY + " not found");
         }

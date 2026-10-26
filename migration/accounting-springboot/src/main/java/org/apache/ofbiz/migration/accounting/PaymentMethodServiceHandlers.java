@@ -86,8 +86,8 @@ public class PaymentMethodServiceHandlers {
     private Map<String, Object> updatePaymentMethodAddress(Map<String, Object> input) {
         String oldContactMechId = required(input, "oldContactMechId");
         required(input, "contactMechId");
-        entities.findByEquality(entities.entityClass("CreditCard"), Map.of("contactMechId", oldContactMechId));
-        entities.findByEquality(entities.entityClass("EftAccount"), Map.of("contactMechId", oldContactMechId));
+        AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("CreditCard"), Map.of("contactMechId", oldContactMechId));
+        AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("EftAccount"), Map.of("contactMechId", oldContactMechId));
         return Map.of();
     }
 
@@ -168,7 +168,7 @@ public class PaymentMethodServiceHandlers {
 
     private Object requireOne(String entityName, Map<String, ?> filters) {
         Class<?> type = entities.entityClass(entityName);
-        List<?> matches = entities.findByEquality(type, filters);
+        List<?> matches = AccountingEntityQueries.findByEquality(entityManager, type, filters);
         if (matches.isEmpty()) {
             throw new MigrationException(HttpStatus.NOT_FOUND, entityName + " not found");
         }

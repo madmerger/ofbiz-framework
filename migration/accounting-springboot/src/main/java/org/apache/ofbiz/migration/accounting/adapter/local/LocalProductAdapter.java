@@ -18,10 +18,12 @@
  *******************************************************************************/
 package org.apache.ofbiz.migration.accounting.adapter.local;
 
+import jakarta.persistence.EntityManager;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.apache.ofbiz.migration.accounting.AccountingEntityQueries;
 import org.apache.ofbiz.migration.accounting.ProductPort;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.springframework.stereotype.Repository;
@@ -31,9 +33,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class LocalProductAdapter implements ProductPort {
     private final EntityRegistry entities;
+    private final EntityManager entityManager;
 
-    public LocalProductAdapter(EntityRegistry entities) {
+    public LocalProductAdapter(EntityRegistry entities, EntityManager entityManager) {
         this.entities = entities;
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -44,7 +48,7 @@ public class LocalProductAdapter implements ProductPort {
 
     @Override
     public String invoiceItemType(String invoiceTypeId, String orderItemTypeId) {
-        List<?> mappings = entities.findByEquality(entities.entityClass("InvoiceItemTypeMap"), Map.of(
+        List<?> mappings = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("InvoiceItemTypeMap"), Map.of(
                 "invoiceTypeId", invoiceTypeId, "invoiceItemMapKey", orderItemTypeId));
         if (!mappings.isEmpty()) {
             Object mapping = mappings.get(0);
@@ -68,7 +72,7 @@ public class LocalProductAdapter implements ProductPort {
     @Override
     public List<Map<String, Object>> productCategoryMemberships(String productId) {
         Date now = new Date();
-        return entities.findByEquality(entities.entityClass("ProductCategoryMember"), Map.of("productId", productId))
+        return AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("ProductCategoryMember"), Map.of("productId", productId))
                 .stream().filter(member -> {
                     Date from = (Date) entities.get(member, "fromDate");
                     Date thru = (Date) entities.get(member, "thruDate");
