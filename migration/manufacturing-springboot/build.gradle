@@ -1,0 +1,89 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+ext['testcontainers.version'] = '1.21.4'
+
+group = 'org.apache.ofbiz.migration'
+version = '0.1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':migration:springboot-common')
+    implementation project(':migration:springboot-datamodel')
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+def serviceFiles = fileTree(rootProject.projectDir) {
+    include 'applications/manufacturing/servicedef/*.xml'
+}
+def generatedRoot = layout.buildDirectory.dir('generated/sources/ofbiz2spring/main/java')
+def reportFile = layout.buildDirectory.file('generated/ofbiz2spring-report.json')
+def inventoryFile = rootProject.file('docs/migration/manufacturing/inventory/inventory.json')
+def entityAutoInventoryFile = layout.buildDirectory.file('generated/manufacturing-entity-auto-inventory.json')
+
+tasks.register('generateManufacturingCatalog', Exec) {
+    inputs.files(serviceFiles)
+    inputs.file(inventoryFile)
+    inputs.file(rootProject.file('migration/tools/ofbiz2spring.py'))
+    inputs.file(buildFile)
+    outputs.dir(generatedRoot)
+    outputs.file(reportFile)
+
+    doFirst {
+        delete generatedRoot.get().asFile
+        def inventory = new JsonSlurper().parse(inventoryFile)
+        inventory.services = inventory.services.findAll { it.engine == 'entity-auto' }
+        def filteredInventory = entityAutoInventoryFile.get().asFile
+        filteredInventory.parentFile.mkdirs()
+        filteredInventory.text = JsonOutput.prettyPrint(JsonOutput.toJson(inventory))
+
+        def arguments = [
+                'python3',
+                rootProject.file('migration/tools/ofbiz2spring.py').absolutePath,
+                '--out', generatedRoot.get().asFile.absolutePath,
+                '--inventory', filteredInventory.absolutePath,
+                '--entity-package', 'org.apache.ofbiz.migration.manufacturing.unused',
+                '--repository-package', 'org.apache.ofbiz.migration.manufacturing.unused',
+                '--service-package', 'org.apache.ofbiz.migration.manufacturing.generated',
+                '--report', reportFile.get().asFile.absolutePath
+        ]
+        serviceFiles.files.sort().each { File service ->
+            arguments.addAll(['--service-def', service.absolutePath])
+        }
+        commandLine arguments
+    }
+}
+
+sourceSets.main.java.srcDir(generatedRoot.map {
+    it.dir('org/apache/ofbiz/migration/manufacturing/generated')
+})
+tasks.named('compileJava') {
+    dependsOn tasks.named('generateManufacturingCatalog')
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    systemProperty 'ofbiz.root', rootProject.projectDir.absolutePath
+}
