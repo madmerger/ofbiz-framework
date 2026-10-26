@@ -95,12 +95,46 @@ class AcctgTransServicesTest {
         assertEquals("Y", entities.get(posted, "isPosted"));
     }
 
+    @Test
+    void postAcctgTransUsesOFBizLedgerRoundingForTotalsAndDifference() throws Exception {
+        createTransaction("MIG_ATX_ROUND");
+        persist("GlAccount", Map.of("glAccountId", "MIG_ATX_ROUND_DEBIT"));
+        persist("GlAccount", Map.of("glAccountId", "MIG_ATX_ROUND_CREDIT"));
+        persistTrialBalanceEntry("00001", "D", "1.00004", "MIG_ATX_ROUND_DEBIT");
+        persistTrialBalanceEntry("00002", "C", "1.00000", "MIG_ATX_ROUND_CREDIT");
+
+        postService("calculateAcctgTransTrialBalance", "{\"acctgTransId\":\"MIG_ATX_ROUND\"}")
+                .andExpect(status().isOk()).andExpect(jsonPath("$.debitTotal").value(1.0000))
+                .andExpect(jsonPath("$.creditTotal").value(1.0000))
+                .andExpect(jsonPath("$.debitCreditDifference").value(0.0000));
+        postService("postAcctgTrans", "{\"acctgTransId\":\"MIG_ATX_ROUND\"}").andExpect(status().isOk());
+    }
+
     private void createTransaction(String transactionId) {
         Object transaction = entities.newEntity(entities.entityClass("AcctgTrans"));
         entities.set(transaction, "acctgTransId", transactionId);
         entities.set(transaction, "isPosted", "N");
         entityManager.persist(transaction);
         entityManager.flush();
+    }
+
+    private void persistTrialBalanceEntry(String sequence, String flag, String amount, String accountId) {
+        Object entry = entities.newEntity(entities.entityClass("AcctgTransEntry"));
+        entities.set(entry, "acctgTransId", "MIG_ATX_ROUND");
+        entities.set(entry, "acctgTransEntrySeqId", sequence);
+        entities.set(entry, "debitCreditFlag", flag);
+        entities.set(entry, "amount", amount);
+        entities.set(entry, "glAccountId", accountId);
+        entityManager.persist(entry);
+        entityManager.flush();
+    }
+
+    private Object persist(String entityName, Map<String, ?> values) {
+        Object entity = entities.newEntity(entities.entityClass(entityName));
+        values.forEach((name, value) -> entities.set(entity, name, value));
+        entityManager.persist(entity);
+        entityManager.flush();
+        return entity;
     }
 
     private static String entryBody(String flag) {

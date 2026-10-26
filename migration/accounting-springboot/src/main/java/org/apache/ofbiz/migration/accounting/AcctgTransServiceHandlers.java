@@ -183,16 +183,15 @@ public class AcctgTransServiceHandlers {
             String flag = text(entities.get(entry, "debitCreditFlag"));
             BigDecimal amount = money(entities.get(entry, "amount"));
             if ("D".equals(flag)) {
-                debit = debit.add(amount);
+                debit = debit.add(amount).setScale(4, java.math.RoundingMode.HALF_UP);
             } else if ("C".equals(flag)) {
-                credit = credit.add(amount);
+                credit = credit.add(amount).setScale(4, java.math.RoundingMode.HALF_UP);
             } else {
                 throw badRequest("Invalid debitCreditFlag on accounting transaction entry");
             }
         }
-        debit = debit.setScale(4, java.math.RoundingMode.HALF_UP);
-        credit = credit.setScale(4, java.math.RoundingMode.HALF_UP);
-        return Map.of("debitTotal", debit, "creditTotal", credit, "debitCreditDifference", debit.subtract(credit));
+        BigDecimal difference = debit.subtract(credit).setScale(4, java.math.RoundingMode.HALF_UP);
+        return Map.of("debitTotal", debit, "creditTotal", credit, "debitCreditDifference", difference);
     }
 
     /**
