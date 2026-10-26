@@ -98,6 +98,47 @@ class EntityAutoServiceApiTest {
     }
 
     @Test
+    void generatesMissingSinglePrimaryKeyInoutValueFromGeneratedCatalog() throws Exception {
+        serviceRegistry.registerCatalog("test", Map.of(
+                "createGeo", ServiceCatalog.find("createGeo").orElseThrow()));
+
+        mockMvc.perform(post("/api/test/services/createGeo")
+                        .with(httpBasic("writer", "writer-password"))
+                        .contentType("application/json")
+                        .content("{\"geoName\":\"Generated single key\", \"geoTypeId\":\"COUNTRY\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.geoId").value(org.hamcrest.Matchers.notNullValue()));
+    }
+
+    @Test
+    void generatesAndPreservesMissingCompositePrimaryKeyInoutValueFromGeneratedCatalog() throws Exception {
+        serviceRegistry.registerCatalog("test", Map.of(
+                "createOrderItemShipGroup", ServiceCatalog.find("createOrderItemShipGroup").orElseThrow()));
+        String orderId = "O" + Long.toString(System.nanoTime(), 36);
+
+        mockMvc.perform(post("/api/test/services/createOrderItemShipGroup")
+                        .with(httpBasic("writer", "writer-password"))
+                        .contentType("application/json")
+                        .content("{\"orderId\":\"" + orderId + "\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.shipGroupSeqId").value("00001"));
+
+        mockMvc.perform(post("/api/test/services/createOrderItemShipGroup")
+                        .with(httpBasic("writer", "writer-password"))
+                        .contentType("application/json")
+                        .content("{\"orderId\":\"" + orderId + "\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.shipGroupSeqId").value("00002"));
+
+        mockMvc.perform(post("/api/test/services/createOrderItemShipGroup")
+                        .with(httpBasic("writer", "writer-password"))
+                        .contentType("application/json")
+                        .content("{\"orderId\":\"" + orderId + "P\", \"shipGroupSeqId\":\"CALLER_SEQ\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.shipGroupSeqId").value("CALLER_SEQ"));
+    }
+
+    @Test
     void requiresNonOptionalInoutParametersAndRejectsUndeclaredUpdateFields() throws Exception {
         serviceRegistry.registerCatalog("test", Map.of(
                 "createRequiredInout",
