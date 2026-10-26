@@ -23,6 +23,12 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -35,8 +41,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import org.apache.ofbiz.migration.common.EntityRegistry;
+import org.apache.ofbiz.migration.common.SequenceService;
 import org.apache.ofbiz.migration.product.generated.ProductServiceMetadata;
 import org.apache.ofbiz.migration.product.generated.ServiceCatalog;
 import org.junit.jupiter.api.Test;
@@ -47,10 +55,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @SpringBootTest(
         classes = ProductMigrationApplication.class,
@@ -81,6 +93,12 @@ class EntityAutoAcceptanceTest {
 
     @Autowired
     private EntityManager entityManager;
+
+    @SpyBean
+    private SequenceService sequences;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     @ParameterizedTest(name = "ac01_{0}")
     @MethodSource("entityAutoServices")
@@ -245,10 +263,42 @@ class EntityAutoAcceptanceTest {
         "PRODUCT_SENSITIVE_VIEW", "CATALOG_PRICE_MAINT", "CATALOG_CREATE", "CATALOG_UPDATE",
         "CATALOG_DELETE", "FACILITY_CREATE", "FACILITY_UPDATE", "FACILITY_DELETE"
     })
-    @Transactional
     void ac05_compositeOutKeysUseParentScopedSubSequences() throws Exception {
         assertCompositeOutSequence("createProductConfigOption", "configItemId", "configOptionId");
         assertCompositeOutSequence("createProductPromoRule", "productPromoId", "productPromoRuleId");
+    }
+
+    @Test
+    void ac07_retriesCompositeOutKeyWhenSubSequenceIsTakenConcurrently() throws Exception {
+        ServiceCatalog.ServiceDefinition create = ServiceCatalog.all().get("createProductConfigOption");
+        String parentKey = "configItemId";
+        String sequenceKey = "configOptionId";
+        Map<String, Object> input = ProductTestSupport.input(create, entities, "concurrent", false);
+        seedRequiredParent(create, input);
+
+        Map<String, Object> concurrentRow = ProductTestSupport.input(
+                create, entities, "concurrent-row", true);
+        concurrentRow.put(parentKey, input.get(parentKey));
+        AtomicBoolean inserted = new AtomicBoolean();
+        clearInvocations(sequences);
+        doAnswer(invocation -> {
+                    String sequence = (String) invocation.callRealMethod();
+                    if (inserted.compareAndSet(false, true)) {
+                        concurrentRow.put(sequenceKey, sequence);
+                        TransactionTemplate transaction = new TransactionTemplate(transactionManager);
+                        transaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+                        transaction.executeWithoutResult(status -> seedEntity(create.entity(), concurrentRow));
+                    }
+                    return sequence;
+                })
+                .when(sequences)
+                .nextSubSequence(eq(create.entity()), anyMap(), eq(sequenceKey));
+
+        Map<String, Object> output = createServiceOutput(create, input);
+
+        assertEquals("00002", output.get(sequenceKey));
+        assertTrue(inserted.get());
+        verify(sequences, times(2)).nextSubSequence(eq(create.entity()), anyMap(), eq(sequenceKey));
     }
 
     @Test
@@ -323,7 +373,7 @@ class EntityAutoAcceptanceTest {
                 create, entities, serviceName + "D", false);
         seedRequiredParent(create, seededInput);
         seededInput.put(sequenceKey, "00001");
-        seedEntity(create.entity(), seededInput);
+        seedEntityInNewTransaction(create.entity(), seededInput);
         Map<String, Object> nextInput = ProductTestSupport.input(
                 create, entities, serviceName + "E", false);
         nextInput.put(parentKey, seededInput.get(parentKey));
@@ -372,8 +422,16 @@ class EntityAutoAcceptanceTest {
         ServiceCatalog.ServiceDefinition parent = ProductTestSupport.matching(parentEntity, "create", "catalog");
         Map<String, Object> parentInput = ProductTestSupport.input(
                 parent, entities, create.name() + "Parent", false);
-        String body = postService(parent.name(), parentInput)
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        TransactionTemplate transaction = new TransactionTemplate(transactionManager);
+        transaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        String body = transaction.execute(transactionStatus -> {
+            try {
+                return postService(parent.name(), parentInput)
+                        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            } catch (Exception exception) {
+                throw new IllegalStateException(exception);
+            }
+        });
         Map<String, Object> parentOutput = JSON.readValue(body, new TypeReference<>() { });
         Map<String, Object> parentKeys = ProductTestSupport.resultKeys(parent, entities, parentOutput);
         if ("ProductConfigOption".equals(create.entity())) {
@@ -388,6 +446,12 @@ class EntityAutoAcceptanceTest {
         values.forEach((name, value) -> entities.set(entity, name, value));
         entityManager.persist(entity);
         entityManager.flush();
+    }
+
+    private void seedEntityInNewTransaction(String entityName, Map<String, Object> values) {
+        TransactionTemplate transaction = new TransactionTemplate(transactionManager);
+        transaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        transaction.executeWithoutResult(status -> seedEntity(entityName, values));
     }
 
     private static org.springframework.security.core.GrantedAuthority[] authorities() {
