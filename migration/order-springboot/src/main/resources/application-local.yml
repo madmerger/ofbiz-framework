@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:order-local;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+migration:
+  security:
+    require-https: false
+    users:
+      - username: admin
+        password: ${MIGRATION_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+          - ORDERMGR_ADMIN
+      - username: orderclerk
+        password: ${MIGRATION_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+          - ORDERMGR_VIEW
+          - ORDERMGR_CREATE
+          - ORDERMGR_UPDATE
+          - ORDERMGR_DELETE
+      - username: readonly
+        password: ${MIGRATION_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+          - ORDERMGR_VIEW
+      - username: sensitive
+        password: ${MIGRATION_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+          - ORDERMGR_VIEW
+          - ORDERMGR_SENSITIVE_VIEW
+      - username: noorder
+        password: ${MIGRATION_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW

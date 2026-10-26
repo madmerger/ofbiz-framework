@@ -1,0 +1,152 @@
+{
+  "component": "order",
+  "baseUrl": "http://localhost:8080",
+  "profile": "local",
+  "auth": "HTTP Basic。全ユーザーのパスワードは環境変数 MIGRATION_DEMO_PASSWORD（画面・録画に表示しない）",
+  "users": {
+    "admin": ["OFBTOOLS_VIEW", "ORDERMGR_ADMIN"],
+    "orderclerk": ["OFBTOOLS_VIEW", "ORDERMGR_VIEW", "ORDERMGR_CREATE", "ORDERMGR_UPDATE", "ORDERMGR_DELETE"],
+    "readonly": ["OFBTOOLS_VIEW", "ORDERMGR_VIEW"],
+    "sensitive": ["OFBTOOLS_VIEW", "ORDERMGR_VIEW", "ORDERMGR_SENSITIVE_VIEW"],
+    "noorder": ["OFBTOOLS_VIEW"]
+  },
+  "cases": [
+    {
+      "id": "ORDER-E2E-01",
+      "name": "未認証 401",
+      "request": {"method": "GET", "path": "/api/order/entities/OrderHeader", "user": null},
+      "expected": {"status": 401}
+    },
+    {
+      "id": "ORDER-E2E-02a",
+      "name": "権限不足 403（base permission ORDERMGR なし）",
+      "request": {"method": "GET", "path": "/api/order/entities/OrderHeader", "user": "noorder"},
+      "expected": {"status": 403}
+    },
+    {
+      "id": "ORDER-E2E-02b",
+      "name": "権限不足 403（閲覧専用ユーザーで entity-auto create）",
+      "request": {"method": "POST", "path": "/api/order/services/createOrderType", "user": "readonly",
+        "body": {"orderTypeId": "E2E_DENIED", "description": "作成されてはいけない"}},
+      "expected": {"status": 403, "afterCheck": "admin で GET /api/order/entities/OrderType/one?orderTypeId=E2E_DENIED が 404"}
+    },
+    {
+      "id": "ORDER-E2E-03a",
+      "name": "機密エンティティ: 閲覧専用ユーザーは 403",
+      "request": {"method": "GET", "path": "/api/order/entities/OrderPaymentPreference", "user": "readonly"},
+      "expected": {"status": 403}
+    },
+    {
+      "id": "ORDER-E2E-03b",
+      "name": "機密エンティティ: 専用権限 ORDERMGR_SENSITIVE_VIEW で 200",
+      "request": {"method": "GET", "path": "/api/order/entities/OrderPaymentPreference", "user": "sensitive"},
+      "expected": {"status": 200, "values": {"orderPaymentPreferenceId": "ORDER-DEMO-PAYMENT"}}
+    },
+    {
+      "id": "ORDER-E2E-04a",
+      "name": "entity-auto 作成 createOrderType",
+      "request": {"method": "POST", "path": "/api/order/services/createOrderType", "user": "orderclerk",
+        "body": {"orderTypeId": "E2E_TYPE", "description": "E2E 作成"}},
+      "expected": {"status": 200}
+    },
+    {
+      "id": "ORDER-E2E-04b",
+      "name": "entity-auto 取得",
+      "request": {"method": "GET", "path": "/api/order/entities/OrderType/one?orderTypeId=E2E_TYPE", "user": "orderclerk"},
+      "expected": {"status": 200, "values": {"orderTypeId": "E2E_TYPE", "description": "E2E 作成"}}
+    },
+    {
+      "id": "ORDER-E2E-04c",
+      "name": "entity-auto 更新 updateOrderType",
+      "request": {"method": "POST", "path": "/api/order/services/updateOrderType", "user": "orderclerk",
+        "body": {"orderTypeId": "E2E_TYPE", "description": "E2E 更新"}},
+      "expected": {"status": 200, "afterCheck": "GET /api/order/entities/OrderType/one?orderTypeId=E2E_TYPE の description が「E2E 更新」"}
+    },
+    {
+      "id": "ORDER-E2E-04d",
+      "name": "entity-auto 削除 deleteOrderType",
+      "request": {"method": "POST", "path": "/api/order/services/deleteOrderType", "user": "orderclerk",
+        "body": {"orderTypeId": "E2E_TYPE"}},
+      "expected": {"status": 200, "afterCheck": "GET /api/order/entities/OrderType/one?orderTypeId=E2E_TYPE が 404"}
+    },
+    {
+      "id": "ORDER-E2E-05a",
+      "name": "simple: createCustRequest（初期状態 CRQ_DRAFT）",
+      "request": {"method": "POST", "path": "/api/order/services/createCustRequest", "user": "orderclerk",
+        "body": {"custRequestName": "E2E 見積依頼", "fromPartyId": "DemoCustomer"}},
+      "expected": {"status": 200, "values": {"custRequestId": "採番された値（以降 {custRequestId}）"},
+        "afterCheck": "GET /api/order/entities/CustRequest/one?custRequestId={custRequestId} の statusId が CRQ_DRAFT"}
+    },
+    {
+      "id": "ORDER-E2E-05b",
+      "name": "simple: setCustRequestStatus（CRQ_DRAFT → CRQ_SUBMITTED）",
+      "request": {"method": "POST", "path": "/api/order/services/setCustRequestStatus", "user": "orderclerk",
+        "body": {"custRequestId": "{custRequestId}", "statusId": "CRQ_SUBMITTED"}},
+      "expected": {"status": 200, "afterCheck": "GET /api/order/entities/CustRequest/one?custRequestId={custRequestId} の statusId が CRQ_SUBMITTED"}
+    },
+    {
+      "id": "ORDER-E2E-06a",
+      "name": "主要フロー: 受注 storeOrder（価格は ProductPricePort から取得）",
+      "request": {"method": "POST", "path": "/api/order/services/storeOrder", "user": "orderclerk",
+        "body": {"partyId": "DemoCustomer", "orderTypeId": "SALES_ORDER", "productStoreId": "DEMO_ORDER_STORE",
+          "orderItems": [{"productId": "DEMO_ORDER_PRODUCT_1", "quantity": 2}, {"productId": "DEMO_ORDER_PRODUCT_2", "quantity": 1}]}},
+      "expected": {"status": 200, "values": {"orderId": "採番された値（以降 {orderId}）", "grandTotal": 90.00, "statusId": "ORDER_CREATED"}}
+    },
+    {
+      "id": "ORDER-E2E-06b",
+      "name": "主要フロー: 承認 changeOrderStatus（setItemStatus=Y）",
+      "request": {"method": "POST", "path": "/api/order/services/changeOrderStatus", "user": "orderclerk",
+        "body": {"orderId": "{orderId}", "statusId": "ORDER_APPROVED", "setItemStatus": "Y"}},
+      "expected": {"status": 200, "values": {"oldStatusId": "ORDER_CREATED", "statusId": "ORDER_APPROVED"}}
+    },
+    {
+      "id": "ORDER-E2E-06c",
+      "name": "主要フロー: 出荷要求 quickShipEntireOrder（ShipmentPort 経由）",
+      "request": {"method": "POST", "path": "/api/order/services/quickShipEntireOrder", "user": "orderclerk",
+        "body": {"orderId": "{orderId}"}},
+      "expected": {"status": 200, "values": {"statusId": "ORDER_COMPLETED", "shipmentIds": "1件"}}
+    },
+    {
+      "id": "ORDER-E2E-06d",
+      "name": "主要フロー: 請求要求 createInvoiceForOrder（InvoicePort 経由）",
+      "request": {"method": "POST", "path": "/api/order/services/createInvoiceForOrder", "user": "orderclerk",
+        "body": {"orderId": "{orderId}"}},
+      "expected": {"status": 200, "values": {"invoiceId": "採番された値"}}
+    },
+    {
+      "id": "ORDER-E2E-06e",
+      "name": "主要フロー: 状態確認（ヘッダ・明細・状態履歴・請求行）",
+      "request": {"method": "GET", "path": "/api/order/entities/OrderHeader/one?orderId={orderId}", "user": "readonly"},
+      "expected": {"status": 200, "values": {"statusId": "ORDER_COMPLETED", "grandTotal": 90.00},
+        "afterCheck": "GET /api/order/entities/OrderItem?orderId={orderId} が 2 件ですべて ITEM_COMPLETED。GET /api/order/entities/OrderStatus?orderId={orderId} にヘッダの ORDER_CREATED / ORDER_APPROVED / ORDER_COMPLETED が含まれる。GET /api/order/entities/OrderItemBilling?orderId={orderId} が 2 件"}
+    },
+    {
+      "id": "ORDER-E2E-06f",
+      "name": "主要フロー: 二重請求は 409",
+      "request": {"method": "POST", "path": "/api/order/services/createInvoiceForOrder", "user": "orderclerk",
+        "body": {"orderId": "{orderId}"}},
+      "expected": {"status": 409}
+    },
+    {
+      "id": "ORDER-E2E-06g",
+      "name": "主要フロー: キャンセル cancelOrderItem（別の受注の全明細）",
+      "request": {"method": "POST", "path": "/api/order/services/cancelOrderItem", "user": "orderclerk",
+        "body": {"orderId": "{cancelOrderId}"}},
+      "precondition": "storeOrder で DEMO_ORDER_PRODUCT_1 を 1 個の受注を作り、その orderId を {cancelOrderId} とする",
+      "expected": {"status": 200, "afterCheck": "GET /api/order/entities/OrderHeader/one?orderId={cancelOrderId} の statusId が ORDER_CANCELLED"}
+    },
+    {
+      "id": "ORDER-E2E-07a",
+      "name": "multi: 重複で 409",
+      "request": {"method": "POST", "path": "/api/order/services/createOrderType/multi", "user": "orderclerk",
+        "body": [{"orderTypeId": "E2E_MULTI_1", "description": "1件目（rollback される）"}, {"orderTypeId": "SALES_ORDER", "description": "重複"}]},
+      "expected": {"status": 409, "values": {"errors[0].index": 1, "errors[0].status": 409}}
+    },
+    {
+      "id": "ORDER-E2E-07b",
+      "name": "multi: 全件 rollback の確認",
+      "request": {"method": "GET", "path": "/api/order/entities/OrderType/one?orderTypeId=E2E_MULTI_1", "user": "orderclerk"},
+      "expected": {"status": 404}
+    }
+  ]
+}
