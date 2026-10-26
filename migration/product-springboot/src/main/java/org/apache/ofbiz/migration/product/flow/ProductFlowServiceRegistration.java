@@ -32,16 +32,19 @@ public class ProductFlowServiceRegistration {
     private final ProductServicePolicy policy;
     private final ProductPermissions permissions;
     private final UpdateShipmentFlow updateShipment;
+    private final CalculateProductPriceFlow calculateProductPrice;
 
     public ProductFlowServiceRegistration(
             ServiceHandlerRegistry registry,
             ProductServicePolicy policy,
             ProductPermissions permissions,
-            UpdateShipmentFlow updateShipment) {
+            UpdateShipmentFlow updateShipment,
+            CalculateProductPriceFlow calculateProductPrice) {
         this.registry = registry;
         this.policy = policy;
         this.permissions = permissions;
         this.updateShipment = updateShipment;
+        this.calculateProductPrice = calculateProductPrice;
     }
 
     @PostConstruct
@@ -49,6 +52,8 @@ public class ProductFlowServiceRegistration {
         register("updateShipment", new ProductServiceMetadata.ServiceMetadata(
                 "services_shipment.xml", "facility", "checkCanChangeShipmentStatusDelivered"),
                 "UPDATE", null, updateShipment::execute);
+        registry.registerHandler("product", "calculateProductPrice", "OFBTOOLS_VIEW", null,
+                calculateProductPrice::execute);
     }
 
     private void register(
