@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.MigrationException;
+import org.apache.ofbiz.migration.product.ProductQueries;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -37,9 +38,11 @@ public class CalculateProductPriceFlow {
     private static final BigDecimal ZERO = BigDecimal.ZERO;
 
     private final EntityRegistry entities;
+    private final ProductQueries queries;
 
-    public CalculateProductPriceFlow(EntityRegistry entities) {
+    public CalculateProductPriceFlow(EntityRegistry entities, ProductQueries queries) {
         this.entities = entities;
+        this.queries = queries;
     }
 
     /**
@@ -145,7 +148,7 @@ public class CalculateProductPriceFlow {
         filters.put("productId", productId);
         filters.put("currencyUomId", currency);
         filters.put("productStoreGroupId", storeGroup);
-        List<Object> found = new ArrayList<>(entities.findByEquality(entities.entityClass("ProductPrice"), filters));
+        List<Object> found = new ArrayList<>(queries.findAll(entities.entityClass("ProductPrice"), filters));
         if ("PURCHASE".equals(purpose)) {
             found.removeIf(price -> {
                 Object rowPurpose = entities.get(price, "productPricePurposeId");
@@ -173,7 +176,7 @@ public class CalculateProductPriceFlow {
     private Object lowestPricedVariant(
             String productId, String purpose, String currency, String storeGroup, String term, Timestamp at) {
         Map<String, Object> assocFilter = Map.of("productId", productId, "productAssocTypeId", "PRODUCT_VARIANT");
-        List<Object> variants = new ArrayList<>(entities.findByEquality(entities.entityClass("ProductAssoc"), assocFilter));
+        List<Object> variants = new ArrayList<>(queries.findAll(entities.entityClass("ProductAssoc"), assocFilter));
         variants.removeIf(assoc -> !active(assoc, at));
         variants.sort(Comparator.comparing(
                 assoc -> dateValue(entities.get(assoc, "fromDate")),
@@ -214,7 +217,7 @@ public class CalculateProductPriceFlow {
         if (storeId == null) {
             return null;
         }
-        List<Object> members = new ArrayList<>(entities.findByEquality(
+        List<Object> members = new ArrayList<>(queries.findAll(
                 entities.entityClass("ProductStoreGroupMember"), Map.of("productStoreId", storeId)));
         members.removeIf(member -> !active(member, at));
         members.sort(Comparator.comparing(
@@ -230,7 +233,7 @@ public class CalculateProductPriceFlow {
             return null;
         }
         String productId = value(entities.get(product, "productId"));
-        List<Object> associations = new ArrayList<>(entities.findByEquality(entities.entityClass("ProductAssoc"),
+        List<Object> associations = new ArrayList<>(queries.findAll(entities.entityClass("ProductAssoc"),
                 Map.of("productIdTo", productId, "productAssocTypeId", "PRODUCT_VARIANT")));
         associations.removeIf(assoc -> !active(assoc, at));
         return associations.isEmpty() ? null : value(entities.get(associations.get(0), "productId"));

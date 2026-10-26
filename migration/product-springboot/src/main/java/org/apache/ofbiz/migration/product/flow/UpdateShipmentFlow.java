@@ -27,6 +27,7 @@ import java.util.Set;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
+import org.apache.ofbiz.migration.product.ProductQueries;
 import org.apache.ofbiz.migration.product.ProductEntityAutoRegistration;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.http.HttpStatus;
@@ -40,16 +41,19 @@ public class UpdateShipmentFlow {
             "createdDate", "createdByUserLogin", "lastModifiedDate", "lastModifiedByUserLogin");
 
     private final EntityRegistry entities;
+    private final ProductQueries queries;
     private final MigrationServiceDispatcher dispatcher;
     private final ShipmentSideEffectPort sideEffects;
     private final ProductEntityAutoRegistration entityAutoRegistration;
 
     public UpdateShipmentFlow(
             EntityRegistry entities,
+            ProductQueries queries,
             MigrationServiceDispatcher dispatcher,
             ShipmentSideEffectPort sideEffects,
             ProductEntityAutoRegistration entityAutoRegistration) {
         this.entities = entities;
+        this.queries = queries;
         this.dispatcher = dispatcher;
         this.sideEffects = sideEffects;
         this.entityAutoRegistration = entityAutoRegistration;
@@ -76,7 +80,7 @@ public class UpdateShipmentFlow {
             Map<String, Object> transitionFilter = new LinkedHashMap<>();
             transitionFilter.put("statusId", oldStatusId);
             transitionFilter.put("statusIdTo", nextStatusId);
-            boolean valid = !entities.findByEquality(entities.entityClass("StatusValidChange"),
+            boolean valid = !queries.findAll(entities.entityClass("StatusValidChange"),
                     transitionFilter).isEmpty();
             if (!valid) {
                 throw new MigrationException(HttpStatus.CONFLICT,

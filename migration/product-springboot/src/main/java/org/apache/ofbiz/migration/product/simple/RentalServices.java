@@ -27,6 +27,7 @@ import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.ServiceHandlerRegistry.ParamDefinition;
 import org.apache.ofbiz.migration.common.ServiceHandlerRegistry.ServiceDefinition;
 import org.apache.ofbiz.migration.product.ProductPermissions;
+import org.apache.ofbiz.migration.product.ProductQueries;
 import org.apache.ofbiz.migration.product.adapter.ProductUnportedPort;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -62,6 +63,7 @@ public class RentalServices extends UnportedSimpleMethodFile {
                     new ParamDefinition("fromDate", "IN", true, "date-time")));
 
     private final EntityRegistry entities;
+    private final ProductQueries queries;
     private final EntityAutoService entityAutoService;
     private final ProductPermissions permissions;
     private final String fixedAssetAutoCreate;
@@ -69,11 +71,13 @@ public class RentalServices extends UnportedSimpleMethodFile {
     public RentalServices(
             ProductUnportedPort unportedPort,
             EntityRegistry entities,
+            ProductQueries queries,
             EntityAutoService entityAutoService,
             ProductPermissions permissions,
             @Value("${accounting.fixedasset.autocreate:Y}") String fixedAssetAutoCreate) {
         super(unportedPort);
         this.entities = entities;
+        this.queries = queries;
         this.entityAutoService = entityAutoService;
         this.permissions = permissions;
         this.fixedAssetAutoCreate = fixedAssetAutoCreate;
@@ -136,7 +140,7 @@ public class RentalServices extends UnportedSimpleMethodFile {
         if (product == null) {
             throw new MigrationException(HttpStatus.NOT_FOUND, "Entity value not found with name: product");
         }
-        List<?> productFixedAssets = entities.findByEquality(
+        List<?> productFixedAssets = queries.findAll(
                 entities.entityClass("FixedAssetProduct"), Map.of("productId", productId));
         Map<String, Object> result = new LinkedHashMap<>();
         if (!productFixedAssets.isEmpty()) {

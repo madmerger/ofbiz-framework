@@ -1369,7 +1369,8 @@ public class PicklistServices extends UnportedSimpleMethodFile {
                 case "is-null" -> result.add(builder.isNull(path));
                 case "is-not-null" -> result.add(builder.isNotNull(path));
                 case "!=" -> result.add(value == null
-                        ? builder.isNotNull(path) : builder.notEqual(path, value));
+                        ? builder.isNotNull(path)
+                        : builder.or(builder.notEqual(path, value), builder.isNull(path)));
                 case ">" -> result.add(builder.greaterThan((Expression) path, (Comparable) value));
                 case "<" -> result.add(builder.lessThan((Expression) path, (Comparable) value));
                 case ">=" -> result.add(builder.greaterThanOrEqualTo((Expression) path, (Comparable) value));

@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.SequenceService;
+import org.apache.ofbiz.migration.product.ProductQueries;
 import org.apache.ofbiz.migration.product.adapter.ProductUnportedPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -51,13 +52,15 @@ public class CustomerDigitalDownloadServices extends UnportedSimpleMethodFile {
             "Cannot add this Content: you are not associated with it as an Owner";
 
     private final EntityRegistry entities;
+    private final ProductQueries queries;
     private final SequenceService sequences;
     private final EntityManager entityManager;
 
     public CustomerDigitalDownloadServices(ProductUnportedPort unportedPort, EntityRegistry entities,
-            SequenceService sequences, EntityManager entityManager) {
+            ProductQueries queries, SequenceService sequences, EntityManager entityManager) {
         super(unportedPort);
         this.entities = entities;
+        this.queries = queries;
         this.sequences = sequences;
         this.entityManager = entityManager;
     }
@@ -294,7 +297,7 @@ public class CustomerDigitalDownloadServices extends UnportedSimpleMethodFile {
         }
         @SuppressWarnings("unchecked")
         Class<Object> type = (Class<Object>) entities.entityClass(entityName);
-        return entities.findByEquality(type, fields);
+        return queries.findAll(type, fields);
     }
 
     private Object makeValue(String entityName) {

@@ -664,8 +664,9 @@ public class InventoryReserveServices extends UnportedSimpleMethodFile {
                 env.parameters.get("inventoryItemId"), true);
         predicates.add("i.availableToPromiseTotal > :minimumAvailable");
         bind.put("minimumAvailable", ZERO);
-        predicates.add("i.statusId <> :nonSerializedDefective");
-        predicates.add("i.statusId <> :defective");
+        // EntityFinderUtil.java:247 includes rows with null fields for Minilang not-equals.
+        predicates.add("(i.statusId is null or (i.statusId <> :nonSerializedDefective"
+                + " and i.statusId <> :defective))");
         bind.put("nonSerializedDefective", "INV_NS_DEFECTIVE");
         bind.put("defective", "INV_DEFECTIVE");
         StringBuilder jpql = new StringBuilder("select i from InventoryItem i where ")

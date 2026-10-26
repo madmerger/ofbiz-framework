@@ -19,10 +19,6 @@
 package org.apache.ofbiz.migration.product.simple;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -37,6 +33,7 @@ import java.util.regex.Pattern;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
+import org.apache.ofbiz.migration.product.ProductQueries;
 import org.apache.ofbiz.migration.product.generated.ProductServiceMetadata;
 import org.apache.ofbiz.migration.product.adapter.ProductUnportedPort;
 import org.springframework.beans.BeanWrapper;
@@ -58,6 +55,7 @@ public class FacilityContactMechServices extends UnportedSimpleMethodFile {
             "[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*");
     private final EntityManager entityManager;
     private final EntityRegistry entities;
+    private final ProductQueries queries;
     private final MigrationServiceDispatcher dispatcher;
     private final FacilityContactMechServicesPartyContact partyContact;
 
@@ -65,11 +63,13 @@ public class FacilityContactMechServices extends UnportedSimpleMethodFile {
             ProductUnportedPort unportedPort,
             EntityManager entityManager,
             EntityRegistry entities,
+            ProductQueries queries,
             @Lazy MigrationServiceDispatcher dispatcher,
             FacilityContactMechServicesPartyContact partyContact) {
         super(unportedPort);
         this.entityManager = entityManager;
         this.entities = entities;
+        this.queries = queries;
         this.dispatcher = dispatcher;
         this.partyContact = partyContact;
     }
@@ -357,13 +357,7 @@ public class FacilityContactMechServices extends UnportedSimpleMethodFile {
     }
 
     private <T> List<T> findByEquality(Class<T> type, Map<String, ?> fields) {
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<T> query = builder.createQuery(type);
-        Root<T> root = query.from(type);
-        List<Predicate> predicates = new ArrayList<>();
-        fields.forEach((name, value) -> predicates.add(builder.equal(root.get(name), value)));
-        query.select(root).where(predicates.toArray(Predicate[]::new));
-        return entityManager.createQuery(query).getResultList();
+        return queries.findAll(type, fields);
     }
 
     private Object newEntity(String entityName) {

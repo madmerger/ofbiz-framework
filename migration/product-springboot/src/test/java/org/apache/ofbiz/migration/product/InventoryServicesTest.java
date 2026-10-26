@@ -81,6 +81,29 @@ class InventoryServicesTest {
     }
 
     @Test
+    void inventoryAvailableByFacilityIncludesMoreThanOneHundredItems() throws Exception {
+        Fixture fixture = fixture(true, "NON_SERIAL_INV_ITEM", "INV_AVAILABLE", BigDecimal.ZERO, BigDecimal.ZERO);
+        for (int index = 0; index < 101; index++) {
+            Object item = entities.newEntity(entities.entityClass("InventoryItem"));
+            entities.set(item, "inventoryItemId", "BULK_INV_" + index);
+            entities.set(item, "inventoryItemTypeId", "NON_SERIAL_INV_ITEM");
+            entities.set(item, "productId", fixture.productId());
+            entities.set(item, "facilityId", fixture.facilityId());
+            entities.set(item, "statusId", "INV_AVAILABLE");
+            entities.set(item, "availableToPromiseTotal", BigDecimal.ONE);
+            entities.set(item, "quantityOnHandTotal", BigDecimal.ONE);
+            entityManager.persist(item);
+        }
+        entityManager.flush();
+
+        JsonNode response = invoke("getInventoryAvailableByFacility", values(
+                "productId", fixture.productId(), "facilityId", fixture.facilityId()));
+
+        assertEquals(0, new BigDecimal("101").compareTo(response.path("availableToPromiseTotal").decimalValue()));
+        assertEquals(0, new BigDecimal("101").compareTo(response.path("quantityOnHandTotal").decimalValue()));
+    }
+
+    @Test
     void ac02_updateInventoryItemRequiresFacilityUpdatePermission() throws Exception {
         mockMvc.perform(post("/api/product/services/updateInventoryItem")
                         .with(user("readonly").authorities(readOnlyAuthorities()))
@@ -428,6 +451,37 @@ class InventoryServicesTest {
         Object inventoryItem = one("InventoryItem", values("inventoryItemId", fixture.inventoryItemId()));
         assertDecimal("1", entities.get(inventoryItem, "availableToPromiseTotal"));
         assertDecimal("1", entities.get(inventoryItem, "quantityOnHandTotal"));
+    }
+
+    @Test
+    void reassignInventoryReservationsTreatsNullPicklistStatusAsActive() throws Exception {
+        Fixture fixture = fixture(true, "NON_SERIAL_INV_ITEM", "INV_AVAILABLE", BigDecimal.ONE, BigDecimal.ONE);
+        String orderId = id();
+        String picklistId = id();
+        String binId = id();
+        seedReservation(fixture, orderId, "1");
+        Object picklist = seed("Picklist", values(
+                "picklistId", picklistId, "facilityId", fixture.facilityId(), "statusId", "PICKLIST_INPUT"));
+        entities.set(picklist, "statusId", null);
+        seed("PicklistBin", values("picklistBinId", binId, "picklistId", picklistId));
+        seed("PicklistItem", values(
+                "picklistBinId", binId,
+                "orderId", orderId,
+                "orderItemSeqId", "00001",
+                "shipGroupSeqId", "00001",
+                "inventoryItemId", fixture.inventoryItemId(),
+                "itemStatusId", "PICKITEM_PENDING",
+                "quantity", BigDecimal.ONE));
+        entityManager.flush();
+
+        JsonNode response = invoke("reassignInventoryReservations", values(
+                "productId", fixture.productId(), "facilityId", fixture.facilityId()));
+
+        assertSuccessWithoutOutputs(response);
+        Object reservation = one("OrderItemShipGrpInvRes", values(
+                "orderId", orderId, "orderItemSeqId", "00001",
+                "shipGroupSeqId", "00001", "inventoryItemId", fixture.inventoryItemId()));
+        assertDecimal("1", entities.get(reservation, "quantityNotAvailable"));
     }
 
     @Test

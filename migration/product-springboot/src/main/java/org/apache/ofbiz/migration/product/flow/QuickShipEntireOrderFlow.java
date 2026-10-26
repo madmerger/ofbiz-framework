@@ -30,6 +30,7 @@ import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
 import org.apache.ofbiz.migration.common.SequenceService;
+import org.apache.ofbiz.migration.product.ProductQueries;
 import org.apache.ofbiz.migration.product.adapter.OrderPort;
 import org.apache.ofbiz.migration.product.simple.IssuanceServices;
 import org.springframework.http.HttpStatus;
@@ -40,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class QuickShipEntireOrderFlow {
     private final OrderPort orders;
     private final EntityRegistry entities;
+    private final ProductQueries queries;
     private final EntityManager entityManager;
     private final MigrationServiceDispatcher dispatcher;
     private final SequenceService sequences;
@@ -49,6 +51,7 @@ public class QuickShipEntireOrderFlow {
     public QuickShipEntireOrderFlow(
             OrderPort orders,
             EntityRegistry entities,
+            ProductQueries queries,
             EntityManager entityManager,
             MigrationServiceDispatcher dispatcher,
             SequenceService sequences,
@@ -56,6 +59,7 @@ public class QuickShipEntireOrderFlow {
             UpdateShipmentFlow updateShipment) {
         this.orders = orders;
         this.entities = entities;
+        this.queries = queries;
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
         this.sequences = sequences;
@@ -212,7 +216,7 @@ public class QuickShipEntireOrderFlow {
     }
 
     private void addIssuedItemsToPackage(String shipmentId, String orderId, String shipGroupSeqId) {
-        List<?> issuances = entities.findByEquality(entities.entityClass("ItemIssuance"), Map.of(
+        List<?> issuances = queries.findAll(entities.entityClass("ItemIssuance"), Map.of(
                 "shipmentId", shipmentId, "orderId", orderId, "shipGroupSeqId", shipGroupSeqId));
         if (issuances.isEmpty()) {
             return;

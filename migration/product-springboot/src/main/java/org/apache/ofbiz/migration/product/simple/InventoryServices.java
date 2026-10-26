@@ -35,6 +35,7 @@ import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
 import org.apache.ofbiz.migration.common.SequenceService;
+import org.apache.ofbiz.migration.product.ProductQueries;
 import org.apache.ofbiz.migration.product.adapter.ProductUnportedPort;
 import org.apache.ofbiz.migration.product.generated.ProductServiceMetadata;
 import org.apache.ofbiz.migration.product.generated.ServiceCatalog;
@@ -50,6 +51,7 @@ public class InventoryServices extends UnportedSimpleMethodFile {
     private static final BigDecimal ZERO = BigDecimal.ZERO;
     private final ProductUnportedPort unportedPort;
     private final EntityRegistry entities;
+    private final ProductQueries queries;
     private final SequenceService sequences;
     private final EntityManager entityManager;
     private final MigrationServiceDispatcher dispatcher;
@@ -58,6 +60,7 @@ public class InventoryServices extends UnportedSimpleMethodFile {
     public InventoryServices(
             ProductUnportedPort unportedPort,
             EntityRegistry entities,
+            ProductQueries queries,
             SequenceService sequences,
             EntityManager entityManager,
             @Lazy MigrationServiceDispatcher dispatcher,
@@ -65,6 +68,7 @@ public class InventoryServices extends UnportedSimpleMethodFile {
         super(unportedPort);
         this.unportedPort = unportedPort;
         this.entities = entities;
+        this.queries = queries;
         this.sequences = sequences;
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
@@ -464,8 +468,8 @@ public class InventoryServices extends UnportedSimpleMethodFile {
                     + "on pb.picklistBinId = pi.picklistBinId join Picklist p "
                     + "on p.picklistId = pb.picklistId where pi.orderId = :order "
                     + "and pi.orderItemSeqId = :item and pi.shipGroupSeqId = :ship "
-                    + "and pi.inventoryItemId = :inventory and p.statusId not in "
-                    + "('PICKLIST_CANCELLED', 'PICKLIST_PICKED')";
+                    + "and pi.inventoryItemId = :inventory and (p.statusId is null or p.statusId not in "
+                    + "('PICKLIST_CANCELLED', 'PICKLIST_PICKED'))";
             List<?> picklists = entityManager.createQuery(picklistQuery)
                     .setParameter("order", get(reservation, "orderId"))
                     .setParameter("item", get(reservation, "orderItemSeqId"))
@@ -823,7 +827,7 @@ public class InventoryServices extends UnportedSimpleMethodFile {
     }
 
     private List<?> find(String name, Map<String, ?> filters) {
-        return entities.findByEquality(entities.entityClass(name), filters);
+        return queries.findAll(entities.entityClass(name), filters);
     }
 
     private Object newEntity(String name) {

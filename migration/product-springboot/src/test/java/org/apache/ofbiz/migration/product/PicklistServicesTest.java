@@ -386,6 +386,22 @@ class PicklistServicesTest {
     }
 
     @Test
+    void getPicklistDisplayInfoIncludesNullStatusPicklists() throws Exception {
+        Fixture fixture = seedOrder("N");
+        String picklistId = seedPicklist(fixture, "PICKLIST_INPUT");
+        updateEntity("Picklist", values("picklistId", picklistId), values("statusId", null));
+
+        mockMvc.perform(post("/api/product/services/getPicklistDisplayInfo")
+                        .with(user("picklist").authorities(adminAuthorities()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JSON.writeValueAsBytes(values(
+                                "facilityId", fixture.facilityId(), "viewIndex", 0, "viewSize", 10))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.picklistCount").value(1))
+                .andExpect(jsonPath("$.picklistInfoList[0].picklist.picklistId").value(picklistId));
+    }
+
+    @Test
     void getPickAndPackReportInfoReturnsBothCollections() throws Exception {
         Fixture fixture = seedOrder("REPORT");
         String picklistId = seedPicklist(fixture, "PICKLIST_INPUT");
