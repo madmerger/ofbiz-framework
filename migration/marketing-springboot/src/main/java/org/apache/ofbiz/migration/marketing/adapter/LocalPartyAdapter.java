@@ -20,6 +20,7 @@ package org.apache.ofbiz.migration.marketing.adapter;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -197,23 +198,34 @@ public class LocalPartyAdapter implements PartyPort {
         for (PartyContactMech link : activeLinks(partyId, contactMechId, now)) {
             link.setThruDate(now);
         }
-        data.query(PartyContactMechPurpose.class,
-                        "select p from PartyContactMechPurpose p where p.partyId = ?1 and p.contactMechId = ?2",
-                        partyId, contactMechId).stream()
-                .filter(purpose -> MarketingData.active(purpose.getFromDate(), purpose.getThruDate(), now))
-                .forEach(purpose -> purpose.setThruDate(now));
         PartyContactMech replacement = new PartyContactMech();
         replacement.setPartyId(partyId);
         replacement.setContactMechId(newContactMechId);
         replacement.setFromDate(now);
         data.persist(replacement);
+        Set<String> purposeTypes = new LinkedHashSet<>();
+        data.query(PartyContactMechPurpose.class,
+                        "select p from PartyContactMechPurpose p where p.partyId = ?1 and p.contactMechId = ?2",
+                        partyId, contactMechId).stream()
+                .filter(purpose -> MarketingData.active(purpose.getFromDate(), purpose.getThruDate(), now))
+                .forEach(purpose -> {
+                    purpose.setThruDate(now);
+                    purposeTypes.add(purpose.getContactMechPurposeTypeId());
+                });
         if (purposeTypeId != null) {
-            PartyContactMechPurpose purpose = new PartyContactMechPurpose();
-            purpose.setPartyId(partyId);
-            purpose.setContactMechId(newContactMechId);
-            purpose.setContactMechPurposeTypeId(purposeTypeId);
-            purpose.setFromDate(now);
-            data.persist(purpose);
+            purposeTypes.add(purposeTypeId);
+        }
+        for (String type : purposeTypes) {
+            if (data.query(PartyContactMechPurpose.class, "select p from PartyContactMechPurpose p where p.partyId = ?1"
+                    + " and p.contactMechId = ?2 and p.contactMechPurposeTypeId = ?3", partyId, newContactMechId, type)
+                    .isEmpty()) {
+                PartyContactMechPurpose purpose = new PartyContactMechPurpose();
+                purpose.setPartyId(partyId);
+                purpose.setContactMechId(newContactMechId);
+                purpose.setContactMechPurposeTypeId(type);
+                purpose.setFromDate(now);
+                data.persist(purpose);
+            }
         }
     }
 

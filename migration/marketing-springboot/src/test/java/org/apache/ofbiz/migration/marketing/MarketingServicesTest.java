@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -274,6 +275,14 @@ class MarketingServicesTest {
         Map<String, Object> b = run("createContact", Map.of("firstName", "B", "lastName", "Merge",
                 "emailAddress", "b@example.com"));
         assertEquals("CONTACT", a.get("roleTypeId"));
+        transactions.executeWithoutResult(status -> {
+            PartyContactMechPurpose billing = new PartyContactMechPurpose();
+            billing.setPartyId((String) a.get("partyId"));
+            billing.setContactMechId((String) a.get("contactMechId"));
+            billing.setContactMechPurposeTypeId("BILLING_EMAIL");
+            billing.setFromDate(Timestamp.from(Instant.now().minusSeconds(60)));
+            entityManager.persist(billing);
+        });
         Map<String, Object> merged = run("mergeContacts", Map.of("partyIdTo", a.get("partyId"),
                 "partyId", b.get("partyId"), "useEmail2", "Y", "emailContactMechId", b.get("contactMechId"),
                 "emailContactMechIdTo", a.get("contactMechId")));
@@ -284,6 +293,8 @@ class MarketingServicesTest {
                 .setParameter(1, a.get("partyId")).getResultList();
         assertTrue(purposes.stream().anyMatch(p -> p.getContactMechId().equals(b.get("contactMechId"))
                 && "PRIMARY_EMAIL".equals(p.getContactMechPurposeTypeId()) && p.getThruDate() == null));
+        assertTrue(purposes.stream().anyMatch(p -> p.getContactMechId().equals(b.get("contactMechId"))
+                && "BILLING_EMAIL".equals(p.getContactMechPurposeTypeId()) && p.getThruDate() == null));
         assertTrue(purposes.stream().filter(p -> p.getContactMechId().equals(a.get("contactMechId")))
                 .allMatch(p -> p.getThruDate() != null));
 
