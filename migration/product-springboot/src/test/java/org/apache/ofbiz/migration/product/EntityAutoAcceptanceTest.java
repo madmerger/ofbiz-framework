@@ -246,7 +246,19 @@ class EntityAutoAcceptanceTest {
         "CATALOG_DELETE", "FACILITY_CREATE", "FACILITY_UPDATE", "FACILITY_DELETE"
     })
     @Transactional
-    void ac05_updateShipmentItemBillingHasNoWritableNonKeyFields() throws Exception {
+    void ac05_compositeOutKeysUseParentScopedSubSequences() throws Exception {
+        assertCompositeOutSequence("createProductConfigOption", "configItemId", "configOptionId");
+        assertCompositeOutSequence("createProductPromoRule", "productPromoId", "productPromoRuleId");
+    }
+
+    @Test
+    @WithMockUser(username = "admin", authorities = {
+        "OFBTOOLS_ADMIN", "CATALOG_ADMIN", "FACILITY_ADMIN", "PRODUCT_ADMIN",
+        "PRODUCT_SENSITIVE_VIEW", "CATALOG_PRICE_MAINT", "CATALOG_CREATE", "CATALOG_UPDATE",
+        "CATALOG_DELETE", "FACILITY_CREATE", "FACILITY_UPDATE", "FACILITY_DELETE"
+    })
+    @Transactional
+    void ac06_updateShipmentItemBillingHasNoWritableNonKeyFields() throws Exception {
         ServiceCatalog.ServiceDefinition update = ServiceCatalog.all().get("updateShipmentItemBilling");
         Map<String, Object> input = ProductTestSupport.input(
                 update, entities, "shipment-item-billing", true);
@@ -286,6 +298,43 @@ class EntityAutoAcceptanceTest {
         Map<String, Object> output = JSON.readValue(body, new TypeReference<>() { });
         assertEquals(oldStatus, output.get(oldStatusOutput));
         assertEquals(newStatus, output.get(statusField));
+    }
+
+    private void assertCompositeOutSequence(
+            String serviceName, String parentKey, String sequenceKey) throws Exception {
+        ServiceCatalog.ServiceDefinition create = ServiceCatalog.all().get(serviceName);
+        Map<String, Object> firstInput = ProductTestSupport.input(
+                create, entities, serviceName + "A", false);
+        seedRequiredParent(create, firstInput);
+        String sharedParent = String.valueOf(firstInput.get(parentKey));
+        assertEquals("00001", createServiceOutput(create, firstInput).get(sequenceKey));
+
+        Map<String, Object> secondInput = ProductTestSupport.input(
+                create, entities, serviceName + "B", false);
+        secondInput.put(parentKey, sharedParent);
+        assertEquals("00002", createServiceOutput(create, secondInput).get(sequenceKey));
+
+        Map<String, Object> otherParentInput = ProductTestSupport.input(
+                create, entities, serviceName + "C", false);
+        seedRequiredParent(create, otherParentInput);
+        assertEquals("00001", createServiceOutput(create, otherParentInput).get(sequenceKey));
+
+        Map<String, Object> seededInput = ProductTestSupport.input(
+                create, entities, serviceName + "D", false);
+        seedRequiredParent(create, seededInput);
+        seededInput.put(sequenceKey, "00001");
+        seedEntity(create.entity(), seededInput);
+        Map<String, Object> nextInput = ProductTestSupport.input(
+                create, entities, serviceName + "E", false);
+        nextInput.put(parentKey, seededInput.get(parentKey));
+        assertEquals("00002", createServiceOutput(create, nextInput).get(sequenceKey));
+    }
+
+    private Map<String, Object> createServiceOutput(
+            ServiceCatalog.ServiceDefinition create, Map<String, Object> input) throws Exception {
+        String body = postService(create.name(), input)
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        return JSON.readValue(body, new TypeReference<>() { });
     }
 
     private org.springframework.test.web.servlet.ResultActions postService(

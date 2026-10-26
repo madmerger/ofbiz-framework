@@ -61,7 +61,8 @@ final class ProductEntityAutoService {
         List<ServiceHandlerRegistry.ParamDefinition> adaptedParams = new ArrayList<>();
         for (ServiceHandlerRegistry.ParamDefinition param : definition.params()) {
             if (generated.stream().anyMatch(candidate -> candidate.name().equals(param.name()))) {
-                adaptedInput.put(param.name(), sequences.nextId(definition.entity()));
+                adaptedInput.put(
+                        param.name(), sequences.nextSubSequence(definition.entity(), input, param.name()));
                 adaptedParams.add(new ServiceHandlerRegistry.ParamDefinition(
                         param.name(), "IN", param.optional(), param.type()));
             } else {
