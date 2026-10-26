@@ -156,7 +156,7 @@ DeepWiki の使い方: 「<component> の主要ユースケース、エンティ
 | StatusValidChange のシードが別コンポーネントにある | 必要な遷移をシードに明示する |
 | センシティブな Entity を汎用 API から公開する | `migration.security.sensitive-entities` に列挙し、`<BASE>_SENSITIVE_VIEW` と HTTPS を設定してテストする |
 | URI だけでセンシティブ Entity を認可する | 正規 Entity 名へ解決した時点で検査し、EntityAuto と simple service の戻り値にも同じゲートを適用する |
-| `X-Forwarded-Proto` を任意クライアントから信頼する | `server.forward-headers-strategy=native` とし、`MIGRATION_SECURITY_TRUSTED_PROXIES` の許可範囲を運用環境に合わせて限定する |
+| `X-Forwarded-Proto` を任意クライアントやプライベートネットワーク全体から信頼する | `server.forward-headers-strategy=native` とし、既定ではプロキシを信頼しない。`MIGRATION_SECURITY_TRUSTED_PROXIES` に TLS 終端の許可範囲だけを設定する |
 | DeepWiki の誤り | コードで裏取りし、spec の「DeepWiki との差分」に記録 |
 | 相互依存（party ⇔ humanres の画面） | 画面を移植しないので API 層では切れる。UI 再構築時に対応する |
 

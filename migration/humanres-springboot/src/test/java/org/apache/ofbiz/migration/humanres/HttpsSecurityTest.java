@@ -58,7 +58,7 @@ class HttpsSecurityTest {
     void untrustedForwardedHttpsIsIgnoredAndTrustedProxyIsHonored() throws Exception {
         mockMvc.perform(get("/actuator/health")
                         .with(request -> {
-                            request.setRemoteAddr("203.0.113.25");
+                            request.setRemoteAddr("10.0.0.5");
                             return request;
                         })
                         .header("X-Forwarded-Proto", "https"))

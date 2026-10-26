@@ -10,3 +10,8 @@ spring:
 migration:
   security:
     require-https: true
+server:
+  forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      internal-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}'
