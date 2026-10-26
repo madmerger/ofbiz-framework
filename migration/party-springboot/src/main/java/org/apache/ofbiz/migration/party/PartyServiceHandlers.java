@@ -344,7 +344,7 @@ public class PartyServiceHandlers {
             return result("contactMechId", newId);
         }
         copyWritable(input, relationship, "partyId", "contactMechId", "newContactMechId",
-                "contactMechTypeId", "fromDate", "thruDate");
+                "contactMechTypeId", "fromDate");
         return result("contactMechId", oldId);
     }
 

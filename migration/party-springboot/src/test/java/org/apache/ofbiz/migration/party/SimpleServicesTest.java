@@ -190,6 +190,23 @@ class SimpleServicesTest {
         call("deletePartyContactMech", Map.of(
                 "partyId", "AC21_CONTACT_PARTY", "contactMechId", updatedContactId));
 
+        call("createPerson", Map.of("partyId", "AC21_EXPIRY_PARTY", "firstName", "Expiry", "lastName", "Check"));
+        Map<String, Object> expiryLink = call("createPartyEmailAddress", Map.of(
+                "partyId", "AC21_EXPIRY_PARTY", "emailAddress", "expiry@example.test"));
+        Timestamp pastDate = Timestamp.from(Instant.parse("2000-01-01T00:00:00Z"));
+        call("updatePartyContactMech", Map.of(
+                "partyId", "AC21_EXPIRY_PARTY",
+                "contactMechId", expiryLink.get("contactMechId"),
+                "thruDate", pastDate.toString()));
+        Object expiredLink = entities.findByEquality(entities.entityClass("PartyContactMech"),
+                Map.of("partyId", "AC21_EXPIRY_PARTY", "contactMechId", expiryLink.get("contactMechId"))).get(0);
+        assertEquals(pastDate, entities.get(expiredLink, "thruDate"));
+        mockMvc.perform(post("/api/party/services/getPartyEmail")
+                        .with(httpBasic("admin", "admin-password"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of("partyId", "AC21_EXPIRY_PARTY"))))
+                .andExpect(status().isNotFound());
+
         call("createPartyEmailAddress", Map.of(
                 "partyId", "AC21_CONTACT_PARTY", "emailAddress", "lookup@example.test"));
         call("findPartyFromEmailAddress", Map.of("address", "lookup@example.test"));
