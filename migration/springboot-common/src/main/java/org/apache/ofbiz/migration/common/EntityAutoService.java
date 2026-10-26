@@ -64,7 +64,8 @@ public class EntityAutoService {
         Object entity = entityRegistry.newEntity(type);
         Set<String> keys = Set.copyOf(entityRegistry.primaryKeys(type));
         for (var param : definition.params()) {
-            if ("IN".equalsIgnoreCase(param.mode()) && input.containsKey(param.name())) {
+            if (("IN".equalsIgnoreCase(param.mode()) || "INOUT".equalsIgnoreCase(param.mode()))
+                    && present(input.get(param.name()))) {
                 entityRegistry.set(entity, param.name(), input.get(param.name()));
             }
         }
@@ -76,15 +77,18 @@ public class EntityAutoService {
         List<ServiceHandlerRegistry.ParamDefinition> generated = definition.params().stream()
                 .filter(param -> keys.contains(param.name()))
                 .filter(param -> "OUT".equalsIgnoreCase(param.mode())
-                        || ("INOUT".equalsIgnoreCase(param.mode()) && input.get(param.name()) == null))
+                        || ("INOUT".equalsIgnoreCase(param.mode()) && param.optional()
+                                && !present(input.get(param.name()))))
+                .filter(param -> entityRegistry.get(entity, param.name()) == null)
                 .toList();
-        if (generated.size() == 1 && keys.size() > 1) {
+        if (generated.size() == 1 && keys.size() > 1
+                && isSubSequenceParameter(definition, keys, generated.get(0), input)) {
             entityRegistry.set(entity, generated.get(0).name(),
                     sequenceService.nextSubSequence(definition.entity(), input, generated.get(0).name()));
-        } else if (generated.size() == 1) {
+        } else if (generated.size() == 1 && keys.size() == 1) {
             entityRegistry.set(entity, generated.get(0).name(), sequenceService.nextId(definition.entity()));
         }
-        validateRequired(definition, input);
+        validateRequired(definition, input, type);
         for (String key : keys) {
             if (entityRegistry.get(entity, key) == null) {
                 throw new MigrationException(HttpStatus.BAD_REQUEST, "Missing primary key: " + key);
@@ -99,16 +103,23 @@ public class EntityAutoService {
 
     private Map<String, Object> update(
             ServiceHandlerRegistry.ServiceDefinition definition, Class<?> type, Map<String, ?> input) {
+        validateRequired(definition, input, type);
+        validateUpdateFields(definition, input);
         Object entity = requireEntity(type, input);
         Set<String> keys = new HashSet<>(entityRegistry.primaryKeys(type));
-        for (var entry : input.entrySet()) {
-            if (!keys.contains(entry.getKey())) entityRegistry.set(entity, entry.getKey(), entry.getValue());
+        for (var param : definition.params()) {
+            if (!keys.contains(param.name())
+                    && ("IN".equalsIgnoreCase(param.mode()) || "INOUT".equalsIgnoreCase(param.mode()))
+                    && input.containsKey(param.name())) {
+                entityRegistry.set(entity, param.name(), input.get(param.name()));
+            }
         }
         return entityRegistry.toMap(entity);
     }
 
     private Map<String, Object> expire(
             ServiceHandlerRegistry.ServiceDefinition definition, Class<?> type, Map<String, ?> input) {
+        validateRequired(definition, input, type);
         Object entity = requireEntity(type, input);
         Object thruDate = input.containsKey("thruDate") ? input.get("thruDate") : Timestamp.from(Instant.now());
         entityRegistry.set(entity, "thruDate", thruDate);
@@ -117,6 +128,7 @@ public class EntityAutoService {
 
     private Map<String, Object> delete(
             ServiceHandlerRegistry.ServiceDefinition definition, Class<?> type, Map<String, ?> input) {
+        validateRequired(definition, input, type);
         Object entity = requireEntity(type, input);
         Map<String, Object> result = entityRegistry.toMap(entity);
         entityManager.remove(entity);
@@ -129,12 +141,55 @@ public class EntityAutoService {
         return entity;
     }
 
-    private static void validateRequired(ServiceHandlerRegistry.ServiceDefinition definition, Map<String, ?> input) {
+    private void validateRequired(
+            ServiceHandlerRegistry.ServiceDefinition definition, Map<String, ?> input, Class<?> type) {
+        Set<String> keys = Set.copyOf(entityRegistry.primaryKeys(type));
         for (var param : definition.params()) {
-            if ("IN".equalsIgnoreCase(param.mode()) && !param.optional() && !input.containsKey(param.name())) {
-                throw new MigrationException(HttpStatus.BAD_REQUEST, "Missing required input: " + param.name());
+            boolean inputParameter = "IN".equalsIgnoreCase(param.mode()) || "INOUT".equalsIgnoreCase(param.mode());
+            if (!inputParameter || param.optional() || present(input.get(param.name()))) {
+                continue;
+            }
+            if ("create".equalsIgnoreCase(definition.invoke())
+                    && keys.contains(param.name()) && "fromDate".equals(param.name())) {
+                continue;
+            }
+            throw new MigrationException(HttpStatus.BAD_REQUEST, "Missing required input: " + param.name());
+        }
+    }
+
+    private static void validateUpdateFields(
+            ServiceHandlerRegistry.ServiceDefinition definition, Map<String, ?> input) {
+        Set<String> allowed = definition.params().stream()
+                .filter(param -> "IN".equalsIgnoreCase(param.mode()) || "INOUT".equalsIgnoreCase(param.mode()))
+                .map(ServiceHandlerRegistry.ParamDefinition::name)
+                .collect(java.util.stream.Collectors.toSet());
+        for (String name : input.keySet()) {
+            if (!allowed.contains(name)) {
+                throw new MigrationException(HttpStatus.BAD_REQUEST, "Unknown field: " + name);
             }
         }
+    }
+
+    private static boolean isSubSequenceParameter(
+            ServiceHandlerRegistry.ServiceDefinition definition,
+            Set<String> keys,
+            ServiceHandlerRegistry.ParamDefinition sequenceParam,
+            Map<String, ?> input) {
+        if (!"OUT".equalsIgnoreCase(sequenceParam.mode()) || !sequenceParam.name().endsWith("SeqId")) {
+            return false;
+        }
+        Map<String, ServiceHandlerRegistry.ParamDefinition> parameters = definition.params().stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        ServiceHandlerRegistry.ParamDefinition::name, param -> param));
+        return keys.stream()
+                .filter(key -> !key.equals(sequenceParam.name()))
+                .allMatch(key -> parameters.containsKey(key)
+                        && "IN".equalsIgnoreCase(parameters.get(key).mode())
+                        && present(input.get(key)));
+    }
+
+    private static boolean present(Object value) {
+        return value != null && !value.toString().isBlank();
     }
 
     private static void validateText(Map<String, ?> input) {
