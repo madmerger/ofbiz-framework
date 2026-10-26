@@ -4,13 +4,13 @@
 
 | 検証 | コマンド/テスト | 結果 |
 | --- | --- | --- |
-| Order API / H2 | `./gradlew :migration:order-springboot:test` | 成功。全 51 件、失敗・エラー・JUnit skip は各 0 件 |
+| Order API / H2 | `./gradlew :migration:order-springboot:test` | 成功。全 52 件、失敗・エラー・JUnit skip は各 0 件 |
 | PostgreSQL | `PostgresSmokeTest` (Testcontainers 1.21.4) | 成功。1 件 pass。終了時に PostgreSQL 接続切断と Hibernate の schema-drop 失敗ログがあるが、テストと Gradle は成功 |
 | 静的解析 | root の `checkstyleMain checkstyleTest codenarcMain codenarcTest`、Order Java への Checkstyle CLI | `-x nodeSetup -x npmInstall` 付きで root の 4 タスク成功。Order サブプロジェクトには同名 task がなく、root の `activeComponents()` にも migration は含まれない。root 設定を Order の Java 20 ファイルへ直接適用した結果は 53 件: `MethodName` 22 件（指定された `acNN_...` テスト名）、`DesignForExtension` 31 件（Spring transaction proxy を使う bean）。switch case の indentation 4 件は修正済み。Order 配下に Groovy source はなく CodeNarc 対象なし |
 | local 起動/curl | `migration/order-springboot/run-local.sh` と HTTP Basic | 成功。未認証 `GET /api/order/entities/OrderHeader` は 401、`admin` 認証では 200、local の `/v3/api-docs` は 200 |
 | unported generator | `migration/order-springboot/scripts/gen_unported.py` の生成物 | `unported.md` を確認。ECA 111、画面 action 75、controller 137、minilang event 10、view-entity 53、service 221、template 126、screen/form/menu/tree 367 |
 
-テストクラス別の内訳は `OrderApiAcceptanceTest` 48、`OrderEntityAutoAcceptanceTest` 1、`OrderHttpsSecurityTest` 1、`PostgresSmokeTest` 1。テスト結果 XML 上の skip は 0 件。root の静的解析は Node 24.16.0 の Maven Central 配布物取得が HTTP 429 となったため Node 関連タスクを除外して実施した。Google Maven mirror は同 artifact に 404 を返した。root の静的解析は migration source を含まず、Order への手動 Checkstyle 結果には指定 AC 命名と Spring proxy に由来する上記の警告が残る。
+テストクラス別の内訳は `OrderApiAcceptanceTest` 49、`OrderEntityAutoAcceptanceTest` 1、`OrderHttpsSecurityTest` 1、`PostgresSmokeTest` 1。テスト結果 XML 上の skip は 0 件。root の静的解析は Node 24.16.0 の Maven Central 配布物取得が HTTP 429 となったため Node 関連タスクを除外して実施した。Google Maven mirror は同 artifact に 404 を返した。root の静的解析は migration source を含まず、Order への手動 Checkstyle 結果には指定 AC 命名と Spring proxy に由来する上記の警告が残る。
 
 entity-auto 網羅テストはカタログ 220 件と内訳を照合し、create 81/81 件、update 62/62 件、expire 4/4 件、delete 73/73 件の成功経路を実行する。対応する entity-auto create がない8件は、次の fixture で前提行を用意する。
 

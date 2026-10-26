@@ -111,7 +111,6 @@ public class OrderSimpleServices {
     }
 
     public Map<String, Object> createCustRequest(Map<String, Object> input) {
-        requiredText(input, "fromPartyId");
         String custRequestId = text(input.get("custRequestId"));
         if (custRequestId == null) {
             custRequestId = sequences.nextId("CustRequest");

@@ -698,6 +698,23 @@ class OrderApiAcceptanceTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @Transactional
+    @WithMockUser(username = "AC21_NO_LOGIN", authorities = {
+        "OFBTOOLS_VIEW", "ORDERMGR_ADMIN", "ORDERMGR_CRQ_ADMIN", "ORDERMGR_CRQ_CREATE"
+    })
+    void ac21_createCustRequestAllowsDraftWithoutFromPartyId() throws Exception {
+        assertTrue(data.find("UserLogin", Map.of("userLoginId", "AC21_NO_LOGIN")).isEmpty());
+        MvcResult result = postService("createCustRequest", Map.of("custRequestName", "Draft without party"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String custRequestId = JSON.readTree(result.getResponse().getContentAsString())
+                .get("custRequestId").asText();
+        Object request = data.require("CustRequest", Map.of("custRequestId", custRequestId));
+        assertEquals("CRQ_DRAFT", data.get(request, "statusId"));
+        assertTrue(data.get(request, "fromPartyId") == null);
+    }
+
     private String createCustRequest(String name, String story) throws Exception {
         Map<String, Object> input = new LinkedHashMap<>();
         input.put("fromPartyId", "DemoCustomer");
