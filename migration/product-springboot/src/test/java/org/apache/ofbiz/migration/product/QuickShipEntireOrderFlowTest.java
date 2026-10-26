@@ -1,0 +1,167 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.ofbiz.migration.product;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
+import java.math.BigDecimal;
+import java.util.Map;
+import org.apache.ofbiz.migration.common.EntityRegistry;
+import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
+import org.apache.ofbiz.migration.product.simple.IssuanceServices;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+
+@SpringBootTest(
+        classes = ProductMigrationApplication.class,
+        properties = "migration.security.require-https=false")
+@AutoConfigureMockMvc
+class QuickShipEntireOrderFlowTest {
+    private static final ObjectMapper JSON = new ObjectMapper();
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private EntityRegistry entities;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @SpyBean
+    private IssuanceServices issuance;
+
+    @SpyBean
+    private MigrationServiceDispatcher dispatcher;
+
+    @Test
+    void missingOrderIdReturnsBadRequest() throws Exception {
+        mockMvc.perform(post("/api/product/services/quickShipEntireOrder")
+                        .with(user("facility").authorities(authorities()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JSON.writeValueAsBytes(Map.of())))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void readOnlyFacilityCannotQuickShip() throws Exception {
+        mockMvc.perform(post("/api/product/services/quickShipEntireOrder")
+                        .with(user("readonly").authorities(
+                                new SimpleGrantedAuthority("OFBTOOLS_VIEW"),
+                                new SimpleGrantedAuthority("FACILITY_VIEW")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JSON.writeValueAsBytes(Map.of("orderId", "FLOW_ORDER"))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @Transactional
+    void seededReservationCreatesShipmentThenPropagatesIssuance501() throws Exception {
+        seedOrderReservation();
+
+        mockMvc.perform(post("/api/product/services/quickShipEntireOrder")
+                        .with(user("facility").authorities(authorities()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JSON.writeValueAsBytes(Map.of("orderId", "FLOW_ORDER"))))
+                .andExpect(status().isNotImplemented());
+
+        verify(dispatcher).execute(eq("product"), eq("createShipment"), anyMap());
+        verify(issuance).execute(
+                eq("issueOrderItemShipGrpInvResToShipment"),
+                eq("issueOrderItemShipGrpInvResToShipment"),
+                anyMap());
+        var shipments = entities.findByEquality(
+                entities.entityClass("Shipment"), Map.of("primaryOrderId", "FLOW_ORDER"));
+        assertFalse(shipments.isEmpty());
+        String shipmentId = entities.get(shipments.get(0), "shipmentId").toString();
+        assertTrue(entities.findByEquality(
+                        entities.entityClass("ShipmentItem"), Map.of("shipmentId", shipmentId))
+                .isEmpty());
+    }
+
+    private void seedOrderReservation() {
+        persist("ProductStore", Map.of(
+                "productStoreId", "FLOW_STORE",
+                "reserveInventory", "Y",
+                "explodeOrderItems", "N"));
+        persist("Product", Map.of(
+                "productId", "FLOW_PRODUCT",
+                "productTypeId", "FINISHED_GOOD"));
+        persist("Facility", Map.of("facilityId", "FLOW_FACILITY"));
+        persist("OrderHeader", Map.of(
+                "orderId", "FLOW_ORDER",
+                "orderTypeId", "SALES_ORDER",
+                "productStoreId", "FLOW_STORE"));
+        persist("OrderItemShipGroup", Map.of(
+                "orderId", "FLOW_ORDER",
+                "shipGroupSeqId", "00001"));
+        persist("OrderItem", Map.of(
+                "orderId", "FLOW_ORDER",
+                "orderItemSeqId", "00001",
+                "productId", "FLOW_PRODUCT",
+                "statusId", "ITEM_APPROVED",
+                "quantity", BigDecimal.ONE));
+        persist("OrderItemShipGroupAssoc", Map.of(
+                "orderId", "FLOW_ORDER",
+                "orderItemSeqId", "00001",
+                "shipGroupSeqId", "00001",
+                "quantity", BigDecimal.ONE));
+        persist("InventoryItem", Map.of(
+                "inventoryItemId", "FLOW_INVENTORY",
+                "productId", "FLOW_PRODUCT",
+                "facilityId", "FLOW_FACILITY",
+                "quantityOnHandTotal", BigDecimal.ONE,
+                "availableToPromiseTotal", BigDecimal.ONE));
+        persist("OrderItemShipGrpInvRes", Map.of(
+                "orderId", "FLOW_ORDER",
+                "shipGroupSeqId", "00001",
+                "orderItemSeqId", "00001",
+                "inventoryItemId", "FLOW_INVENTORY",
+                "quantity", BigDecimal.ONE));
+        entityManager.flush();
+    }
+
+    private void persist(String entityName, Map<String, Object> values) {
+        Object entity = entities.newEntity(entities.entityClass(entityName));
+        values.forEach((field, value) -> entities.set(entity, field, value));
+        entityManager.persist(entity);
+    }
+
+    private static SimpleGrantedAuthority[] authorities() {
+        return java.util.Arrays.stream(new String[] {
+            "OFBTOOLS_VIEW", "FACILITY_VIEW", "FACILITY_CREATE", "FACILITY_UPDATE"
+        }).map(SimpleGrantedAuthority::new).toArray(SimpleGrantedAuthority[]::new);
+    }
+}

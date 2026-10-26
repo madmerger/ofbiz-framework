@@ -18,8 +18,21 @@
  *******************************************************************************/
 package org.apache.ofbiz.migration.product.adapter;
 
+import java.util.List;
 import java.util.Map;
 
 public interface OrderPort {
     Map<String, Object> invoke(String serviceName, Map<String, Object> input);
+
+    Map<String, Object> findOrderHeader(String orderId);
+
+    Map<String, Object> findOrderItem(String orderId, String orderItemSeqId);
+
+    List<Map<String, Object>> findOrderItemShipGroups(String orderId);
+
+    List<Map<String, Object>> findApprovedOrderItemShipGroupAssocs(String orderId);
+
+    List<Map<String, Object>> findApprovedReservations(String orderId);
+
+    List<Map<String, Object>> findOrderRoles(String orderId);
 }

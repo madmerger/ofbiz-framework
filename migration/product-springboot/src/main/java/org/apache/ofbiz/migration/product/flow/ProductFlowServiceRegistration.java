@@ -32,6 +32,7 @@ public class ProductFlowServiceRegistration {
     private final ProductServicePolicy policy;
     private final ProductPermissions permissions;
     private final UpdateShipmentFlow updateShipment;
+    private final QuickShipEntireOrderFlow quickShipEntireOrder;
     private final CalculateProductPriceFlow calculateProductPrice;
 
     public ProductFlowServiceRegistration(
@@ -39,11 +40,13 @@ public class ProductFlowServiceRegistration {
             ProductServicePolicy policy,
             ProductPermissions permissions,
             UpdateShipmentFlow updateShipment,
+            QuickShipEntireOrderFlow quickShipEntireOrder,
             CalculateProductPriceFlow calculateProductPrice) {
         this.registry = registry;
         this.policy = policy;
         this.permissions = permissions;
         this.updateShipment = updateShipment;
+        this.quickShipEntireOrder = quickShipEntireOrder;
         this.calculateProductPrice = calculateProductPrice;
     }
 
@@ -52,6 +55,9 @@ public class ProductFlowServiceRegistration {
         register("updateShipment", new ProductServiceMetadata.ServiceMetadata(
                 "services_shipment.xml", "facility", "checkCanChangeShipmentStatusDelivered"),
                 "UPDATE", null, updateShipment::execute);
+        register("quickShipEntireOrder", new ProductServiceMetadata.ServiceMetadata(
+                "services_shipment.xml", "facility", ""),
+                "UPDATE", null, quickShipEntireOrder::execute);
         registry.registerHandler("product", "calculateProductPrice", "OFBTOOLS_VIEW", null,
                 calculateProductPrice::execute);
     }
