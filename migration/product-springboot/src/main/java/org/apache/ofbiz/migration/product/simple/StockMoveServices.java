@@ -45,7 +45,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-/** Port of StockMoveServices.xml:28-634. */
+/** Port of applications/product/minilang/product/inventory/StockMoveServices.xml:28-634. */
 @Component
 public class StockMoveServices extends UnportedSimpleMethodFile {
     private static final int SCALE = 2;
@@ -65,6 +65,7 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
     private final ProductPermissions permissions;
     private final InventoryServices inventoryServices;
 
+    /** Creates the service with its persistence, permission, and delegation dependencies. */
     public StockMoveServices(
             ProductUnportedPort unportedPort,
             EntityRegistry entities,
@@ -79,6 +80,7 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         this.inventoryServices = inventoryServices;
     }
 
+    /** Dispatches the supported stock-move simple-methods and delegates other methods. */
     @Override
     public Map<String, Object> execute(String serviceName, String methodName, Map<String, Object> input) {
         return switch (methodName) {
@@ -90,7 +92,10 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         };
     }
 
-    /** Port of StockMoveServices.xml:28-191. */
+    /**
+     * Port of applications/product/minilang/product/inventory/StockMoveServices.xml:28-191;
+     * missing-relation failure follows GetRelated.java:79-86.
+     */
     private Map<String, Object> findStockMovesNeeded(Map<String, Object> input) {
         Map<String, Object> output = new LinkedHashMap<>();
         List<Map<String, Object>> reservations = orderReservationLocationRows(
@@ -178,32 +183,16 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
                             formatValues));
                     moveInfo.put("totalQuantity", totalQuantityOnHand);
                 } else {
-                    List<Object> targetInventoryItems = findAll("InventoryItem", Map.of(
-                            "productId", pickLocation.get("productId"),
-                            "facilityId", pickLocation.get("facilityId"),
-                            "locationSeqId", pickLocation.get("locationSeqId")), List.of());
-                    BigDecimal targetAvailableToPromise = sumEntities(
-                            targetInventoryItems, "availableToPromiseTotal");
-                    BigDecimal targetQuantityOnHand = sumEntities(targetInventoryItems, "quantityOnHandTotal");
-                    moveInfo.put("availableToPromiseTotalTo", targetAvailableToPromise);
-                    moveInfo.put("quantityOnHandTotalTo", targetQuantityOnHand);
-                    Object minimumStock = get(pickLocation, "minimumStock");
-                    if (less(targetAvailableToPromise, minimumStock, errors)) {
-                        Object targetLocation = pickLocation.get("locationSeqId");
-                        BigDecimal priorMoveQuantity = targetLocationSimpleMoveQuantity.get(targetLocation);
-                        if (empty(priorMoveQuantity)) {
-                            moveInfo.put("totalQuantity", add(totalQuantity,
-                                    decimal(get(pickLocation, "moveQuantity"))));
-                        } else {
-                            moveInfo.put("totalQuantity", add(totalQuantity, priorMoveQuantity));
-                        }
-                        if (less(totalQuantityOnHand, moveInfo.get("totalQuantity"), errors)) {
-                            targetLocationSimpleMoveQuantity.put(targetLocation,
-                                    subtract(decimal(moveInfo.get("totalQuantity")), totalQuantityOnHand));
-                            moveInfo.put("totalQuantity", totalQuantityOnHand);
-                        }
-                        stockMoveHandled.put(targetLocation, "Y");
-                    }
+                    // XML 128-185 would retrieve target InventoryItems, recalculate their totals, and
+                    // schedule a minimum-stock transfer.
+                    Map<String, Object> targetProductFacilityLocationDetails =
+                            entityMap(targetProductFacilityLocation);
+                    throw new MigrationException(HttpStatus.INTERNAL_SERVER_ERROR,
+                            "Exception thrown while finding related values: Could not find relation for "
+                                    + "relationName: InventoryItem for value [ProductFacilityLocation productId="
+                                    + targetProductFacilityLocationDetails.get("productId") + ", facilityId="
+                                    + targetProductFacilityLocationDetails.get("facilityId") + ", locationSeqId="
+                                    + targetProductFacilityLocationDetails.get("locationSeqId") + "]");
                 }
 
                 if (moveInfos == null) {
@@ -219,7 +208,7 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return output;
     }
 
-    /** Port of StockMoveServices.xml:192-341. */
+    /** Port of applications/product/minilang/product/inventory/StockMoveServices.xml:192-341. */
     private Map<String, Object> findStockMovesRecommended(Map<String, Object> input) {
         Map<String, Object> output = new LinkedHashMap<>();
         Map<Object, Object> stockMoveHandled = input.get("stockMoveHandled") instanceof Map<?, ?> supplied
@@ -236,8 +225,8 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         for (Map<String, Object> pickLocation : productFacilityLocationQuantityRows(
                 input.get("facilityId"), "FLT_PICKLOC")) {
             Object minimumStockValue = pickLocation.get("minimumStock");
-            BigDecimal minimumStock = empty(minimumStockValue) ? zero() : decimal(minimumStockValue);
-            BigDecimal moveQuantity = decimal(pickLocation.get("moveQuantity"));
+            Object minimumStock = empty(minimumStockValue) ? BigDecimal.ZERO : minimumStockValue;
+            Object moveQuantity = pickLocation.get("moveQuantity");
             Object availableValue = pickLocation.get("availableToPromiseTotal");
             boolean belowMinimum = !empty(moveQuantity)
                     && greater(moveQuantity, BigDecimal.ZERO, errors)
@@ -253,9 +242,10 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
                 continue;
             }
 
-            if (notEqual(pickLocation.get("productId"), productSave.get("productId"))) {
+            Object previousProductId = productSave == null ? null : productSave.get("productId");
+            if (notEqual(pickLocation.get("productId"), previousProductId)) {
                 Object product = findByPrimaryKey("Product", Map.of("productId", pickLocation.get("productId")));
-                productSave = entityMap(product);
+                productSave = product == null ? null : entityMap(product);
                 fromLocationTotalAvailableToPromise.clear();
             }
             Object targetFacilityLocation = findByPrimaryKey("FacilityLocation",
@@ -279,7 +269,7 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
             for (Map<String, Object> item : bulkItems) {
                 addToListMap(bulkItemsByLocation, item.get("locationSeqId"), item);
             }
-            BigDecimal targetLocationMoveQuantity = moveQuantity;
+            Object targetLocationMoveQuantity = moveQuantity;
             for (Map.Entry<Object, List<Map<String, Object>>> bulkEntry : bulkItemsByLocation.entrySet()) {
                 Object bulkLocationSeqId = bulkEntry.getKey();
                 BigDecimal totalAvailableToPromise;
@@ -315,13 +305,15 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
                 moveInfo.put("quantityOnHandTotalFrom", totalQuantityOnHand);
 
                 if (less(totalAvailableToPromise, targetLocationMoveQuantity, errors)) {
-                    targetLocationMoveQuantity = subtract(targetLocationMoveQuantity, totalAvailableToPromise);
+                    targetLocationMoveQuantity = subtract(
+                            calcValue(targetLocationMoveQuantity), totalAvailableToPromise);
                     moveInfo.put("totalQuantity", totalAvailableToPromise);
                     fromLocationTotalAvailableToPromise.put(bulkLocationSeqId, zero());
                 } else {
                     moveInfo.put("totalQuantity", targetLocationMoveQuantity);
                     fromLocationTotalAvailableToPromise.put(
-                            bulkLocationSeqId, subtract(totalAvailableToPromise, targetLocationMoveQuantity));
+                            bulkLocationSeqId, subtract(
+                                    totalAvailableToPromise, calcValue(targetLocationMoveQuantity)));
                     targetLocationMoveQuantity = zero();
                 }
 
@@ -337,11 +329,16 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return output;
     }
 
-    /** Port of StockMoveServices.xml:343-425. */
+    /**
+     * Port of applications/product/minilang/product/inventory/StockMoveServices.xml:343-425.
+     * The non-OISGIR loop at XML:362-418 does not decrement quantityLeftToProcess: each source item
+     * with positive ATP independently moves min(quantityLeftToProcess, ATP), then the unchanged
+     * positive value triggers the insufficient-inventory warning.
+     */
     private Map<String, Object> processPhysicalStockMove(Map<String, Object> input) {
         permissions.require("FACILITY", "CREATE");
         permissions.require("FACILITY", "UPDATE");
-        BigDecimal quantityMoved = decimal(input.get("quantityMoved"));
+        Object quantityMoved = input.get("quantityMoved");
         Map<String, Object> state = new LinkedHashMap<>();
         state.put("parameters", input);
         state.put("quantityLeftToProcess", quantityMoved);
@@ -361,12 +358,12 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
                 if (!greater(state.get("quantityLeftToProcess"), BigDecimal.ZERO, errors(state))) {
                     break;
                 }
-                BigDecimal availableToPromise = decimal(entities.get(inventoryItem, "availableToPromiseTotal"));
+                Object availableToPromise = entities.get(inventoryItem, "availableToPromiseTotal");
                 if (!greater(availableToPromise, BigDecimal.ZERO, errors(state))) {
                     continue;
                 }
-                BigDecimal quantityLeft = decimal(state.get("quantityLeftToProcess"));
-                BigDecimal currentQuantityToMove = greater(quantityLeft, availableToPromise, errors(state))
+                Object quantityLeft = state.get("quantityLeftToProcess");
+                Object currentQuantityToMove = greater(quantityLeft, availableToPromise, errors(state))
                         ? availableToPromise
                         : quantityLeft;
                 Object targetInventoryItem = copyEntity("InventoryItem", inventoryItem);
@@ -385,11 +382,10 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
 
                 Map<String, Object> sourceDetail = new LinkedHashMap<>();
                 sourceDetail.put("inventoryItemId", entities.get(inventoryItem, "inventoryItemId"));
-                sourceDetail.put("availableToPromiseDiff", negative(currentQuantityToMove));
-                sourceDetail.put("quantityOnHandDiff", negative(currentQuantityToMove));
+                sourceDetail.put("availableToPromiseDiff", negative(toDecimal(currentQuantityToMove)));
+                sourceDetail.put("quantityOnHandDiff", negative(toDecimal(currentQuantityToMove)));
                 callInventoryService("createInventoryItemDetail", sourceDetail);
                 refresh("InventoryItem", targetInventoryItem);
-                state.put("quantityLeftToProcess", subtract(quantityLeft, currentQuantityToMove));
             }
         }
         if (greater(state.get("quantityLeftToProcess"), BigDecimal.ZERO, errors(state))) {
@@ -408,7 +404,7 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return output;
     }
 
-    /** Port of StockMoveServices.xml:426-624; called inline by processPhysicalStockMove. */
+    /** Port of applications/product/minilang/product/inventory/StockMoveServices.xml:426-624 inline. */
     private void processOisgirMoveByStatusInline(Map<String, Object> state) {
         Map<String, Object> input = castMap((Map<?, ?>) state.get("parameters"));
         List<Map<String, Object>> reservations = orderReservationLocationRows(Map.of(
@@ -432,7 +428,8 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
             if (equal(inventoryItemTypeId, "SERIALIZED_INV_ITEM")) {
                 entities.set(inventoryItem, "locationSeqId", input.get("targetLocationSeqId"));
                 store(inventoryItem);
-                // The asynchronous discontinuation check is a no-op for an item with nonpositive ATP.
+                // Emulates applications/product/entitydef/eecas.xml:46-55: sync updateSerializedInventoryTotals;
+                // async checkProductInventoryDiscontinuation is a documented no-op when ATP is nonempty and <= 0.
                 callInventoryService("updateSerializedInventoryTotals",
                         Map.of("inventoryItemId", entities.get(inventoryItem, "inventoryItemId")));
             }
@@ -449,7 +446,7 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
             }
             targetInventoryItem = refresh("InventoryItem", targetInventoryItem);
             state.put("haveSetIiDetail", "N");
-            state.put("remainingQuantityOnHand", decimal(entities.get(inventoryItem, "quantityOnHandTotal")));
+            state.put("remainingQuantityOnHand", entities.get(inventoryItem, "quantityOnHandTotal"));
 
             for (Map<String, Object> reservationRow : inventoryEntry.getValue()) {
                 Object reservation = findByPrimaryKey("OrderItemShipGrpInvRes", keys(
@@ -467,28 +464,29 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
                     continue;
                 }
 
-                BigDecimal quantityLeft = decimal(state.get("quantityLeftToProcess"));
-                BigDecimal reservationQuantity = decimal(entities.get(reservation, "quantity"));
-                BigDecimal currentQuantityToMove = less(quantityLeft, reservationQuantity, errors(state))
+                Object quantityLeft = state.get("quantityLeftToProcess");
+                Object reservationQuantity = entities.get(reservation, "quantity");
+                Object currentQuantityToMove = less(quantityLeft, reservationQuantity, errors(state))
                         ? quantityLeft
                         : reservationQuantity;
-                BigDecimal remainingQuantityOnHand = decimal(state.get("remainingQuantityOnHand"));
+                Object remainingQuantityOnHand = state.get("remainingQuantityOnHand");
                 if (greater(currentQuantityToMove, remainingQuantityOnHand, errors(state))) {
                     currentQuantityToMove = remainingQuantityOnHand;
                 }
                 Object quantityNotAvailableValue = entities.get(reservation, "quantityNotAvailable");
                 if (empty(quantityNotAvailableValue)) {
-                    quantityNotAvailableValue = zero();
+                    quantityNotAvailableValue = BigDecimal.ZERO;
                     entities.set(reservation, "quantityNotAvailable", quantityNotAvailableValue);
                 }
                 BigDecimal reservedQuantityLeftOver = subtract(
-                        subtract(reservationQuantity, decimal(quantityNotAvailableValue)), currentQuantityToMove);
-                BigDecimal quantityNotAvailableToMove;
+                        subtract(calcValue(reservationQuantity), calcValue(quantityNotAvailableValue)),
+                        calcValue(currentQuantityToMove));
+                Object quantityNotAvailableToMove;
                 if (!empty(reservedQuantityLeftOver)
                         && greater(reservedQuantityLeftOver, BigDecimal.ZERO, errors(state))) {
-                    quantityNotAvailableToMove = zero();
+                    quantityNotAvailableToMove = BigDecimal.ZERO;
                 } else {
-                    quantityNotAvailableToMove = decimal(quantityNotAvailableValue);
+                    quantityNotAvailableToMove = quantityNotAvailableValue;
                 }
 
                 Object targetReservation = copyEntity("OrderItemShipGrpInvRes", reservation);
@@ -497,25 +495,28 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
                 sourceDetail.put("inventoryItemId", entities.get(inventoryItem, "inventoryItemId"));
                 Map<String, Object> targetDetail = new LinkedHashMap<>();
                 targetDetail.put("inventoryItemId", targetInventoryItemId);
-                sourceDetail.put("quantityOnHandDiff", negative(currentQuantityToMove));
-                targetDetail.put("quantityOnHandDiff", currentQuantityToMove);
+                sourceDetail.put("quantityOnHandDiff", negative(calcValue(currentQuantityToMove)));
+                targetDetail.put("quantityOnHandDiff", scale2(calcValue(currentQuantityToMove)));
                 if (!empty(entities.get(reservation, "quantityNotAvailable"))
                         && greater(entities.get(reservation, "quantityNotAvailable"), BigDecimal.ZERO, errors(state))) {
-                    sourceDetail.put("availableToPromiseDiff", quantityNotAvailableToMove);
-                    targetDetail.put("availableToPromiseDiff", negative(quantityNotAvailableToMove));
+                    sourceDetail.put("availableToPromiseDiff", scale2(calcValue(quantityNotAvailableToMove)));
+                    targetDetail.put("availableToPromiseDiff", negative(calcValue(quantityNotAvailableToMove)));
                 }
                 callInventoryService("createInventoryItemDetail", sourceDetail);
                 callInventoryService("createInventoryItemDetail", targetDetail);
 
                 entities.set(targetReservation, "quantity",
-                        add(currentQuantityToMove, quantityNotAvailableToMove));
-                entities.set(targetReservation, "quantityNotAvailable", quantityNotAvailableToMove);
+                        add(calcValue(currentQuantityToMove), calcValue(quantityNotAvailableToMove)));
+                entities.set(targetReservation, "quantityNotAvailable",
+                        scale2(calcValue(quantityNotAvailableToMove)));
                 create(targetReservation);
 
                 BigDecimal newReservationQuantity = subtract(
-                        subtract(reservationQuantity, currentQuantityToMove), quantityNotAvailableToMove);
+                        subtract(calcValue(reservationQuantity), calcValue(currentQuantityToMove)),
+                        calcValue(quantityNotAvailableToMove));
                 BigDecimal newQuantityNotAvailable = subtract(
-                        decimal(entities.get(reservation, "quantityNotAvailable")), quantityNotAvailableToMove);
+                        calcValue(entities.get(reservation, "quantityNotAvailable")),
+                        calcValue(quantityNotAvailableToMove));
                 entities.set(reservation, "quantity", newReservationQuantity);
                 entities.set(reservation, "quantityNotAvailable", newQuantityNotAvailable);
                 store(reservation);
@@ -526,9 +527,10 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
                     store(reservation);
                 }
                 state.put("haveSetIiDetail", "Y");
-                state.put("quantityLeftToProcess", subtract(quantityLeft, currentQuantityToMove));
+                state.put("quantityLeftToProcess",
+                        subtract(calcValue(quantityLeft), calcValue(currentQuantityToMove)));
                 state.put("remainingQuantityOnHand",
-                        subtract(remainingQuantityOnHand, currentQuantityToMove));
+                        subtract(calcValue(remainingQuantityOnHand), calcValue(currentQuantityToMove)));
             }
             if (equal(state.get("haveSetIiDetail"), "N")) {
                 remove(targetInventoryItem);
@@ -536,7 +538,7 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         }
     }
 
-    /** Port of StockMoveServices.xml:625-634. */
+    /** Port of applications/product/minilang/product/inventory/StockMoveServices.xml:625-634. */
     private Map<String, Object> findProductInventorylocations(Map<String, Object> input) {
         List<Map<String, Object>> locations = inventoryItemAndLocationRows(Map.of(
                 "facilityId", input.get("facilityId"),
@@ -545,10 +547,12 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return Map.of("LocationList", locations);
     }
 
+    /** Delegates the unported Groovy createInventoryItem service. */
     public Map<String, Object> createInventoryItem(Map<String, Object> serviceInput) {
         return unportedPort.execute("createInventoryItem");
     }
 
+    /** Builds the createInventoryItem input fields selected by Minilang set-service-fields. */
     private Map<String, Object> inventoryItemServiceFields(Object inventoryItem) {
         Map<String, Object> serviceInput = new LinkedHashMap<>();
         for (String field : CREATE_INVENTORY_ITEM_FIELDS) {
@@ -558,22 +562,27 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return serviceInput;
     }
 
+    /** Invokes an InventoryServices simple-method through its service executor. */
     private void callInventoryService(String serviceName, Map<String, Object> input) {
         inventoryServices.execute(serviceName, serviceName, input);
     }
 
+    /** Merges an entity using the persistence context. */
     private void store(Object entity) {
         entityManager.merge(entity);
     }
 
+    /** Persists a new entity using the persistence context. */
     private void create(Object entity) {
         entityManager.persist(entity);
     }
 
+    /** Removes an entity, attaching it to the persistence context when needed. */
     private void remove(Object entity) {
         entityManager.remove(entityManager.contains(entity) ? entity : entityManager.merge(entity));
     }
 
+    /** Flushes pending writes and reloads an entity by its primary key. */
     private Object refresh(String entityName, Object entity) {
         entityManager.flush();
         Object refreshed = findByPrimaryKey(entityName, entities.toMap(entity));
@@ -584,6 +593,7 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return entity;
     }
 
+    /** Copies writable entity fields into a new generated entity instance. */
     private Object copyEntity(String entityName, Object source) {
         Object copy = entities.newEntity(entities.entityClass(entityName));
         BeanWrapperImpl wrapper = new BeanWrapperImpl(copy);
@@ -595,14 +605,17 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return copy;
     }
 
+    /** Finds an entity by its primary-key fields. */
     private Object findByPrimaryKey(String entityName, Map<String, ?> keys) {
         return entities.findByPrimaryKey(entities.entityClass(entityName), keys);
     }
 
+    /** Finds generated entities matching equality filters and sort fields. */
     private List<Object> findAll(String entityName, Map<String, ?> filters, List<String> orderBy) {
         return new ArrayList<>(findAll(entities.entityClass(entityName), filters, orderBy));
     }
 
+    /** Executes a generated-entity query with equality predicates and ordering. */
     private <T> List<T> findAll(Class<T> type, Map<String, ?> filters, List<String> orderBy) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<T> query = builder.createQuery(type);
@@ -622,6 +635,7 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return entityManager.createQuery(query).getResultList();
     }
 
+    /** Converts filter values to the generated entity property's Java type. */
     private Object convertFilter(Class<?> type, String field, Object value) {
         if (value == null) {
             return null;
@@ -646,6 +660,11 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return value;
     }
 
+    /**
+     * Emulates OrderItemShipGrpInvResAndItemLocation from applications/order/entitydef/entitymodel_view.xml:808
+     * using view-member processing in
+     * framework/entity/src/main/java/org/apache/ofbiz/entity/model/ModelViewEntity.java:795-870.
+     */
     private List<Map<String, Object>> orderReservationLocationRows(
             Map<String, ?> filters, String orderBy) {
         StringBuilder jpql = new StringBuilder("select reservation, item, location, orderItem.statusId "
@@ -678,6 +697,11 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return rows;
     }
 
+    /**
+     * Emulates ProductFacilityLocationView from applications/datamodel/entitydef/product-entitymodel.xml:1572
+     * using view-member processing in
+     * framework/entity/src/main/java/org/apache/ofbiz/entity/model/ModelViewEntity.java:795-870.
+     */
     private List<Map<String, Object>> productFacilityLocationViewRows(Map<String, ?> filters) {
         StringBuilder jpql = new StringBuilder("select pfl, location from ProductFacilityLocation pfl, "
                 + "FacilityLocation location where pfl.facilityId = location.facilityId "
@@ -700,6 +724,11 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return rows;
     }
 
+    /**
+     * Emulates ProductFacilityLocationQuantityTest from applications/datamodel/entitydef/product-entitymodel.xml:1538
+     * using view-member processing in
+     * framework/entity/src/main/java/org/apache/ofbiz/entity/model/ModelViewEntity.java:795-870.
+     */
     private List<Map<String, Object>> productFacilityLocationQuantityRows(
             Object facilityId, String locationTypeEnumId) {
         String jpql = "select pfl.productId, pfl.facilityId, pfl.locationSeqId, pfl.minimumStock, "
@@ -730,6 +759,11 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return rows;
     }
 
+    /**
+     * Emulates InventoryItemAndLocation from applications/datamodel/entitydef/product-entitymodel.xml:2045
+     * using view-member processing in
+     * framework/entity/src/main/java/org/apache/ofbiz/entity/model/ModelViewEntity.java:795-870.
+     */
     private List<Map<String, Object>> inventoryItemAndLocationRows(Map<String, ?> filters) {
         Map<String, Object> itemFilters = new LinkedHashMap<>();
         for (String field : List.of("productId", "facilityId", "locationSeqId", "inventoryItemId")) {
@@ -775,6 +809,7 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return rows;
     }
 
+    /** Appends equality predicates for fields exposed by an emulated entity view. */
     private Map<String, Object> appendFilters(
             StringBuilder jpql, Map<String, ?> filters, Map<String, String> fieldExpressions) {
         Map<String, Object> parameters = new LinkedHashMap<>();
@@ -790,6 +825,7 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return parameters;
     }
 
+    /** Adds generated entity fields to an emulated entity-view row. */
     private void appendEntityFields(Map<String, Object> row, Object entity, Set<String> excluded) {
         if (entity == null) {
             return;
@@ -805,6 +841,7 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         }
     }
 
+    /** Converts an entity to a mutable field map, returning an empty map for a missing entity. */
     private Map<String, Object> entityMap(Object entity) {
         if (entity == null) {
             return new LinkedHashMap<>();
@@ -812,10 +849,12 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return new LinkedHashMap<>(entities.toMap(entity));
     }
 
+    /** Stores an entity field map in a result under the requested field name. */
     private void putEntity(Map<String, Object> target, String field, Object entity) {
         target.put(field, entity == null ? null : entities.toMap(entity));
     }
 
+    /** Builds a field-name map from alternating name and value arguments. */
     private Map<String, Object> keys(Object... nameValues) {
         Map<String, Object> result = new LinkedHashMap<>();
         for (int i = 0; i < nameValues.length; i += 2) {
@@ -824,17 +863,20 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return result;
     }
 
+    /** Appends a row to the list grouped under its key. */
     private static void addToListMap(
             Map<Object, List<Map<String, Object>>> map, Object key, Map<String, Object> value) {
         map.computeIfAbsent(key, ignored -> new ArrayList<>()).add(value);
     }
 
+    /** Returns a list with the supplied value appended. */
     private static List<String> add(List<String> values, String value) {
         List<String> result = values == null ? new ArrayList<>() : values;
         result.add(value);
         return result;
     }
 
+    /** Copies list values to strings, preserving a missing list as null. */
     private static List<String> stringList(Object value) {
         if (value instanceof List<?> list) {
             List<String> result = new ArrayList<>();
@@ -846,52 +888,91 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return null;
     }
 
+    /** Adds a non-null output value to a result map. */
     private static void putIfPresent(Map<String, Object> output, String name, Object value) {
         if (value != null) {
             output.put(name, value);
         }
     }
 
+    /** Sums row fields as Minilang calculate results. */
     private static BigDecimal sum(List<Map<String, Object>> rows, String field) {
         BigDecimal result = zero();
         for (Map<String, Object> row : rows) {
-            result = add(result, decimal(row.get(field)));
+            result = add(result, calcValue(row.get(field)));
         }
         return result;
     }
 
+    /** Sums generated entity fields as Minilang calculate results. */
     private BigDecimal sumEntities(List<Object> rows, String field) {
         BigDecimal result = zero();
         for (Object row : rows) {
-            result = add(result, decimal(entities.get(row, field)));
+            result = add(result, calcValue(entities.get(row, field)));
         }
         return result;
     }
 
+    /** Creates the scaled zero used as a Minilang calculate result. */
     private static BigDecimal zero() {
         return BigDecimal.ZERO.setScale(SCALE, ROUNDING);
     }
 
-    private static BigDecimal decimal(Object value) {
+    /**
+     * Reads a calcop field value, mapping null to zero without scaling it
+     * (framework/minilang/src/main/java/org/apache/ofbiz/minilang/method/otherops/Calculate.java:129-137).
+     */
+    private static BigDecimal calcValue(Object value) {
         if (value == null) {
-            return zero();
+            return BigDecimal.ZERO;
         }
-        BigDecimal decimal = value instanceof BigDecimal number ? number : new BigDecimal(value.toString());
-        return decimal.setScale(SCALE, ROUNDING);
+        return toDecimal(value);
     }
 
+    /**
+     * Converts a raw numeric value without changing its scale
+     * (framework/minilang/src/main/java/org/apache/ofbiz/minilang/method/conditional/Compare.java:36-48).
+     */
+    private static BigDecimal toDecimal(Object value) {
+        if (value == null) {
+            return null;
+        }
+        return value instanceof BigDecimal number ? number : new BigDecimal(value.toString());
+    }
+
+    /**
+     * Applies Minilang calculate's scale and rounding mode
+     * (framework/minilang/src/main/java/org/apache/ofbiz/minilang/method/otherops/Calculate.java:129-137).
+     */
+    private static BigDecimal scale2(BigDecimal value) {
+        return value.setScale(SCALE, ROUNDING);
+    }
+
+    /**
+     * Adds calcop operands and scales the calculate result
+     * (framework/minilang/src/main/java/org/apache/ofbiz/minilang/method/otherops/Calculate.java:129-137).
+     */
     private static BigDecimal add(BigDecimal left, BigDecimal right) {
-        return left.add(right).setScale(SCALE, ROUNDING);
+        return scale2(left.add(right));
     }
 
+    /**
+     * Subtracts calcop operands and scales the calculate result
+     * (framework/minilang/src/main/java/org/apache/ofbiz/minilang/method/otherops/Calculate.java:129-137).
+     */
     private static BigDecimal subtract(BigDecimal left, BigDecimal right) {
-        return left.subtract(right).setScale(SCALE, ROUNDING);
+        return scale2(left.subtract(right));
     }
 
+    /**
+     * Negates a calcop operand and scales the calculate result
+     * (framework/minilang/src/main/java/org/apache/ofbiz/minilang/method/otherops/Calculate.java:129-137).
+     */
     private static BigDecimal negative(BigDecimal value) {
-        return value.negate().setScale(SCALE, ROUNDING);
+        return scale2(value.negate());
     }
 
+    /** Checks whether a value is empty using Minilang's empty-value conventions. */
     private static boolean empty(Object value) {
         return value == null
                 || value instanceof String text && text.isEmpty()
@@ -899,28 +980,48 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
                 || value instanceof List<?> list && list.isEmpty();
     }
 
+    /**
+     * Compares values for equality without changing their numeric scale
+     * (framework/minilang/src/main/java/org/apache/ofbiz/minilang/method/conditional/Compare.java:36-48).
+     */
     private static boolean equal(Object left, Object right) {
         if (left == null || right == null) {
             return left == right;
         }
         if (left instanceof Number || right instanceof Number) {
-            return decimal(left).compareTo(decimal(right)) == 0;
+            return toDecimal(left).compareTo(toDecimal(right)) == 0;
         }
         return left.equals(right);
     }
 
+    /**
+     * Returns the inverse of Minilang equality
+     * (framework/minilang/src/main/java/org/apache/ofbiz/minilang/method/conditional/Compare.java:36-48).
+     */
     private static boolean notEqual(Object left, Object right) {
         return !equal(left, right);
     }
 
+    /**
+     * Performs a Minilang ordered less-than comparison
+     * (framework/minilang/src/main/java/org/apache/ofbiz/minilang/method/conditional/Compare.java:36-48).
+     */
     private static boolean less(Object left, Object right, List<String> errors) {
         return compare(left, right, errors) < 0;
     }
 
+    /**
+     * Performs a Minilang ordered greater-than comparison
+     * (framework/minilang/src/main/java/org/apache/ofbiz/minilang/method/conditional/Compare.java:36-48).
+     */
     private static boolean greater(Object left, Object right, List<String> errors) {
         return compare(left, right, errors) > 0;
     }
 
+    /**
+     * Compares raw values, collecting the Minilang null-operand error when necessary
+     * (framework/minilang/src/main/java/org/apache/ofbiz/minilang/method/conditional/Compare.java:36-48).
+     */
     private static int compare(Object left, Object right, List<String> errors) {
         if (left == null) {
             errors.add("Cannot compare: l-value is null");
@@ -931,23 +1032,26 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
             return 0;
         }
         if (left instanceof Number || right instanceof Number) {
-            return decimal(left).compareTo(decimal(right));
+            return toDecimal(left).compareTo(toDecimal(right));
         }
         return left.toString().compareTo(right.toString());
     }
 
+    /** Raises a service failure for errors accumulated by Minilang operations. */
     private static void throwErrors(List<String> errors) {
         if (!errors.isEmpty()) {
             throw new MigrationException(HttpStatus.BAD_REQUEST, String.join(" ", errors));
         }
     }
 
+    /** Retrieves the error list carried in a Minilang state map. */
     private static List<String> errors(Map<String, Object> state) {
         @SuppressWarnings("unchecked")
         List<String> errors = (List<String>) state.get("errors");
         return errors;
     }
 
+    /** Expands a Minilang message using the provided scope maps. */
     private static String expand(String message, Object... scopes) {
         Map<String, Object> scope = new LinkedHashMap<>();
         for (Object item : scopes) {
@@ -968,6 +1072,7 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return result.toString();
     }
 
+    /** Resolves a dotted path through nested result maps. */
     private static Object getPath(Map<String, Object> scope, String path) {
         Object value = scope;
         for (String part : path.split("\\.")) {
@@ -980,10 +1085,12 @@ public class StockMoveServices extends UnportedSimpleMethodFile {
         return value;
     }
 
+    /** Reads a field from a Minilang scope map. */
     private static Object get(Map<String, Object> scope, String field) {
         return scope.get(field);
     }
 
+    /** Casts a map whose keys and values are known to be strings and objects. */
     @SuppressWarnings("unchecked")
     private static Map<String, Object> castMap(Map<?, ?> map) {
         return (Map<String, Object>) map;

@@ -98,18 +98,16 @@ class StockMoveServicesTest {
     }
 
     @Test
-    void findStockMovesNeededCombinesReservationAndPickRestockQuantities() throws Exception {
+    void findStockMovesNeededReturnsInternalServerErrorForSufficientSourceStock() throws Exception {
         Seed seed = seed(
                 "NON_SERIAL_INV_ITEM", "ITEM_APPROVED", bd("12"), bd("12"), bd("0"), bd("0"),
                 bd("10"), bd("5"), bd("3"));
 
         postService("findStockMovesNeeded", map("facilityId", seed.facilityId()), "FACILITY_VIEW")
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.moveByOisgirInfoList[0].totalQuantity").value(8.0))
-                .andExpect(jsonPath("$.moveByOisgirInfoList[0].quantityOnHandTotalFrom").value(12.0))
-                .andExpect(jsonPath("$.moveByOisgirInfoList[0].quantityOnHandTotalTo").value(0.0))
-                .andExpect(jsonPath("$.stockMoveHandled['" + seed.pickLocationId() + "']").value("Y"))
-                .andExpect(jsonPath("$.warningMessageList").doesNotExist());
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.errorMessage").value(org.hamcrest.Matchers.startsWith(
+                        "Exception thrown while finding related values: Could not find relation for "
+                                + "relationName: InventoryItem for value [ProductFacilityLocation")));
     }
 
     @Test
@@ -120,9 +118,17 @@ class StockMoveServicesTest {
 
         postService("findStockMovesNeeded", map("facilityId", seed.facilityId()), "FACILITY_VIEW")
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.moveByOisgirInfoList[0].product.productId").value(seed.productId()))
+                .andExpect(jsonPath("$.moveByOisgirInfoList[0].facilityLocationFrom.locationSeqId")
+                        .value(seed.bulkLocationId()))
+                .andExpect(jsonPath("$.moveByOisgirInfoList[0].facilityLocationTo.locationSeqId")
+                        .value(seed.pickLocationId()))
                 .andExpect(jsonPath("$.moveByOisgirInfoList[0].totalQuantity").value(2.0))
+                .andExpect(jsonPath("$.moveByOisgirInfoList[0].quantityOnHandTotalFrom").value(2.0))
+                .andExpect(jsonPath("$.moveByOisgirInfoList[0].availableToPromiseTotalFrom").value(2.0))
                 .andExpect(jsonPath("$.warningMessageList[0]").value(
-                        org.hamcrest.Matchers.containsString("there are only [2.00] on hand")));
+                        org.hamcrest.Matchers.containsString("there are only [2.00] on hand")))
+                .andExpect(jsonPath("$.stockMoveHandled").doesNotExist());
     }
 
     @Test
@@ -144,20 +150,21 @@ class StockMoveServicesTest {
     }
 
     @Test
-    void findStockMovesNeededReturnsBadRequestForReachableNullOrderedComparison() throws Exception {
+    void processPhysicalStockMoveReturnsBadRequestForNullSourceAvailableToPromise() throws Exception {
         Seed seed = seed(
-                "NON_SERIAL_INV_ITEM", "ITEM_APPROVED", bd("5"), bd("5"), null, null,
-                bd("10"), bd("5"), bd("3"));
-        Object pickLocation = entities.findByPrimaryKey(
-                entities.entityClass("ProductFacilityLocation"),
-                map("productId", seed.productId(),
-                        "facilityId", seed.facilityId(),
-                        "locationSeqId", seed.pickLocationId()));
-        entities.set(pickLocation, "minimumStock", null);
+                "NON_SERIAL_INV_ITEM", null, bd("5"), null, null, null, null, null, null);
 
-        postService("findStockMovesNeeded", map("facilityId", seed.facilityId()), "FACILITY_VIEW")
+        postService("processPhysicalStockMove", moveInput(seed, bd("2")),
+                "FACILITY_VIEW", "FACILITY_CREATE", "FACILITY_UPDATE")
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorMessage").value("Cannot compare: r-value is null"));
+                .andExpect(jsonPath("$.errorMessage").value("Cannot compare: l-value is null"));
+
+        assertDecimalValue("5", entities.get(seed.bulkInventoryItem(), "quantityOnHandTotal"));
+        org.junit.jupiter.api.Assertions.assertNull(
+                entities.get(seed.bulkInventoryItem(), "availableToPromiseTotal"));
+        org.junit.jupiter.api.Assertions.assertTrue(entities.findByEquality(
+                entities.entityClass("InventoryItem"),
+                Map.of("productId", seed.productId(), "locationSeqId", seed.pickLocationId())).isEmpty());
     }
 
     @Test
@@ -171,6 +178,22 @@ class StockMoveServicesTest {
                 .andExpect(jsonPath("$.moveByPflInfoList[0].totalQuantity").value(4.0))
                 .andExpect(jsonPath("$.moveByPflInfoList[0].availableToPromiseTotalFrom").value(8.0))
                 .andExpect(jsonPath("$.warningMessageList").doesNotExist());
+    }
+
+    @Test
+    void findStockMovesRecommendedPreservesMissingProductAsNull() throws Exception {
+        Seed seed = seed(
+                "NON_SERIAL_INV_ITEM", null, bd("8"), bd("8"), bd("0"), bd("0"),
+                bd("10"), bd("4"), null);
+        Object product = entities.findByPrimaryKey(
+                entities.entityClass("Product"), Map.of("productId", seed.productId()));
+        entityManager.remove(product);
+        entityManager.flush();
+
+        postService("findStockMovesRecommended", map("facilityId", seed.facilityId()), "FACILITY_VIEW")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.moveByPflInfoList[0].product")
+                        .value(org.hamcrest.Matchers.nullValue()));
     }
 
     @Test
@@ -210,7 +233,10 @@ class StockMoveServicesTest {
 
         postService("processPhysicalStockMove", moveInput(seed, bd("2")),
                 "FACILITY_VIEW", "FACILITY_CREATE", "FACILITY_UPDATE")
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.warningMessageList[0]").value(
+                        org.hamcrest.Matchers.containsString(
+                                "did not reallocate 2.0 of the 2.0 reported as physically moved.")));
 
         List<?> targetItems = entities.findByEquality(
                 entities.entityClass("InventoryItem"),
@@ -219,6 +245,43 @@ class StockMoveServicesTest {
         assertDecimalValue("2", entities.get(targetItems.get(0), "quantityOnHandTotal"));
         assertDecimalValue("2", entities.get(targetItems.get(0), "availableToPromiseTotal"));
         assertDecimalValue("1", entities.get(seed.inventoryItems().get(0), "quantityOnHandTotal"));
+    }
+
+    @Test
+    void processPhysicalStockMoveMovesEachNonSerializedSourceWithoutDecrementingRemainingQuantity()
+            throws Exception {
+        Seed seed = seed(
+                "NON_SERIAL_INV_ITEM", null, bd("1"), bd("1"), null, null, null, null, null);
+        Object secondSourceItem = save("InventoryItem", map(
+                "inventoryItemId", id("bulk-item"),
+                "productId", seed.productId(),
+                "facilityId", seed.facilityId(),
+                "locationSeqId", seed.bulkLocationId(),
+                "inventoryItemTypeId", "NON_SERIAL_INV_ITEM",
+                "statusId", "INV_AVAILABLE",
+                "quantityOnHandTotal", bd("1"),
+                "availableToPromiseTotal", bd("1")));
+        stubCreateInventoryItem();
+
+        postService("processPhysicalStockMove", moveInput(seed, bd("2")),
+                "FACILITY_VIEW", "FACILITY_CREATE", "FACILITY_UPDATE")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.warningMessageList[0]").value(
+                        org.hamcrest.Matchers.containsString(
+                                "did not reallocate 2.0 of the 2.0 reported as physically moved.")));
+
+        List<?> targetItems = entities.findByEquality(
+                entities.entityClass("InventoryItem"),
+                Map.of("productId", seed.productId(), "locationSeqId", seed.pickLocationId()));
+        org.junit.jupiter.api.Assertions.assertEquals(2, targetItems.size());
+        for (Object targetItem : targetItems) {
+            assertDecimalValue("1", entities.get(targetItem, "quantityOnHandTotal"));
+            assertDecimalValue("1", entities.get(targetItem, "availableToPromiseTotal"));
+        }
+        for (Object sourceItem : List.of(seed.bulkInventoryItem(), secondSourceItem)) {
+            assertDecimalValue("0", entities.get(sourceItem, "quantityOnHandTotal"));
+            assertDecimalValue("0", entities.get(sourceItem, "availableToPromiseTotal"));
+        }
     }
 
     @Test
@@ -232,7 +295,7 @@ class StockMoveServicesTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.warningMessageList[0]").value(
                         org.hamcrest.Matchers.containsString(
-                                "did not reallocate 1.00 of the 2.0 reported as physically moved.")));
+                                "did not reallocate 2.0 of the 2.0 reported as physically moved.")));
     }
 
     @Test
