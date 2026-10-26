@@ -2,7 +2,7 @@
 
 ## 1. 検証結果
 
-最終 plain `./gradlew :migration:product-springboot:check`: **BUILD SUCCESSFUL**。XML レポート集計は 1605 tests、failures/errors/skipped 0。
+最終 plain `./gradlew :migration:product-springboot:check`: **BUILD SUCCESSFUL**。XML レポート集計は 1608 tests、failures/errors/skipped 0。
 
 | テストクラス | 件数 |
 | --- | ---: |
@@ -21,7 +21,7 @@
 | `PermissionServicesTest` | 3 |
 | `PicklistServicesTest` | 17 |
 | `PostgresSmokeTest` | 1 |
-| `ProductInventoryFlowTest` | 14 |
+| `ProductInventoryFlowTest` | 17 |
 | `ProductSimpleServiceExecutorTest` | 4 |
 | `ProductUomFormulasTest` | 2 |
 | `QuickShipEntireOrderFlowTest` | 3 |
@@ -34,7 +34,7 @@
 | `SpringdocProfileTest` | 1 |
 | `StockMoveServicesTest` | 17 |
 | `UpdateShipmentFlowTest` | 3 |
-| **合計** | **1605** |
+| **合計** | **1608** |
 ## 2. OFBiz 互換の判断・差分
 
 - 同一親の複合 OUT-key 作成で parent-scoped max+1 が競合した場合、DB の一意制約により 409 を返す。これは OFBiz の make-next-seq-id の競合特性に合わせた明示判断であり、再試行しない。`REQUIRES_NEW` 再試行は `/multi` の原子性を壊したため revert `6f24478024` で撤回し、rollback 回帰は `b012a905` の `MultiRollbackTest` にある（`migration/product-springboot/src/test/java/org/apache/ofbiz/migration/product/MultiRollbackTest.java:91`）。

@@ -69,6 +69,9 @@ public class ProductInventoryFlow {
      */
     @Transactional
     public Map<String, Object> createProduct(Map<String, Object> input) {
+        if (!permissions.hasPermission("OFBTOOLS", "VIEW")) {
+            throw new MigrationException(HttpStatus.FORBIDDEN, "Service permission denied");
+        }
         if (!permissions.hasPermission("CATALOG", "CREATE")
                 && !permissions.hasPermission("CATALOG_ROLE", "CREATE")) {
             throw new MigrationException(HttpStatus.FORBIDDEN, "ProductCatalogCreatePermissionError");
@@ -229,7 +232,9 @@ public class ProductInventoryFlow {
         Object oldOwnerPartyId = null;
         for (int i = 0; i < count; i++) {
             Map<String, Object> itemInput = new LinkedHashMap<>(input);
-            itemInput.put("statusId", statusId);
+            if ("NON_SERIAL_INV_ITEM".equals(inventoryType)) {
+                itemInput.put("statusId", statusId);
+            }
             String currentInventoryItemId = text(input.get("currentInventoryItemId"));
             if (receivedEach.signum() > 0) {
                 if (currentInventoryItemId == null) {

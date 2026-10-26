@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,12 +37,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.ofbiz.migration.common.EntityRegistry;
+import org.apache.ofbiz.migration.common.MigrationException;
+import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,6 +71,9 @@ class ProductInventoryFlowTest {
 
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private MigrationServiceDispatcher dispatcher;
 
     @Test
     void createProductAllocatesIdAndDefaultsFlagsAndAuditFields() throws Exception {
@@ -189,6 +198,39 @@ class ProductInventoryFlowTest {
                         "quantityAccepted", 1,
                         "quantityRejected", 0)))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void receiveSerializedExistingPromisedItemKeepsStatusWhenStatusIdIsOmitted() throws Exception {
+        String inventoryItemId = createSerializedItem("E2E_PROMISED", "INV_PROMISED");
+
+        call("receiveInventoryProduct", Map.of(
+                "productId", "E2E_PROMISED",
+                "facilityId", "E2E_WH",
+                "inventoryItemTypeId", "SERIALIZED_INV_ITEM",
+                "currentInventoryItemId", inventoryItemId,
+                "quantityAccepted", 1,
+                "quantityRejected", 0));
+
+        Map<String, Object> item = entity("InventoryItem", Map.of("inventoryItemId", inventoryItemId));
+        assertEquals("INV_PROMISED", item.get("statusId"));
+    }
+
+    @Test
+    void receiveSerializedExistingItemAppliesExplicitStatusId() throws Exception {
+        String inventoryItemId = createSerializedItem("E2E_EXPLICIT", "INV_PROMISED");
+
+        call("receiveInventoryProduct", Map.of(
+                "productId", "E2E_EXPLICIT",
+                "facilityId", "E2E_WH",
+                "inventoryItemTypeId", "SERIALIZED_INV_ITEM",
+                "currentInventoryItemId", inventoryItemId,
+                "statusId", "INV_ON_HOLD",
+                "quantityAccepted", 1,
+                "quantityRejected", 0));
+
+        Map<String, Object> item = entity("InventoryItem", Map.of("inventoryItemId", inventoryItemId));
+        assertEquals("INV_ON_HOLD", item.get("statusId"));
     }
 
     @Test
@@ -385,6 +427,31 @@ class ProductInventoryFlowTest {
                 Map.of("productId", "E2E_ROLE_PRODUCT")));
     }
 
+    @Test
+    void createProductRequiresOftoolsPermissionWhenDispatchedDirectly() {
+        Map<String, Object> request = Map.of(
+                "productId", "E2E_DIRECT_PERM",
+                "productTypeId", "FINISHED_GOOD",
+                "internalName", "Directly dispatched product");
+        SecurityContext previousContext = SecurityContextHolder.getContext();
+        try {
+            setAuthentication(authorities("PRODUCT_ADMIN", "CATALOG_CREATE"));
+            MigrationException denied = assertThrows(
+                    MigrationException.class, () -> dispatcher.execute("product", "createProduct", request));
+            assertEquals(403, denied.getStatus().value());
+            assertNull(entities.findByPrimaryKey(entities.entityClass("Product"),
+                    Map.of("productId", "E2E_DIRECT_PERM")));
+
+            setAuthentication(authorities("PRODUCT_ADMIN", "CATALOG_CREATE", "OFBTOOLS_VIEW"));
+            Map<String, Object> result = dispatcher.execute("product", "createProduct", request);
+            assertEquals("E2E_DIRECT_PERM", result.get("productId"));
+            assertNotNull(entities.findByPrimaryKey(entities.entityClass("Product"),
+                    Map.of("productId", "E2E_DIRECT_PERM")));
+        } finally {
+            SecurityContextHolder.setContext(previousContext);
+        }
+    }
+
     private JsonNode call(String service, Map<String, Object> body) throws Exception {
         return call(service, body, adminAuthorities());
     }
@@ -430,6 +497,24 @@ class ProductInventoryFlowTest {
                 "productId", productId,
                 "productTypeId", "FINISHED_GOOD",
                 "internalName", "Inventory Flow Product"));
+    }
+
+    private String createSerializedItem(String productId, String statusId) throws Exception {
+        createProduct(productId);
+        JsonNode created = call("createInventoryItem", Map.of(
+                "inventoryItemTypeId", "SERIALIZED_INV_ITEM",
+                "productId", productId,
+                "facilityId", "E2E_WH",
+                "statusId", statusId,
+                "unitCost", 1));
+        return created.path("inventoryItemId").asText();
+    }
+
+    private static void setAuthentication(SimpleGrantedAuthority[] authorities) {
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(
+                "admin", "", java.util.Arrays.asList(authorities)));
+        SecurityContextHolder.setContext(context);
     }
 
     private static void assertDecimalEquals(String expected, Object actual) {
