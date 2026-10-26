@@ -70,7 +70,9 @@ public class OrderSimpleServices {
 
     public Map<String, Object> custRequestPermissionCheck(Map<String, Object> input) {
         String requestedParty = text(input.get("fromPartyId"));
-        boolean ownRequest = requestedParty == null || requestedParty.equals(currentPartyId());
+        String currentPartyId = currentPartyId();
+        boolean ownRequest = currentPartyId != null
+                && (requestedParty == null || requestedParty.equals(currentPartyId));
         Map<String, Object> result = permissionResult(
                 text(input.getOrDefault("mainAction", "CREATE")), "ORDERMGR_CRQ");
         boolean allowed = ownRequest || Boolean.TRUE.equals(result.get("hasPermission"));
@@ -109,6 +111,7 @@ public class OrderSimpleServices {
     }
 
     public Map<String, Object> createCustRequest(Map<String, Object> input) {
+        requiredText(input, "fromPartyId");
         String custRequestId = text(input.get("custRequestId"));
         if (custRequestId == null) {
             custRequestId = sequences.nextId("CustRequest");
@@ -263,7 +266,13 @@ public class OrderSimpleServices {
                 "custRequestItemSeqId", itemSeqId,
                 "noteId", noteId));
         updateLastModified(request);
-        return Map.of("noteId", noteId, "partyId", currentPartyId());
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("noteId", noteId);
+        String currentPartyId = currentPartyId();
+        if (currentPartyId != null) {
+            result.put("partyId", currentPartyId);
+        }
+        return result;
     }
 
     public Map<String, Object> createCustRequestFromCart(Map<String, Object> input) {
@@ -308,6 +317,9 @@ public class OrderSimpleServices {
 
     public Map<String, Object> getCustRequestsByRole(Map<String, Object> input) {
         String partyId = currentPartyId();
+        if (partyId == null) {
+            return Map.of("custRequestAndRoles", List.of());
+        }
         String roleTypeId = text(input.get("roleTypeId"));
         Map<String, Object> filters = new LinkedHashMap<>();
         filters.put("partyId", partyId);
@@ -523,7 +535,7 @@ public class OrderSimpleServices {
     private String currentPartyId() {
         String currentUser = currentUser();
         List<?> logins = data.find("UserLogin", Map.of("userLoginId", currentUser));
-        return logins.isEmpty() ? "DemoCustomer" : text(data.get(logins.get(0), "partyId"));
+        return logins.isEmpty() ? null : text(data.get(logins.get(0), "partyId"));
     }
 
     private static String currentUser() {

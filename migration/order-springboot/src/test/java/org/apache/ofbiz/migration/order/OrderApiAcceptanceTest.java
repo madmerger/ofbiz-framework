@@ -49,6 +49,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -68,6 +69,9 @@ class OrderApiAcceptanceTest {
 
     @Autowired
     private EntityRegistry entities;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private OrderEntitySupport data;
@@ -331,17 +335,26 @@ class OrderApiAcceptanceTest {
     }
 
     @Test
-    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
-    void ac06e_multiMapsDataIntegrityViolationToConflict() throws Exception {
-        MvcResult result = mockMvc.perform(post("/api/order/services/createCustRequestStatus/multi")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(JSON.writeValueAsString(List.of(Map.of(
-                                "custRequestId", "AC06E_MISSING_REQUEST",
-                                "statusId", "CRQ_DRAFT")))))
-                .andExpect(status().isConflict())
-                .andReturn();
-        assertEquals(409, JSON.readTree(result.getResponse().getContentAsString())
-                .get("errors").get(0).get("status").asInt());
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN", "ORDERMGR_CREATE"})
+    void ac06f_multiReportsIntegrityViolationAtFailingItem() throws Exception {
+        jdbcTemplate.execute("CREATE UNIQUE INDEX AC06F_UQ ON order_item_type(description)");
+        try {
+            Map<String, Object> first = Map.of(
+                    "orderItemTypeId", "AC06F_FIRST", "description", "AC06F_DUPLICATE");
+            Map<String, Object> second = Map.of(
+                    "orderItemTypeId", "AC06F_SECOND", "description", "AC06F_DUPLICATE");
+            MvcResult result = mockMvc.perform(post("/api/order/services/createOrderItemType/multi")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(JSON.writeValueAsString(List.of(first, second))))
+                    .andExpect(status().isConflict())
+                    .andReturn();
+            JsonNode error = JSON.readTree(result.getResponse().getContentAsString()).get("errors").get(0);
+            assertEquals(1, error.get("index").asInt());
+            assertEquals(409, error.get("status").asInt());
+            assertEquals("Data integrity violation", error.get("errorMessage").asText());
+        } finally {
+            jdbcTemplate.execute("DROP INDEX AC06F_UQ");
+        }
     }
 
     @Test
@@ -555,6 +568,7 @@ class OrderApiAcceptanceTest {
                 .andExpect(status().isOk());
 
         MvcResult fromCart = postService("createCustRequestFromCart", Map.of(
+                "fromPartyId", "DemoCustomer",
                 "custRequestName", "Cart request",
                 "cartItems", List.of(Map.of(
                         "productId", "DEMO_ORDER_PRODUCT_1", "quantity", BigDecimal.ONE))))
@@ -648,6 +662,40 @@ class OrderApiAcceptanceTest {
         assertTrue(responseStatus == 400
                 || (responseStatus == 200
                         && !lookup.getResponse().getContentAsString().contains(otherRequestId)));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "AC20_NO_LOGIN", authorities = {
+        "OFBTOOLS_VIEW", "ORDERMGR_ADMIN", "ORDERMGR_CRQ_ADMIN", "ORDERMGR_CRQ_CREATE"
+    })
+    void ac20_getCustRequestsByRoleIsEmptyWithoutUserLogin() throws Exception {
+        assertTrue(data.find("UserLogin", Map.of("userLoginId", "AC20_NO_LOGIN")).isEmpty());
+        data.create("CustRequest", Map.of(
+                "custRequestId", "AC20_DEMO_REQUEST",
+                "fromPartyId", "DemoCustomer",
+                "statusId", "CRQ_DRAFT",
+                "custRequestName", "Demo customer request"));
+        data.create("RoleType", Map.of(
+                "roleTypeId", "AC20_REQUEST_ROLE", "description", "Request role"));
+        data.create("CustRequestParty", Map.of(
+                "custRequestId", "AC20_DEMO_REQUEST",
+                "partyId", "DemoCustomer",
+                "roleTypeId", "AC20_REQUEST_ROLE",
+                "fromDate", Timestamp.from(Instant.now())));
+
+        MvcResult result = postService("getCustRequestsByRole", Map.of("roleTypeId", "AC20_REQUEST_ROLE"))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertEquals(
+                0,
+                JSON.readTree(result.getResponse().getContentAsString())
+                        .get("custRequestAndRoles")
+                        .size());
+        postService("createCustRequestFromCart", Map.of(
+                "cartItems", List.of(Map.of(
+                        "productId", "DEMO_ORDER_PRODUCT_1", "quantity", BigDecimal.ONE))))
+                .andExpect(status().isBadRequest());
     }
 
     private String createCustRequest(String name, String story) throws Exception {
