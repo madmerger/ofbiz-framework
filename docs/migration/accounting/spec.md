@@ -21,7 +21,7 @@
 
 主要な手書きサービス12件: `createInvoice`, `setInvoiceStatus`, `createInvoiceItem`, `createInvoiceForOrder`, `checkInvoicePaymentApplications`, `getInvoiceTotal`, `getInvoiceItemTotal`, `getInvoiceNotApplied`, `getInvoiceApplied`, `createPayment`, `createPaymentApplication`, `setPaymentStatus`。`getInvoice*` のうち合計・残高は OFBiz ではサービスではなく `InvoiceWorker` のメソッドを API handler として公開する。
 
-simple-method の手書き移植73件:
+simple-method の手書き移植93件:
 
 | クラス | 件数 | サービス |
 | --- | ---: | --- |
@@ -31,15 +31,16 @@ simple-method の手書き移植73件:
 | `AcctgTransServiceHandlers` | 8 | `checkAcctgTransPosted`, `createAcctgTransEntry`, `updateAcctgTransEntry`, `deleteAcctgTransEntry`, `getAcctgTransEntriesAndTransTotal`, `calculateAcctgTransTrialBalance`, `postAcctgTrans`, `calculateGlAccountTrialBalance` |
 | `PaymentMethodServiceHandlers` | 5 | `setPaymentMethodAddress`, `updatePaymentMethodAddress`, `createPayPalPaymentMethod`, `createPaymentGroupMember`, `expirePaymentGroupMember` |
 | `PaymentGatewayConfigServiceHandlers` | 1 | `updatePaymentGatewayConfigType` |
+| `GlPostingServiceHandlers` | 20 | `postFinAccountTransToGl`, `createAcctgTransForSalesShipmentIssuance`, `createAcctgTransForCanceledSalesShipmentIssuance`, `createAcctgTransForInventoryItemCostChange`, `createAcctgTransForShipmentReceipt`, `createAcctgTransForWorkEffortIssuance`, `createAcctgTransForPhysicalInventoryVariance`, `createAcctgTransForWorkEffortInventoryProduced`, `createAcctgTransForWorkEffortCost`, `createAcctgTransForInventoryItemOwnerChange`, `createAcctgTransForFixedAssetMaintIssuance`, `createAcctgTransForCustomerReturnInvoice`, `createAcctgTransForPurchaseInvoice`, `createAcctgTransForSalesInvoice`, `createAcctgTransAndEntriesForIncomingPayment`, `createAcctgTransAndEntriesForOutgoingPayment`, `createAcctgTransAndEntriesForPaymentApplication`, `createAcctgTransAndEntriesForCustomerRefundPaymentApplication`, `revertAcctgTransOnCancelInvoice`, `revertAcctgTransOnRemovePaymentApplications` |
 
-GL自動仕訳のsimple 20件は意図的に未登録として404を返す。権限は、FinAccountの明示的な`acctgFinAcctPermissionCheck`でCREATE/UPDATEを照合し、その他はservicedefのpermission-service/main-actionまたはinvoke既定アクションに従う。FinAccount handlerは機密result entityを指定する。共通の割当表と除外理由は `unported.md` を参照。
+合計93件。GL自動仕訳20件も移植済み。commit ECA は invoice READY、received/sent payment、invoice payment application、および glAccountId 指定 FinAccountTrans の各条件を照合し、after-commit の `REQUIRES_NEW` で実行する。権限は、FinAccountの明示的な`acctgFinAcctPermissionCheck`でCREATE/UPDATEを照合し、その他はservicedefのpermission-service/main-actionまたはinvoke既定アクションに従う。FinAccount handlerは機密result entityを指定する。ECAの未配線元は `unported.md` を参照。
 
 ### 手書きサービスの権限割当
 
 | サービス群 | 権限 |
 | --- | --- |
 | FinAccount 27件 | 明示的な `acctgFinAcctPermissionCheck` は servicedef の `main-action` を適用: CREATE は `createFinAccount`, `createFinAccountTrans`, `createFinAccountRole`, `createFinAccountAuth`, `depositWithdrawPayments`、UPDATE は `updateFinAccount`, `setFinAccountTransStatus`, `reconcileFinAccountTrans`, `assignGlRecToFinAccTrans`, `removeFinAccountTransFromReconciliation`, `cancelBankReconciliation`。他の mutation は `ACCOUNTING_CREATE` / `ACCOUNTING_UPDATE`、読取6件は `ACCOUNTING_VIEW`。`createPaymentAndFinAccountTrans` は `ACCOUNTING_CREATE`。全27 handlerに機密な `FinAccount` / `FinAccountTrans` / `FinAccountAuth` / `FinAccountRole` を `sensitiveResultEntity` として設定し、`ACCOUNTING_SENSITIVE_VIEW` または `ACCOUNTING_ADMIN` も必須とする。 |
-| GeneralLedger 19件 | `basicGeneralLedgerPermissionCheck` は `ACCOUNTING_{CREATE,UPDATE,DELETE,VIEW}`。`acctgTransactionPermissionCheck` を指定する `createAcctgTransAndEntries` / `completeAcctgTransEntries` は `ACCTG_ATX_CREATE` / `ACCTG_ATX_UPDATE`。 |
+| GeneralLedger 19件 / GL posting 20件 | `basicGeneralLedgerPermissionCheck` は `ACCOUNTING_{CREATE,UPDATE,DELETE,VIEW}`。`acctgTransactionPermissionCheck` を指定する `createAcctgTransAndEntries` / `completeAcctgTransEntries` は `ACCTG_ATX_CREATE` / `ACCTG_ATX_UPDATE`。GL posting simple は servicedef の auth/main-action に従う。 |
 | AcctgTrans 8件 | `acctgTransactionPermissionCheck` の `main-action` に従い `ACCTG_ATX_CREATE` / `ACCTG_ATX_UPDATE` / `ACCTG_ATX_DELETE`。permission-service のない読取系は `ACCOUNTING_VIEW`。 |
 | PermissionServices 13件 | `mainAction` を受け、`ACCOUNTING_*`、`ACCOUNTING_ROLE_*`、`ACCOUNTING_COMM_*`、`ACCOUNTING_FX_*`、`ACCTG_PREF_*`、`ACCTG_ATX_*` authorityから `hasPermission` / `failMessage` を返す。`ADMIN` は該当actionを包含する。 |
 | PaymentMethod 5件 / GatewayConfig 1件 | servicedefに個別permission-serviceがないため、handlerのCREATE/UPDATE/VIEW actionで `ACCOUNTING_*` を要求。機密entityのhandlerには `sensitiveResultEntity` も適用。 |
@@ -64,7 +65,7 @@ GL自動仕訳のsimple 20件は意図的に未登録として404を返す。権
 ## 5. 依存と Port 境界
 
 - 受注・請求関連の呼出し境界: `OrderPort`、`ProductPort` と `adapter/local`。
-- Accounting 外の service は Port を介して接続する。未移植 Java/Groovy、GL 自動仕訳は未呼出し。Port 実装・境界の現況は `migration/accounting-springboot/src/main/java/org/apache/ofbiz/migration/accounting/` を参照。
+- Accounting 外の service は Port を介して接続する。未移植 Java/Groovy service と未配線 ECA 起動元は呼び出さない。Port 実装・境界の現況は `migration/accounting-springboot/src/main/java/org/apache/ofbiz/migration/accounting/` を参照。
 - 共通基盤の entity-auto カタログ・採番・セキュリティ・multi API は利用するが、共通基盤ソースは変更しない。
 
 ## 6. テストと受け入れ基準
@@ -82,7 +83,8 @@ simpleサービスは `GeneralLedgerServicesTest`, `FinAccountServicesTest`, `Ac
 | AC-05 | 不正遷移・過剰消込・再請求と multi rollback | `AccountingFlowTest` |
 | AC-06 | local/test HTTP、postgres HTTPS、Swagger local-only | `HttpsSecurityTest`, `SpringdocProfileTest` |
 | AC-07 | PostgreSQL で schema と CRUD が動作する | `PostgresSmokeTest` |
-| AC-08 | simple-method 73件が登録され、除外GL 20件は未登録 | `AccountingCatalogTest.simpleServicesMatchTheServicedefRegistrationScope` |
+| AC-08 | simple-method 93件がすべて登録される | `AccountingCatalogTest.allSimpleServicesAreRegistered` |
+| AC-09 | GL postingのAccounting起動元ECA、仕訳伝票と借貸一致を確認 | `GlPostingServicesTest` |
 
 主要な受入れ基準の実行状況は `review.md` に記録する。
 

@@ -45,6 +45,7 @@ public class AccountingServiceHandlers {
     private final ServiceHandlerRegistry registry;
     private final OrderPort orders;
     private final ProductPort products;
+    private final CommitGlPostingEca glPostingEca;
 
     public AccountingServiceHandlers(
             EntityManager entityManager,
@@ -52,13 +53,15 @@ public class AccountingServiceHandlers {
             SequenceService sequences,
             ServiceHandlerRegistry registry,
             OrderPort orders,
-            ProductPort products) {
+            ProductPort products,
+            CommitGlPostingEca glPostingEca) {
         this.entityManager = entityManager;
         this.entities = entities;
         this.sequences = sequences;
         this.registry = registry;
         this.orders = orders;
         this.products = products;
+        this.glPostingEca = glPostingEca;
     }
 
     @PostConstruct
@@ -127,6 +130,10 @@ public class AccountingServiceHandlers {
             set(invoice, "statusId", "INVOICE_PAID");
             set(invoice, "paidDate", now());
             addInvoiceStatus(invoice, "INVOICE_PAID", null);
+        }
+        if ("INVOICE_READY".equals(newStatusId)) {
+            glPostingEca.invoiceReady(text(value(invoice, "invoiceId")),
+                    text(value(invoice, "invoiceTypeId")), oldStatusId);
         }
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("oldStatusId", oldStatusId);
@@ -302,6 +309,7 @@ public class AccountingServiceHandlers {
         setDefault(payment, "statusId", "PMNT_NOT_PAID");
         setDefault(payment, "effectiveDate", now());
         entityManager.persist(payment);
+        glPostingEca.paymentCreated(paymentId, text(value(payment, "statusId")));
         return Map.of("paymentId", paymentId);
     }
 
@@ -355,6 +363,8 @@ public class AccountingServiceHandlers {
         setIfWritable(application, "invoiceId", input.get("invoiceId"));
         set(application, "amountApplied", amount);
         entityManager.persist(application);
+        glPostingEca.paymentApplicationCreated(text(value(application, "paymentApplicationId")),
+                invoiceId, text(value(payment, "paymentTypeId")));
         if (invoice != null && "INVOICE_READY".equals(value(invoice, "statusId"))
                 && money(invoiceNotApplied(invoice)).signum() == 0) {
             requireValidChange("INVOICE_READY", "INVOICE_PAID");
@@ -387,6 +397,7 @@ public class AccountingServiceHandlers {
             }
         }
         set(payment, "statusId", statusId);
+        glPostingEca.paymentStatusChanged(text(value(payment, "paymentId")), oldStatusId, statusId);
         return Map.of("oldStatusId", oldStatusId);
     }
 

@@ -10,9 +10,9 @@
 | entity-auto | 386 | AccountingCatalogRegistrar に登録 |
 | groovy | 88 | 主要フロー 6 本を移植、82 本未移植 |
 | java | 109 | 主要フロー 2 本を移植、107 本未移植 |
-| simple 合計 | 93 | 73本を移植、GL自動仕訳20本を意図的に除外 |
-| simple: 移植済み | 73 | FinAccount 27、GL 19、Permission 13、AcctgTrans 8、PaymentMethod 5、GatewayConfig 1 |
-| simple: GL 自動仕訳除外 | 20 | 意図的に未登録・404 |
+| simple 合計 | 93 | 全93本を移植 |
+| simple: 移植済み | 93 | FinAccount 27、GL 39、Permission 13、AcctgTrans 8、PaymentMethod 5、GatewayConfig 1 |
+| simple: 未移植 | 0 | GL 自動仕訳 simple を含め全件移植 |
 | group | 10 | 未移植 |
 | interface | 19 | 未移植 |
 | view-entity | 40 | 未移植（JPA view 化なし） |
@@ -233,36 +233,13 @@
 | `updatePartyTaxAuthInfo` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/tax/TaxAuthorityServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `createCustomerTaxAuthInfo` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/tax/TaxAuthorityServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 
-## simple サービス（未移植の GL 自動仕訳 20 本のみ）
+## GL 自動仕訳 simple services
 
-その他の simple サービス73本は Java handler として移植済み。servicedef 由来の期待集合で登録を検証し、以下20本は未登録・404とする。
+GL 自動仕訳 simple 20 本を含む全93本は Java handler として移植する。servicedef 由来の期待集合で93/93件の登録を検証する。出荷・入荷・在庫・作業・固定資産、未移植 Java `cancelInvoice` / `removePaymentApplication` から起動するECAは未配線だが、関連 service は API handler として登録する。
 
-### GL 自動仕訳 simple 20 本（意図的除外）
+### GL 自動仕訳の未配線 ECA
 
-GL 自動仕訳・転記は未移植 Java/Groovy 呼び出しや会計ポスティング副作用を含むため、handler を登録せず API は404とする。
-
-| service name | engine | location | 理由 |
-| --- | --- | --- | --- |
-| `postFinAccountTransToGl` | simple | `component://accounting/minilang/finaccount/FinAccountGlPostServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransForSalesShipmentIssuance` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransForCanceledSalesShipmentIssuance` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransForInventoryItemCostChange` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransForShipmentReceipt` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransForWorkEffortIssuance` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransForPhysicalInventoryVariance` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransForWorkEffortInventoryProduced` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransForWorkEffortCost` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransForInventoryItemOwnerChange` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransAndEntriesForIncomingPayment` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransForFixedAssetMaintIssuance` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransForCustomerReturnInvoice` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransForPurchaseInvoice` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransForSalesInvoice` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransAndEntriesForOutgoingPayment` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransAndEntriesForPaymentApplication` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `createAcctgTransAndEntriesForCustomerRefundPaymentApplication` | simple | `component://accounting/minilang/ledger/GeneralLedgerServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `revertAcctgTransOnCancelInvoice` | simple | `component://accounting/minilang/ledger/AcctgTransServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
-| `revertAcctgTransOnRemovePaymentApplications` | simple | `component://accounting/minilang/ledger/AcctgTransServices.xml` | GL 自動仕訳を対象外とする明示的判断 |
+invoice READY、payment received/sent、payment application、FinAccountTrans の GL account 指定に伴う Accounting 内の commit ECA は after-commit の新規トランザクションとして移植した。出荷・入荷・在庫・作業・固定資産コンポーネントが起動元となる ECA、および未移植 Java `cancelInvoice` / `removePaymentApplication` が起動する reversal ECA は配線していない。関連 simple service は API handler として直接利用できる。
 
 ## group / interface
 
@@ -1120,9 +1097,9 @@ GL 自動仕訳・転記は未移植 Java/Groovy 呼び出しや会計ポステ�
 ## 主要フロー／simple サービス内で省略した OFBiz 分岐
 
 - 主要 invoice/payment flow: party invoice prefix と個別採番、承認時 payment application matching/capture、order adjustments/billing account/contact-mech/shipment/payment-preference/fees、GL posting/reversal、purchase/return order。
-- 未移植 simple services: 下流の GL 自動仕訳・未移植 Java/Groovy・他コンポーネント service 呼出しは実行していない。
+- simple services: `getPartyAccountingPreferences` Groovy service は公開登録せず、PartyAcctgPreference と親組織への `GROUP_ROLLUP` fallback を持つ内部 helper として利用する。未移植 Java/Groovy・他コンポーネント service 呼出しは実行していない。
 - 再請求: 未請求数量のない受注は追加請求を生成しない。
 - `updatePaymentMethodAddress`: 住所履歴更新を委譲する未移植の `createUpdatePaymentMethodAndCreditCard` Java service 呼び出しのみを省略。PaymentMethod address の他の各 simple handler は実装済み。
-- `GeneralLedgerServices.xml`: 為替レート取得と通貨換算、`GROUP_ROLLUP` 親組織への集計、未移植 GL 自動仕訳サービス呼び出しは省略。期間締めに伴う自動仕訳・一部の account posting configuration／error journal 分岐も未移植。
-- `AcctgTransServices.xml`: 外貨換算、関連組織の `GROUP_ROLLUP` 集計、posting configuration に基づく自動仕訳と error journal の生成は省略。
-- `FinAccountServices.xml`: `getFinAccountTransRunningTotalAndBalances` が呼ぶ未移植 Groovy `getPartyAccountingPreferences` は実行せず、`PartyAcctgPreference` の直接参照で基準通貨を選ぶ（locale による OFBiz 通貨書式は未移植）。`depositWithdrawPayments` の `checkAndCreateBatchForValidPayments` 呼び出しは未移植のため、`groupInOneTransaction=Y` でも PaymentGroup の作成は行わない。`updatePayment` Groovy service 呼び出しは Payment の FinAccountTrans 関連付けのみを直接更新し、service 固有の処理/ECA は実行しない。`postFinAccountTransToGl` の GL 自動仕訳と外貨換算は省略した。
+- `GeneralLedgerServices.xml`: 外貨換算、`GROUP_ROLLUP` 親組織への ledger 集計、期間締めに伴う自動仕訳、一部の account posting configuration／error journal 分岐は未移植。起動元が Accounting 内にない inventory/shipment/work-effort/fixed-asset ECA は未配線。
+- `AcctgTransServices.xml`: 外貨換算、関連組織の `GROUP_ROLLUP` 集計、posting configuration に基づく自動仕訳と error journal の生成は省略。`revertAcctgTransOnCancelInvoice` / `revertAcctgTransOnRemovePaymentApplications` のECA起動元 Java service は未移植のため未配線。
+- `FinAccountServices.xml`: `getFinAccountTransRunningTotalAndBalances` は `getPartyAccountingPreferences` の代わりに内部 helper を使う（locale による OFBiz 通貨書式は未移植）。`depositWithdrawPayments` の `checkAndCreateBatchForValidPayments` 呼び出しは未移植のため、`groupInOneTransaction=Y` でも PaymentGroup の作成は行わない。`updatePayment` Groovy service 呼び出しは Payment の FinAccountTrans 関連付けのみを直接更新し、service 固有の処理/ECA は実行しない。`postFinAccountTransToGl` は移植済み。

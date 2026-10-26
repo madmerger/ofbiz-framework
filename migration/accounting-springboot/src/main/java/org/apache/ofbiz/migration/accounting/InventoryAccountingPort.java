@@ -27,4 +27,6 @@ public interface InventoryAccountingPort {
     List<Map<String, Object>> findProductInventoryItems();
 
     BigDecimal averageCost(Map<String, Object> inventoryItem);
+
+    Map<String, Object> createInventoryItemDetail(Map<String, Object> input);
 }

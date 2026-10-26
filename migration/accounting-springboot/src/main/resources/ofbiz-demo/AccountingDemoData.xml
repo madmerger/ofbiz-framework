@@ -5,6 +5,37 @@
     <PartyRole partyId="MIG_DEMO_CUSTOMER" roleTypeId="CUSTOMER"/>
     <PartyRole partyId="MIG_DEMO_CUSTOMER" roleTypeId="BILL_TO_CUSTOMER"/>
     <PartyRole partyId="MIG_DEMO_VENDOR" roleTypeId="BILL_FROM_VENDOR"/>
+    <PartyRole partyId="MIG_DEMO_VENDOR" roleTypeId="INTERNAL_ORGANIZATIO"/>
+    <PartyAcctgPreference partyId="MIG_DEMO_VENDOR" baseCurrencyUomId="USD" cogsMethodId="COGS_AVG_COST"
+                          enableAccounting="Y"/>
+    <GlAccount glAccountId="120000" accountCode="120000" glAccountClassId="CURRENT_ASSET"
+               glAccountTypeId="ACCOUNTS_RECEIVABLE" glResourceTypeId="MONEY"
+               accountName="ACCOUNTS RECEIVABLE"/>
+    <GlAccount glAccountId="126000" accountCode="126000" glAccountClassId="CURRENT_LIABILITY"
+               glAccountTypeId="ACCREC_UNAPPLIED" glResourceTypeId="MONEY"
+               accountName="ACCOUNTS RECEIVABLE UNAPPLIED"/>
+    <GlAccount glAccountId="122000" accountCode="122000" glAccountClassId="CURRENT_ASSET"
+               glResourceTypeId="MONEY" accountName="PAYMENT CLEARING"/>
+    <GlAccount glAccountId="400000" accountCode="400000" glAccountClassId="REVENUE"
+               glResourceTypeId="MONEY" accountName="SALES"/>
+    <GlAccountOrganization organizationPartyId="MIG_DEMO_VENDOR" glAccountId="120000"
+                           fromDate="2001-01-01 00:00:00.0"/>
+    <GlAccountOrganization organizationPartyId="MIG_DEMO_VENDOR" glAccountId="126000"
+                           fromDate="2001-01-01 00:00:00.0"/>
+    <GlAccountOrganization organizationPartyId="MIG_DEMO_VENDOR" glAccountId="122000"
+                           fromDate="2001-01-01 00:00:00.0"/>
+    <GlAccountOrganization organizationPartyId="MIG_DEMO_VENDOR" glAccountId="400000"
+                           fromDate="2001-01-01 00:00:00.0"/>
+    <GlAccountTypeDefault organizationPartyId="MIG_DEMO_VENDOR"
+                          glAccountTypeId="ACCOUNTS_RECEIVABLE" glAccountId="120000"/>
+    <GlAccountTypeDefault organizationPartyId="MIG_DEMO_VENDOR"
+                          glAccountTypeId="ACCREC_UNAPPLIED" glAccountId="126000"/>
+    <GlAccountTypeDefault organizationPartyId="MIG_DEMO_VENDOR"
+                          glAccountTypeId="SALES_ACCOUNT" glAccountId="400000"/>
+    <PaymentGlAccountTypeMap organizationPartyId="MIG_DEMO_VENDOR"
+                              paymentTypeId="CUSTOMER_PAYMENT" glAccountTypeId="ACCREC_UNAPPLIED"/>
+    <PaymentMethodTypeGlAccount organizationPartyId="MIG_DEMO_VENDOR"
+                                paymentMethodTypeId="CREDIT_CARD" glAccountId="122000"/>
     <Product productId="MIG_DEMO_PRODUCT_1" productTypeId="FINISHED_GOOD" internalName="Demo item one" description="Demo item one"/>
     <Product productId="MIG_DEMO_PRODUCT_2" productTypeId="FINISHED_GOOD" internalName="Demo item two" description="Demo item two"/>
     <ProductStore productStoreId="MIG_DEMO_STORE" storeName="Migration demo store" payToPartyId="MIG_DEMO_VENDOR" defaultCurrencyUomId="USD"/>

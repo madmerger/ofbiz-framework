@@ -56,18 +56,21 @@ public class FinAccountServiceHandlers {
     private final SequenceService sequences;
     private final MigrationServiceDispatcher dispatcher;
     private final ServiceHandlerRegistry registry;
+    private final CommitGlPostingEca glPostingEca;
 
     public FinAccountServiceHandlers(
             EntityManager entityManager,
             EntityRegistry entities,
             SequenceService sequences,
             MigrationServiceDispatcher dispatcher,
-            ServiceHandlerRegistry registry) {
+            ServiceHandlerRegistry registry,
+            CommitGlPostingEca glPostingEca) {
         this.entityManager = entityManager;
         this.entities = entities;
         this.sequences = sequences;
         this.dispatcher = dispatcher;
         this.registry = registry;
+        this.glPostingEca = glPostingEca;
     }
 
     @PostConstruct
@@ -189,6 +192,7 @@ public class FinAccountServiceHandlers {
         entities.set(trans, "amount", round(amount));
         entityManager.persist(trans);
         updateBalancesForApprovedTransaction(trans);
+        glPostingEca.finAccountTransactionCreated(id, text(input.get("glAccountId")));
         return Map.of("finAccountTransId", id);
     }
 

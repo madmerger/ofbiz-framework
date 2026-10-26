@@ -94,23 +94,13 @@ class AccountingCatalogTest {
 
     @ParameterizedTest(name = "Accounting simple service {0}")
     @MethodSource("simpleServicesFromDefinitions")
-    void simpleServicesMatchTheServicedefRegistrationScope(String name, boolean excluded) throws Exception {
-        if (excluded) {
-            assertTrue(registry.handler("accounting", name).isEmpty(), name);
-            mockMvc.perform(post("/api/accounting/services/" + name)
-                            .with(httpBasic("acct-admin", "test"))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{}"))
-                    .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status()
-                            .isNotFound());
-        } else {
-            assertTrue(registry.handler("accounting", name).isPresent(), name);
-            assertTrue(mockMvc.perform(post("/api/accounting/services/" + name)
-                            .with(httpBasic("acct-admin", "test"))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{}"))
-                    .andReturn().getResponse().getStatus() != 404, name);
-        }
+    void allSimpleServicesAreRegistered(String name) throws Exception {
+        assertTrue(registry.handler("accounting", name).isPresent(), name);
+        assertTrue(mockMvc.perform(post("/api/accounting/services/" + name)
+                        .with(httpBasic("acct-admin", "test"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andReturn().getResponse().getStatus() != 404, name);
     }
 
     @Test
@@ -242,17 +232,12 @@ class AccountingCatalogTest {
                     Node node = services.item(index);
                     if (node instanceof Element service && "simple".equals(service.getAttribute("engine"))) {
                         String name = service.getAttribute("name");
-                        boolean excluded = name.startsWith("createAcctgTransFor")
-                                || name.startsWith("createAcctgTransAndEntriesFor")
-                                || name.startsWith("revertAcctgTransOn")
-                                || "postFinAccountTransToGl".equals(name);
-                        result.add(Arguments.of(name, excluded));
+                        result.add(Arguments.of(name));
                     }
                 }
             }
         }
         assertEquals(93, result.size());
-        assertEquals(20, result.stream().filter(argument -> (boolean) argument.get()[1]).count());
         return result.stream();
     }
 

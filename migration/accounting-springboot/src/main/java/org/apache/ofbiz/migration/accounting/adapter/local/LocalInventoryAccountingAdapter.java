@@ -25,6 +25,7 @@ import java.util.Map;
 import org.apache.ofbiz.migration.accounting.AccountingEntityQueries;
 import org.apache.ofbiz.migration.accounting.InventoryAccountingPort;
 import org.apache.ofbiz.migration.common.EntityRegistry;
+import org.apache.ofbiz.migration.common.SequenceService;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,10 +34,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class LocalInventoryAccountingAdapter implements InventoryAccountingPort {
     private final EntityRegistry entities;
     private final EntityManager entityManager;
+    private final SequenceService sequences;
 
-    public LocalInventoryAccountingAdapter(EntityRegistry entities, EntityManager entityManager) {
+    public LocalInventoryAccountingAdapter(
+            EntityRegistry entities, EntityManager entityManager, SequenceService sequences) {
         this.entities = entities;
         this.entityManager = entityManager;
+        this.sequences = sequences;
     }
 
     @Override
@@ -91,6 +95,39 @@ public class LocalInventoryAccountingAdapter implements InventoryAccountingPort 
             }
         }
         return decimal(inventoryItem.get("unitCost"));
+    }
+
+    @Override
+    public Map<String, Object> createInventoryItemDetail(Map<String, Object> input) {
+        Object detail = entities.newEntity(entities.entityClass("InventoryItemDetail"));
+        Map<String, Object> fields = entities.toMap(detail);
+        for (String field : fields.keySet()) {
+            if (input.containsKey(field) && input.get(field) != null) {
+                entities.set(detail, field, input.get(field));
+            }
+        }
+        String inventoryItemId = input.get("inventoryItemId").toString();
+        String sequenceId = sequences.nextId("InventoryItemDetail");
+        entities.set(detail, "inventoryItemId", inventoryItemId);
+        entities.set(detail, "inventoryItemDetailSeqId", sequenceId);
+        Object issuanceId = input.get("itemIssuanceId");
+        if (issuanceId != null) {
+            Object issuance = entities.findByPrimaryKey(entities.entityClass("ItemIssuance"),
+                    Map.of("itemIssuanceId", issuanceId));
+            if (issuance != null) {
+                entities.set(detail, "effectiveDate", entities.get(issuance, "issuedDateTime"));
+            }
+        } else {
+            entities.set(detail, "effectiveDate", new Date());
+        }
+        for (String field : List.of(
+                "availableToPromiseDiff", "quantityOnHandDiff", "accountingQuantityDiff")) {
+            if (entities.get(detail, field) == null) {
+                entities.set(detail, field, BigDecimal.ZERO);
+            }
+        }
+        entityManager.persist(detail);
+        return Map.of("inventoryItemDetailSeqId", sequenceId);
     }
 
     private static Date date(Object value) {

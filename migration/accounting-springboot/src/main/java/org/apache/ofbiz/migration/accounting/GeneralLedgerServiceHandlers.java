@@ -99,7 +99,7 @@ public class GeneralLedgerServiceHandlers {
     }
 
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:25. */
-    private Map<String, Object> quickCreate(Map<String, Object> input) {
+    Map<String, Object> quickCreate(Map<String, Object> input) {
         String transactionId = createTransactionHeader(input);
         Map<String, Object> debitEntry = new LinkedHashMap<>(input);
         debitEntry.put("acctgTransId", transactionId);
@@ -229,7 +229,7 @@ public class GeneralLedgerServiceHandlers {
     }
 
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:199. */
-    private Map<String, Object> createTransactionAndEntries(Map<String, Object> input) {
+    Map<String, Object> createTransactionAndEntries(Map<String, Object> input) {
         Object rawEntries = input.get("acctgTransEntries");
         if (!(rawEntries instanceof List<?> entryValues) || entryValues.isEmpty()) {
             return Map.of();
@@ -560,7 +560,7 @@ public class GeneralLedgerServiceHandlers {
     }
 
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:333. */
-    private Map<String, Object> getGlAccountFromType(Map<String, Object> input) {
+    Map<String, Object> getGlAccountFromType(Map<String, Object> input) {
         String organization = required(input, "organizationPartyId");
         String type = text(input.get("glAccountTypeId"));
         Object accountId = null;
@@ -691,7 +691,7 @@ public class GeneralLedgerServiceHandlers {
     }
 
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:2459. */
-    private Map<String, Object> copyTransaction(Map<String, Object> input) {
+    Map<String, Object> copyTransaction(Map<String, Object> input) {
         String sourceId = required(input, "fromAcctgTransId");
         Object source = requireOne("AcctgTrans", Map.of("acctgTransId", sourceId));
         Map<String, Object> header = new LinkedHashMap<>(entities.toMap(source));

@@ -67,6 +67,13 @@
      "expected": {"status": 409, "body": {"responseMessage": "error", "errors": "ServiceValueFound を含む"}}},
     {"id": "ACCOUNTING-E2E-21", "name": "multi: 全件ロールバック（先行 2 件も残らない）", "section": "multi",
      "request": {"method": "GET", "path": "/api/accounting/entities/Invoice/one?invoiceId=E2E_ROLLBACK_A", "user": "acct-clerk", "body": null},
-     "expected": {"status": 404, "followUp": {"method": "GET", "path": "/api/accounting/entities/Invoice/one?invoiceId=E2E_ROLLBACK_B", "status": 404}}}
+     "expected": {"status": 404, "followUp": {"method": "GET", "path": "/api/accounting/entities/Invoice/one?invoiceId=E2E_ROLLBACK_B", "status": 404}}},
+    {"id": "ACCOUNTING-E2E-22", "name": "請求書承認で売上仕訳が自動作成", "section": "GL 自動仕訳",
+     "request": {"method": "GET", "path": "/api/accounting/entities/AcctgTrans?invoiceId=${invoiceId}&acctgTransTypeId=SALES_INVOICE", "user": "acct-clerk", "body": null},
+     "expected": {"status": 200, "body": "acctgTransTypeId=SALES_INVOICE の行が 1 件"}},
+    {"id": "ACCOUNTING-E2E-23", "name": "売上仕訳の借方・貸方が一致", "section": "GL 自動仕訳",
+     "request": {"method": "GET", "path": "/api/accounting/entities/AcctgTransEntry?acctgTransId=${acctgTransId}", "user": "acct-clerk", "body": null},
+     "setup": {"method": "GET", "path": "/api/accounting/entities/AcctgTrans?invoiceId=${invoiceId}&acctgTransTypeId=SALES_INVOICE", "user": "acct-clerk", "capture": {"acctgTransId": "$[0].acctgTransId"}},
+     "expected": {"status": 200, "body": {"debitTotal": 30.00, "creditTotal": 30.00}}}
   ]
 }
