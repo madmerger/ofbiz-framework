@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:party-local;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+server:
+  forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      internal-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}'
+migration:
+  security:
+    require-https: false
+    users:
+      - username: admin
+        password: ${PARTY_DEMO_PASSWORD}
+        authorities: [OFBTOOLS_VIEW, OFBTOOLS_ADMIN, PARTYMGR_ADMIN]
+      - username: readonly
+        password: ${PARTY_DEMO_PASSWORD}
+        authorities: [OFBTOOLS_VIEW, PARTYMGR_VIEW]
+      - username: nopartymgr
+        password: ${PARTY_DEMO_PASSWORD}
+        authorities: [OFBTOOLS_VIEW]
+      - username: sensitive
+        password: ${PARTY_DEMO_PASSWORD}
+        authorities: [OFBTOOLS_VIEW, PARTYMGR_VIEW, PARTYMGR_SENSITIVE_VIEW]
+      - username: writer
+        password: ${PARTY_DEMO_PASSWORD}
+        authorities: [OFBTOOLS_VIEW, PARTYMGR_VIEW, PARTYMGR_CREATE, PARTYMGR_UPDATE, PARTYMGR_DELETE]
