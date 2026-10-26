@@ -1,3 +1,21 @@
+/*******************************************************************************
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *******************************************************************************/
 package org.apache.ofbiz.migration.marketing.service;
 
 import java.security.SecureRandom;
@@ -126,14 +144,33 @@ public class ContactListServices {
         Timestamp fromDate = MarketingData.timestamp(input, "fromDate");
         String code = MarketingData.text(input, "optInVerifyCode");
         data.require(ContactList.class, Map.of("contactListId", contactListId));
-        boolean valid = code != null && fromDate != null && !data.query(ContactListPartyStatus.class,
-                "select s from ContactListPartyStatus s where s.contactListId = ?1 and s.partyId = ?2"
-                        + " and s.optInVerifyCode = ?3 and s.fromDate = ?4", contactListId, partyId, code, fromDate)
-                .isEmpty();
+        boolean valid = code != null && fromDate != null
+                && data.one(ContactListParty.class,
+                                Map.of("contactListId", contactListId, "partyId", partyId, "fromDate", fromDate))
+                        .map(current -> allowedVerifiedTransitions(current.getStatusId())
+                                .contains(MarketingData.text(input, "statusId")))
+                        .orElse(false)
+                && data.first(ContactListPartyStatus.class,
+                                "select s from ContactListPartyStatus s where s.contactListId = ?1 and s.partyId = ?2"
+                                        + " and s.fromDate = ?3 and s.statusId = ?4 order by s.statusDate desc",
+                                contactListId, partyId, fromDate, PENDING)
+                        .map(ContactListPartyStatus::getOptInVerifyCode)
+                        .filter(code::equals)
+                        .isPresent();
         if (!valid) {
             throw new MigrationException(HttpStatus.BAD_REQUEST, "MarketingContactListInvalidVerifyCode");
         }
         return updateContactListParty(input);
+    }
+
+    private static Set<String> allowedVerifiedTransitions(String currentStatusId) {
+        if (PENDING.equals(currentStatusId)) {
+            return Set.of(ACCEPTED, REJECTED);
+        }
+        if (UNSUBS_PENDING.equals(currentStatusId)) {
+            return Set.of(UNSUBSCRIBED);
+        }
+        return Set.of();
     }
 
     public Map<String, Object> unsubscribeContactListParty(Map<String, Object> input) {
