@@ -170,7 +170,7 @@ public class GlPostingServiceHandlers {
             return Map.of();
         }
         String organization = text(value(invoice,
-                customerReturn ? "partyId" : purchase ? "partyIdTo" : "partyIdFrom"));
+                customerReturn || purchase ? "partyId" : "partyIdFrom"));
         String currency = text(value(invoice, "currencyUomId"));
         List<Map<String, Object>> entries = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
