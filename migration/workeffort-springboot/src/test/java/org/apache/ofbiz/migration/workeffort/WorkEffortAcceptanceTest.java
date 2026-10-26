@@ -458,6 +458,111 @@ class WorkEffortAcceptanceTest {
     @Test
     @Transactional
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
+    void invoiceBillingIncludesAllTimeEntriesBeyondOneHundred() {
+        Timestamp now = Timestamp.from(Instant.now().minusSeconds(60));
+        persistWorkEffort("WE-INVOICE-BULK", "Bulk invoice task", now);
+        persistTimesheet("TS-INVOICE-BULK", "DemoEmployee", "TIMESHEET_IN_PROCESS");
+        persistInvoice("INV-INVOICE-BULK", "INVOICE_IN_PROCESS");
+        persistRateAmount("WE-INVOICE-BULK", now);
+        for (int index = 0; index < 105; index++) {
+            persistTimeEntry("TE-INV-BULK-" + String.format("%03d", index), "TS-INVOICE-BULK",
+                    "WE-INVOICE-BULK", 1.0d, "Bulk entry " + index, null, now);
+        }
+
+        services.execute("addTimesheetToInvoice", Map.of(
+                "timesheetId", "TS-INVOICE-BULK", "invoiceId", "INV-INVOICE-BULK"));
+
+        Long invoiceItemCount = entityManager.createQuery(
+                "select count(item) from InvoiceItem item where item.invoiceId = :invoiceId", Long.class)
+                .setParameter("invoiceId", "INV-INVOICE-BULK")
+                .getSingleResult();
+        Long linkedEntryCount = entityManager.createQuery(
+                "select count(entry) from TimeEntry entry where entry.timesheetId = :timesheetId "
+                        + "and entry.invoiceId = :invoiceId and entry.invoiceItemSeqId is not null",
+                Long.class)
+                .setParameter("timesheetId", "TS-INVOICE-BULK")
+                .setParameter("invoiceId", "INV-INVOICE-BULK")
+                .getSingleResult();
+        assertThat(invoiceItemCount).isEqualTo(105L);
+        assertThat(linkedEntryCount).isEqualTo(105L);
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
+    void invoiceCurrencyUsesPartyPreferenceOrUsdBeforeRateLookup() {
+        Timestamp now = Timestamp.from(Instant.now().minusSeconds(60));
+        persistPartyCurrency("DemoEmployee", null);
+        persistWorkEffort("WE-CUR-DEF", "Default currency task", now);
+        persistTimesheet("TS-CUR-DEF", "DemoEmployee", "TIMESHEET_IN_PROCESS");
+        persistRateAmount("WE-CUR-DEF", now, "USD", "125.00");
+        persistRateAmount("WE-CUR-DEF", now, "EUR", "999.00");
+        persistTimeEntry("TE-CUR-DEF", "TS-CUR-DEF",
+                "WE-CUR-DEF", 1.0d, "Default currency entry", null, now);
+
+        Map<String, Object> newInvoice = services.execute("addTimesheetToNewInvoice", Map.of(
+                "timesheetId", "TS-CUR-DEF",
+                "partyIdFrom", "DemoEmployee",
+                "partyId", "DemoEmployee"));
+        String newInvoiceId = (String) newInvoice.get("invoiceId");
+        assertThat(newInvoice.get("currencyUomId")).isEqualTo("USD");
+        assertInvoiceItemAmount(newInvoiceId, 125.0d);
+        assertTimeEntryInvoice("TE-CUR-DEF", newInvoiceId);
+
+        persistPartyCurrency("DemoEmployee", "EUR");
+        persistWorkEffort("WE-CUR-PREF", "Preferred currency task", now);
+        persistTimesheet("TS-CUR-PREF", "DemoEmployee", "TIMESHEET_IN_PROCESS");
+        persistInvoiceWithoutCurrency("INV-CUR-PREF", "INVOICE_IN_PROCESS", "DemoEmployee");
+        persistRateAmount("WE-CUR-PREF", now, "USD", "125.00");
+        persistRateAmount("WE-CUR-PREF", now, "EUR", "999.00");
+        persistTimeEntry("TE-CUR-PREF", "TS-CUR-PREF",
+                "WE-CUR-PREF", 1.0d, "Preferred currency entry", null, now);
+
+        Map<String, Object> existingInvoice = services.execute("addTimesheetToInvoice", Map.of(
+                "timesheetId", "TS-CUR-PREF",
+                "invoiceId", "INV-CUR-PREF"));
+        assertThat(existingInvoice.get("currencyUomId")).isEqualTo("EUR");
+        assertInvoiceItemAmount("INV-CUR-PREF", 999.0d);
+        assertTimeEntryInvoice("TE-CUR-PREF", "INV-CUR-PREF");
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
+    void invoiceServicesReturnBadRequestForMissingRequiredIds() throws Exception {
+        Timestamp now = Timestamp.from(Instant.now().minusSeconds(60));
+        persistWorkEffort("WE-INVOICE-REQUIRED", "Invoice validation task", now);
+        persistTimesheet("TS-INVOICE-REQUIRED", "DemoEmployee", "TIMESHEET_IN_PROCESS");
+
+        mockMvc.perform(post("/api/workeffort/services/addTimesheetToInvoice")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/workeffort/services/addTimesheetToNewInvoice")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/workeffort/services/addWorkEffortTimeToInvoice")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/workeffort/services/addWorkEffortTimeToNewInvoice")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/workeffort/services/addTimesheetToInvoice")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"timesheetId\":\"TS-INVOICE-REQUIRED\"}"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/workeffort/services/addWorkEffortTimeToInvoice")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"workEffortId\":\"WE-INVOICE-REQUIRED\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
     void timeEntryIdOnlyStatusChecksRejectUpdateAndDeleteForCompletedTimesheet() throws Exception {
         Timestamp now = Timestamp.from(Instant.now().minusSeconds(60));
         persistWorkEffort("WE-STATUS-GUARD", "Timesheet status guard", now);
@@ -692,13 +797,35 @@ class WorkEffortAcceptanceTest {
     }
 
     private void persistInvoice(String invoiceId, String statusId) {
+        persistInvoice(invoiceId, statusId, "USD", null);
+    }
+
+    private void persistInvoiceWithoutCurrency(String invoiceId, String statusId, String partyIdFrom) {
+        persistInvoice(invoiceId, statusId, null, partyIdFrom);
+    }
+
+    private void persistInvoice(
+            String invoiceId, String statusId, String currencyUomId, String partyIdFrom) {
         Object invoice = entities.newEntity(entities.entityClass("Invoice"));
         entities.set(invoice, "invoiceId", invoiceId);
         entities.set(invoice, "invoiceTypeId", "SALES_INVOICE");
         entities.set(invoice, "statusId", statusId);
-        entities.set(invoice, "currencyUomId", "USD");
+        if (currencyUomId != null) entities.set(invoice, "currencyUomId", currencyUomId);
+        if (partyIdFrom != null) entities.set(invoice, "partyIdFrom", partyIdFrom);
         entities.set(invoice, "invoiceDate", Timestamp.from(Instant.now()));
         entityManager.persist(invoice);
+    }
+
+    private void persistPartyCurrency(String partyId, String currencyUomId) {
+        Class<?> type = entities.entityClass("Party");
+        Object party = entities.findByPrimaryKey(type, Map.of("partyId", partyId));
+        if (party == null) {
+            party = entities.newEntity(type);
+            entities.set(party, "partyId", partyId);
+            entities.set(party, "partyTypeId", "PERSON");
+            entityManager.persist(party);
+        }
+        entities.set(party, "preferredCurrencyUomId", currencyUomId);
     }
 
     private void persistTimeEntry(
@@ -724,16 +851,28 @@ class WorkEffortAcceptanceTest {
     }
 
     private void persistRateAmount(String workEffortId, Timestamp fromDate) {
+        persistRateAmount(workEffortId, fromDate, "USD", "125.00");
+    }
+
+    private void persistRateAmount(
+            String workEffortId, Timestamp fromDate, String currencyUomId, String amount) {
         Object rate = entities.newEntity(entities.entityClass("RateAmount"));
         entities.set(rate, "workEffortId", workEffortId);
         entities.set(rate, "partyId", "DemoEmployee");
         entities.set(rate, "rateTypeId", "RATE_HOURLY");
-        entities.set(rate, "rateCurrencyUomId", "USD");
+        entities.set(rate, "rateCurrencyUomId", currencyUomId);
         entities.set(rate, "periodTypeId", "RATE_HOUR");
-        entities.set(rate, "rateAmount", new BigDecimal("125.00"));
+        entities.set(rate, "rateAmount", new BigDecimal(amount));
         entities.set(rate, "fromDate", fromDate);
         entities.set(rate, "emplPositionTypeId", "EMPLOYEE");
         entityManager.persist(rate);
+    }
+
+    private void assertInvoiceItemAmount(String invoiceId, double amount) {
+        List<?> items = entities.findByEquality(
+                entities.entityClass("InvoiceItem"), Map.of("invoiceId", invoiceId));
+        assertThat(items).hasSize(1);
+        assertThat(((Number) entities.get(items.get(0), "amount")).doubleValue()).isEqualTo(amount);
     }
 
     private void assertInvoiceItems(String invoiceId) {

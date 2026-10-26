@@ -19,6 +19,10 @@
 package org.apache.ofbiz.migration.workeffort;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import jakarta.persistence.metamodel.Attribute;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -883,23 +887,27 @@ public final class WorkEffortBusinessServices {
     }
 
     private Map<String, Object> addTimesheetToInvoice(String service, Map<String, ?> input) {
-        Object timesheet = findNullable("Timesheet", Map.of("timesheetId", input.get("timesheetId")));
+        String timesheetId = requiredInput(input, "timesheetId");
+        if (!"addTimesheetToNewInvoice".equals(service)) requiredInput(input, "invoiceId");
+        Object timesheet = findNullable("Timesheet", Map.of("timesheetId", timesheetId));
         if (timesheet == null) throw new MigrationException(HttpStatus.NOT_FOUND, "Timesheet not found");
         Map<String, Object> invoice = createInvoiceIfNeeded(service, input,
                 "addTimesheetToNewInvoice");
         if (invoice.isEmpty()) throw new MigrationException(HttpStatus.NOT_FOUND, "Invoice not found");
+        invoice = ensureInvoiceCurrency(invoice, input);
         addTimeEntryInvoiceItems(timesheet, null, invoice, input);
         return invoice;
     }
 
     private Map<String, Object> addWorkEffortTimeToInvoice(String service, Map<String, ?> input) {
-        Object workEffort = findNullable("WorkEffort", Map.of("workEffortId", input.get("workEffortId")));
+        String workEffortId = requiredInput(input, "workEffortId");
+        if (!"addWorkEffortTimeToNewInvoice".equals(service)) requiredInput(input, "invoiceId");
+        Object workEffort = findNullable("WorkEffort", Map.of("workEffortId", workEffortId));
         if (workEffort == null) throw new MigrationException(HttpStatus.NOT_FOUND, "WorkEffort not found");
         Map<String, Object> invoice = createInvoiceIfNeeded(service, input,
                 "addWorkEffortTimeToNewInvoice");
         if (invoice.isEmpty()) throw new MigrationException(HttpStatus.NOT_FOUND, "Invoice not found");
-        updateInvoiceCurrency(invoice, input);
-        invoice = invoices.findInvoice(string(invoice.get("invoiceId")));
+        invoice = ensureInvoiceCurrency(invoice, input);
         addTimeEntryInvoiceItems(null, workEffort, invoice, input);
         return invoice;
     }
@@ -917,18 +925,25 @@ public final class WorkEffortBusinessServices {
         return invoices.findInvoice(requestedInvoiceId);
     }
 
-    private void updateInvoiceCurrency(Map<String, Object> invoice, Map<String, ?> input) {
-        Object invoicePartyId = invoice.get("partyId");
-        Object party = invoicePartyId == null ? null
-                : findNullable("Party", Map.of("partyId", invoicePartyId));
-        String currencyUomId = party == null ? null : string(property(party, "preferredCurrencyUomId"));
-        if (currencyUomId == null) currencyUomId = string(invoice.get("currencyUomId"));
-        if (currencyUomId == null) currencyUomId = "USD";
+    private Map<String, Object> ensureInvoiceCurrency(Map<String, Object> invoice, Map<String, ?> input) {
+        String currencyUomId = string(invoice.get("currencyUomId"));
+        if (currencyUomId != null && !currencyUomId.isBlank()) return invoice;
+        currencyUomId = string(input.get("currencyUomId"));
+        if (currencyUomId == null || currencyUomId.isBlank()) {
+            String partyIdFrom = string(input.get("partyIdFrom"));
+            if (partyIdFrom == null || partyIdFrom.isBlank()) {
+                partyIdFrom = string(invoice.get("partyIdFrom"));
+            }
+            Object party = partyIdFrom == null ? null
+                    : findNullable("Party", Map.of("partyId", partyIdFrom));
+            currencyUomId = party == null ? null : string(property(party, "preferredCurrencyUomId"));
+        }
+        if (currencyUomId == null || currencyUomId.isBlank()) currencyUomId = "USD";
         Map<String, Object> update = new LinkedHashMap<>();
         update.put("invoiceId", invoice.get("invoiceId"));
         update.put("currencyUomId", currencyUomId);
-        update.put("invoiceDate", Timestamp.from(Instant.now()));
         invoices.updateInvoice(update);
+        return invoices.findInvoice(string(invoice.get("invoiceId")));
     }
 
     private void addTimeEntryInvoiceItems(
@@ -937,11 +952,9 @@ public final class WorkEffortBusinessServices {
             throw new MigrationException(HttpStatus.BAD_REQUEST, "Invoice is not in process");
         }
         String invoiceId = string(invoice.get("invoiceId"));
-        List<Object> timeEntries = new ArrayList<>(entities.findByEquality(
-                entities.entityClass("TimeEntry"),
-                timesheet != null
-                        ? Map.of("timesheetId", entities.get(timesheet, "timesheetId"))
-                        : Map.of("workEffortId", entities.get(workEffort, "workEffortId"))));
+        List<Object> timeEntries = findTimeEntries(timesheet != null
+                ? Map.of("timesheetId", entities.get(timesheet, "timesheetId"))
+                : Map.of("workEffortId", entities.get(workEffort, "workEffortId")));
         if (workEffort != null) {
             timeEntries.sort((first, second) -> String.valueOf(entities.get(first, "rateTypeId"))
                     .compareTo(String.valueOf(entities.get(second, "rateTypeId"))));
@@ -993,6 +1006,17 @@ public final class WorkEffortBusinessServices {
             timeEntryFields.put("invoiceItemSeqId", invoiceItem.get("invoiceItemSeqId"));
             dispatcher.execute("workeffort", "updateTimeEntry", timeEntryFields);
         }
+    }
+
+    private List<Object> findTimeEntries(Map<String, ?> filters) {
+        Class<?> type = entities.entityClass("TimeEntry");
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object> query = builder.createQuery(Object.class);
+        Root<?> root = query.from(type);
+        List<Predicate> predicates = new ArrayList<>();
+        filters.forEach((field, value) -> predicates.add(builder.equal(root.get(field), value)));
+        query.select(root).where(predicates.toArray(Predicate[]::new));
+        return new ArrayList<>(entityManager.createQuery(query).getResultList());
     }
 
     private Object findInvoiceItem(String invoiceId, BigDecimal amount, String description) {
@@ -1247,6 +1271,14 @@ public final class WorkEffortBusinessServices {
 
     private static String value(Map<String, ?> input, String name, String fallback) {
         return input.get(name) == null ? fallback : input.get(name).toString();
+    }
+
+    private static String requiredInput(Map<String, ?> input, String name) {
+        String value = string(input.get(name));
+        if (value == null || value.isBlank()) {
+            throw new MigrationException(HttpStatus.BAD_REQUEST, name + " is required");
+        }
+        return value;
     }
 
     private static String string(Object value) {
