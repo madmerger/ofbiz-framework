@@ -41,7 +41,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 @Component
-@Profile({"local", "test"})
+@Profile({"local", "test", "integration"})
 public class LocalSeedData implements CommandLineRunner {
     private static final Set<String> STATUS_TYPES =
             Set.of("ORDER_STATUS", "ORDER_ITEM_STATUS", "CUSTREQ_STTS", "REQUIREMENT_STATUS");

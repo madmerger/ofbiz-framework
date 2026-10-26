@@ -41,7 +41,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 @Component
-@Profile({"local", "test"})
+@Profile({"local", "test", "integration"})
 public class SeedDataLoader implements ApplicationRunner {
     private static final Logger LOG = LoggerFactory.getLogger(SeedDataLoader.class);
     private final EntityManager entityManager;

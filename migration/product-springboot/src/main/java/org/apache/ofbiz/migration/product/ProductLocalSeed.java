@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Profile("local & !postgres & !prod & !production")
+@Profile({"local & !postgres & !prod & !production", "integration"})
 public class ProductLocalSeed implements CommandLineRunner {
     private final EntityRegistry entities;
     private final EntityManager entityManager;
