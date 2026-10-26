@@ -32,7 +32,7 @@ class PostgresSmokeTest {
             new PostgreSQLContainer<>("postgres:16-alpine");
 
     @Test
-    void ac11_postgresContainerStarts() {
+    void ac11PostgresContainerStarts() {
         assertThat(POSTGRES.isRunning()).isTrue();
     }
 }

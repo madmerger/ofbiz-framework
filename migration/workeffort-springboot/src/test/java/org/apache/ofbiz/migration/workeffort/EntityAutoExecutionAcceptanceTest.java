@@ -25,7 +25,6 @@ import jakarta.persistence.metamodel.SingularAttribute;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -193,16 +192,16 @@ class EntityAutoExecutionAcceptanceTest {
                 || type.contains("float")) return 1.0;
         if (entityFieldType == Boolean.class || entityFieldType == boolean.class) return Boolean.TRUE;
         String sample = switch (name) {
-            case "partyId" -> "DemoEmployee";
-            case "userLoginId" -> "admin";
-            case "workEffortTypeId" -> "TASK";
-            case "roleTypeId" -> "CAL_OWNER";
-            case "currentStatusId" -> "CAL_CREATED";
-            case "statusId" -> "PRTYASGN_ASSIGNED";
-            case "scopeEnumId" -> "WES_PUBLIC";
-            case "currencyUomId", "rateCurrencyUomId" -> "USD";
-            case "uomId" -> "EA";
-            default -> "T" + Long.toString(unique, 36).toUpperCase();
+        case "partyId" -> "DemoEmployee";
+        case "userLoginId" -> "admin";
+        case "workEffortTypeId" -> "TASK";
+        case "roleTypeId" -> "CAL_OWNER";
+        case "currentStatusId" -> "CAL_CREATED";
+        case "statusId" -> "PRTYASGN_ASSIGNED";
+        case "scopeEnumId" -> "WES_PUBLIC";
+        case "currencyUomId", "rateCurrencyUomId" -> "USD";
+        case "uomId" -> "EA";
+        default -> "T" + Long.toString(unique, 36).toUpperCase();
         };
         int length = columnLength(entityType, name);
         return length == 1 ? "Y" : length > 0 && sample.length() > length ? sample.substring(0, length) : sample;
@@ -220,12 +219,12 @@ class EntityAutoExecutionAcceptanceTest {
         if (type == Float.class || type == float.class) return 1.0f;
         if (type == Boolean.class || type == boolean.class) return Boolean.TRUE;
         String value = switch (name) {
-            case "partyId" -> "DemoEmployee";
-            case "workEffortTypeId" -> "TASK";
-            case "roleTypeId" -> "CAL_OWNER";
-            case "currentStatusId" -> "CAL_CREATED";
-            case "statusId" -> "PRTYASGN_ASSIGNED";
-            default -> "F" + Long.toString(unique, 36).toUpperCase();
+        case "partyId" -> "DemoEmployee";
+        case "workEffortTypeId" -> "TASK";
+        case "roleTypeId" -> "CAL_OWNER";
+        case "currentStatusId" -> "CAL_CREATED";
+        case "statusId" -> "PRTYASGN_ASSIGNED";
+        default -> "F" + Long.toString(unique, 36).toUpperCase();
         };
         return length == 1 ? "Y" : length > 0 && value.length() > length ? value.substring(0, length) : value;
     }

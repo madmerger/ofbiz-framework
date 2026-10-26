@@ -91,9 +91,10 @@ public final class WorkEffortPermissionServices {
         String workEffortId = string(input.get("workEffortId"), null);
         if (workEffortId == null) return result(true, "");
         List<?> assignments = entities.findByEquality(
-                entities.entityClass("WorkEffortPartyAssignByRole"),
+                entities.entityClass("WorkEffortPartyAssignment"),
                 Map.of("workEffortId", workEffortId, "partyId", partyId));
-        return assignments.stream().anyMatch(this::isActive)
+        return assignments.stream().anyMatch(assignment -> isActive(assignment)
+                        && "CAL_OWNER".equals(string(entities.get(assignment, "roleTypeId"), "")))
                 ? result(true, "") : result(false, "Timesheet update permission denied");
     }
 

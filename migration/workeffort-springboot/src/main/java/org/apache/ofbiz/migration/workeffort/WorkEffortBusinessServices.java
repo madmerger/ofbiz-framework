@@ -201,7 +201,11 @@ public final class WorkEffortBusinessServices {
         if (input.get("workEffortParentId") != null) {
             find("WorkEffort", Map.of("workEffortId", input.get("workEffortParentId")));
         }
-        Map<String, Object> values = serviceInput("createWorkEffort", input);
+        Map<String, Object> values = new LinkedHashMap<>();
+        entityManager.getMetamodel().entity(entities.entityClass("WorkEffort")).getAttributes().forEach(attribute -> {
+            String field = attribute.getName();
+            if (input.containsKey(field)) values.put(field, input.get(field));
+        });
         values.putIfAbsent("workEffortId", sequences.nextId("WorkEffort"));
         values.putIfAbsent("currentStatusId", "CAL_CREATED");
         Timestamp now = Timestamp.from(Instant.now());
@@ -537,7 +541,7 @@ public final class WorkEffortBusinessServices {
             throw new MigrationException(HttpStatus.BAD_REQUEST, "WorkEffort association already exists");
         }
         if (values.get("workEffortIdTo") == null || values.get("workEffortIdTo").toString().isBlank()) {
-            Map<String, Object> created = createWorkEffort(serviceInput("createWorkEffort", input));
+            Map<String, Object> created = createWorkEffort(input);
             values.put("workEffortIdTo", created.get("workEffortId"));
         }
         Map<String, Object> association = createWorkEffortAssoc(values);
@@ -741,8 +745,8 @@ public final class WorkEffortBusinessServices {
             if (!active(assignment)) continue;
             String partyId = string(property(assignment, "partyId"));
             for (Object assigned : entities.findByEquality(
-                    entities.entityClass("WorkEffortAndPartyAssign"), Map.of("partyId", partyId))) {
-                if (icalCandidate(assigned, input)) ids.add(string(property(assigned, "workEffortId")));
+                    entities.entityClass("WorkEffortPartyAssignment"), Map.of("partyId", partyId))) {
+                addIcalCandidate(ids, property(assigned, "workEffortId"), input);
             }
         }
         for (Object fixedAsset : entities.findByEquality(
@@ -750,17 +754,13 @@ public final class WorkEffortBusinessServices {
             if (!active(fixedAsset)) continue;
             String fixedAssetId = string(property(fixedAsset, "fixedAssetId"));
             for (Object assigned : entities.findByEquality(
-                    entities.entityClass("WorkEffortAndFixedAssetAssign"), Map.of("fixedAssetId", fixedAssetId))) {
-                if (icalCandidate(assigned, input)) ids.add(string(property(assigned, "workEffortId")));
+                    entities.entityClass("WorkEffortFixedAssetAssign"), Map.of("fixedAssetId", fixedAssetId))) {
+                if (active(assigned)) addIcalCandidate(ids, property(assigned, "workEffortId"), input);
             }
         }
-        Map<String, Object> associationFilter = new LinkedHashMap<>();
-        associationFilter.put("workEffortIdFrom", publishWorkEffortId);
         for (Object associated : entities.findByEquality(
-                entities.entityClass("WorkEffortAssocToView"), associationFilter)) {
-            if (active(associated) && matches(associated, "workEffortTypeId", input.get("workEffortTypeId"))) {
-                ids.add(string(property(associated, "workEffortId")));
-            }
+                entities.entityClass("WorkEffortAssoc"), Map.of("workEffortIdFrom", publishWorkEffortId))) {
+            if (active(associated)) addIcalCandidate(ids, property(associated, "workEffortIdTo"), input);
         }
         List<Map<String, Object>> workEfforts = new ArrayList<>();
         for (String id : ids) {
@@ -771,29 +771,46 @@ public final class WorkEffortBusinessServices {
         return Map.of("workEfforts", workEfforts);
     }
 
-    private boolean icalCandidate(Object row, Map<String, ?> input) {
-        return active(row)
-                && "WES_PUBLIC".equals(property(row, "scopeEnumId"))
-                && !"PUBLISH_PROPS".equals(property(row, "workEffortTypeId"))
-                && matches(row, "workEffortTypeId", input.get("workEffortTypeId"));
+    private void addIcalCandidate(Set<String> ids, Object candidateId, Map<String, ?> input) {
+        if (candidateId == null) return;
+        Object candidate = findNullable("WorkEffort", Map.of("workEffortId", candidateId));
+        if (candidate != null
+                && "WES_PUBLIC".equals(property(candidate, "scopeEnumId"))
+                && !"PUBLISH_PROPS".equals(property(candidate, "workEffortTypeId"))
+                && matches(candidate, "workEffortTypeId", input.get("workEffortTypeId"))) {
+            ids.add(string(candidateId));
+        }
     }
 
     private Map<String, Object> getPartyICalUrl(Map<String, ?> input) {
         String partyId = string(input.get("partyId"));
-        List<?> contactMechs = entities.findByEquality(
-                entities.entityClass("PartyContactWithPurpose"), Map.of("partyId", partyId));
         Timestamp now = Timestamp.from(Instant.now());
-        Object infoString = contactMechs.stream()
-                .filter(row -> dateActive(row, "purposeFromDate", "purposeThruDate", now))
-                .filter(row -> dateActive(row, "contactFromDate", "contactThruDate", now))
-                .filter(row -> Set.of("ICAL_URL", "PRIMARY_EMAIL")
-                        .contains(string(property(row, "contactMechPurposeTypeId"))))
-                .sorted((left, right) -> string(property(left, "contactMechPurposeTypeId"))
-                        .compareTo(string(property(right, "contactMechPurposeTypeId"))))
-                .map(row -> property(row, "infoString"))
-                .findFirst()
-                .orElse(null);
+        List<?> purposes = entities.findByEquality(
+                entities.entityClass("PartyContactMechPurpose"), Map.of("partyId", partyId));
+        Object infoString = null;
+        for (Object purpose : purposes) {
+            String purposeType = string(property(purpose, "contactMechPurposeTypeId"));
+            if (!Set.of("ICAL_URL", "PRIMARY_EMAIL").contains(purposeType)
+                    || !dateActive(purpose, "fromDate", "thruDate", now)) continue;
+            boolean activeContact = entities.findByEquality(entities.entityClass("PartyContactMech"), Map.of(
+                            "partyId", partyId, "contactMechId", property(purpose, "contactMechId")))
+                    .stream().anyMatch(contact -> dateActive(contact, "fromDate", "thruDate", now));
+            if (!activeContact) continue;
+            Object contactMech = findNullable("ContactMech", Map.of(
+                    "contactMechId", property(purpose, "contactMechId")));
+            if (contactMech != null && property(contactMech, "infoString") != null
+                    && ("ICAL_URL".equals(purposeType) || infoString == null)) {
+                infoString = property(contactMech, "infoString");
+                if ("ICAL_URL".equals(purposeType)) break;
+            }
+        }
         return infoString == null ? Map.of() : Map.of("iCalUrl", infoString);
+    }
+
+    private Map<String, Object> without(Map<String, ?> input, String name) {
+        Map<String, Object> result = new LinkedHashMap<>(input);
+        result.remove(name);
+        return result;
     }
 
     private boolean dateActive(Object entity, String fromField, String thruField, Timestamp now) {
@@ -841,7 +858,7 @@ public final class WorkEffortBusinessServices {
 
     private Map<String, Object> addTimesheetToInvoice(String service, Map<String, ?> input) {
         Map<String, Object> invoice = "addTimesheetToNewInvoice".equals(service)
-                ? invoices.createInvoice(input)
+                ? invoices.createInvoice(without(input, "invoiceId"))
                 : invoices.findInvoice(string(input.get("invoiceId")));
         if (invoice.isEmpty()) throw new MigrationException(HttpStatus.NOT_FOUND, "Invoice not found");
         invoices.updateInvoice(Map.of("invoiceId", invoice.get("invoiceId"), "statusId", "INVOICE_IN_PROCESS"));
@@ -851,14 +868,14 @@ public final class WorkEffortBusinessServices {
 
     private Map<String, Object> addWorkEffortTimeToInvoice(String service, Map<String, ?> input) {
         Map<String, Object> invoice = "addWorkEffortTimeToNewInvoice".equals(service)
-                ? invoices.createInvoice(input)
+                ? invoices.createInvoice(without(input, "invoiceId"))
                 : invoices.findInvoice(string(input.get("invoiceId")));
         if (invoice.isEmpty()) throw new MigrationException(HttpStatus.NOT_FOUND, "Invoice not found");
         for (Object entry : entities.findByEquality(entities.entityClass("TimeEntry"),
                 Map.of("workEffortId", input.get("workEffortId")))) {
             Map<String, Object> item = new LinkedHashMap<>(input);
             item.put("invoiceId", invoice.get("invoiceId"));
-            item.put("description", entities.get(entry, "description"));
+            if (input.get("description") != null) item.put("description", input.get("description"));
             invoices.createInvoiceItem(item);
         }
         return invoice;

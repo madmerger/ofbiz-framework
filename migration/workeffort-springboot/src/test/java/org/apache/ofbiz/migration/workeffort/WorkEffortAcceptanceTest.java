@@ -75,25 +75,25 @@ class WorkEffortAcceptanceTest {
     private WorkEffortBusinessServices services;
 
     @Test
-    void ac01_entityAutoCatalogContainsNinetyFiveServices() {
+    void ac01EntityAutoCatalogContainsNinetyFiveServices() {
         long count = registryCatalogCount();
         assertThat(count).isEqualTo(95);
     }
 
     @Test
-    void ac02_simpleCatalogCoversAllThirtyThreeServices() {
+    void ac02SimpleCatalogCoversAllThirtyThreeServices() {
         for (String name : new String[] {
-            "makeCommunicationEventWorkEffort", "createWorkEffortNote", "updateWorkEffortNote",
-            "createWorkEffortAssoc", "copyWorkEffortAssocs", "createWorkEffortAndAssoc",
-            "assignInventoryToWorkEffort", "createCommunicationEventWorkEff", "updateCommunicationEventWorkEff",
-            "deleteCommunicationEventWorkEff", "checkCustRequestItemExists", "setWorkEffortFixedAssetAssign",
-            "createWorkEffortFixedAssetAssign", "createWorkEffortReview", "indexWorkEffortKeywords",
-            "createWorkEffortKeyword", "createWorkEffortKeywords", "deleteWorkEffortKeywords",
-            "workEffortManagerPermission", "workEffortGenericPermission", "timesheetUpdatePermission",
-            "workEffortICalendarPermission", "getICalWorkEfforts", "getPartyICalUrl", "createTimesheets",
-            "createTimesheetForThisWeek", "addTimesheetToInvoice", "addTimesheetToNewInvoice",
-            "addWorkEffortTimeToInvoice", "addWorkEffortTimeToNewInvoice", "checkTimesheetStatus",
-            "updateTimeEntry", "getTimeEntryRate"
+                "makeCommunicationEventWorkEffort", "createWorkEffortNote", "updateWorkEffortNote",
+                "createWorkEffortAssoc", "copyWorkEffortAssocs", "createWorkEffortAndAssoc",
+                "assignInventoryToWorkEffort", "createCommunicationEventWorkEff", "updateCommunicationEventWorkEff",
+                "deleteCommunicationEventWorkEff", "checkCustRequestItemExists", "setWorkEffortFixedAssetAssign",
+                "createWorkEffortFixedAssetAssign", "createWorkEffortReview", "indexWorkEffortKeywords",
+                "createWorkEffortKeyword", "createWorkEffortKeywords", "deleteWorkEffortKeywords",
+                "workEffortManagerPermission", "workEffortGenericPermission", "timesheetUpdatePermission",
+                "workEffortICalendarPermission", "getICalWorkEfforts", "getPartyICalUrl", "createTimesheets",
+                "createTimesheetForThisWeek", "addTimesheetToInvoice", "addTimesheetToNewInvoice",
+                "addWorkEffortTimeToInvoice", "addWorkEffortTimeToNewInvoice", "checkTimesheetStatus",
+                "updateTimeEntry", "getTimeEntryRate"
         }) {
             assertThat(registry.handler("workeffort", name)).as(name).isPresent();
         }
@@ -102,13 +102,13 @@ class WorkEffortAcceptanceTest {
     }
 
     @Test
-    void ac03_sensitiveEntitiesResolveFromGeneratedDatamodel() {
+    void ac03SensitiveEntitiesResolveFromGeneratedDatamodel() {
         for (String name : new String[] {
-            "UserLogin", "UserLoginHistory", "UserLoginPasswordHistory", "UserLoginSession",
-            "CreditCard", "PaymentMethod", "EftAccount", "GiftCard", "CheckAccount",
-            "PayPalPaymentMethod", "BillingAccount", "Payment", "PaymentGatewayResponse",
-            "PaymentGatewayConfig", "FinAccount", "FinAccountTrans", "PayHistory",
-            "PayrollPreference", "PartyRate", "RateAmount", "EmplPositionTypeRate", "SalaryStep", "PayGrade"
+                "UserLogin", "UserLoginHistory", "UserLoginPasswordHistory", "UserLoginSession",
+                "CreditCard", "PaymentMethod", "EftAccount", "GiftCard", "CheckAccount",
+                "PayPalPaymentMethod", "BillingAccount", "Payment", "PaymentGatewayResponse",
+                "PaymentGatewayConfig", "FinAccount", "FinAccountTrans", "PayHistory",
+                "PayrollPreference", "PartyRate", "RateAmount", "EmplPositionTypeRate", "SalaryStep", "PayGrade"
         }) {
             assertThat(entities.entityClass(name)).isNotNull();
         }
@@ -116,28 +116,28 @@ class WorkEffortAcceptanceTest {
 
     @Test
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_VIEW", "WORKEFFORTMGR_SENSITIVE_VIEW"})
-    void ac03b_sensitiveRateAmountIsAllowedByEntityApiExtraEntityScope() throws Exception {
+    void ac03bSensitiveRateAmountIsAllowedByEntityApiExtraEntityScope() throws Exception {
         mockMvc.perform(get("/api/workeffort/entities/RateAmount"))
                 .andExpect(status().isOk());
     }
 
     @Test
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_VIEW", "WORKEFFORTMGR_SENSITIVE_VIEW"})
-    void ac03c_entityOutsideCatalogAndExtraEntitiesIsNotFound() throws Exception {
+    void ac03cEntityOutsideCatalogAndExtraEntitiesIsNotFound() throws Exception {
         mockMvc.perform(get("/api/workeffort/entities/Payment"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_VIEW"})
-    void ac03d_mismatchedComponentIsNotFound() throws Exception {
+    void ac03dMismatchedComponentIsNotFound() throws Exception {
         mockMvc.perform(get("/api/other/entities/WorkEffort"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_VIEW"})
-    void ac04_readonlyUserCannotCreateWorkEffort() throws Exception {
+    void ac04ReadonlyUserCannotCreateWorkEffort() throws Exception {
         mockMvc.perform(post("/api/workeffort/services/createWorkEffort")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"workEffortName\":\"denied\"}"))
@@ -145,21 +145,21 @@ class WorkEffortAcceptanceTest {
     }
 
     @Test
-    void ac05_anonymousRequestIsUnauthorized() throws Exception {
+    void ac05AnonymousRequestIsUnauthorized() throws Exception {
         mockMvc.perform(get("/api/workeffort/entities/WorkEffort"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     @WithMockUser(authorities = {"OFBTOOLS_VIEW"})
-    void ac06_missingBasePermissionIsForbidden() throws Exception {
+    void ac06MissingBasePermissionIsForbidden() throws Exception {
         mockMvc.perform(get("/api/workeffort/entities/WorkEffort"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_VIEW"})
-    void ac07_sensitiveRateAmountIsForbiddenForReadonly() throws Exception {
+    void ac07SensitiveRateAmountIsForbiddenForReadonly() throws Exception {
         mockMvc.perform(get("/api/workeffort/entities/RateAmount"))
                 .andExpect(status().isForbidden());
     }
@@ -167,7 +167,7 @@ class WorkEffortAcceptanceTest {
     @Test
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_VIEW", "WORKEFFORTMGR_SENSITIVE_VIEW"})
     @Transactional
-    void ac08_auditorCanReadNonemptySensitiveRateAmount() throws Exception {
+    void ac08AuditorCanReadNonemptySensitiveRateAmount() throws Exception {
         Object rate = entities.newEntity(entities.entityClass("RateAmount"));
         entities.set(rate, "rateTypeId", "RATE_HOURLY");
         entities.set(rate, "rateCurrencyUomId", "USD");
@@ -186,7 +186,7 @@ class WorkEffortAcceptanceTest {
 
     @Test
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
-    void ac09_multiConflictRollsBackEarlierRows() throws Exception {
+    void ac09MultiConflictRollsBackEarlierRows() throws Exception {
         String body = """
                 [
                   {"workEffortId":"WE-MULTI","statusId":"CAL_CREATED","statusDatetime":"2025-01-01T00:00:00Z"},
@@ -204,7 +204,7 @@ class WorkEffortAcceptanceTest {
 
     @Test
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
-    void ac09f_multiInvalidServiceInputReturnsBadRequest() throws Exception {
+    void ac09fMultiInvalidServiceInputReturnsBadRequest() throws Exception {
         mockMvc.perform(post("/api/workeffort/services/createWorkEffortStatus/multi")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -219,7 +219,7 @@ class WorkEffortAcceptanceTest {
 
     @Test
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
-    void ac09b_entityAutoUpdateRejectsUndeclaredAttributes() throws Exception {
+    void ac09bEntityAutoUpdateRejectsUndeclaredAttributes() throws Exception {
         mockMvc.perform(post("/api/workeffort/services/updateWorkEffortType")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"workEffortTypeId\":\"TASK\",\"notDeclared\":\"no\"}"))
@@ -228,7 +228,7 @@ class WorkEffortAcceptanceTest {
 
     @Test
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
-    void ac09c_entityAutoCreateHonorsProvidedInoutPrimaryKey() throws Exception {
+    void ac09cEntityAutoCreateHonorsProvidedInoutPrimaryKey() throws Exception {
         mockMvc.perform(post("/api/workeffort/services/createWorkEffortType")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"workEffortTypeId\":\"WE-TEST-TYPE\",\"description\":\"Test type\"}"))
@@ -239,7 +239,7 @@ class WorkEffortAcceptanceTest {
 
     @Test
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
-    void ac09d_entityAutoCreateGeneratesEmptyInoutPrimaryKey() throws Exception {
+    void ac09dEntityAutoCreateGeneratesEmptyInoutPrimaryKey() throws Exception {
         String response = mockMvc.perform(post("/api/workeffort/services/createWorkEffortType")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"workEffortTypeId\":\"\",\"description\":\"Generated type\"}"))
@@ -256,7 +256,7 @@ class WorkEffortAcceptanceTest {
 
     @Test
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
-    void ac09e_entityAutoCreateIgnoresSuppliedOutPrimaryKey() throws Exception {
+    void ac09eEntityAutoCreateIgnoresSuppliedOutPrimaryKey() throws Exception {
         String response = mockMvc.perform(post("/api/workeffort/services/createTimesheet")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"timesheetId\":\"CALLER-TIMESHEET-ID\"}"))
@@ -393,6 +393,159 @@ class WorkEffortAcceptanceTest {
         assertThat((List<?>) ((Map<?, ?>) periods.get(2)).get("calendarEntries")).isEmpty();
     }
 
+    @Test
+    @Transactional
+    @WithMockUser(username = "flow-admin", authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
+    void createsAssignsTimesheetsAndCompletesWorkEffortWithStatusHistory() {
+        persistStatusChange("CAL_CREATED", "CAL_IN_PROGRESS");
+        persistStatusChange("CAL_IN_PROGRESS", "CAL_COMPLETED");
+        Map<String, Object> created = services.execute("createWorkEffort", Map.of(
+                "workEffortTypeId", "TASK",
+                "workEffortName", "WorkEffort flow",
+                "currentStatusId", "CAL_CREATED"));
+        String workEffortId = created.get("workEffortId").toString();
+        services.execute("assignPartyToWorkEffort", Map.of(
+                "workEffortId", workEffortId,
+                "partyId", "DemoEmployee",
+                "roleTypeId", "CAL_OWNER"));
+
+        Timestamp start = Timestamp.from(Instant.parse("2025-03-01T09:00:00Z"));
+        Map<String, Object> timesheet = dispatcherCreateTimesheet(start);
+        String timesheetId = timesheet.get("timesheetId").toString();
+        Map<String, Object> timeEntry = services.execute("createTimeEntry", Map.of(
+                "timesheetId", timesheetId,
+                "workEffortId", workEffortId,
+                "partyId", "DemoEmployee",
+                "rateTypeId", "RATE_HOURLY",
+                "fromDate", start,
+                "thruDate", Timestamp.from(start.toInstant().plusSeconds(3600)),
+                "hours", 1.0d));
+        assertThat(timeEntry.get("timeEntryId")).isNotNull();
+
+        services.execute("updateWorkEffort", Map.of(
+                "workEffortId", workEffortId, "currentStatusId", "CAL_IN_PROGRESS"));
+        services.execute("updateWorkEffort", Map.of(
+                "workEffortId", workEffortId, "currentStatusId", "CAL_COMPLETED"));
+
+        Object current = entities.findByPrimaryKey(
+                entities.entityClass("WorkEffort"), Map.of("workEffortId", workEffortId));
+        assertThat(entities.get(current, "currentStatusId")).isEqualTo("CAL_COMPLETED");
+        assertThat(entities.findByEquality(entities.entityClass("WorkEffortStatus"),
+                Map.of("workEffortId", workEffortId))).extracting(status -> entities.get(status, "statusId"))
+                .contains("CAL_CREATED", "CAL_IN_PROGRESS", "CAL_COMPLETED");
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "quick-assign-admin", authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
+    void quickAssignPartyIdCreatesAssignment() {
+        Map<String, Object> created = services.execute("createWorkEffort", Map.of(
+                "workEffortTypeId", "TASK",
+                "workEffortName", "Quick assign",
+                "currentStatusId", "CAL_CREATED",
+                "quickAssignPartyId", "DemoEmployee"));
+        String workEffortId = created.get("workEffortId").toString();
+        assertThat(entities.findByEquality(entities.entityClass("WorkEffortPartyAssignment"), Map.of(
+                "workEffortId", workEffortId, "partyId", "DemoEmployee"))).isNotEmpty();
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "flow-admin", authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
+    void createTimeEntryRejectsCompletedTimesheet() {
+        Object timesheet = entities.newEntity(entities.entityClass("Timesheet"));
+        entities.set(timesheet, "timesheetId", "TS-COMPLETED-FLOW");
+        entities.set(timesheet, "partyId", "DemoEmployee");
+        entities.set(timesheet, "statusId", "TIMESHEET_APPROVED");
+        entityManager.persist(timesheet);
+
+        assertThatThrownBy(() -> services.execute("createTimeEntry", Map.of(
+                "timesheetId", "TS-COMPLETED-FLOW",
+                "workEffortId", "WE-NOT-FOUND",
+                "partyId", "DemoEmployee")))
+                .isInstanceOf(MigrationException.class)
+                .hasMessageContaining("Timesheet is not in process");
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "flow-admin", authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
+    void invalidWorkEffortStatusTransitionReturnsBadRequest() throws Exception {
+        persistWorkEffort("WE-INVALID-TRANS", "Invalid transition", Timestamp.from(Instant.now()));
+        mockMvc.perform(post("/api/workeffort/services/updateWorkEffort")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"workEffortId":"WE-INVALID-TRANS","currentStatusId":"CAL_COMPLETED"}
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "rate-readonly", authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_VIEW"})
+    void getTimeEntryRateDeniesReadonlyWithoutReturningRate() throws Exception {
+        seedRateLookupFixture("WE-RATE-READONLY", "TS-RATE-READONLY", "TE-RATE-READONLY");
+        mockMvc.perform(post("/api/workeffort/services/getTimeEntryRate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"timeEntryId\":\"TE-RATE-READONLY\",\"currencyUomId\":\"USD\"}"))
+                .andExpect(status().isForbidden())
+                .andExpect(result -> assertThat(result.getResponse().getContentAsString()).doesNotContain("125.00"));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "rate-auditor", authorities = {
+            "OFBTOOLS_VIEW", "WORKEFFORTMGR_VIEW", "WORKEFFORTMGR_SENSITIVE_VIEW"
+    })
+    void getTimeEntryRateReturnsSeededAmountForAuditor() throws Exception {
+        seedRateLookupFixture("WE-RATE-AUDITOR", "TS-RATE-AUDITOR", "TE-RATE-AUDITOR");
+        mockMvc.perform(post("/api/workeffort/services/getTimeEntryRate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"timeEntryId\":\"TE-RATE-AUDITOR\",\"currencyUomId\":\"USD\"}"))
+                .andExpect(status().isOk())
+                .andExpect(result -> assertThat(result.getResponse().getContentAsString()).contains("125.00"));
+    }
+
+    private Map<String, Object> dispatcherCreateTimesheet(Timestamp fromDate) {
+        return services.execute("createTimesheet", Map.of(
+                "partyId", "DemoEmployee",
+                "statusId", "TIMESHEET_IN_PROCESS",
+                "fromDate", fromDate));
+    }
+
+    private void persistStatusChange(String from, String to) {
+        Object transition = entities.newEntity(entities.entityClass("StatusValidChange"));
+        entities.set(transition, "statusId", from);
+        entities.set(transition, "statusIdTo", to);
+        entityManager.persist(transition);
+    }
+
+    private void seedRateLookupFixture(String workEffortId, String timesheetId, String timeEntryId) {
+        persistWorkEffort(workEffortId, "Rate lookup", Timestamp.from(Instant.now()));
+        Object timesheet = entities.newEntity(entities.entityClass("Timesheet"));
+        entities.set(timesheet, "timesheetId", timesheetId);
+        entities.set(timesheet, "partyId", "DemoEmployee");
+        entities.set(timesheet, "statusId", "TIMESHEET_IN_PROCESS");
+        entityManager.persist(timesheet);
+        Object entry = entities.newEntity(entities.entityClass("TimeEntry"));
+        entities.set(entry, "timeEntryId", timeEntryId);
+        entities.set(entry, "timesheetId", timesheetId);
+        entities.set(entry, "workEffortId", workEffortId);
+        entities.set(entry, "partyId", "DemoEmployee");
+        entities.set(entry, "rateTypeId", "RATE_HOURLY");
+        entityManager.persist(entry);
+        Object rate = entities.newEntity(entities.entityClass("RateAmount"));
+        entities.set(rate, "workEffortId", workEffortId);
+        entities.set(rate, "partyId", "DemoEmployee");
+        entities.set(rate, "rateTypeId", "RATE_HOURLY");
+        entities.set(rate, "rateCurrencyUomId", "USD");
+        entities.set(rate, "periodTypeId", "RATE_HOUR");
+        entities.set(rate, "rateAmount", new BigDecimal("125.00"));
+        entities.set(rate, "fromDate", Timestamp.from(Instant.now()));
+        entities.set(rate, "emplPositionTypeId", "EMPLOYEE");
+        entityManager.persist(rate);
+    }
+
     private void persistWorkEffort(String workEffortId, String name, Timestamp eventDate) {
         Object workEffort = entities.newEntity(entities.entityClass("WorkEffort"));
         entities.set(workEffort, "workEffortId", workEffortId);
@@ -405,7 +558,7 @@ class WorkEffortAcceptanceTest {
     }
 
     @Test
-    void ac10_localProfileRequiresEnvironmentPassword() {
+    void ac10LocalProfileRequiresEnvironmentPassword() {
         assertThat(Path.of("src/main/resources/application-local.yml")).exists();
     }
 

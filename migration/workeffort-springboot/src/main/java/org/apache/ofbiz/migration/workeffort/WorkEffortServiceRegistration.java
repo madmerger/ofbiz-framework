@@ -19,7 +19,6 @@
 package org.apache.ofbiz.migration.workeffort;
 
 import jakarta.annotation.PostConstruct;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.ofbiz.migration.common.ServiceHandlerRegistry;
