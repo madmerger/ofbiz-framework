@@ -76,9 +76,7 @@ public class EntityAutoService {
         }
         List<ServiceHandlerRegistry.ParamDefinition> generated = definition.params().stream()
                 .filter(param -> keys.contains(param.name()))
-                .filter(param -> "OUT".equalsIgnoreCase(param.mode())
-                        || ("INOUT".equalsIgnoreCase(param.mode()) && param.optional()
-                                && !present(input.get(param.name()))))
+                .filter(param -> canGeneratePrimaryKey(definition, keys, param, input))
                 .filter(param -> entityRegistry.get(entity, param.name()) == null)
                 .toList();
         if (generated.size() == 1 && keys.size() > 1
@@ -150,6 +148,10 @@ public class EntityAutoService {
                 continue;
             }
             if ("create".equalsIgnoreCase(definition.invoke())
+                    && canGeneratePrimaryKey(definition, keys, param, input)) {
+                continue;
+            }
+            if ("create".equalsIgnoreCase(definition.invoke())
                     && keys.contains(param.name()) && "fromDate".equals(param.name())) {
                 continue;
             }
@@ -175,17 +177,32 @@ public class EntityAutoService {
             Set<String> keys,
             ServiceHandlerRegistry.ParamDefinition sequenceParam,
             Map<String, ?> input) {
-        if (!"OUT".equalsIgnoreCase(sequenceParam.mode()) || !sequenceParam.name().endsWith("SeqId")) {
+        if (!("OUT".equalsIgnoreCase(sequenceParam.mode()) || "INOUT".equalsIgnoreCase(sequenceParam.mode()))
+                || !sequenceParam.name().endsWith("SeqId")) {
             return false;
         }
         Map<String, ServiceHandlerRegistry.ParamDefinition> parameters = definition.params().stream()
                 .collect(java.util.stream.Collectors.toMap(
                         ServiceHandlerRegistry.ParamDefinition::name, param -> param));
-        return keys.stream()
-                .filter(key -> !key.equals(sequenceParam.name()))
-                .allMatch(key -> parameters.containsKey(key)
-                        && "IN".equalsIgnoreCase(parameters.get(key).mode())
-                        && present(input.get(key)));
+        return keys.stream().filter(key -> !key.equals(sequenceParam.name())).allMatch(key -> {
+            ServiceHandlerRegistry.ParamDefinition parameter = parameters.get(key);
+            return parameter != null
+                    && ("IN".equalsIgnoreCase(parameter.mode()) || "INOUT".equalsIgnoreCase(parameter.mode()))
+                    && present(input.get(key));
+        });
+    }
+
+    private static boolean canGeneratePrimaryKey(
+            ServiceHandlerRegistry.ServiceDefinition definition,
+            Set<String> keys,
+            ServiceHandlerRegistry.ParamDefinition param,
+            Map<String, ?> input) {
+        if (!keys.contains(param.name())
+                || !("OUT".equalsIgnoreCase(param.mode()) || "INOUT".equalsIgnoreCase(param.mode()))
+                || present(input.get(param.name()))) {
+            return false;
+        }
+        return keys.size() == 1 || isSubSequenceParameter(definition, keys, param, input);
     }
 
     private static boolean present(Object value) {
