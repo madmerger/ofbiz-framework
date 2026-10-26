@@ -63,4 +63,11 @@ activeComponents().each { File component ->
     
 }
 
-include 'migration:humanres-springboot'
+def migrationDirectory = new File(rootDir, 'migration')
+if (migrationDirectory.isDirectory()) {
+    migrationDirectory.eachDir { File migrationProject ->
+        if (new File(migrationProject, 'build.gradle').isFile()) {
+            include "migration:${migrationProject.name}"
+        }
+    }
+}

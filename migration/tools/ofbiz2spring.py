@@ -16,7 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""Generate the HumanRes JPA model and entity-auto catalog from inventory.json."""
+"""Generate JPA models and entity-auto catalogs from OFBiz inventory or XML."""
 
 from __future__ import annotations
 
@@ -25,6 +25,8 @@ import json
 import re
 from pathlib import Path
 from typing import Any
+
+from ofbiz_inventory import parse_entitymodel, parse_service_file, parse_xml
 
 
 HEADER = """/*******************************************************************************
@@ -56,27 +58,32 @@ TYPE_MAPPING: dict[str, dict[str, Any]] = {
     "id": {"java_type": "String", "length": 20},
     "id-long": {"java_type": "String", "length": 60},
     "id-vlong": {"java_type": "String", "length": 255},
+    "indicator": {"java_type": "String", "length": 1},
     "very-short": {"java_type": "String", "length": 10},
     "short-varchar": {"java_type": "String", "length": 60},
-    "long-varchar": {"java_type": "String", "length": 255},
-    "comment": {"java_type": "String", "length": 255},
-    "description": {"java_type": "String", "length": 255},
-    "value": {"java_type": "String", "length": 255},
     "name": {"java_type": "String", "length": 100},
-    "email": {"java_type": "String", "length": 320},
+    "value": {"java_type": "String", "length": 255},
+    "description": {"java_type": "String", "length": 255},
+    "comment": {"java_type": "String", "length": 255},
     "url": {"java_type": "String", "length": 2000},
+    "email": {"java_type": "String", "length": 320},
+    "long-varchar": {"java_type": "String", "length": 255},
     "tel-number": {"java_type": "String", "length": 60},
-    "indicator": {"java_type": "String", "length": 1},
+    "credit-card-number": {"java_type": "String", "length": 255},
+    "credit-card-date": {"java_type": "String", "length": 7},
     "date-time": {"java_type": "Timestamp"},
-    "date": {"java_type": "LocalDate"},
-    "time": {"java_type": "LocalTime"},
+    "date": {"java_type": "Date"},
+    "time": {"java_type": "Time"},
     "currency-amount": {"java_type": "BigDecimal", "precision": 18, "scale": 2},
     "currency-precise": {"java_type": "BigDecimal", "precision": 18, "scale": 3},
     "fixed-point": {"java_type": "BigDecimal", "precision": 18, "scale": 6},
     "floating-point": {"java_type": "Double"},
-    "integer": {"java_type": "Long"},
+    "integer": {"java_type": "Integer"},
     "numeric": {"java_type": "Long"},
-    "very-long": {"java_type": "String", "lob": True},
+    "very-long": {"java_type": "String", "lob": True, "column_definition": "TEXT"},
+    "blob": {"java_type": "byte[]", "lob": True},
+    "byte-array": {"java_type": "byte[]", "lob": True},
+    "object": {"java_type": "byte[]", "lob": True},
 }
 
 JAVA_KEYWORDS = {
@@ -108,7 +115,10 @@ def java_string(value: Any) -> str:
 
 
 def field_mapping(field: dict[str, Any]) -> dict[str, Any]:
-    return TYPE_MAPPING.get(field["type"], {"java_type": "String", "length": 255})
+    try:
+        return TYPE_MAPPING[field["type"]]
+    except KeyError as error:
+        raise ValueError(f"Unsupported OFBiz field type: {field['type']}") from error
 
 
 def column_name(field: dict[str, Any]) -> str:
@@ -133,10 +143,10 @@ def imports_for(entity: dict[str, Any]) -> list[str]:
     java_types = {field_mapping(field)["java_type"] for field in entity["fields"]}
     if "BigDecimal" in java_types:
         imports.add("java.math.BigDecimal")
-    if "LocalDate" in java_types:
-        imports.add("java.time.LocalDate")
-    if "LocalTime" in java_types:
-        imports.add("java.time.LocalTime")
+    if "Date" in java_types:
+        imports.add("java.sql.Date")
+    if "Time" in java_types:
+        imports.add("java.sql.Time")
     if any(field_mapping(field).get("lob") for field in entity["fields"]):
         imports.add("jakarta.persistence.Lob")
     return sorted(imports)
@@ -152,8 +162,8 @@ def column_annotation(field: dict[str, Any]) -> list[str]:
         attributes.append(f"scale = {mapping['scale']}")
     if field["pk"]:
         attributes.append("nullable = false")
-    if mapping.get("lob"):
-        attributes.append('columnDefinition = "TEXT"')
+    if mapping.get("column_definition"):
+        attributes.append(f"columnDefinition = {java_string(mapping['column_definition'])}")
     return [
         "@Lob" if mapping.get("lob") else "",
         f"@Column({', '.join(attributes)})",
@@ -168,14 +178,14 @@ def getter_setter(java_type: str, name: str) -> str:
     )
 
 
-def entity_source(entity: dict[str, Any]) -> str:
+def entity_source(entity: dict[str, Any], package_name: str = PACKAGE) -> str:
     class_name = entity["name"]
     fields = entity["fields"]
     pk_fields = [field for field in fields if field["pk"]]
     imports = "\n".join(f"import {item};" for item in imports_for(entity))
     lines = [
         HEADER,
-        f"package {PACKAGE};",
+        f"package {package_name};",
         "",
         imports,
         "",
@@ -259,9 +269,9 @@ def id_class_source(pk_fields: list[dict[str, Any]], entity_name: str) -> list[s
     return lines
 
 
-def stamp_fields_source() -> str:
+def stamp_fields_source(package_name: str = PACKAGE) -> str:
     return f"""{HEADER}
-package {PACKAGE};
+package {package_name};
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
@@ -305,15 +315,21 @@ public abstract class StampFields {{
 """
 
 
-def repository_source(entity: dict[str, Any]) -> str:
+def repository_source(
+    entity: dict[str, Any],
+    package_name: str = PACKAGE,
+    entity_package: str = PACKAGE,
+) -> str:
     entity_name = entity["name"]
     pk_fields = [field for field in entity["fields"] if field["pk"]]
     id_type = f"{entity_name}.EntityId" if len(pk_fields) > 1 else field_mapping(pk_fields[0])["java_type"]
+    entity_import = "" if package_name == entity_package else f"import {entity_package}.{entity_name};\n"
     return f"""{HEADER}
-package {PACKAGE};
+package {package_name};
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+{entity_import}
 
 @Repository
 public interface {entity_name}Repository extends JpaRepository<{entity_name}, {id_type}> {{
@@ -321,10 +337,10 @@ public interface {entity_name}Repository extends JpaRepository<{entity_name}, {i
 """
 
 
-def catalog_source(services: list[dict[str, Any]]) -> str:
+def catalog_source(services: list[dict[str, Any]], package_name: str = PACKAGE) -> str:
     lines = [
         HEADER,
-        f"package {PACKAGE};",
+        f"package {package_name};",
         "",
         "import java.util.Collections;",
         "import java.util.LinkedHashMap;",
@@ -335,7 +351,8 @@ def catalog_source(services: list[dict[str, Any]]) -> str:
         "public final class ServiceCatalog {",
         "    public record ParamDefinition(String name, String mode, boolean optional, String type) {}",
         "    public record ServiceDefinition(String name, String entity, String invoke,",
-        "            String permissionMainAction, List<ParamDefinition> params) {}",
+        "            String permissionMainAction, List<ParamDefinition> params,",
+        "            List<Map<String, String>> implementations) {}",
         "",
         "    private static final Map<String, ServiceDefinition> SERVICES = createServices();",
         "",
@@ -347,6 +364,7 @@ def catalog_source(services: list[dict[str, Any]]) -> str:
         "    private static Map<String, ServiceDefinition> createServices() {",
         "        Map<String, ServiceDefinition> services = new LinkedHashMap<>();",
     ]
+    service_lines: list[str] = []
     for service in services:
         permission = (
             service.get("permission_service", {}).get("main_action")
@@ -366,59 +384,232 @@ def catalog_source(services: list[dict[str, Any]]) -> str:
             + ")"
             for param in service.get("params", [])
         )
-        lines.append(
+        implementation_entries = ", ".join(
+            "Map.of(" + ", ".join(
+                f"{java_string(key)}, {java_string(value)}"
+                for key, value in implementation.items()
+            ) + ")"
+            for implementation in service.get("implements", [])
+        )
+        service_lines.append(
             f"        services.put({java_string(service['name'])}, new ServiceDefinition("
             f"{java_string(service['name'])}, {java_string(service.get('default_entity_name') or '')}, "
             f"{java_string(service.get('invoke') or '')}, "
             f"{'null' if permission is None else java_string(permission)}, "
-            f"List.of({param_entries})));"
+            f"List.of({param_entries}), List.of({implementation_entries})));"
         )
-    lines.extend(
-        [
-            "        return Collections.unmodifiableMap(services);",
-            "    }",
-            "}",
-        ]
-    )
+    chunk_size = 50
+    for batch in range((len(service_lines) + chunk_size - 1) // chunk_size):
+        lines.append(f"        addServiceBatch{batch}(services);")
+    lines.extend(["        return Collections.unmodifiableMap(services);", "    }", ""])
+    for batch, start in enumerate(range(0, len(service_lines), chunk_size)):
+        lines.append(f"    private static void addServiceBatch{batch}(Map<String, ServiceDefinition> services) {{")
+        lines.extend(service_lines[start:start + chunk_size])
+        lines.extend(["    }", ""])
+    lines.append("}")
     return "\n".join(lines) + "\n"
 
 
-def generate(inventory: dict[str, Any], java_root: Path) -> list[Path]:
-    """Write generated Java source files below java_root/package and return paths."""
+def generate(
+    inventory: dict[str, Any],
+    java_root: Path,
+    entity_package: str = PACKAGE,
+    repository_package: str = PACKAGE,
+    service_package: str = PACKAGE,
+    include_catalog: bool = True,
+) -> list[Path]:
+    """Write generated Java sources below java_root and return their paths."""
     entities = inventory.get("entities", [])
     services = [
         service for service in inventory.get("services", [])
         if service.get("engine") == "entity-auto"
     ]
-    output_dir = java_root / PACKAGE_PATH
-    output_dir.mkdir(parents=True, exist_ok=True)
     files: list[Path] = []
-    sources = {
-        "StampFields.java": stamp_fields_source(),
-        "ServiceCatalog.java": catalog_source(services),
-    }
+    entity_dir = java_root / Path(*entity_package.split("."))
+    repository_dir = java_root / Path(*repository_package.split("."))
+    service_dir = java_root / Path(*service_package.split("."))
+    entity_dir.mkdir(parents=True, exist_ok=True)
+    repository_dir.mkdir(parents=True, exist_ok=True)
+    sources: list[tuple[Path, str]] = [
+        (entity_dir / "StampFields.java", stamp_fields_source(entity_package)),
+    ]
+    if include_catalog:
+        service_dir.mkdir(parents=True, exist_ok=True)
+        sources.append((service_dir / "ServiceCatalog.java", catalog_source(services, service_package)))
     for entity in entities:
-        sources[f"{entity['name']}.java"] = entity_source(entity)
-        sources[f"{entity['name']}Repository.java"] = repository_source(entity)
-    for file_name, source in sources.items():
-        output = output_dir / file_name
+        sources.append((entity_dir / f"{entity['name']}.java", entity_source(entity, entity_package)))
+        sources.append((
+            repository_dir / f"{entity['name']}Repository.java",
+            repository_source(entity, repository_package, entity_package),
+        ))
+    for output, source in sources:
+        output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(source, encoding="utf-8")
         files.append(output)
     return files
 
 
+def inventory_from_xml(
+    entity_models: list[Path],
+    service_files: list[Path],
+    repository_root: Path = REPO_ROOT,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Read multiple OFBiz XML files, merge entity extensions, and report views."""
+    entities_by_name: dict[str, dict[str, Any]] = {}
+    views: list[dict[str, Any]] = []
+    errors: list[dict[str, str]] = []
+    extensions: list[tuple[Path, str | None, list[dict[str, Any]]]] = []
+    for path in entity_models:
+        try:
+            parsed_entities, parsed_views = parse_entitymodel(repository_root, path)
+            views.extend(parsed_views)
+            for entity in parsed_entities:
+                existing = entities_by_name.get(entity["name"])
+                if existing is not None:
+                    errors.append({
+                        "file": str(path),
+                        "error": f"Duplicate entity definition: {entity['name']}",
+                    })
+                    continue
+                entities_by_name[entity["name"]] = entity
+            xml, _lines = parse_xml(path)
+            for extension in xml.iter("extend-entity"):
+                entity_name = extension.get("entity-name")
+                fields = [
+                    {
+                        "name": field.get("name"),
+                        "type": field.get("type"),
+                        "column": field.get("col-name"),
+                        "pk": False,
+                    }
+                    for field in extension.findall("field")
+                ]
+                extensions.append((path, entity_name, fields))
+        except Exception as error:  # XML is supplied by the repository and errors are reported per file.
+            errors.append({"file": str(path), "error": str(error)})
+
+    for path, entity_name, extension_fields in extensions:
+        entity = entities_by_name.get(entity_name or "")
+        if entity is None:
+            errors.append({
+                "file": str(path),
+                "error": f"Extension has no base entity: {entity_name}",
+            })
+            continue
+        fields = {field["name"]: field for field in entity["fields"]}
+        fields.update({field["name"]: field for field in extension_fields})
+        entity["fields"] = list(fields.values())
+
+    entities = list(entities_by_name.values())
+    entity_fields = {
+        entity["name"]: {field["name"]: field for field in entity["fields"]}
+        for entity in entities
+    }
+    services: list[dict[str, Any]] = []
+    for path in service_files:
+        try:
+            services.extend(parse_service_file(repository_root, path, entity_fields))
+        except Exception as error:  # Keep processing the remaining definitions for a complete report.
+            errors.append({"file": str(path), "error": str(error)})
+
+    for entity in entities:
+        for field in entity["fields"]:
+            try:
+                field_mapping(field)
+            except ValueError as error:
+                errors.append({"file": entity["source"], "error": str(error)})
+
+    report = {
+        "entity_count": len(entities),
+        "view_entity_count": len(views),
+        "entity_auto_service_count": sum(service.get("engine") == "entity-auto" for service in services),
+        "view_entities": [
+            {"name": view["name"], "source": view["source"], "line": view["line"]}
+            for view in views
+        ],
+        "entity_models": [str(path) for path in entity_models],
+        "service_files": [str(path) for path in service_files],
+        "errors": errors,
+    }
+    return {"entities": entities, "services": services}, report
+
+
+def generate_from_xml(
+    entity_models: list[Path],
+    service_files: list[Path],
+    java_root: Path,
+    entity_package: str,
+    repository_package: str,
+    service_package: str,
+    report_path: Path,
+    repository_root: Path = REPO_ROOT,
+) -> tuple[list[Path], dict[str, Any]]:
+    inventory, report = inventory_from_xml(entity_models, service_files, repository_root)
+    generated = generate(
+        inventory,
+        java_root,
+        entity_package,
+        repository_package,
+        service_package,
+        include_catalog=bool(service_files),
+    )
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return generated, report
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--inventory", type=Path, default=DEFAULT_INVENTORY)
+    parser.add_argument("--inventory", type=Path)
+    parser.add_argument("--entity-model", "--entitymodel", type=Path, action="append", default=[])
+    parser.add_argument("--service-def", "--servicedef", type=Path, action="append", default=[])
     parser.add_argument("--out", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--package", default=None, help="Set all generated package names")
+    parser.add_argument("--entity-package", default=None)
+    parser.add_argument("--repository-package", default=None)
+    parser.add_argument("--service-package", default=None)
+    parser.add_argument("--report", type=Path)
     args = parser.parse_args()
-    inventory = json.loads(args.inventory.read_text(encoding="utf-8"))
-    generated = generate(inventory, args.out)
+    entity_package = args.entity_package or args.package or PACKAGE
+    repository_package = args.repository_package or args.package or PACKAGE
+    service_package = args.service_package or args.package or PACKAGE
+    if args.entity_model:
+        entity_models = [path.resolve() for path in args.entity_model]
+        service_files = [path.resolve() for path in args.service_def]
+        report_path = args.report or args.out / "ofbiz2spring-report.json"
+        generated, report = generate_from_xml(
+            entity_models,
+            service_files,
+            args.out,
+            entity_package,
+            repository_package,
+            service_package,
+            report_path,
+            REPO_ROOT,
+        )
+        if report["errors"]:
+            for error in report["errors"]:
+                print(f"ERROR {error['file']}: {error['error']}")
+            raise SystemExit(1)
+        print(
+            f"Generated {report['entity_count']} entities, {report['view_entity_count']} views, "
+            f"{report['entity_auto_service_count']} entity-auto services, {len(generated)} files"
+        )
+        return
+    inventory_path = args.inventory or DEFAULT_INVENTORY
+    inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+    generated = generate(
+        inventory,
+        args.out,
+        entity_package,
+        repository_package,
+        service_package,
+    )
     print(
         f"Generated {len(inventory.get('entities', []))} entities, "
         f"{len(inventory.get('entities', []))} repositories, "
         f"{sum(service.get('engine') == 'entity-auto' for service in inventory.get('services', []))} "
-        f"entity-auto services: {len(generated)} files under {args.out / PACKAGE_PATH}"
+        f"entity-auto services: {len(generated)} files under {args.out}"
     )
 
 
