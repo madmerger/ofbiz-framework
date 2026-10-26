@@ -90,8 +90,14 @@ sourceSets.main.java.srcDir(generatedRoot.map { it.dir('java') })
 tasks.named('compileJava') {
     dependsOn tasks.named('generateContentCatalog')
 }
+// ルートの checkstyle 実行時に共通基盤・カタログ生成のコンパイルを連鎖させない（ソースのみ検査）
 tasks.named('checkstyleMain') {
     source = fileTree('src/main/java')
+    classpath = files()
+}
+tasks.named('checkstyleTest') {
+    source = fileTree('src/test/java')
+    classpath = files()
 }
 
 tasks.named('test') {
