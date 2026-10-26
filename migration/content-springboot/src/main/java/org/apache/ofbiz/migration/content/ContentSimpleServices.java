@@ -124,7 +124,11 @@ public final class ContentSimpleServices {
         Object response = null;
         if ("Y".equals(store.get(survey, "allowUpdate")) && !ContentEntityStore.isEmpty(input.get("surveyResponseId"))) {
             response = store.findOne("SurveyResponse", Map.of("surveyResponseId", input.get("surveyResponseId")));
-            // 他の Survey や他人の回答は更新させない
+            // 既存回答の上書きは CONTENTMGR_UPDATE が必要。partyId は利用者と結び付かない（UserLogin 未移行）ため、
+            // 他の Survey や別 partyId の回答も更新させない
+            if (response != null && !ContentPermissionService.basePermission("CONTENTMGR", "UPDATE")) {
+                throw new MigrationException(HttpStatus.FORBIDDEN, "Service permission denied");
+            }
             if (response != null && (!surveyId.equals(store.get(response, "surveyId"))
                     || !java.util.Objects.equals(store.get(response, "partyId"), ContentEntityStore.isEmpty(partyId) ? null : partyId))) {
                 throw new MigrationException(HttpStatus.FORBIDDEN, "ContentSurveyResponseNotOwned");

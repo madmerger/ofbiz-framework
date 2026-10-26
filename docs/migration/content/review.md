@@ -49,7 +49,7 @@
 | D-09 | 検証メソッドは OFBiz `UtilValidate` の簡易版（Luhn、日付 yyyy-MM-dd、メール、URL、数値） | framework に依存しない |
 | D-10 | `/multi` の失敗は重複を含めば 409、それ以外は 400（OFBiz は画面へエラー表示） | API 化 |
 | D-11 | `getContent` の `view` は `ContentDataResourceView` を Java で結合して再現（キャッシュなし） | view-entity は未 JPA 化 |
-| D-13 | `createSurveyResponse` の更新（allowUpdate）は同じ Survey・同じ partyId の回答だけを許可（OFBiz は所属を確認しない）。`createContent` / `updateTextContent` は servicedef で OUT の `serviceName` / `customMethodId` を入力から受け付けない | Devin Review のセキュリティ指摘への対応 |
+| D-13 | `createSurveyResponse` の既存回答の更新（allowUpdate）は `CONTENTMGR_UPDATE` が必要で、同じ Survey・同じ partyId の回答だけを許可（OFBiz は所属を確認しない。partyId と利用者の紐付けは UserLogin 移行後の課題）。`createContent` / `updateTextContent` は servicedef で OUT の `serviceName` / `customMethodId` を入力から受け付けない | Devin Review のセキュリティ指摘への対応 |
 | D-12 | `createSurveyMultiResp` / `createSurveyMultiRespColumn` は handler でサブシーケンス採番（共通の entity-auto は `*SeqId` 名のみ対象） | OFBiz と同じ採番結果にするため |
 
 ## 4. 既知の制約

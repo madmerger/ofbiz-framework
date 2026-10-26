@@ -9,6 +9,9 @@ migration:
       - username: editor
         password: ${CONTENT_TEST_PASSWORD:test-only}
         authorities: [OFBTOOLS_VIEW, CONTENTMGR_VIEW, CONTENTMGR_CREATE, CONTENTMGR_UPDATE, CONTENTMGR_DELETE]
+      - username: creator
+        password: ${CONTENT_TEST_PASSWORD:test-only}
+        authorities: [OFBTOOLS_VIEW, CONTENTMGR_VIEW, CONTENTMGR_CREATE]
       - username: readonly
         password: ${CONTENT_TEST_PASSWORD:test-only}
         authorities: [OFBTOOLS_VIEW, CONTENTMGR_VIEW]

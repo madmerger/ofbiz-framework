@@ -106,6 +106,9 @@ class ContentSimpleServicesTest extends ContentApiTestSupport {
         call("editor", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "AC35_B",
                 "surveyResponseId", responseId, "answers", Map.of(q, "B")))
                 .andExpect(status().isForbidden());
+        call("creator", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "AC35_A",
+                "surveyResponseId", responseId, "answers", Map.of(q, "A3")))
+                .andExpect(status().isForbidden());
         call("editor", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "AC35_A",
                 "surveyResponseId", responseId, "answers", Map.of(q, "A2")))
                 .andExpect(status().isOk())
