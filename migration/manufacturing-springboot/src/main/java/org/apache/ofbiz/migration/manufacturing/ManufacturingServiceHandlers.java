@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Deque;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,6 +43,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class ManufacturingServiceHandlers {
     private static final String BOM_TYPE = "MANUF_COMPONENT";
+    private static final Set<String> PRODUCT_ASSOC_FIELDS = Set.of(
+            "productId", "productIdTo", "productAssocTypeId", "fromDate", "thruDate", "sequenceNum", "reason",
+            "quantity", "scrapFactor", "instruction", "routingWorkEffortId", "estimateCalcMethod", "recurrenceInfoId");
+    private static final Set<String> PRODUCT_RULE_FIELDS = Set.of(
+            "ruleId", "productId", "productIdFor", "productIdIn", "ruleSeqId", "fromDate", "productIdInSubst",
+            "productFeature", "ruleOperator", "quantity", "description", "thruDate");
+    private static final Set<String> COPY_BOM_INPUT_FIELDS = Set.of(
+            "productId", "copyToProductId", "productAssocTypeId", "productIdTo", "fromDate", "thruDate");
     private final ServiceHandlerRegistry registry;
     private final EntityRegistry entities;
     private final EntityManager entityManager;
@@ -109,9 +118,10 @@ public class ManufacturingServiceHandlers {
     }
 
     private Map<String, Object> createBomAssoc(Map<String, Object> input) {
+        validateFields(input, PRODUCT_ASSOC_FIELDS);
         String productId = required(input, "productId");
         String componentId = required(input, "productIdTo");
-        String type = text(input.getOrDefault("productAssocTypeId", BOM_TYPE));
+        String type = required(input, "productAssocTypeId");
         Timestamp fromDate = timestamp(input.get("fromDate"));
         if (fromDate == null) {
             fromDate = Timestamp.from(Instant.now());
@@ -123,22 +133,23 @@ public class ManufacturingServiceHandlers {
         if (products.findProductAssoc(keys) != null) {
             throw new MigrationException(HttpStatus.CONFLICT, "ServiceValueFound");
         }
-        if (isAncestor(componentId, productId, type, fromDate)) {
+        if (isAncestor(productId, componentId, type, fromDate)) {
             throw badRequest("ManufacturingDuplicatedComponentInBOM: " + productId + " " + componentId);
         }
-        Map<String, Object> values = new LinkedHashMap<>(input);
+        Map<String, Object> values = new LinkedHashMap<>();
+        input.forEach(values::put);
         values.putAll(keys);
-        values.putIfAbsent("quantity", BigDecimal.ONE);
-        values.putIfAbsent("scrapFactor", BigDecimal.ONE);
         return products.createProductAssoc(values);
     }
 
     private Map<String, Object> copyBomAssocs(Map<String, Object> input) {
+        validateFields(input, COPY_BOM_INPUT_FIELDS);
         String source = required(input, "productId");
         String destination = required(input, "copyToProductId");
+        String type = required(input, "productAssocTypeId");
         Map<String, Object> filter = new LinkedHashMap<>();
         filter.put("productId", source);
-        copyIfPresent(input, filter, "productAssocTypeId");
+        filter.put("productAssocTypeId", type);
         copyIfPresent(input, filter, "productIdTo");
         Timestamp now = Timestamp.from(Instant.now());
         List<Map<String, Object>> assocs = products.findProductAssocs(filter);
@@ -149,7 +160,12 @@ public class ManufacturingServiceHandlers {
             if ((from != null && from.after(now)) || (thru != null && !thru.after(now))) {
                 continue;
             }
-            Map<String, Object> values = new LinkedHashMap<>(assoc);
+            Map<String, Object> values = new LinkedHashMap<>();
+            assoc.forEach((name, value) -> {
+                if (PRODUCT_ASSOC_FIELDS.contains(name)) {
+                    values.put(name, value);
+                }
+            });
             values.put("productId", destination);
             if (input.get("fromDate") != null) {
                 values.put("fromDate", timestamp(input.get("fromDate")));
@@ -159,8 +175,8 @@ public class ManufacturingServiceHandlers {
             }
             if (!destination.equals(values.get("productIdTo"))
                     && products.findProductAssoc(assocKeys(destination, text(values.get("productIdTo")),
-                            text(values.get("productAssocTypeId")), timestamp(values.get("fromDate"))) ) == null
-                    && !isAncestor(text(values.get("productIdTo")), destination,
+                            text(values.get("productAssocTypeId")), timestamp(values.get("fromDate")))) == null
+                    && !isAncestor(destination, text(values.get("productIdTo")),
                             text(values.get("productAssocTypeId")), timestamp(values.get("fromDate")))) {
                 products.createProductAssoc(values);
                 copied++;
@@ -170,6 +186,7 @@ public class ManufacturingServiceHandlers {
     }
 
     private Map<String, Object> addRule(Map<String, Object> input) {
+        validateFields(input, PRODUCT_RULE_FIELDS);
         required(input, "productIdIn");
         Map<String, Object> values = new LinkedHashMap<>(input);
         String ruleId = text(values.get("ruleId"));
@@ -184,6 +201,7 @@ public class ManufacturingServiceHandlers {
     }
 
     private Map<String, Object> updateRule(Map<String, Object> input) {
+        validateFields(input, PRODUCT_RULE_FIELDS);
         String ruleId = required(input, "ruleId");
         required(input, "productIdIn");
         Map<String, Object> values = find("ProductManufacturingRule", Map.of("ruleId", ruleId));
@@ -200,6 +218,7 @@ public class ManufacturingServiceHandlers {
     }
 
     private Map<String, Object> deleteRule(Map<String, Object> input) {
+        validateFields(input, Set.of("ruleId"));
         String ruleId = required(input, "ruleId");
         Object rule = entityByPk("ProductManufacturingRule", Map.of("ruleId", ruleId));
         if (rule != null) {
@@ -268,10 +287,13 @@ public class ManufacturingServiceHandlers {
 
     private Map<String, Object> getProductRouting(Map<String, Object> input) {
         String id = text(input.get("workEffortId"));
+        Timestamp requestedDate = timestamp(input.get("applicableDate"));
+        Timestamp applicableDate = requestedDate == null ? Timestamp.from(Instant.now()) : requestedDate;
         if (id.isBlank()) {
             String productId = required(input, "productId");
             List<Map<String, Object>> standards = workEfforts.findWorkEffortGoodStandards(
                     Map.of("productId", productId, "workEffortGoodStdTypeId", "ROU_PROD_TEMPLATE"));
+            standards = standards.stream().filter(value -> activeOn(value, applicableDate)).toList();
             if (!standards.isEmpty()) {
                 id = text(standards.get(0).get("workEffortId"));
             } else if (!Boolean.TRUE.equals(input.get("ignoreDefaultRouting"))) {
@@ -284,21 +306,25 @@ public class ManufacturingServiceHandlers {
         }
         List<Map<String, Object>> tasks = workEfforts.findWorkEffortAssocs(Map.of(
                 "workEffortIdFrom", id, "workEffortAssocTypeId", "ROUTING_COMPONENT"));
-        tasks = tasks.stream().sorted((left, right) -> text(left.get("sequenceNum"))
-                .compareTo(text(right.get("sequenceNum")))).toList();
+        tasks = tasks.stream().filter(value -> activeOn(value, applicableDate))
+                .sorted((left, right) -> decimal(left.get("sequenceNum")).compareTo(decimal(right.get("sequenceNum"))))
+                .toList();
         return Map.of("workEffortId", id, "routing", routing, "tasks", tasks);
     }
 
     private Map<String, Object> getManufacturingComponents(Map<String, Object> input) {
         String productId = required(input, "productId");
         BigDecimal quantity = input.get("quantity") == null ? BigDecimal.ONE : decimal(input.get("quantity"));
+        Timestamp requestedDate = timestamp(input.get("applicableDate"));
+        Timestamp applicableDate = requestedDate == null ? Timestamp.from(Instant.now()) : requestedDate;
         List<Map<String, Object>> components = new ArrayList<>();
         for (Map<String, Object> assoc : products.findProductAssocs(
                 Map.of("productId", productId, "productAssocTypeId", BOM_TYPE))) {
-            BigDecimal factor = assoc.get("quantity") == null ? BigDecimal.ONE : decimal(assoc.get("quantity"));
-            BigDecimal scrap = assoc.get("scrapFactor") == null ? BigDecimal.ONE : decimal(assoc.get("scrapFactor"));
+            if (!activeOn(assoc, applicableDate)) {
+                continue;
+            }
             Map<String, Object> item = new LinkedHashMap<>(assoc);
-            item.put("requiredQuantity", quantity.multiply(factor).multiply(scrap));
+            item.put("requiredQuantity", requiredComponentQuantity(assoc, quantity));
             components.add(item);
         }
         return Map.of("components", components);
@@ -309,61 +335,105 @@ public class ManufacturingServiceHandlers {
         if (products.findProduct(productId) == null) {
             throw badRequest("Product not found: " + productId);
         }
-        BigDecimal quantity = input.get("quantityToProduce") == null
-                ? BigDecimal.ONE : decimal(input.get("quantityToProduce"));
-        Map<String, Object> routing = getProductRouting(input);
+        BigDecimal quantity = requiredDecimal(input, "pRQuantity");
+        Timestamp start = requiredTimestamp(input, "startDate");
+        String facilityId = required(input, "facilityId");
+        Map<String, Object> routingInput = new LinkedHashMap<>();
+        routingInput.put("productId", productId);
+        routingInput.put("applicableDate", start);
+        if (input.get("routingId") != null) {
+            routingInput.put("workEffortId", input.get("routingId"));
+        }
+        Map<String, Object> routing;
+        try {
+            routing = getProductRouting(routingInput);
+        } catch (MigrationException exception) {
+            throw badRequest("Manufacturing routing not found for product " + productId);
+        }
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> routingTasks = (List<Map<String, Object>>) routing.get("tasks");
         if (routingTasks.isEmpty()) {
             throw badRequest("Manufacturing routing has no tasks");
         }
+        Map<String, Object> componentInput = Map.of("productId", productId, "quantity", quantity,
+                "applicableDate", start);
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> components = (List<Map<String, Object>>) getManufacturingComponents(componentInput)
+                .get("components");
+
+        Map<String, Object> routingWorkEffort = (Map<String, Object>) routing.get("routing");
+        String workEffortName = text(input.get("workEffortName"));
+        if (workEffortName.isBlank()) {
+            String routingName = text(routingWorkEffort.get("workEffortName"));
+            workEffortName = productId + "-" + (routingName.isBlank()
+                    ? text(routingWorkEffort.get("workEffortId")) : routingName);
+        }
         String productionRunId = sequences.nextId("WorkEffort");
-        Timestamp start = input.get("estimatedStartDate") == null
-                ? Timestamp.from(Instant.now()) : timestamp(input.get("estimatedStartDate"));
-        Map<String, Object> header = workEfforts.createWorkEffort(Map.of(
-                "workEffortId", productionRunId,
-                "workEffortTypeId", "PROD_ORDER_HEADER",
-                "currentStatusId", "PRUN_CREATED",
-                "quantityToProduce", quantity,
-                "facilityId", input.getOrDefault("facilityId", "MFG_PLANT"),
-                "estimatedStartDate", start,
-                "workEffortName", input.getOrDefault("workEffortName", "Manufacturing run")));
+        Map<String, Object> headerValues = new LinkedHashMap<>();
+        headerValues.put("workEffortId", productionRunId);
+        headerValues.put("workEffortTypeId", "PROD_ORDER_HEADER");
+        headerValues.put("workEffortPurposeTypeId", "WEPT_PRODUCTION_RUN");
+        headerValues.put("currentStatusId", "PRUN_CREATED");
+        headerValues.put("quantityToProduce", quantity);
+        headerValues.put("facilityId", facilityId);
+        headerValues.put("estimatedStartDate", start);
+        headerValues.put("workEffortName", workEffortName);
+        headerValues.put("description", input.get("description"));
+        Map<String, Object> header = workEfforts.createWorkEffort(headerValues);
         workEfforts.createWorkEffortGoodStandard(Map.of(
                 "workEffortId", productionRunId, "productId", productId,
                 "workEffortGoodStdTypeId", "PRUN_PROD_DELIV", "statusId", "WEGS_CREATED",
                 "estimatedQuantity", quantity, "fromDate", start));
+
         Timestamp completion = start;
+        Map<String, String> routingToProductionTask = new LinkedHashMap<>();
+        List<Map<String, Object>> productionTasks = new ArrayList<>();
         for (Map<String, Object> routingTask : routingTasks) {
+            String routingTaskId = text(routingTask.get("workEffortIdTo"));
+            Map<String, Object> routingTaskWorkEffort = workEfforts.findWorkEffort(routingTaskId);
+            if (routingTaskWorkEffort == null || !"ROU_TASK".equals(routingTaskWorkEffort.get("workEffortTypeId"))) {
+                throw badRequest("Manufacturing routing task not found: " + routingTaskId);
+            }
             String taskId = sequences.nextId("WorkEffort");
-            BigDecimal duration = decimal(routingTask.getOrDefault("estimatedSetupMillis", 0))
-                    .add(decimal(routingTask.getOrDefault("estimatedMilliSeconds", 0)).multiply(quantity));
+            BigDecimal setupMillis = decimal(routingTaskWorkEffort.get("estimatedSetupMillis"));
+            BigDecimal estimatedMillis = decimal(routingTaskWorkEffort.get("estimatedMilliSeconds"));
+            Timestamp taskStart = completion;
+            BigDecimal duration = setupMillis.add(estimatedMillis.multiply(quantity));
             completion = new Timestamp(completion.getTime() + duration.longValue());
             Map<String, Object> task = new LinkedHashMap<>();
             task.put("workEffortId", taskId);
             task.put("workEffortTypeId", "PROD_ORDER_TASK");
+            task.put("workEffortPurposeTypeId", "WEPT_PRODUCTION_RUN");
             task.put("workEffortParentId", productionRunId);
             task.put("currentStatusId", "PRUN_CREATED");
-            task.put("priority", routingTask.getOrDefault("sequenceNum", "10"));
-            task.put("estimatedStartDate", start);
+            task.put("priority", routingTask.get("sequenceNum"));
+            task.put("workEffortName", routingTaskWorkEffort.get("workEffortName"));
+            task.put("description", routingTaskWorkEffort.get("description"));
+            task.put("facilityId", facilityId);
+            task.put("estimatedSetupMillis", setupMillis);
+            task.put("estimatedMilliSeconds", estimatedMillis);
+            task.put("quantityToProduce", quantity);
+            task.put("estimatedStartDate", taskStart);
             task.put("estimatedCompletionDate", completion);
             workEfforts.createWorkEffort(task);
             workEfforts.createWorkEffortAssoc(Map.of(
-                    "workEffortIdFrom", productionRunId, "workEffortIdTo", taskId,
+                    "workEffortIdFrom", routingTaskId, "workEffortIdTo", taskId,
                     "workEffortAssocTypeId", "WORK_EFF_TEMPLATE", "fromDate", start));
+            routingToProductionTask.put(routingTaskId, taskId);
+            productionTasks.add(task);
         }
-        List<Map<String, Object>> tasks = workEfforts.findChildTasks(productionRunId);
-        String taskId = text(tasks.get(0).get("workEffortId"));
-        for (Map<String, Object> component : products.findProductAssocs(
-                Map.of("productId", productId, "productAssocTypeId", BOM_TYPE))) {
-            BigDecimal componentQuantity = decimal(component.getOrDefault("quantity", BigDecimal.ONE))
-                    .multiply(quantity).multiply(decimal(component.getOrDefault("scrapFactor", BigDecimal.ONE)));
+        String firstTaskId = text(productionTasks.get(0).get("workEffortId"));
+        for (Map<String, Object> component : components) {
+            String routingTaskId = text(component.get("routingWorkEffortId"));
+            String taskId = routingToProductionTask.getOrDefault(routingTaskId, firstTaskId);
             workEfforts.createWorkEffortGoodStandard(Map.of(
                     "workEffortId", taskId,
                     "productId", component.get("productIdTo"),
                     "workEffortGoodStdTypeId", "PRUNT_PROD_NEEDED",
-                    "estimatedQuantity", componentQuantity,
+                    "estimatedQuantity", component.get("requiredQuantity"),
                     "statusId", "WEGS_CREATED", "fromDate", start));
         }
+        header = workEfforts.updateWorkEffort(productionRunId, Map.of("estimatedCompletionDate", completion));
         return Map.of("productionRunId", productionRunId, "estimatedCompletionDate", completion,
                 "workEffort", header);
     }
@@ -390,6 +460,18 @@ public class ManufacturingServiceHandlers {
                 "PRUN_SCHEDULED:PRUN_DOC_PRINTED", "PRUN_DOC_PRINTED:PRUN_RUNNING",
                 "PRUN_RUNNING:PRUN_COMPLETED", "PRUN_COMPLETED:PRUN_CLOSED");
         if (allowed.contains(oldStatus + ":" + newStatus)) {
+            if ("PRUN_DOC_PRINTED".equals(oldStatus) && "PRUN_RUNNING".equals(newStatus)) {
+                Timestamp effectiveDate = Timestamp.from(Instant.now());
+                List<Map<String, Object>> predecessors = workEfforts.findWorkEffortAssocs(Map.of(
+                        "workEffortIdTo", id, "workEffortAssocTypeId", "WORK_EFF_PRECEDENCY"));
+                boolean blocked = predecessors.stream().filter(value -> activeOn(value, effectiveDate))
+                        .map(value -> workEfforts.findWorkEffort(text(value.get("workEffortIdFrom"))))
+                        .anyMatch(value -> value == null || !Set.of("PRUN_COMPLETED", "PRUN_RUNNING", "PRUN_CLOSED")
+                                .contains(text(value.get("currentStatusId"))));
+                if (blocked) {
+                    throw badRequest("Production run has incomplete precedence work efforts");
+                }
+            }
             String targetStatus = newStatus;
             Map<String, Object> changes = new LinkedHashMap<>();
             changes.put("currentStatusId", targetStatus);
@@ -404,32 +486,80 @@ public class ManufacturingServiceHandlers {
                 workEfforts.findChildTasks(id).forEach(task -> workEfforts.updateWorkEffort(
                         text(task.get("workEffortId")), Map.of("currentStatusId", targetStatus)));
             }
+        } else {
+            newStatus = oldStatus;
         }
         return Map.of("newStatusId", newStatus);
     }
 
     private Map<String, Object> changeProductionRunTaskStatus(Map<String, Object> input) {
         String runId = required(input, "productionRunId");
-        String taskId = required(input, "workEffortId");
+        String taskId = required(input, "productionRunTaskId");
         Map<String, Object> task = workEfforts.findWorkEffort(taskId);
         if (task == null) {
             throw new MigrationException(HttpStatus.NOT_FOUND, "ServiceValueNotFound");
+        }
+        if (!runId.equals(text(task.get("workEffortParentId")))) {
+            throw badRequest("Production run task does not belong to the requested production run");
         }
         String oldStatus = text(task.get("currentStatusId"));
         String newStatus = text(input.get("statusId"));
         if (newStatus.isBlank()) {
             newStatus = oldStatus.equals("PRUN_RUNNING") ? "PRUN_COMPLETED" : "PRUN_RUNNING";
         }
+        if (newStatus.equals(oldStatus)) {
+            return Map.of("oldStatusId", oldStatus, "newStatusId", oldStatus);
+        }
         Map<String, Object> header = workEfforts.findWorkEffort(runId);
-        if ("PRUN_RUNNING".equals(newStatus) && header != null
-                && "PRUN_CREATED".equals(header.get("currentStatusId"))) {
-            throw badRequest("Production run must be printed before a task starts");
+        if (header == null) {
+            throw new MigrationException(HttpStatus.NOT_FOUND, "ServiceValueNotFound");
         }
-        if (newStatus.equals("PRUN_RUNNING") && header != null
-                && !"PRUN_RUNNING".equals(header.get("currentStatusId"))) {
-            changeProductionRunStatus(Map.of("productionRunId", runId, "statusId", "PRUN_RUNNING"));
+        Map<String, Object> changes = new LinkedHashMap<>();
+        if ("PRUN_RUNNING".equals(newStatus)) {
+            if (!Set.of("PRUN_CREATED", "PRUN_SCHEDULED", "PRUN_DOC_PRINTED").contains(oldStatus)) {
+                throw badRequest("Production run task cannot be started from its current status");
+            }
+            if ("PRUN_CREATED".equals(header.get("currentStatusId"))) {
+                throw badRequest("Production run must be printed before a task starts");
+            }
+            BigDecimal priority = decimal(task.get("priority"));
+            boolean earlierIncomplete = workEfforts.findChildTasks(runId).stream()
+                    .filter(value -> decimal(value.get("priority")).compareTo(priority) < 0)
+                    .anyMatch(value -> !"PRUN_COMPLETED".equals(value.get("currentStatusId")));
+            if (earlierIncomplete) {
+                throw badRequest("An earlier production run task is not completed");
+            }
+            if ("PRUN_DOC_PRINTED".equals(header.get("currentStatusId"))) {
+                changeProductionRunStatus(Map.of("productionRunId", runId, "statusId", "PRUN_RUNNING"));
+            }
+            changes.put("actualStartDate", Timestamp.from(Instant.now()));
+        } else if ("PRUN_COMPLETED".equals(newStatus)) {
+            if (!"PRUN_RUNNING".equals(oldStatus)) {
+                throw badRequest("Only a running production run task can be completed");
+            }
+            BigDecimal targetQuantity = decimal(task.get("quantityToProduce"));
+            if (targetQuantity.compareTo(BigDecimal.ZERO) == 0) {
+                targetQuantity = decimal(header.get("quantityToProduce"));
+            }
+            BigDecimal produced = decimal(task.get("quantityProduced"));
+            BigDecimal rejected = decimal(task.get("quantityRejected"));
+            BigDecimal shortage = targetQuantity.subtract(produced.add(rejected));
+            if (shortage.compareTo(BigDecimal.ZERO) > 0) {
+                produced = produced.add(shortage);
+            }
+            changes.put("actualCompletionDate", Timestamp.from(Instant.now()));
+            changes.put("quantityProduced", produced);
+            if (task.get("actualSetupMillis") == null) {
+                changes.put("actualSetupMillis", decimal(task.get("estimatedSetupMillis")));
+            }
+            if (task.get("actualMilliSeconds") == null) {
+                changes.put("actualMilliSeconds", decimal(task.get("estimatedMilliSeconds")).multiply(produced));
+            }
+        } else {
+            throw badRequest("Unsupported production run task status: " + newStatus);
         }
-        workEfforts.updateWorkEffort(taskId, Map.of("currentStatusId", newStatus));
+        changes.put("currentStatusId", newStatus);
+        workEfforts.updateWorkEffort(taskId, changes);
         if (newStatus.equals("PRUN_COMPLETED")) {
             List<Map<String, Object>> tasks = workEfforts.findChildTasks(runId);
             if (tasks.stream().allMatch(value -> "PRUN_COMPLETED".equals(value.get("currentStatusId")))) {
@@ -440,13 +570,14 @@ public class ManufacturingServiceHandlers {
     }
 
     private Map<String, Object> updateProductionRunTask(Map<String, Object> input) {
-        String id = text(input.getOrDefault("productionRunTaskId", input.get("workEffortId")));
-        if (id.isBlank()) {
-            throw badRequest("Missing required input: productionRunTaskId");
-        }
+        String runId = required(input, "productionRunId");
+        String id = required(input, "productionRunTaskId");
         Map<String, Object> task = workEfforts.findWorkEffort(id);
         if (task == null) {
             throw new MigrationException(HttpStatus.NOT_FOUND, "ServiceValueNotFound");
+        }
+        if (!runId.equals(text(task.get("workEffortParentId")))) {
+            throw badRequest("Production run task does not belong to the requested production run");
         }
         if (!"PRUN_RUNNING".equals(task.get("currentStatusId"))) {
             throw badRequest("Production run task must be running");
@@ -506,6 +637,55 @@ public class ManufacturingServiceHandlers {
             return value instanceof BigDecimal decimal ? decimal : new BigDecimal(value.toString());
         } catch (NumberFormatException exception) {
             throw badRequest("Invalid decimal value");
+        }
+    }
+
+    private static BigDecimal requiredDecimal(Map<String, ?> input, String name) {
+        Object value = input.get(name);
+        if (value == null || value.toString().isBlank()) {
+            throw badRequest("Missing required input: " + name);
+        }
+        return decimal(value);
+    }
+
+    private static Timestamp requiredTimestamp(Map<String, ?> input, String name) {
+        Object value = input.get(name);
+        if (value == null || value.toString().isBlank()) {
+            throw badRequest("Missing required input: " + name);
+        }
+        try {
+            return timestamp(value);
+        } catch (RuntimeException exception) {
+            throw badRequest("Invalid timestamp value for " + name);
+        }
+    }
+
+    private static BigDecimal requiredComponentQuantity(Map<String, ?> assoc, BigDecimal productionQuantity) {
+        BigDecimal componentQuantity = assoc.get("quantity") == null
+                ? BigDecimal.ONE : decimal(assoc.get("quantity"));
+        return productionQuantity.multiply(componentQuantity).multiply(scrapMultiplier(assoc.get("scrapFactor")));
+    }
+
+    private static BigDecimal scrapMultiplier(Object scrapValue) {
+        BigDecimal percent = scrapValue == null ? BigDecimal.ZERO : decimal(scrapValue);
+        BigDecimal hundred = new BigDecimal("100");
+        if (percent.compareTo(hundred.negate()) > 0 && percent.compareTo(hundred) < 0) {
+            return BigDecimal.ONE.add(percent.movePointLeft(2));
+        }
+        return BigDecimal.ONE;
+    }
+
+    private static boolean activeOn(Map<String, ?> value, Timestamp date) {
+        Timestamp from = timestamp(value.get("fromDate"));
+        Timestamp thru = timestamp(value.get("thruDate"));
+        return (from == null || !from.after(date)) && (thru == null || thru.after(date));
+    }
+
+    private static void validateFields(Map<String, ?> input, Set<String> allowed) {
+        Set<String> unknown = new LinkedHashSet<>(input.keySet());
+        unknown.removeAll(allowed);
+        if (!unknown.isEmpty()) {
+            throw badRequest("Undeclared input fields: " + String.join(", ", unknown));
         }
     }
 

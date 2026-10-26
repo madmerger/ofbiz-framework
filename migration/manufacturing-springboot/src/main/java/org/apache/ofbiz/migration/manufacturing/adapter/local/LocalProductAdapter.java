@@ -20,14 +20,20 @@ package org.apache.ofbiz.migration.manufacturing.adapter.local;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import jakarta.persistence.EntityManager;
 import org.apache.ofbiz.migration.common.EntityRegistry;
+import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.manufacturing.ProductPort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class LocalProductAdapter implements ProductPort {
+    private static final Set<String> PRODUCT_ASSOC_FIELDS = Set.of(
+            "productId", "productIdTo", "productAssocTypeId", "fromDate", "thruDate", "sequenceNum", "reason",
+            "quantity", "scrapFactor", "instruction", "routingWorkEffortId", "estimateCalcMethod", "recurrenceInfoId");
     private final EntityRegistry entities;
     private final EntityManager entityManager;
 
@@ -59,10 +65,20 @@ public class LocalProductAdapter implements ProductPort {
 
     @Override
     public Map<String, Object> createProductAssoc(Map<String, ?> values) {
+        validateFields(values, PRODUCT_ASSOC_FIELDS);
         Class<?> type = entities.entityClass("ProductAssoc");
         Object entity = entities.newEntity(type);
         values.forEach((name, value) -> entities.set(entity, name, value));
         entityManager.persist(entity);
+        entityManager.flush();
         return entities.toMap(entity);
+    }
+
+    private static void validateFields(Map<String, ?> values, Set<String> allowed) {
+        Set<String> unknown = new java.util.HashSet<>(values.keySet());
+        unknown.removeAll(allowed);
+        if (!unknown.isEmpty()) {
+            throw new MigrationException(HttpStatus.BAD_REQUEST, "Undeclared ProductAssoc fields: " + unknown);
+        }
     }
 }

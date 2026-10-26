@@ -68,9 +68,9 @@ Manufacturing の主キーは単一 ID と複合キーの両方を含む。`Prod
 
 | AC | 受け入れ条件 | 対応テスト |
 | --- | --- | --- |
-| AC-01 | モジュール構成、catalog が entity-auto 18件を認識する | `ac01_catalogContainsAllEntityAutoServices` |
-| AC-02 | calendar entity-auto の作成・更新・例外日の削除ができる | `ac02_calendarEntityAutoSupportsCreateUpdateAndDelete` |
-| AC-03 | simple formula、BOM 自己参照拒否等を検証する | `ac03_simpleFormulaAndBomValidationMatchTheContract` |
-| AC-04 | BOM 登録から生産 run / task 完了まで進み header が PRUN_COMPLETED になる | `ac04_productionRunCompletesAfterItsTasks` |
-| AC-05 | 未認証・権限不足・機密 Entity・Swagger profile を検証する | `ac05_apiAuthorizationSensitiveEntityAndSwagger` |
-| AC-06 | multi の重複 409 と全件 rollback を検証する | `ac06_multiDuplicateReturnsConflictAndRollsBackEarlierRows` |
+| AC-01 | servicing XML の entity-auto 数と catalog が一致する | `ac01_entityAutoCatalogMatchesServiceDefinitions` |
+| AC-02 | 18 catalog service を lifecycle 実行し、INOUT key の採番と指定値を確認する | `ac02_entityAutoServicesSupportLifecycle`、`ac02_inoutPrimaryKeysAreGeneratedOrPreserved` |
+| AC-03 | 8 simple services の成功・異常・式・循環・重複を確認する | `ac03_*`（SimpleServicesAcceptanceTest） |
+| AC-04 | BOM 2部品、routing task、数量・状態遷移と主要な拒否条件を確認する | `ac04_*`（ManufacturingAcceptanceTest、ProductionRunFlowTest） |
+| AC-05 | component scope、extra entities、sensitive entity、HTTPS/proxy を確認する | `ac05_*`（ManufacturingSecurityTest、ManufacturingHttpsSecurityTest） |
+| AC-06 | HTTP multi の重複409と全件 rollback を確認する | `ac06_*`（MultiRollbackTest） |

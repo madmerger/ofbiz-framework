@@ -73,6 +73,8 @@ class PostgresSmokeTest {
                 Map.of("calendarId", "PG_CAL")) == null);
         create("Product", Map.of("productId", "PG_FG", "productTypeId", "FINISHED_GOOD",
                 "internalName", "Postgres finished good", "isVirtual", "N"));
+        create("Facility", Map.of("facilityId", "PG_PLANT", "facilityTypeId", "PLANT",
+                "facilityName", "Postgres plant"));
         workEfforts.createWorkEffort(Map.of("workEffortId", "PG_ROUTING", "workEffortTypeId", "ROUTING"));
         workEfforts.createWorkEffort(Map.of("workEffortId", "PG_TASK", "workEffortTypeId", "ROU_TASK",
                 "estimatedSetupMillis", BigDecimal.ONE, "estimatedMilliSeconds", BigDecimal.ONE));
@@ -82,7 +84,8 @@ class PostgresSmokeTest {
         workEfforts.createWorkEffortGoodStandard(Map.of("workEffortId", "PG_ROUTING", "productId", "PG_FG",
                 "workEffortGoodStdTypeId", "ROU_PROD_TEMPLATE", "fromDate", date));
         Map<String, Object> result = dispatcher.execute("manufacturing", "createProductionRun",
-                Map.of("productId", "PG_FG", "quantityToProduce", BigDecimal.ONE));
+                Map.of("productId", "PG_FG", "pRQuantity", BigDecimal.ONE,
+                        "startDate", date, "facilityId", "PG_PLANT"));
         assertFalse(String.valueOf(result.get("productionRunId")).isBlank());
     }
 

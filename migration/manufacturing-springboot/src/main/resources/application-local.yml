@@ -9,7 +9,7 @@ springdoc:
 server:
   tomcat:
     remoteip:
-      internal-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:127\.\d{1,3}\.\d{1,3}\.\d{1,3}|::1}'
+      internal-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}'
 migration:
   security:
     require-https: false

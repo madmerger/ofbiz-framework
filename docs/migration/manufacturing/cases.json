@@ -237,7 +237,8 @@
             "productIdTo": "MFG_RAW2",
             "productAssocTypeId": "MANUF_COMPONENT",
             "quantity": 1,
-            "scrapFactor": 1
+            "scrapFactor": 1,
+            "routingWorkEffortId": "MFG_TASK_20"
           }
         },
         "expected": {
@@ -252,7 +253,8 @@
           "user": "mfgwriter",
           "body": {
             "productId": "MFG_FG",
-            "quantityToProduce": 2,
+            "pRQuantity": 2,
+            "startDate": "2030-01-01T00:00:00Z",
             "facilityId": "MFG_PLANT"
           }
         },
@@ -298,7 +300,7 @@
           "user": "mfgwriter",
           "body": {
             "productionRunId": "${MANUFACTURING-E2E-06-03.productionRunId}",
-            "workEffortId": "${MANUFACTURING-E2E-06-04.tasks[0].workEffortId}",
+            "productionRunTaskId": "${MANUFACTURING-E2E-06-04.tasks[0].workEffortId}",
             "statusId": "PRUN_RUNNING"
           }
         },
@@ -314,7 +316,8 @@
           "path": "/api/manufacturing/services/updateProductionRunTask",
           "user": "mfgwriter",
           "body": {
-            "workEffortId": "${MANUFACTURING-E2E-06-04.tasks[0].workEffortId}",
+            "productionRunId": "${MANUFACTURING-E2E-06-03.productionRunId}",
+            "productionRunTaskId": "${MANUFACTURING-E2E-06-04.tasks[0].workEffortId}",
             "addQuantityProduced": 2
           }
         },
@@ -331,7 +334,7 @@
           "user": "mfgwriter",
           "body": {
             "productionRunId": "${MANUFACTURING-E2E-06-03.productionRunId}",
-            "workEffortId": "${MANUFACTURING-E2E-06-04.tasks[0].workEffortId}",
+            "productionRunTaskId": "${MANUFACTURING-E2E-06-04.tasks[0].workEffortId}",
             "statusId": "PRUN_COMPLETED"
           }
         },
@@ -348,7 +351,7 @@
           "user": "mfgwriter",
           "body": {
             "productionRunId": "${MANUFACTURING-E2E-06-03.productionRunId}",
-            "workEffortId": "${MANUFACTURING-E2E-06-04.tasks[1].workEffortId}",
+            "productionRunTaskId": "${MANUFACTURING-E2E-06-04.tasks[1].workEffortId}",
             "statusId": "PRUN_RUNNING"
           }
         },
@@ -364,7 +367,8 @@
           "path": "/api/manufacturing/services/updateProductionRunTask",
           "user": "mfgwriter",
           "body": {
-            "workEffortId": "${MANUFACTURING-E2E-06-04.tasks[1].workEffortId}",
+            "productionRunId": "${MANUFACTURING-E2E-06-03.productionRunId}",
+            "productionRunTaskId": "${MANUFACTURING-E2E-06-04.tasks[1].workEffortId}",
             "addQuantityProduced": 2
           }
         },
@@ -381,7 +385,7 @@
           "user": "mfgwriter",
           "body": {
             "productionRunId": "${MANUFACTURING-E2E-06-03.productionRunId}",
-            "workEffortId": "${MANUFACTURING-E2E-06-04.tasks[1].workEffortId}",
+            "productionRunTaskId": "${MANUFACTURING-E2E-06-04.tasks[1].workEffortId}",
             "statusId": "PRUN_COMPLETED"
           }
         },
@@ -401,6 +405,35 @@
         "expected": {
           "status": 200,
           "currentStatusId": "PRUN_COMPLETED"
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-06-13",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/changeProductionRunStatus",
+          "user": "mfgwriter",
+          "body": {
+            "productionRunId": "${MANUFACTURING-E2E-06-03.productionRunId}",
+            "statusId": "PRUN_CLOSED"
+          }
+        },
+        "expected": {
+          "status": 200,
+          "newStatusId": "PRUN_CLOSED"
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-06-14",
+        "request": {
+          "method": "GET",
+          "path": "/api/manufacturing/entities/WorkEffort/one?workEffortId=${MANUFACTURING-E2E-06-03.productionRunId}",
+          "user": "mfgwriter",
+          "body": null
+        },
+        "expected": {
+          "status": 200,
+          "currentStatusId": "PRUN_CLOSED"
         }
       }
     ]
@@ -434,13 +467,12 @@
         "id": "MANUFACTURING-E2E-07-02",
         "request": {
           "method": "GET",
-          "path": "/api/manufacturing/entities/TechDataCalendar?calendarId=E2E_MULTI",
+          "path": "/api/manufacturing/entities/TechDataCalendar/one?calendarId=E2E_MULTI",
           "user": "mfgwriter",
           "body": null
         },
         "expected": {
-          "status": 200,
-          "recordCount": 0
+          "status": 404
         }
       }
     ]

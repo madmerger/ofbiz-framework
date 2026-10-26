@@ -18,8 +18,10 @@
 package org.apache.ofbiz.migration.manufacturing;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Map;
+import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,29 +42,64 @@ class ManufacturingSecurityTest {
     private int port;
     @Autowired
     private TestRestTemplate rest;
+    @Autowired
+    private EntityRegistry entities;
 
     @Test
-    void ac05_apiAuthorizationSensitiveEntityAndSwagger() {
+    void ac05_unauthenticatedRequestsReturn401() {
         String base = "http://localhost:" + port;
         assertEquals(HttpStatus.UNAUTHORIZED, rest.getForEntity(base + "/api/manufacturing/entities/Product",
                 String.class).getStatusCode());
+    }
+
+    @Test
+    void ac05_ofbtoolsOnlyRequestsReturn403() {
+        String base = "http://localhost:" + port;
         assertEquals(HttpStatus.FORBIDDEN, rest.withBasicAuth("ofbtoolsonly", password())
                 .getForEntity(base + "/api/manufacturing/entities/Product", String.class).getStatusCode());
+    }
+
+    @Test
+    void ac05_viewerCannotCreateAndDatabaseRemainsUnchanged() {
+        String base = "http://localhost:" + port;
+        String calendarId = "AC05_VIEWER_DENIED";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String, String>> request = new HttpEntity<>(
+                Map.of("calendarId", calendarId, "description", "denied"), headers);
+        ResponseEntity<String> denied = rest.withBasicAuth("mfgviewer", password()).exchange(
+                base + "/api/manufacturing/services/createCalendar", HttpMethod.POST, request, String.class);
+        assertEquals(HttpStatus.FORBIDDEN, denied.getStatusCode());
+        assertNull(entities.findByPrimaryKey(entities.entityClass("TechDataCalendar"),
+                Map.of("calendarId", calendarId)));
+    }
+
+    @Test
+    void ac05_sensitiveCostComponentRequiresWriterAuthority() {
+        String base = "http://localhost:" + port;
         assertEquals(HttpStatus.FORBIDDEN, rest.withBasicAuth("mfgviewer", password())
                 .getForEntity(base + "/api/manufacturing/entities/CostComponent", String.class).getStatusCode());
         assertEquals(HttpStatus.OK, rest.withBasicAuth("mfgwriter", password())
                 .getForEntity(base + "/api/manufacturing/entities/CostComponent", String.class).getStatusCode());
+    }
+
+    @Test
+    void ac05_componentMismatchReturns404() {
+        String base = "http://localhost:" + port;
         assertEquals(HttpStatus.NOT_FOUND, rest.withBasicAuth("mfgadmin", password())
                 .getForEntity(base + "/api/humanres/entities/Product", String.class).getStatusCode());
+    }
+
+    @Test
+    void ac05_entityOutsideExtraEntitiesReturns404() {
+        String base = "http://localhost:" + port;
         assertEquals(HttpStatus.NOT_FOUND, rest.withBasicAuth("mfgadmin", password())
                 .getForEntity(base + "/api/manufacturing/entities/PaymentMethod", String.class).getStatusCode());
+    }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<Map<String, String>> request = new HttpEntity<>(Map.of("calendarId", "DENIED"), headers);
-        ResponseEntity<String> denied = rest.withBasicAuth("mfgviewer", password()).exchange(
-                base + "/api/manufacturing/services/createCalendar", HttpMethod.POST, request, String.class);
-        assertEquals(HttpStatus.FORBIDDEN, denied.getStatusCode());
+    @Test
+    void ac05_localSwaggerIsAvailable() {
+        String base = "http://localhost:" + port;
         assertEquals(HttpStatus.OK, rest.getForEntity(base + "/swagger-ui/index.html", String.class).getStatusCode());
     }
 

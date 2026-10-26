@@ -30,15 +30,16 @@ import java.util.Map;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
-import org.apache.ofbiz.migration.manufacturing.generated.ServiceCatalog;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @ActiveProfiles("local")
+@Transactional
 @WithMockUser(authorities = {"OFBTOOLS_VIEW", "MANUFACTURING_ADMIN", "MANUFACTURING_SENSITIVE_VIEW"})
 class ManufacturingAcceptanceTest {
     @Autowired
@@ -49,15 +50,6 @@ class ManufacturingAcceptanceTest {
     private ProductPort products;
     @Autowired
     private WorkEffortPort workEfforts;
-
-    @Test
-    void ac01_catalogContainsAllEntityAutoServices() {
-        long count = ServiceCatalog.all().values().stream()
-                .filter(definition -> definition.entity() != null && !definition.entity().isBlank())
-                .filter(definition -> definition.invoke() != null && !definition.invoke().isBlank())
-                .count();
-        assertEquals(18, count);
-    }
 
     @Test
     void ac02_calendarEntityAutoSupportsCreateUpdateAndDelete() {
@@ -118,46 +110,74 @@ class ManufacturingAcceptanceTest {
 
     @Test
     void ac04_productionRunCompletesAfterItsTasks() {
+        Timestamp start = Timestamp.from(Instant.now());
         call("createBOMAssoc", Map.of(
                 "productId", "MFG_FG",
                 "productIdTo", "MFG_RAW1",
                 "productAssocTypeId", "MANUF_COMPONENT",
-                "fromDate", Timestamp.from(Instant.now()),
+                "fromDate", start,
                 "quantity", new BigDecimal("2"),
-                "scrapFactor", BigDecimal.ONE));
+                "scrapFactor", new BigDecimal("10")));
+        call("createBOMAssoc", Map.of(
+                "productId", "MFG_FG",
+                "productIdTo", "MFG_RAW2",
+                "productAssocTypeId", "MANUF_COMPONENT",
+                "fromDate", start,
+                "quantity", new BigDecimal("3"),
+                "scrapFactor", new BigDecimal("-10"),
+                "routingWorkEffortId", "MFG_TASK_20"));
         Map<String, Object> created = call("createProductionRun", Map.of(
-                "productId", "MFG_FG", "quantityToProduce", new BigDecimal("2"), "facilityId", "MFG_PLANT"));
+                "productId", "MFG_FG", "pRQuantity", new BigDecimal("2"),
+                "startDate", start, "facilityId", "MFG_PLANT"));
         String runId = String.valueOf(created.get("productionRunId"));
         call("changeProductionRunStatus", Map.of("productionRunId", runId, "statusId", "PRUN_DOC_PRINTED"));
         List<Map<String, Object>> tasks = workEfforts.findChildTasks(runId);
         assertEquals(2, tasks.size());
-        for (Map<String, Object> task : tasks) {
-            String taskId = String.valueOf(task.get("workEffortId"));
-            call("changeProductionRunTaskStatus", Map.of(
-                    "productionRunId", runId, "workEffortId", taskId, "statusId", "PRUN_RUNNING"));
-            call("updateProductionRunTask", Map.of(
-                    "workEffortId", taskId, "addQuantityProduced", BigDecimal.ONE));
-            call("changeProductionRunTaskStatus", Map.of(
-                    "productionRunId", runId, "workEffortId", taskId, "statusId", "PRUN_COMPLETED"));
-        }
+        long expectedDuration = tasks.stream().mapToLong(task ->
+                new BigDecimal(task.get("estimatedSetupMillis").toString()).longValue()
+                        + new BigDecimal(task.get("estimatedMilliSeconds").toString())
+                                .multiply(new BigDecimal(task.get("quantityToProduce").toString())).longValue())
+                .sum();
+        assertEquals(new Timestamp(start.getTime() + expectedDuration), created.get("estimatedCompletionDate"));
+        assertEquals("Preparation", tasks.get(0).get("workEffortName"));
+        assertEquals("Assembly", tasks.get(1).get("workEffortName"));
+        assertEquals(start, tasks.get(0).get("estimatedStartDate"));
+        assertEquals(tasks.get(0).get("estimatedCompletionDate"), tasks.get(1).get("estimatedStartDate"));
+        String firstTaskId = String.valueOf(tasks.get(0).get("workEffortId"));
+        String secondTaskId = String.valueOf(tasks.get(1).get("workEffortId"));
+        assertEquals("MFG_TASK_10", workEfforts.findWorkEffortAssocs(Map.of(
+                "workEffortIdTo", firstTaskId, "workEffortAssocTypeId", "WORK_EFF_TEMPLATE"))
+                .get(0).get("workEffortIdFrom"));
+        assertEquals("MFG_TASK_20", workEfforts.findWorkEffortAssocs(Map.of(
+                "workEffortIdTo", secondTaskId, "workEffortAssocTypeId", "WORK_EFF_TEMPLATE"))
+                .get(0).get("workEffortIdFrom"));
+        assertEquals(0, new BigDecimal("4.4").compareTo(new BigDecimal(workEfforts.findWorkEffortGoodStandards(Map.of(
+                "workEffortId", firstTaskId, "workEffortGoodStdTypeId", "PRUNT_PROD_NEEDED"))
+                .get(0).get("estimatedQuantity").toString())));
+        assertEquals(0, new BigDecimal("5.4").compareTo(new BigDecimal(workEfforts.findWorkEffortGoodStandards(Map.of(
+                "workEffortId", secondTaskId, "workEffortGoodStdTypeId", "PRUNT_PROD_NEEDED"))
+                .get(0).get("estimatedQuantity").toString())));
+
+        call("changeProductionRunTaskStatus", Map.of(
+                "productionRunId", runId, "productionRunTaskId", firstTaskId, "statusId", "PRUN_RUNNING"));
+        call("updateProductionRunTask", Map.of(
+                "productionRunId", runId, "productionRunTaskId", firstTaskId,
+                "addQuantityProduced", BigDecimal.ONE));
+        call("changeProductionRunTaskStatus", Map.of(
+                "productionRunId", runId, "productionRunTaskId", firstTaskId, "statusId", "PRUN_COMPLETED"));
+        call("changeProductionRunTaskStatus", Map.of(
+                "productionRunId", runId, "productionRunTaskId", secondTaskId, "statusId", "PRUN_RUNNING"));
+        call("updateProductionRunTask", Map.of(
+                "productionRunId", runId, "productionRunTaskId", secondTaskId,
+                "addQuantityProduced", BigDecimal.ONE));
+        call("changeProductionRunTaskStatus", Map.of(
+                "productionRunId", runId, "productionRunTaskId", secondTaskId, "statusId", "PRUN_COMPLETED"));
         Map<String, Object> header = workEfforts.findWorkEffort(runId);
         assertEquals("PRUN_COMPLETED", header.get("currentStatusId"));
-    }
-
-    @Test
-    void ac06_multiDuplicateReturnsConflictAndRollsBackEarlierRows() {
-        Timestamp from = Timestamp.from(Instant.now());
-        List<Map<String, Object>> rows = List.of(
-                Map.of("calendarId", "AC06_FIRST", "description", "should rollback"),
-                Map.of("calendarId", "AC06_FIRST", "description", "duplicate"));
-        MigrationServiceDispatcher.MultiServiceException exception = assertThrows(
-                MigrationServiceDispatcher.MultiServiceException.class,
-                () -> dispatcher.executeMulti("manufacturing", "createCalendar", rows));
-        assertFalse(exception.getErrors().isEmpty());
-        assertTrue(exception.getErrors().stream().anyMatch(error ->
-                String.valueOf(error.get("errorMessage")).contains("ServiceValueFound")));
-        assertTrue(entities.findByPrimaryKey(entities.entityClass("TechDataCalendar"),
-                Map.of("calendarId", "AC06_FIRST")) == null);
+        call("changeProductionRunStatus", Map.of("productionRunId", runId, "statusId", "PRUN_CLOSED"));
+        assertEquals("PRUN_CLOSED", workEfforts.findWorkEffort(runId).get("currentStatusId"));
+        assertTrue(workEfforts.findChildTasks(runId).stream()
+                .allMatch(task -> "PRUN_CLOSED".equals(task.get("currentStatusId"))));
     }
 
     private Map<String, Object> call(String service, Map<String, Object> input) {

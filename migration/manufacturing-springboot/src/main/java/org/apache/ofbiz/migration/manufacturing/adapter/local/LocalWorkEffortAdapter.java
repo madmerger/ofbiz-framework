@@ -17,17 +17,38 @@
  *******************************************************************************/
 package org.apache.ofbiz.migration.manufacturing.adapter.local;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import jakarta.persistence.EntityManager;
 import org.apache.ofbiz.migration.common.EntityRegistry;
+import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.manufacturing.WorkEffortPort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class LocalWorkEffortAdapter implements WorkEffortPort {
+    private static final Set<String> WORK_EFFORT_FIELDS = Set.of(
+            "workEffortId", "workEffortTypeId", "currentStatusId", "lastStatusUpdate", "workEffortPurposeTypeId",
+            "workEffortParentId", "scopeEnumId", "priority", "percentComplete", "workEffortName", "showAsEnumId",
+            "sendNotificationEmail", "description", "locationDesc", "estimatedStartDate", "estimatedCompletionDate",
+            "actualStartDate", "actualCompletionDate", "estimatedMilliSeconds", "estimatedSetupMillis",
+            "estimateCalcMethod", "actualMilliSeconds", "actualSetupMillis", "totalMilliSecondsAllowed",
+            "totalMoneyAllowed", "moneyUomId", "specialTerms", "timeTransparency", "universalId",
+            "sourceReferenceId", "fixedAssetId", "facilityId", "infoUrl", "recurrenceInfoId", "tempExprId",
+            "runtimeDataId", "noteId", "serviceLoaderName", "quantityToProduce", "quantityProduced",
+            "quantityRejected", "reservPersons", "reserv2ndPPPerc", "reservNthPPPerc", "accommodationMapId",
+            "accommodationSpotId", "revisionNumber", "createdDate", "createdByUserLogin", "lastModifiedDate",
+            "lastModifiedByUserLogin");
+    private static final Set<String> GOOD_STANDARD_FIELDS = Set.of(
+            "workEffortId", "productId", "workEffortGoodStdTypeId", "fromDate", "thruDate", "statusId",
+            "estimatedQuantity", "estimatedCost");
+    private static final Set<String> WORK_EFFORT_ASSOC_FIELDS = Set.of(
+            "workEffortIdFrom", "workEffortIdTo", "workEffortAssocTypeId", "sequenceNum", "fromDate", "thruDate");
     private final EntityRegistry entities;
     private final EntityManager entityManager;
 
@@ -64,7 +85,7 @@ public class LocalWorkEffortAdapter implements WorkEffortPort {
         return entities.findByEquality(entities.entityClass("WorkEffort"),
                 Map.of("workEffortParentId", parentId, "workEffortTypeId", "PROD_ORDER_TASK")).stream()
                 .map(entities::toMap)
-                .sorted(Comparator.comparing(value -> String.valueOf(value.getOrDefault("priority", ""))))
+                .sorted(Comparator.comparing(value -> decimal(value.get("priority"))))
                 .toList();
     }
 
@@ -93,9 +114,29 @@ public class LocalWorkEffortAdapter implements WorkEffortPort {
     }
 
     private Map<String, Object> create(String name, Map<String, ?> values) {
+        Set<String> allowed = switch (name) {
+            case "WorkEffort" -> WORK_EFFORT_FIELDS;
+            case "WorkEffortGoodStandard" -> GOOD_STANDARD_FIELDS;
+            case "WorkEffortAssoc" -> WORK_EFFORT_ASSOC_FIELDS;
+            default -> Set.of();
+        };
+        validateFields(name, values, allowed);
         Object entity = entities.newEntity(entities.entityClass(name));
         values.forEach((field, value) -> entities.set(entity, field, value));
         entityManager.persist(entity);
         return entities.toMap(entity);
+    }
+
+    private static BigDecimal decimal(Object value) {
+        return value == null ? BigDecimal.ZERO : new BigDecimal(value.toString());
+    }
+
+    private static void validateFields(String entityName, Map<String, ?> values, Set<String> allowed) {
+        Set<String> unknown = new java.util.HashSet<>(values.keySet());
+        unknown.removeAll(allowed);
+        if (!unknown.isEmpty()) {
+            throw new MigrationException(HttpStatus.BAD_REQUEST,
+                    "Undeclared " + entityName + " fields: " + unknown);
+        }
     }
 }
