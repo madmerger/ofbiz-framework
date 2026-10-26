@@ -37,6 +37,7 @@ AC-01〜AC-15 はすべて PASS（対応テストは spec §4）。
 | D-08 | `updateContactListPartyNoUserLogin` は、購読確認（PENDING→ACCEPTED/REJECTED）だけを受け付け、最新の PENDING の確認コードと照合する。解除の確定は認証付きの `updateContactListParty` で行う | OFBiz は履歴に一致するコードがあれば任意の statusId を受け付けるため、古いコードで解除済みの購読を再承認したり、購読時のコードで解除を確定したりできた（Devin Review の指摘で強化） |
 | D-09 | `createContact` で Person に書き込めるのは、party の `person` マップ処理（PartyMapProcs.xml）が許可する属性だけ | OFBiz の map-processor と同じ制限 |
 | D-10 | メールスタブは直近 100 件だけを保持する | 長時間起動したときのメモリ増加を防ぐ |
+| D-11 | `arePartiesRelatedThroughSegmentGroup` は SegmentGroupRole 経由の関係だけを判定する（分類経由は判定しない） | OFBiz の SegmentServices.xml でも分類経由の `SegmentGroupViewRelatedPartiesClass` 検索はコメントアウトされており、ロール経由だけで判定しているため、現行の挙動に合わせた |
 
 ## 5. 既知の制約
 
