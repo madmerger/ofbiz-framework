@@ -49,9 +49,7 @@ class HttpsTest {
     @Test
     void ac02_httpRequestsAreRedirectedToHttps() throws Exception {
         HttpResponse<String> response = client().send(request().build(), HttpResponse.BodyHandlers.ofString());
-        assertEquals(302, response.statusCode());
-        String location = response.headers().firstValue("location").orElseThrow();
-        assertTrue(location.startsWith("https://"), location);
+        assertSecureRedirect(response);
     }
 
     @Test
@@ -60,9 +58,7 @@ class HttpsTest {
         HttpResponse<String> response = client().send(
                 request().header("X-Forwarded-Proto", "https").build(),
                 HttpResponse.BodyHandlers.ofString());
-        assertEquals(302, response.statusCode());
-        String location = response.headers().firstValue("location").orElseThrow();
-        assertTrue(location.startsWith("https://"), location);
+        assertSecureRedirect(response);
     }
 
     private HttpClient client() {
@@ -72,5 +68,12 @@ class HttpsTest {
     private HttpRequest.Builder request() {
         return HttpRequest.newBuilder(URI.create(
                 "http://127.0.0.1:" + port + "/api/product/entities/ProductType")).GET();
+    }
+
+    private static void assertSecureRedirect(HttpResponse<String> response) {
+        assertEquals(302, response.statusCode());
+        URI location = URI.create(response.headers().firstValue("location").orElseThrow());
+        assertEquals("/api/product/entities/ProductType", location.getPath());
+        assertTrue(location.getHost().equals("127.0.0.1"), location.toString());
     }
 }
