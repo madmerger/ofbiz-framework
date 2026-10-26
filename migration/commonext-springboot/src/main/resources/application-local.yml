@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:commonext-local;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+migration:
+  security:
+    require-https: false
+    users:
+      - username: admin
+        authorities:
+          - OFBTOOLS_VIEW
+          - SETUP_ADMIN
+          - COMMONEXT_PUBLMSG
+      - username: editor
+        authorities:
+          - OFBTOOLS_VIEW
+          - SETUP_VIEW
+          - SETUP_UPDATE
+          - SETUP_SENSITIVE_VIEW
+      - username: readonly
+        authorities:
+          - OFBTOOLS_VIEW
+          - SETUP_VIEW
+      - username: nosetup
+        authorities:
+          - OFBTOOLS_VIEW

@@ -1,0 +1,100 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'checkstyle'
+}
+
+ext['testcontainers.version'] = '1.21.4'
+
+group = 'org.apache.ofbiz.migration'
+version = '0.1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':migration:springboot-common')
+    implementation project(':migration:springboot-datamodel')
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+checkstyle {
+    toolVersion = '10.20.2'
+    maxErrors = 0
+    configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+}
+
+def generatedRoot = layout.buildDirectory.dir('generated/sources/ofbiz2spring/main/java')
+def reportFile = layout.buildDirectory.file('generated/ofbiz2spring-report.json')
+def generator = rootProject.file('migration/tools/ofbiz2spring.py')
+def serviceDef = rootProject.file('applications/commonext/servicedef/services.xml')
+def entityModelFiles = rootProject.fileTree(rootProject.projectDir) {
+    include 'framework/common/entitydef/entitymodel*.xml'
+    include 'framework/*/entitydef/entitymodel*.xml'
+    include 'applications/datamodel/entitydef/*entitymodel*.xml'
+    include 'applications/*/entitydef/entitymodel*.xml'
+    exclude '**/*_test.xml'
+}
+
+tasks.register('generateCommonextCatalog', Exec) {
+    inputs.files(generator, serviceDef, entityModelFiles)
+    outputs.dir(generatedRoot)
+    outputs.file(reportFile)
+    doFirst {
+        def arguments = [
+                'python3',
+                generator.absolutePath,
+                '--service-def', serviceDef.absolutePath,
+                '--service-package', 'org.apache.ofbiz.migration.commonext.generated',
+                '--out', generatedRoot.get().asFile.absolutePath,
+                '--report', reportFile.get().asFile.absolutePath
+        ]
+        entityModelFiles.files.sort().each { File model ->
+            arguments.addAll(['--entity-model', model.absolutePath])
+        }
+        commandLine arguments
+    }
+}
+
+sourceSets.main.java.srcDir(
+        generatedRoot.map { it.dir('org/apache/ofbiz/migration/commonext/generated') })
+tasks.named('compileJava') {
+    dependsOn tasks.named('generateCommonextCatalog')
+}
+
+tasks.withType(Checkstyle).configureEach {
+    maxErrors = 0
+}
+
+tasks.named('checkstyleMain') {
+    exclude { element -> element.file.toPath().startsWith(generatedRoot.get().asFile.toPath()) }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    maxHeapSize = '4g'
+    systemProperty 'commonext.ofbiz.root', rootProject.projectDir.absolutePath
+    systemProperty 'commonext.report', reportFile.get().asFile.absolutePath
+    environment 'MIGRATION_DEMO_PASSWORD', 'commonext-test-password'
+}

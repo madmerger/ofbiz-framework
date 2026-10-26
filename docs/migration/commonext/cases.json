@@ -1,0 +1,109 @@
+{
+  "component": "commonext",
+  "baseUrl": "http://localhost:8080",
+  "profile": "local",
+  "auth": "HTTP Basic。パスワードは全ユーザー共通で環境変数 MIGRATION_DEMO_PASSWORD の値（画面・録画に表示しない）",
+  "notes": [
+    "commonext の servicedef は entity-auto 0件・simple(minilang) 0件のため、COMMONEXT-E2E-06 と COMMONEXT-E2E-07 は未登録であることの確認ケースとする",
+    "共通基盤の /multi は失敗時 HTTP 400（MultiServiceException）を返す。依頼の 409 との差分は e2e-report.md に記録する",
+    "ケースは id 順に実行する。COMMONEXT-E2E-09 以降は 08 で得た noteId を使う"
+  ],
+  "cases": [
+    {
+      "id": "COMMONEXT-E2E-01",
+      "name": "未認証アクセスは 401",
+      "request": {"method": "POST", "path": "/api/commonext/services/getSystemInfoNotes", "user": null, "body": {}},
+      "expected": {"status": 401}
+    },
+    {
+      "id": "COMMONEXT-E2E-02",
+      "name": "base-permission(SETUP) なしユーザーは 403",
+      "request": {"method": "POST", "path": "/api/commonext/services/getSystemInfoNotes", "user": "nosetup", "body": {}},
+      "expected": {"status": 403}
+    },
+    {
+      "id": "COMMONEXT-E2E-03",
+      "name": "閲覧専用ユーザーの更新系サービスは 403",
+      "request": {"method": "POST", "path": "/api/commonext/services/createSystemInfoNote", "user": "readonly", "body": {"noteInfo": "E2E readonly"}},
+      "expected": {"status": 403}
+    },
+    {
+      "id": "COMMONEXT-E2E-04",
+      "name": "機密エンティティ UserLogin: 閲覧専用ユーザーは 403",
+      "request": {"method": "GET", "path": "/api/commonext/entities/UserLogin/one?userLoginId=admin", "user": "readonly", "body": null},
+      "expected": {"status": 403, "body": {"errorMessage": "Sensitive entity access denied"}}
+    },
+    {
+      "id": "COMMONEXT-E2E-05",
+      "name": "機密エンティティ UserLogin: 専用権限 SETUP_SENSITIVE_VIEW があれば 200（パスワードはマスク）",
+      "request": {"method": "GET", "path": "/api/commonext/entities/UserLogin/one?userLoginId=admin", "user": "editor", "body": null},
+      "expected": {"status": 200, "body": {"userLoginId": "admin", "partyId": "admin", "currentPassword": "[REDACTED]"}}
+    },
+    {
+      "id": "COMMONEXT-E2E-06",
+      "name": "entity-auto（0件）: 未登録の CRUD サービスは 404",
+      "request": {"method": "POST", "path": "/api/commonext/services/createNoteData", "user": "admin", "body": {"noteInfo": "E2E"}},
+      "expected": {"status": 404, "body": {"errorMessage": "Unknown service: createNoteData"}}
+    },
+    {
+      "id": "COMMONEXT-E2E-07",
+      "name": "simple サービス（0件）: 他コンポーネント URL は 404（component スコープ）",
+      "request": {"method": "GET", "path": "/api/humanres/entities/NoteData", "user": "admin", "body": null},
+      "expected": {"status": 404}
+    },
+    {
+      "id": "COMMONEXT-E2E-08",
+      "name": "主要フロー: createSystemInfoNote でノート作成",
+      "request": {"method": "POST", "path": "/api/commonext/services/createSystemInfoNote", "user": "admin", "body": {"noteInfo": "E2E system note", "moreInfoUrl": "/setup/control/main"}},
+      "expected": {"status": 200, "body": {"responseMessage": "success", "noteId": "<採番値。以降のケースで使用>"}}
+    },
+    {
+      "id": "COMMONEXT-E2E-09",
+      "name": "主要フロー: getSystemInfoNotes で作成したノートが先頭（noteDateTime 降順）",
+      "request": {"method": "POST", "path": "/api/commonext/services/getSystemInfoNotes", "user": "admin", "body": {}},
+      "expected": {"status": 200, "body": {"systemInfoNotes[0].noteId": "<08 の noteId>", "systemInfoNotes[0].noteInfo": "E2E system note", "systemInfoNotes[0].noteName": "SYSTEMNOTE", "systemInfoNotes[0].noteParty": "admin"}}
+    },
+    {
+      "id": "COMMONEXT-E2E-10",
+      "name": "主要フロー: getLastSystemInfoNote で最新ノートを取得",
+      "request": {"method": "POST", "path": "/api/commonext/services/getLastSystemInfoNote", "user": "admin", "body": {}},
+      "expected": {"status": 200, "body": {"lastSystemInfoNote1.noteInfo": "E2E system note"}}
+    },
+    {
+      "id": "COMMONEXT-E2E-11",
+      "name": "主要フロー: getSystemInfoStatus で未完了の通信イベント・タスク件数を取得",
+      "request": {"method": "POST", "path": "/api/commonext/services/getSystemInfoStatus", "user": "admin", "body": {}},
+      "expected": {"status": 200, "body": {"systemInfoStatus[0].noteInfo": "Open communication events: 1", "systemInfoStatus[1].noteInfo": "Assigned and not completed tasks: 2"}}
+    },
+    {
+      "id": "COMMONEXT-E2E-12",
+      "name": "入力検証: スクリプトを含むノートは 400",
+      "request": {"method": "POST", "path": "/api/commonext/services/createSystemInfoNote", "user": "admin", "body": {"noteInfo": "<script>alert(1)</script>"}},
+      "expected": {"status": 400, "body": {"errorMessage": "Unsafe text in noteInfo"}}
+    },
+    {
+      "id": "COMMONEXT-E2E-13",
+      "name": "multi: 2件目が失敗すると 400 で全件ロールバック",
+      "request": {"method": "POST", "path": "/api/commonext/services/createSystemInfoNote/multi", "user": "admin", "body": [{"noteInfo": "E2E multi 1"}, {"noteInfo": "<script>x</script>"}]},
+      "expected": {"status": 400, "body": {"errors[0].index": 1, "errors[0].errorMessage": "Unsafe text in noteInfo"}}
+    },
+    {
+      "id": "COMMONEXT-E2E-14",
+      "name": "multi ロールバック確認: 'E2E multi 1' が存在しない",
+      "request": {"method": "POST", "path": "/api/commonext/services/getSystemInfoNotes", "user": "admin", "body": {}},
+      "expected": {"status": 200, "body": {"systemInfoNotes[*].noteInfo に 'E2E multi 1' を含まない": true}}
+    },
+    {
+      "id": "COMMONEXT-E2E-15",
+      "name": "主要フロー: deleteSystemInfoNote で 08 のノートを削除",
+      "request": {"method": "POST", "path": "/api/commonext/services/deleteSystemInfoNote", "user": "admin", "body": {"noteId": "<08 の noteId>"}},
+      "expected": {"status": 200, "body": {"responseMessage": "success"}}
+    },
+    {
+      "id": "COMMONEXT-E2E-16",
+      "name": "主要フロー: 削除後の getSystemInfoNotes に 08 の noteId が無い",
+      "request": {"method": "POST", "path": "/api/commonext/services/getSystemInfoNotes", "user": "admin", "body": {}},
+      "expected": {"status": 200, "body": {"systemInfoNotes[*].noteId に 08 の noteId を含まない": true}}
+    }
+  ]
+}
