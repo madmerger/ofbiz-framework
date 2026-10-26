@@ -6,7 +6,7 @@
 |---|---|
 | Party inventory 生成 | 成功。84 entities / 128 entity-auto / 274 requests / 266 services / 41 view entities / 111 view maps |
 | Catalog 生成 | Gradle `generatePartyCatalog` 成功。84 entity/repository、128 entity-auto service |
-| Party テスト | 最終ゲート `./gradlew :migration:party-springboot:test checkstyleMain checkstyleTest codenarcMain codenarcTest` 成功。147 件成功、失敗 0、エラー 0、スキップ 0 |
+| Party テスト | 最終ゲート `./gradlew :migration:party-springboot:test checkstyleMain checkstyleTest codenarcMain codenarcTest` 成功。148 件成功、失敗 0、エラー 0、スキップ 0 |
 | Checkstyle / CodeNarc | `./gradlew checkstyleMain checkstyleTest codenarcMain codenarcTest` 成功。Party サブプロジェクト固有の解析タスクは未定義 |
 | PostgreSQL / Testcontainers | `PostgresSmokeTest` 1 件成功。コンテナ停止後の context shutdown で Hibernate / Hikari が接続拒否を記録したが、テストは成功 |
 | local curl | anonymous 401、`nopartymgr` 403、`admin` 200。確認後にローカルサーバーを停止 |
@@ -18,14 +18,14 @@
 |---|---:|---:|---:|
 | EntityAutoAcceptanceTest | 133 | 0 | 0 |
 | HttpsSecurityTest | 1 | 0 | 0 |
-| MainFlowTest | 3 | 0 | 0 |
+| MainFlowTest | 4 | 0 | 0 |
 | MultiRollbackTest | 1 | 0 | 0 |
 | PartySecurityTest | 3 | 0 | 0 |
 | PostgresSmokeTest | 1 | 0 | 0 |
 | SimpleServicesTest | 3 | 0 | 0 |
 | SpringdocProfileTest | 1 | 0 | 0 |
 | UnportedInventoryTest | 1 | 0 | 0 |
-| 合計 | 147 | 0 | 0 |
+| 合計 | 148 | 0 | 0 |
 
 ## 受け入れ基準
 
@@ -33,7 +33,7 @@
 |---|---|---|
 | AC-01 – AC-06 | 成功 | `EntityAutoAcceptanceTest` |
 | AC-20 – AC-22 | 成功 | `SimpleServicesTest` |
-| AC-30 – AC-31、AC-33 | 成功 | `MainFlowTest` |
+| AC-30 – AC-31、AC-33 – AC-34 | 成功 | `MainFlowTest` |
 | AC-32 | 成功 | `MultiRollbackTest` |
 | AC-40 – AC-42 | 成功 | `PartySecurityTest` |
 | AC-43 | 成功 | `HttpsSecurityTest` |

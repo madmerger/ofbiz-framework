@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.apache.ofbiz.migration.party;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -28,7 +29,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
+import java.sql.Timestamp;
+import java.time.OffsetDateTime;
+import java.util.Map;
+import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.datamodel.entity.UserLogin;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +54,12 @@ class MainFlowTest {
 
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private EntityRegistry entities;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -144,6 +156,69 @@ class MainFlowTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].partyRelationshipTypeId").value("EMPLOYMENT"));
+    }
+
+    @Test
+    void ac34_partyRelationshipFromDateCanBeReusedForDeletion() throws Exception {
+        mockMvc.perform(post("/api/party/services/createPartyGroup")
+                        .with(httpBasic("admin", "admin-password"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"partyId\":\"AC34_GROUP\",\"groupName\":\"Date Group\"}"))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/api/party/services/createPerson")
+                        .with(httpBasic("admin", "admin-password"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"partyId\":\"AC34_PERSON\",\"firstName\":\"From\",\"lastName\":\"Date\"}"))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/api/party/services/ensurePartyRole")
+                        .with(httpBasic("admin", "admin-password"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"partyId\":\"AC34_GROUP\",\"roleTypeId\":\"_NA_\"}"))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/api/party/services/ensurePartyRole")
+                        .with(httpBasic("admin", "admin-password"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"partyId\":\"AC34_PERSON\",\"roleTypeId\":\"_NA_\"}"))
+                .andExpect(status().isOk());
+
+        String createRelationship = objectMapper.writeValueAsString(Map.of(
+                "partyIdFrom", "AC34_GROUP",
+                "partyIdTo", "AC34_PERSON",
+                "roleTypeIdFrom", "_NA_",
+                "roleTypeIdTo", "_NA_",
+                "partyRelationshipTypeId", "CONTACT_REL"));
+        String createResponse = mockMvc.perform(post("/api/party/services/createPartyRelationship")
+                        .with(httpBasic("admin", "admin-password"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createRelationship))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String fromDate = objectMapper.readTree(createResponse).path("fromDate").asText();
+        assertTrue(!fromDate.isBlank());
+        Map<String, Object> relationship = entities.toMap(entities.findByEquality(
+                entities.entityClass("PartyRelationship"),
+                Map.of("partyIdFrom", "AC34_GROUP", "partyIdTo", "AC34_PERSON",
+                        "partyRelationshipTypeId", "CONTACT_REL")).get(0));
+        assertEquals(relationship.get("fromDate"), Timestamp.from(OffsetDateTime.parse(fromDate).toInstant()));
+
+        String deleteRelationship = objectMapper.writeValueAsString(Map.of(
+                "partyIdFrom", "AC34_GROUP",
+                "partyIdTo", "AC34_PERSON",
+                "roleTypeIdFrom", "_NA_",
+                "roleTypeIdTo", "_NA_",
+                "partyRelationshipTypeId", "CONTACT_REL",
+                "fromDate", fromDate));
+        mockMvc.perform(post("/api/party/services/deletePartyRelationship")
+                        .with(httpBasic("admin", "admin-password"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(deleteRelationship))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/party/entities/PartyRelationship")
+                        .with(httpBasic("admin", "admin-password"))
+                        .param("partyIdFrom", "AC34_GROUP")
+                        .param("partyIdTo", "AC34_PERSON"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
     }
 
     @Test

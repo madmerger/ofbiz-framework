@@ -34,6 +34,7 @@ entity-auto 件数の受け入れ確認は inventory を参照せず `applicatio
 
 - 既定値のない `partyId` は `SequenceService.nextId("Party")` で採番する。パーティーから人物・グループ、役割へ同一トランザクションで作成する。
 - PartyRelationship の role 未指定値は `_NA_`。削除は party ID、両 role、関係種別、必要に応じ fromDate を使い、別 role の関係を削除しない。
+- `createPartyRelationship` が返す ISO offset 形式の `fromDate` は、そのまま `deletePartyRelationship` に渡して削除できる。
 - 連絡先の作成では ContactMech と具体的な連絡先 entity、PartyContactMech を同じトランザクションで作る。住所・電話・メールの取得サービスは現行の有効な連絡先を返す。
 - 連絡先の内容変更では新 ContactMech を作り、PartyContactMech を付け替える。USA / CAN の住所では state / province を検証し、メール形式を検証する。
 - `partyIdFrom` を省略した PartyRelationship は 400 とする。このモジュールの認証ユーザーに OFBiz の partyId はない。
@@ -53,6 +54,7 @@ entity-auto 件数の受け入れ確認は inventory を参照せず `applicatio
 | AC-31 | UserLogin 応答のパスワードを伏せ、DB 保存値が平文ではなく BCrypt 検証に成功する | `MainFlowTest.ac31_userLoginIsHashedAndMasked` |
 | AC-32 | 重複を含む multi は 409 かつ先行行も rollback | `MultiRollbackTest` |
 | AC-33 | UserLogin 作成で許可リスト外属性を無視し、enabled は null のままにする | `MainFlowTest.ac33_userLoginIgnoresUnlistedFields` |
+| AC-34 | `createPartyRelationship` の応答 `fromDate` をそのまま削除へ渡し、関係が削除される | `MainFlowTest.ac34_partyRelationshipFromDateCanBeReusedForDeletion` |
 | AC-40 – AC-42 | 認証・権限・機密 Entity・component scope を適用する | `PartySecurityTest` |
 | AC-43 | HTTPS 必須設定で HTTP は redirect される | `HttpsSecurityTest` |
 | AC-45 | local 以外で OpenAPI と Swagger を無効にする | `SpringdocProfileTest` |

@@ -8,6 +8,7 @@
 - `migration.security.component` を `party` に固定する。Entity API の公開対象は entity-auto catalog の Entity と必要な `extra-entities` に限定する。ローカル・テストは `require-https: false` を明示し、PostgreSQL 設定は `true` のままにする。
 - 共通基盤の最新更新を取り込み、空の INOUT 主キーは呼び出し側の値を優先し、未指定の場合はサービス側で採番する。Party の `createAddendum` を受け入れテストで確認する。
 - Party の直接 handler は共通 Entity Auto の型変換を通らないため、JSON の日付文字列を JDBC `Timestamp` / `Date` / `Time` に変換する。
+- `PartyRelationship.fromDate` は Jackson の ISO offset 形式を受け付け、`now()` をミリ秒精度に揃える。応答から返された日時を削除条件へそのまま渡せるよう、保存値と JSON 表現の精度を一致させる。
 - 全 84 entity の JPA mapping を読み込むテスト用に、Party の Gradle test worker heap を 2 GiB に設定する。
 
 ## OFBiz との差分

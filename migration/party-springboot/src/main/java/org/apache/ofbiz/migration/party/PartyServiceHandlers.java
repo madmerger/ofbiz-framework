@@ -20,6 +20,9 @@ package org.apache.ofbiz.migration.party;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -209,6 +212,9 @@ public class PartyServiceHandlers {
         filters.putIfAbsent("roleTypeIdFrom", "_NA_");
         filters.putIfAbsent("roleTypeIdTo", "_NA_");
         copy(input, filters, "fromDate");
+        if (filters.get("fromDate") instanceof String text) {
+            filters.put("fromDate", parseTimestamp(text));
+        }
         List<?> matches = entities.findByEquality(entities.entityClass("PartyRelationship"), filters);
         if (matches.isEmpty()) {
             throw notFound(NOT_FOUND);
@@ -844,7 +850,7 @@ public class PartyServiceHandlers {
         if (value instanceof String text) {
             Class<?> propertyType = wrapper.getPropertyType(property);
             if (Timestamp.class.equals(propertyType)) {
-                return Timestamp.valueOf(text.replace('T', ' '));
+                return parseTimestamp(text);
             }
             if (java.sql.Date.class.equals(propertyType)) {
                 return java.sql.Date.valueOf(text);
@@ -854,6 +860,14 @@ public class PartyServiceHandlers {
             }
         }
         return value;
+    }
+
+    private static Timestamp parseTimestamp(String text) {
+        try {
+            return Timestamp.from(OffsetDateTime.parse(text).toInstant());
+        } catch (DateTimeParseException ignored) {
+            return Timestamp.valueOf(text.replace('T', ' '));
+        }
     }
 
     private static boolean hasProperty(Object target, String name) {
@@ -914,7 +928,7 @@ public class PartyServiceHandlers {
     }
 
     private static Timestamp now() {
-        return Timestamp.from(Instant.now());
+        return Timestamp.from(Instant.now().truncatedTo(ChronoUnit.MILLIS));
     }
 
     private static boolean isCurrent(Object entity, Timestamp current) {
