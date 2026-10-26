@@ -68,6 +68,7 @@ public final class WorkEffortPermissionServices {
             String existingParent = workEffort == null ? null
                     : string(entities.get(workEffort, "workEffortParentId"), null);
             String requestedParent = string(input.get("workEffortParentId"), null);
+            if (requestedParent != null && requestedParent.isBlank()) requestedParent = null;
             if (allowed && requestedParent != null && !requestedParent.equals(existingParent)) {
                 allowed = hasOwnerRoleInTree(requestedParent, partyId);
             }

@@ -73,7 +73,8 @@ public final class WorkEffortServiceRegistration {
             "getWorkEffort",
             "getWorkEffortAssignedTasks",
             "getWorkEffortEventsByPeriod");
-    private static final Set<String> STATUS_WRAPPERS = Set.of("createTimeEntry", "updateTimesheet", "deleteTimesheet");
+    private static final Set<String> STATUS_WRAPPERS = Set.of(
+            "createTimeEntry", "updateTimesheet", "deleteTimeEntry", "deleteTimesheet");
     private static final Map<String, String> DEFAULT_ACTIONS = Map.ofEntries(
             Map.entry("makeCommunicationEventWorkEffort", "UPDATE"),
             Map.entry("createWorkEffortNote", "CREATE"),
@@ -109,6 +110,7 @@ public final class WorkEffortServiceRegistration {
             Map.entry("updateTimeEntry", "UPDATE"),
             Map.entry("getTimeEntryRate", "VIEW"),
             Map.entry("deleteTimesheet", "DELETE"),
+            Map.entry("deleteTimeEntry", "DELETE"),
             Map.entry("createWorkEffortAttribute", "CREATE"),
             Map.entry("updateWorkEffortAttribute", "UPDATE"),
             Map.entry("deleteWorkEffortAttribute", "DELETE"),

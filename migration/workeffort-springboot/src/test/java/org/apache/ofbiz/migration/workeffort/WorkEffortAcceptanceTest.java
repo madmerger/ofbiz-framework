@@ -43,6 +43,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
@@ -375,6 +376,148 @@ class WorkEffortAcceptanceTest {
 
     @Test
     @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
+    void invoiceServicesBillUnbilledTimeEntriesUsingHoursAndRate() {
+        Timestamp now = Timestamp.from(Instant.now().minusSeconds(60));
+        persistWorkEffort("WE-INVOICE-TIMESHEET", "Timesheet invoice task", now);
+        persistTimesheet("TS-INVOICE-TIMESHEET", "DemoEmployee", "TIMESHEET_IN_PROCESS");
+        persistInvoice("INV-TS-BILLING", "INVOICE_IN_PROCESS");
+        persistInvoice("INV-TIMESHEET-OLD", "INVOICE_IN_PROCESS");
+        persistRateAmount("WE-INVOICE-TIMESHEET", now);
+        persistTimeEntry("TE-INVOICE-TS-25", "TS-INVOICE-TIMESHEET",
+                "WE-INVOICE-TIMESHEET", 2.5d, "First timesheet entry", null, now);
+        persistTimeEntry("TE-INVOICE-TS-10", "TS-INVOICE-TIMESHEET",
+                "WE-INVOICE-TIMESHEET", 1.0d, "Second timesheet entry", null, now);
+        persistTimeEntry("TE-INVOICE-TS-OLD", "TS-INVOICE-TIMESHEET",
+                "WE-INVOICE-TIMESHEET", 0.75d, "Already billed", "INV-TIMESHEET-OLD", now);
+
+        services.execute("addTimesheetToInvoice", Map.of(
+                "timesheetId", "TS-INVOICE-TIMESHEET", "invoiceId", "INV-TS-BILLING"));
+
+        assertInvoiceItems("INV-TS-BILLING");
+        assertTimeEntryInvoice("TE-INVOICE-TS-25", "INV-TS-BILLING");
+        assertTimeEntryInvoice("TE-INVOICE-TS-10", "INV-TS-BILLING");
+        Object alreadyBilled = entities.findByPrimaryKey(
+                entities.entityClass("TimeEntry"), Map.of("timeEntryId", "TE-INVOICE-TS-OLD"));
+        assertThat(entities.get(alreadyBilled, "invoiceId")).isEqualTo("INV-TIMESHEET-OLD");
+
+        persistWorkEffort("WE-INV-TS-NEW", "New timesheet invoice task", now);
+        persistTimesheet("TS-INV-NEW", "DemoEmployee", "TIMESHEET_IN_PROCESS");
+        persistRateAmount("WE-INV-TS-NEW", now);
+        persistTimeEntry("TE-INV-TS-25", "TS-INV-NEW",
+                "WE-INV-TS-NEW", 2.5d, "First new invoice entry", null, now);
+        persistTimeEntry("TE-INV-TS-10", "TS-INV-NEW",
+                "WE-INV-TS-NEW", 1.0d, "Second new invoice entry", null, now);
+        Map<String, Object> newTimesheetInvoice = services.execute("addTimesheetToNewInvoice", Map.of(
+                "timesheetId", "TS-INV-NEW",
+                "partyIdFrom", "DemoEmployee",
+                "partyId", "DemoEmployee"));
+        String newTimesheetInvoiceId = (String) newTimesheetInvoice.get("invoiceId");
+        assertThat(newTimesheetInvoiceId).isNotBlank();
+        assertInvoiceItems(newTimesheetInvoiceId);
+        assertTimeEntryInvoice("TE-INV-TS-25", newTimesheetInvoiceId);
+        assertTimeEntryInvoice("TE-INV-TS-10", newTimesheetInvoiceId);
+
+        persistWorkEffort("WE-INVOICE-WE", "WorkEffort invoice task", now);
+        persistTimesheet("TS-INVOICE-WE", "DemoEmployee", "TIMESHEET_IN_PROCESS");
+        persistInvoice("INV-WE-BILLING", "INVOICE_IN_PROCESS");
+        persistRateAmount("WE-INVOICE-WE", now);
+        persistTimeEntry("TE-INVOICE-WE-25", "TS-INVOICE-WE",
+                "WE-INVOICE-WE", 2.5d, "First task entry", null, now);
+        persistTimeEntry("TE-INVOICE-WE-10", "TS-INVOICE-WE",
+                "WE-INVOICE-WE", 1.0d, "Second task entry", null, now);
+
+        services.execute("addWorkEffortTimeToInvoice", Map.of(
+                "workEffortId", "WE-INVOICE-WE",
+                "invoiceId", "INV-WE-BILLING",
+                "combineInvoiceItem", "N"));
+
+        assertInvoiceItems("INV-WE-BILLING");
+        assertTimeEntryInvoice("TE-INVOICE-WE-25", "INV-WE-BILLING");
+        assertTimeEntryInvoice("TE-INVOICE-WE-10", "INV-WE-BILLING");
+
+        persistWorkEffort("WE-INV-WE-NEW", "New work effort invoice task", now);
+        persistTimesheet("TS-INV-WE-NEW", "DemoEmployee", "TIMESHEET_IN_PROCESS");
+        persistRateAmount("WE-INV-WE-NEW", now);
+        persistTimeEntry("TE-INV-WE-25", "TS-INV-WE-NEW",
+                "WE-INV-WE-NEW", 2.5d, "First new task entry", null, now);
+        persistTimeEntry("TE-INV-WE-10", "TS-INV-WE-NEW",
+                "WE-INV-WE-NEW", 1.0d, "Second new task entry", null, now);
+        Map<String, Object> newWorkEffortInvoice = services.execute("addWorkEffortTimeToNewInvoice", Map.of(
+                "workEffortId", "WE-INV-WE-NEW",
+                "partyIdFrom", "DemoEmployee",
+                "partyId", "DemoEmployee",
+                "combineInvoiceItem", "N"));
+        String newWorkEffortInvoiceId = (String) newWorkEffortInvoice.get("invoiceId");
+        assertThat(newWorkEffortInvoiceId).isNotBlank();
+        assertInvoiceItems(newWorkEffortInvoiceId);
+        assertTimeEntryInvoice("TE-INV-WE-25", newWorkEffortInvoiceId);
+        assertTimeEntryInvoice("TE-INV-WE-10", newWorkEffortInvoiceId);
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
+    void timeEntryIdOnlyStatusChecksRejectUpdateAndDeleteForCompletedTimesheet() throws Exception {
+        Timestamp now = Timestamp.from(Instant.now().minusSeconds(60));
+        persistWorkEffort("WE-STATUS-GUARD", "Timesheet status guard", now);
+        persistTimesheet("TS-STATUS-GUARD", "DemoEmployee", "TIMESHEET_APPROVED");
+        persistTimeEntry("TE-STATUS-GUARD", "TS-STATUS-GUARD",
+                "WE-STATUS-GUARD", 1.0d, "unchanged comments", null, now);
+        entityManager.flush();
+        entityManager.clear();
+
+        mockMvc.perform(post("/api/workeffort/services/updateTimeEntry")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"timeEntryId\":\"TE-STATUS-GUARD\",\"hours\":9.0}"))
+                .andExpect(status().isBadRequest());
+        entityManager.clear();
+        Object afterUpdate = entities.findByPrimaryKey(
+                entities.entityClass("TimeEntry"), Map.of("timeEntryId", "TE-STATUS-GUARD"));
+        assertThat(((Number) entities.get(afterUpdate, "hours")).doubleValue()).isEqualTo(1.0d);
+        assertThat(entities.get(afterUpdate, "comments")).isEqualTo("unchanged comments");
+
+        mockMvc.perform(post("/api/workeffort/services/deleteTimeEntry")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"timeEntryId\":\"TE-STATUS-GUARD\"}"))
+                .andExpect(status().isBadRequest());
+        entityManager.clear();
+        Object afterDelete = entities.findByPrimaryKey(
+                entities.entityClass("TimeEntry"), Map.of("timeEntryId", "TE-STATUS-GUARD"));
+        assertThat(afterDelete).isNotNull();
+        assertThat(((Number) entities.get(afterDelete, "hours")).doubleValue()).isEqualTo(1.0d);
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "permission-user", authorities = "WORKEFFORTMGR_ROLE_UPDATE")
+    void assignmentUpdateRequiresGenericUpdateAndOwnerPermission() {
+        Timestamp now = Timestamp.valueOf("2025-01-01 00:00:00");
+        persistWorkEffort("WE-ASGN-UNOWNED", "Unowned assignment", now);
+        persistWorkEffort("WE-ASGN-OWNED", "Owned assignment", now);
+        persistOwnerAssignment("WE-ASGN-OWNED", now);
+        entityManager.flush();
+
+        Map<String, Object> deniedInput = assignmentUpdateInput("WE-ASGN-UNOWNED", now);
+        assertThatThrownBy(() -> services.execute("updatePartyToWorkEffortAssignment", deniedInput))
+                .isInstanceOf(MigrationException.class)
+                .satisfies(exception -> assertThat(((MigrationException) exception).getStatus())
+                        .isEqualTo(HttpStatus.FORBIDDEN));
+
+        assertThat(services.execute("workEffortGenericPermission", Map.of(
+                "mainAction", "UPDATE", "workEffortId", "WE-ASGN-OWNED")).get("hasPermission"))
+                .isEqualTo(true);
+        assertThat(entities.findByPrimaryKey(
+                entities.entityClass("WorkEffortPartyAssignment"),
+                assignmentUpdateInput("WE-ASGN-OWNED", now))).isNotNull();
+        Map<String, Object> allowed = services.execute(
+                "updatePartyToWorkEffortAssignment", assignmentUpdateInput("WE-ASGN-OWNED", now));
+        assertThat(allowed).containsEntry("workEffortId", "WE-ASGN-OWNED")
+                .containsEntry("statusId", "PRTYASGN_ACCEPTED");
+    }
+
+    @Test
+    @Transactional
     void simpleGetWorkEffortEventsByPeriodBucketsInRangeHolidayAndEvent() {
         Timestamp eventDate = Timestamp.from(Instant.parse("2025-01-15T10:00:00Z"));
         persistWorkEffort("WE-PERIOD-EVENT", "Meeting", eventDate);
@@ -518,6 +661,98 @@ class WorkEffortAcceptanceTest {
         entities.set(transition, "statusId", from);
         entities.set(transition, "statusIdTo", to);
         entityManager.persist(transition);
+    }
+
+    private void persistTimesheet(String timesheetId, String partyId, String statusId) {
+        Object timesheet = entities.newEntity(entities.entityClass("Timesheet"));
+        entities.set(timesheet, "timesheetId", timesheetId);
+        entities.set(timesheet, "partyId", partyId);
+        entities.set(timesheet, "statusId", statusId);
+        entityManager.persist(timesheet);
+    }
+
+    private void persistOwnerAssignment(String workEffortId, Timestamp fromDate) {
+        Object assignment = entities.newEntity(entities.entityClass("WorkEffortPartyAssignment"));
+        entities.set(assignment, "workEffortId", workEffortId);
+        entities.set(assignment, "partyId", "DemoEmployee");
+        entities.set(assignment, "roleTypeId", "CAL_OWNER");
+        entities.set(assignment, "statusId", "PRTYASGN_ASSIGNED");
+        entities.set(assignment, "fromDate", fromDate);
+        entityManager.persist(assignment);
+    }
+
+    private Map<String, Object> assignmentUpdateInput(String workEffortId, Timestamp fromDate) {
+        Map<String, Object> input = new java.util.LinkedHashMap<>();
+        input.put("workEffortId", workEffortId);
+        input.put("partyId", "DemoEmployee");
+        input.put("roleTypeId", "CAL_OWNER");
+        input.put("fromDate", fromDate);
+        input.put("statusId", "PRTYASGN_ACCEPTED");
+        return input;
+    }
+
+    private void persistInvoice(String invoiceId, String statusId) {
+        Object invoice = entities.newEntity(entities.entityClass("Invoice"));
+        entities.set(invoice, "invoiceId", invoiceId);
+        entities.set(invoice, "invoiceTypeId", "SALES_INVOICE");
+        entities.set(invoice, "statusId", statusId);
+        entities.set(invoice, "currencyUomId", "USD");
+        entities.set(invoice, "invoiceDate", Timestamp.from(Instant.now()));
+        entityManager.persist(invoice);
+    }
+
+    private void persistTimeEntry(
+            String timeEntryId,
+            String timesheetId,
+            String workEffortId,
+            double hours,
+            String comments,
+            String invoiceId,
+            Timestamp fromDate) {
+        Object timeEntry = entities.newEntity(entities.entityClass("TimeEntry"));
+        entities.set(timeEntry, "timeEntryId", timeEntryId);
+        entities.set(timeEntry, "timesheetId", timesheetId);
+        entities.set(timeEntry, "workEffortId", workEffortId);
+        entities.set(timeEntry, "partyId", "DemoEmployee");
+        entities.set(timeEntry, "rateTypeId", "RATE_HOURLY");
+        entities.set(timeEntry, "fromDate", fromDate);
+        entities.set(timeEntry, "thruDate", Timestamp.from(fromDate.toInstant().plusSeconds(3600)));
+        entities.set(timeEntry, "hours", hours);
+        entities.set(timeEntry, "comments", comments);
+        entities.set(timeEntry, "invoiceId", invoiceId);
+        entityManager.persist(timeEntry);
+    }
+
+    private void persistRateAmount(String workEffortId, Timestamp fromDate) {
+        Object rate = entities.newEntity(entities.entityClass("RateAmount"));
+        entities.set(rate, "workEffortId", workEffortId);
+        entities.set(rate, "partyId", "DemoEmployee");
+        entities.set(rate, "rateTypeId", "RATE_HOURLY");
+        entities.set(rate, "rateCurrencyUomId", "USD");
+        entities.set(rate, "periodTypeId", "RATE_HOUR");
+        entities.set(rate, "rateAmount", new BigDecimal("125.00"));
+        entities.set(rate, "fromDate", fromDate);
+        entities.set(rate, "emplPositionTypeId", "EMPLOYEE");
+        entityManager.persist(rate);
+    }
+
+    private void assertInvoiceItems(String invoiceId) {
+        List<?> items = entities.findByEquality(
+                entities.entityClass("InvoiceItem"), Map.of("invoiceId", invoiceId));
+        assertThat(items).hasSize(2);
+        assertThat(items).extracting(item -> ((Number) entities.get(item, "quantity")).doubleValue())
+                .containsExactlyInAnyOrder(2.5d, 1.0d);
+        for (Object item : items) {
+            assertThat(((Number) entities.get(item, "amount")).doubleValue()).isEqualTo(125.0d);
+            assertThat(String.valueOf(entities.get(item, "description"))).isNotBlank();
+        }
+    }
+
+    private void assertTimeEntryInvoice(String timeEntryId, String invoiceId) {
+        Object timeEntry = entities.findByPrimaryKey(
+                entities.entityClass("TimeEntry"), Map.of("timeEntryId", timeEntryId));
+        assertThat(entities.get(timeEntry, "invoiceId")).isEqualTo(invoiceId);
+        assertThat(entities.get(timeEntry, "invoiceItemSeqId")).isNotNull();
     }
 
     private void seedRateLookupFixture(String workEffortId, String timesheetId, String timeEntryId) {

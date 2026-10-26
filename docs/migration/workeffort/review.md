@@ -18,25 +18,25 @@ Inventory JSON の `services` は service definition files 上のユニーク数
 
 ## テスト結果
 
-最終実行コマンド:
+検証コマンド:
 
 ```sh
 ./gradlew --console=plain :migration:workeffort-springboot:test :migration:workeffort-springboot:checkstyleMain :migration:workeffort-springboot:checkstyleTest
 ```
 
-結果: `BUILD SUCCESSFUL in 1m 33s`、21 actionable tasks（3 executed / 18 up-to-date）。Test XML 合計は164 passed / 0 failed / 0 errors / 0 skipped。`checkstyleMain` / `checkstyleTest` とも成功。
+結果: `BUILD SUCCESSFUL in 1m 45s`、21 actionable tasks（1 executed / 20 up-to-date）。Test XML 合計は167 passed / 0 failed / 0 errors / 0 skipped。`checkstyleMain` / `checkstyleTest` とも成功。
 
 | Test class | Cases | Passed | Failed | Skipped |
 |---|---:|---:|---:|---:|
 | `EntityAutoExecutionAcceptanceTest` | 95 | 95 | 0 | 0 |
-| `WorkEffortAcceptanceTest` | 31 | 31 | 0 | 0 |
+| `WorkEffortAcceptanceTest` | 34 | 34 | 0 | 0 |
 | `WorkEffortSimpleServicesTest` | 33 | 33 | 0 | 0 |
 | `HttpsSecurityTest` | 1 | 1 | 0 | 0 |
 | `LocalSpringdocProfileTest` | 1 | 1 | 0 | 0 |
 | `SpringdocProfileTest` | 1 | 1 | 0 | 0 |
 | `PostgresSmokeTest` | 1 | 1 | 0 | 0 |
 | `WorkEffortServiceRegistrationTest` | 1 | 1 | 0 | 0 |
-| **合計** | **164** | **164** | **0** | **0** |
+| **合計** | **167** | **167** | **0** | **0** |
 
 ## local profile curl 実測
 
@@ -78,3 +78,6 @@ RateAmount seed値はLocalSeedData由来。E2Eの詳細なmethod/path/user/body/
 ## 実行時の注意
 
 Gradle出力に `Plugins directory not found.` とGradle 10互換性に関するdeprecation noticeがあったが、指定テスト/Checkstyleコマンドは成功した。`codenarcMain` は今回の検証対象ではなく、Java-only moduleにGroovy source setはない。
+
+### 既知の制約: ROLE 権限のみの利用者（HTTP 経由）
+共通 dispatcher はハンドラ実行前に `WORKEFFORTMGR_<action>` を検査するため、`WORKEFFORTMGR_ROLE_<action>` のみを持つ利用者（OFBiz では CAL_OWNER 等の割当があれば更新可）は HTTP API ではハンドラ内の owner 判定に到達せず 403 になる。ハンドラ内の `workEffortGenericPermission`（ROLE 分岐・親遡り）は移植・テスト済み（直接呼び出し）。HTTP で ROLE 単独を許可するには共通 dispatcher/registry に「通常権限 OR ROLE 権限」判定を追加する必要があり、他コンポーネントと衝突しやすいため本 PR では共通基盤を変更していない。

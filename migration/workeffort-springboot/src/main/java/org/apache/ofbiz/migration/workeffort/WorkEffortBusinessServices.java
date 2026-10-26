@@ -20,6 +20,7 @@ package org.apache.ofbiz.migration.workeffort;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.Attribute;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.Instant;
@@ -104,12 +105,12 @@ public final class WorkEffortBusinessServices {
         case "createWorkEffortAndPartyAssign" -> createWorkEffortAndPartyAssign(input);
         case "assignPartyToWorkEffort", "quickAssignPartyToWorkEffort",
                 "quickAssignPartyToWorkEffortWithRole" -> assignParty(name, input);
-        case "updatePartyToWorkEffortAssignment" -> dispatcher.execute(
-                "workeffort", "updateWorkEffortPartyAssignment", input);
+        case "updatePartyToWorkEffortAssignment" -> updatePartyToWorkEffortAssignment(input);
         case "getWorkEffort" -> getWorkEffort(input);
         case "getWorkEffortAssignedTasks" -> getWorkEffortAssignedTasks(input);
         case "getWorkEffortEventsByPeriod" -> getWorkEffortEventsByPeriod(input);
-        case "createTimeEntry", "updateTimesheet", "deleteTimesheet" -> executeStatusWrappedAuto(name, input);
+        case "createTimeEntry", "updateTimesheet", "deleteTimesheet", "deleteTimeEntry" ->
+                executeStatusWrappedAuto(name, input);
         case "createWorkEffortNote" -> createWorkEffortNote(input);
         case "updateWorkEffortNote" -> updateWorkEffortNote(input);
         case "makeCommunicationEventWorkEffort", "createCommunicationEventWorkEff" ->
@@ -283,7 +284,9 @@ public final class WorkEffortBusinessServices {
     private Map<String, Object> assignParty(String name, Map<String, ?> input) {
         String workEffortId = string(input.get("workEffortId"));
         if (workEffortId == null) throw new MigrationException(HttpStatus.BAD_REQUEST, "workEffortId is required");
-        requireCorePermission("UPDATE", workEffortId, null);
+        Object workEffort = findNullable("WorkEffort", Map.of("workEffortId", workEffortId));
+        String parentId = workEffortParentId(workEffort);
+        requireCorePermission("UPDATE", workEffortId, parentId);
         Map<String, Object> assignment = new LinkedHashMap<>(input);
         assignment.putIfAbsent("roleTypeId",
                 "createWorkEffortAndPartyAssign".equals(name) ? "CAL_OWNER" : "CAL_ATTENDEE");
@@ -315,8 +318,31 @@ public final class WorkEffortBusinessServices {
         if (userLoginId != null) assignment.putIfAbsent("assignedByUserLoginId", userLoginId);
         String autoService = "updatePartyToWorkEffortAssignment".equals(name)
                 ? "updateWorkEffortPartyAssignment" : "createWorkEffortPartyAssignment";
-        Map<String, Object> result = dispatcher.execute("workeffort", autoService, assignment);
+        Map<String, Object> result = executeEntityAuto(autoService, assignment);
         return quickAssign ? Map.of() : result;
+    }
+
+    private Map<String, Object> updatePartyToWorkEffortAssignment(Map<String, ?> input) {
+        String workEffortId = string(input.get("workEffortId"));
+        if (workEffortId == null) {
+            throw new MigrationException(HttpStatus.BAD_REQUEST, "workEffortId is required");
+        }
+        Object workEffort = findNullable("WorkEffort", Map.of("workEffortId", workEffortId));
+        String parentId = workEffortParentId(workEffort);
+        requireCorePermission("UPDATE", workEffortId, parentId);
+        return executeEntityAuto("updateWorkEffortPartyAssignment", input);
+    }
+
+    private String workEffortParentId(Object workEffort) {
+        String parentId = workEffort == null ? null : string(entities.get(workEffort, "workEffortParentId"));
+        return parentId == null || parentId.isBlank() ? null : parentId;
+    }
+
+    private Map<String, Object> executeEntityAuto(String serviceName, Map<String, ?> input) {
+        ServiceHandlerRegistry.ServiceDefinition definition = registry.find("workeffort", serviceName)
+                .orElseThrow(() -> new IllegalStateException(
+                        "Missing " + serviceName + " definition"));
+        return entityAuto.execute(definition, input);
     }
 
     private Map<String, Object> getWorkEffort(Map<String, ?> input) {
@@ -857,35 +883,188 @@ public final class WorkEffortBusinessServices {
     }
 
     private Map<String, Object> addTimesheetToInvoice(String service, Map<String, ?> input) {
-        Map<String, Object> invoice = "addTimesheetToNewInvoice".equals(service)
-                ? invoices.createInvoice(without(input, "invoiceId"))
-                : invoices.findInvoice(string(input.get("invoiceId")));
+        Object timesheet = findNullable("Timesheet", Map.of("timesheetId", input.get("timesheetId")));
+        if (timesheet == null) throw new MigrationException(HttpStatus.NOT_FOUND, "Timesheet not found");
+        Map<String, Object> invoice = createInvoiceIfNeeded(service, input,
+                "addTimesheetToNewInvoice");
         if (invoice.isEmpty()) throw new MigrationException(HttpStatus.NOT_FOUND, "Invoice not found");
-        invoices.updateInvoice(Map.of("invoiceId", invoice.get("invoiceId"), "statusId", "INVOICE_IN_PROCESS"));
-        invoices.createInvoiceItem(input);
+        addTimeEntryInvoiceItems(timesheet, null, invoice, input);
         return invoice;
     }
 
     private Map<String, Object> addWorkEffortTimeToInvoice(String service, Map<String, ?> input) {
-        Map<String, Object> invoice = "addWorkEffortTimeToNewInvoice".equals(service)
-                ? invoices.createInvoice(without(input, "invoiceId"))
-                : invoices.findInvoice(string(input.get("invoiceId")));
+        Object workEffort = findNullable("WorkEffort", Map.of("workEffortId", input.get("workEffortId")));
+        if (workEffort == null) throw new MigrationException(HttpStatus.NOT_FOUND, "WorkEffort not found");
+        Map<String, Object> invoice = createInvoiceIfNeeded(service, input,
+                "addWorkEffortTimeToNewInvoice");
         if (invoice.isEmpty()) throw new MigrationException(HttpStatus.NOT_FOUND, "Invoice not found");
-        for (Object entry : entities.findByEquality(entities.entityClass("TimeEntry"),
-                Map.of("workEffortId", input.get("workEffortId")))) {
-            Map<String, Object> item = new LinkedHashMap<>(input);
-            item.put("invoiceId", invoice.get("invoiceId"));
-            if (input.get("description") != null) item.put("description", input.get("description"));
-            invoices.createInvoiceItem(item);
-        }
+        updateInvoiceCurrency(invoice, input);
+        invoice = invoices.findInvoice(string(invoice.get("invoiceId")));
+        addTimeEntryInvoiceItems(null, workEffort, invoice, input);
         return invoice;
+    }
+
+    private Map<String, Object> createInvoiceIfNeeded(
+            String service, Map<String, ?> input, String newInvoiceService) {
+        String requestedInvoiceId = string(input.get("invoiceId"));
+        if (newInvoiceService.equals(service)
+                || requestedInvoiceId == null || requestedInvoiceId.isBlank()) {
+            Map<String, Object> createParams = new LinkedHashMap<>(without(input, "invoiceId"));
+            createParams.put("invoiceTypeId", "SALES_INVOICE");
+            createParams.put("statusId", "INVOICE_IN_PROCESS");
+            return invoices.createInvoice(createParams);
+        }
+        return invoices.findInvoice(requestedInvoiceId);
+    }
+
+    private void updateInvoiceCurrency(Map<String, Object> invoice, Map<String, ?> input) {
+        Object invoicePartyId = invoice.get("partyId");
+        Object party = invoicePartyId == null ? null
+                : findNullable("Party", Map.of("partyId", invoicePartyId));
+        String currencyUomId = party == null ? null : string(property(party, "preferredCurrencyUomId"));
+        if (currencyUomId == null) currencyUomId = string(invoice.get("currencyUomId"));
+        if (currencyUomId == null) currencyUomId = "USD";
+        Map<String, Object> update = new LinkedHashMap<>();
+        update.put("invoiceId", invoice.get("invoiceId"));
+        update.put("currencyUomId", currencyUomId);
+        update.put("invoiceDate", Timestamp.from(Instant.now()));
+        invoices.updateInvoice(update);
+    }
+
+    private void addTimeEntryInvoiceItems(
+            Object timesheet, Object workEffort, Map<String, Object> invoice, Map<String, ?> input) {
+        if (!"INVOICE_IN_PROCESS".equals(invoice.get("statusId"))) {
+            throw new MigrationException(HttpStatus.BAD_REQUEST, "Invoice is not in process");
+        }
+        String invoiceId = string(invoice.get("invoiceId"));
+        List<Object> timeEntries = new ArrayList<>(entities.findByEquality(
+                entities.entityClass("TimeEntry"),
+                timesheet != null
+                        ? Map.of("timesheetId", entities.get(timesheet, "timesheetId"))
+                        : Map.of("workEffortId", entities.get(workEffort, "workEffortId"))));
+        if (workEffort != null) {
+            timeEntries.sort((first, second) -> String.valueOf(entities.get(first, "rateTypeId"))
+                    .compareTo(String.valueOf(entities.get(second, "rateTypeId"))));
+        }
+        String baseDescription = timesheet == null
+                ? workEffortInvoiceDescription(workEffort)
+                : "[Timesheet:" + entities.get(timesheet, "timesheetId") + "]";
+        Timestamp thruDate = timestamp(input.get("thruDate"));
+        boolean combine = "Y".equals(input.get("combineInvoiceItem"));
+        BigDecimal oldRateAmount = null;
+        for (Object timeEntry : timeEntries) {
+            Timestamp fromDate = timestamp(entities.get(timeEntry, "fromDate"));
+            if (thruDate != null && (fromDate == null || !fromDate.before(thruDate))) continue;
+            if (entities.get(timeEntry, "invoiceId") != null) continue;
+            BigDecimal hours = billableHours(timeEntry);
+            Map<String, Object> rateInput = new LinkedHashMap<>();
+            rateInput.put("timeEntryId", entities.get(timeEntry, "timeEntryId"));
+            rateInput.put("currencyUomId", invoice.get("currencyUomId"));
+            BigDecimal rateAmount = decimal(getTimeEntryRate(rateInput).get("rateAmount"));
+            String description = combine
+                    ? baseDescription
+                    : timeEntryDescription(timeEntry, workEffort, baseDescription);
+            Object existingItem = combine
+                    ? findInvoiceItem(invoiceId, rateAmount, description) : null;
+            boolean createItem = !combine || existingItem == null || oldRateAmount == null
+                    || rateAmount.compareTo(oldRateAmount) != 0;
+            Map<String, Object> invoiceItem;
+            if (createItem) {
+                Map<String, Object> item = new LinkedHashMap<>();
+                item.put("invoiceId", invoiceId);
+                item.put("taxableFlag", "N");
+                item.put("invoiceItemTypeId", "INV_TE_ITEM");
+                item.put("uomId", "TF_hr");
+                item.put("description", description);
+                item.put("amount", rateAmount);
+                item.put("quantity", hours);
+                invoiceItem = invoices.createInvoiceItem(item);
+            } else {
+                BigDecimal quantity = decimal(entities.get(existingItem, "quantity")).add(hours);
+                invoiceItem = invoices.updateInvoiceItem(Map.of(
+                        "invoiceId", invoiceId,
+                        "invoiceItemSeqId", entities.get(existingItem, "invoiceItemSeqId"),
+                        "quantity", quantity));
+            }
+            oldRateAmount = rateAmount;
+            Map<String, Object> timeEntryFields = new LinkedHashMap<>();
+            timeEntryFields.put("timeEntryId", entities.get(timeEntry, "timeEntryId"));
+            timeEntryFields.put("invoiceId", invoiceId);
+            timeEntryFields.put("invoiceItemSeqId", invoiceItem.get("invoiceItemSeqId"));
+            dispatcher.execute("workeffort", "updateTimeEntry", timeEntryFields);
+        }
+    }
+
+    private Object findInvoiceItem(String invoiceId, BigDecimal amount, String description) {
+        Map<String, Object> criteria = new LinkedHashMap<>();
+        criteria.put("invoiceId", invoiceId);
+        criteria.put("amount", amount);
+        if (description != null) criteria.put("description", description);
+        return entities.findByEquality(entities.entityClass("InvoiceItem"), criteria).stream()
+                .filter(item -> description == null || description.equals(entities.get(item, "description")))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private BigDecimal billableHours(Object timeEntry) {
+        BigDecimal hours = BigDecimal.valueOf(number(entities.get(timeEntry, "hours")));
+        String partyId = string(entities.get(timeEntry, "partyId"));
+        if (partyId == null && entities.get(timeEntry, "timesheetId") != null) {
+            Object timesheet = findNullable("Timesheet",
+                    Map.of("timesheetId", entities.get(timeEntry, "timesheetId")));
+            if (timesheet != null) partyId = string(entities.get(timesheet, "partyId"));
+        }
+        String rateTypeId = string(entities.get(timeEntry, "rateTypeId"));
+        if (partyId == null || rateTypeId == null) return hours;
+        List<?> partyRates = entities.findByEquality(entities.entityClass("PartyRate"),
+                Map.of("partyId", partyId, "rateTypeId", rateTypeId));
+        for (Object partyRate : partyRates) {
+            if (active(partyRate) && entities.get(partyRate, "percentageUsed") != null) {
+                return hours.multiply(decimal(entities.get(partyRate, "percentageUsed")))
+                        .divide(BigDecimal.valueOf(100));
+            }
+        }
+        return hours;
+    }
+
+    private String workEffortInvoiceDescription(Object workEffort) {
+        String workEffortId = string(entities.get(workEffort, "workEffortId"));
+        String description = string(entities.get(workEffort, "workEffortName"))
+                + " [Task:" + workEffortId + "]";
+        List<?> requestLinks = entities.findByEquality(
+                entities.entityClass("CustRequestWorkEffort"), Map.of("workEffortId", workEffortId));
+        if (!requestLinks.isEmpty()) {
+            Object requestLink = requestLinks.get(0);
+            Object request = findNullable("CustRequest",
+                    Map.of("custRequestId", entities.get(requestLink, "custRequestId")));
+            if (request != null) {
+                description = string(entities.get(request, "custRequestName"))
+                        + " [CRQ:" + entities.get(request, "custRequestId") + "] "
+                        + string(entities.get(request, "description"));
+            }
+        }
+        return description.length() > 255 ? description.substring(0, 251) + " ..." : description;
+    }
+
+    private String timeEntryDescription(Object timeEntry, Object workEffort, String fallback) {
+        String comments = string(entities.get(timeEntry, "comments"));
+        if (comments != null && !comments.isBlank()) return comments;
+        return workEffort == null ? fallback : string(entities.get(workEffort, "workEffortName"));
+    }
+
+    private static BigDecimal decimal(Object value) {
+        if (value instanceof BigDecimal amount) return amount;
+        return value == null ? BigDecimal.ZERO : BigDecimal.valueOf(number(value));
     }
 
     private Map<String, Object> checkTimesheetStatus(Map<String, ?> input) {
         Object timesheetId = input.get("timesheetId");
-        if (timesheetId == null) return Map.of("statusId", "");
         Object timeEntry = input.get("timeEntryId") == null ? null
                 : findNullable("TimeEntry", Map.of("timeEntryId", input.get("timeEntryId")));
+        if (timesheetId == null && timeEntry != null) {
+            timesheetId = entities.get(timeEntry, "timesheetId");
+        }
+        if (timesheetId == null) return Map.of("statusId", "");
         Object timesheet = findNullable("Timesheet", Map.of("timesheetId", timesheetId));
         if (timesheet == null) {
             throw new MigrationException(HttpStatus.BAD_REQUEST, "Timesheet could not be found");
@@ -893,9 +1072,6 @@ public final class WorkEffortBusinessServices {
         String status = string(entities.get(timesheet, "statusId"));
         if (input.get("invoiceId") == null && !"TIMESHEET_IN_PROCESS".equals(status)) {
             throw new MigrationException(HttpStatus.BAD_REQUEST, "Timesheet is not in process");
-        }
-        if (timeEntry != null && input.get("timesheetId") == null) {
-            timesheetId = entities.get(timeEntry, "timesheetId");
         }
         return Map.of("statusId", status == null ? "" : status);
     }
