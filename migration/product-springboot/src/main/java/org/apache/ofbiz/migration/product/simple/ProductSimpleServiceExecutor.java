@@ -25,6 +25,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -116,9 +117,21 @@ public class ProductSimpleServiceExecutor {
         }
         String text = value.toString();
         try {
-            return Timestamp.from(Instant.parse(text));
-        } catch (DateTimeParseException ignored) {
-            return Timestamp.valueOf(LocalDateTime.parse(text));
+            return Timestamp.valueOf(text);
+        } catch (IllegalArgumentException ignored) {
+            try {
+                return Timestamp.valueOf(LocalDate.parse(text).atStartOfDay());
+            } catch (DateTimeParseException dateOnly) {
+                try {
+                    return Timestamp.from(OffsetDateTime.parse(text).toInstant());
+                } catch (DateTimeParseException offsetDateTime) {
+                    try {
+                        return Timestamp.from(Instant.parse(text));
+                    } catch (DateTimeParseException instant) {
+                        return Timestamp.valueOf(LocalDateTime.parse(text));
+                    }
+                }
+            }
         }
     }
 
