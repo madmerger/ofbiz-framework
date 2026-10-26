@@ -86,12 +86,17 @@ public class AccountingServiceHandlers {
         if (invoiceId == null) {
             invoiceId = sequences.nextId("Invoice");
         }
+        if (findOne("Invoice", Map.of("invoiceId", invoiceId)) != null) {
+            throw new MigrationException(HttpStatus.CONFLICT, "ServiceValueFound");
+        }
         Object invoice = newEntity("Invoice");
         assign(invoice, input);
         set(invoice, "invoiceId", invoiceId);
         setDefault(invoice, "statusId", "INVOICE_IN_PROCESS");
         setDefault(invoice, "invoiceDate", now());
-        require(value(invoice, "invoiceTypeId"), "Missing invoiceTypeId");
+        if (value(invoice, "invoiceTypeId") == null) {
+            throw new MigrationException(HttpStatus.BAD_REQUEST, "Missing invoiceTypeId");
+        }
         entityManager.persist(invoice);
         addInvoiceStatus(invoice, text(value(invoice, "statusId")), null);
         return Map.of("invoiceId", invoiceId);

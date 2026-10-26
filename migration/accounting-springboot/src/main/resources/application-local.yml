@@ -1,6 +1,11 @@
 spring:
   datasource:
     url: jdbc:h2:mem:accounting-local;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+server:
+  forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      internal-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:127\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|::1}'
 springdoc:
   api-docs:
     enabled: true
@@ -11,12 +16,12 @@ migration:
     require-https: false
     users:
       - username: acct-admin
-        authorities: [OFBTOOLS_VIEW, OFBTOOLS_ADMIN, ACCOUNTING_VIEW, ACCOUNTING_ADMIN, ACCOUNTING_CREATE, ACCOUNTING_UPDATE, ACCOUNTING_DELETE, ACCOUNTING_SENSITIVE_VIEW]
+        authorities: [OFBTOOLS_VIEW, ACCOUNTING_ADMIN]
       - username: acct-clerk
-        authorities: [OFBTOOLS_VIEW, ACCOUNTING_VIEW, ACCOUNTING_CREATE, ACCOUNTING_UPDATE]
+        authorities: [OFBTOOLS_VIEW, ACCOUNTING_VIEW, ACCOUNTING_CREATE, ACCOUNTING_UPDATE, ACCOUNTING_DELETE]
       - username: acct-viewer
         authorities: [OFBTOOLS_VIEW, ACCOUNTING_VIEW]
       - username: acct-sensitive
         authorities: [OFBTOOLS_VIEW, ACCOUNTING_VIEW, ACCOUNTING_SENSITIVE_VIEW]
       - username: acct-nobase
-        authorities: [ACCOUNTING_VIEW, ACCOUNTING_CREATE, ACCOUNTING_UPDATE]
+        authorities: [OFBTOOLS_VIEW]

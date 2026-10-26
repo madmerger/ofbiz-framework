@@ -34,11 +34,32 @@ management:
         include: health
 migration:
   security:
+    component: accounting
     base-permissions:
       - OFBTOOLS
       - ACCOUNTING
     service-permission-prefix: ACCOUNTING
     trusted-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}'
+    extra-entities:
+      - StatusItem
+      - StatusValidChange
+      - Party
+      - PartyRole
+      - OrderHeader
+      - OrderRole
+      - OrderItem
+      - OrderItemBilling
+      - Product
+      - ProductStore
+      - Invoice
+      - InvoiceItem
+      - InvoiceStatus
+      - InvoiceItemTypeMap
+      - Payment
+      - PaymentApplication
+      - PaymentMethod
+      - PaymentMethodType
+      - CreditCard
     sensitive-entities:
       - PaymentMethod
       - CreditCard

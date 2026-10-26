@@ -19,7 +19,6 @@
 package org.apache.ofbiz.migration.accounting;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -48,23 +47,19 @@ public class AccountingCatalogRegistrar {
         this.registry = registry;
     }
 
-    @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
+    @org.springframework.context.event.EventListener(
+            org.springframework.boot.context.event.ApplicationReadyEvent.class)
     public void registerCatalog() {
         Set<String> entityAutoNames = parseEntityAutoNames();
         if (entityAutoNames.size() != EXPECTED_ENTITY_AUTO_COUNT) {
             throw new IllegalStateException("Expected " + EXPECTED_ENTITY_AUTO_COUNT
                     + " Accounting entity-auto services but found " + entityAutoNames.size());
         }
-        Map<String, ServiceHandlerRegistry.ServiceDefinition> catalog = new LinkedHashMap<>();
+        Map<String, ServiceCatalog.ServiceDefinition> catalog = new LinkedHashMap<>();
         for (String name : entityAutoNames) {
             ServiceCatalog.ServiceDefinition source = ServiceCatalog.find(name)
                     .orElseThrow(() -> new IllegalStateException("Accounting service missing from generated catalog: " + name));
-            List<ServiceHandlerRegistry.ParamDefinition> params = source.params().stream()
-                    .map(param -> new ServiceHandlerRegistry.ParamDefinition(
-                            param.name(), param.mode(), param.optional(), param.type()))
-                    .toList();
-            catalog.put(name, new ServiceHandlerRegistry.ServiceDefinition(
-                    source.name(), source.entity(), source.invoke(), source.permissionMainAction(), params));
+            catalog.put(name, source);
         }
         registry.registerCatalog("accounting", catalog);
         LOG.info("Registered {} Accounting entity-auto services", catalog.size());
