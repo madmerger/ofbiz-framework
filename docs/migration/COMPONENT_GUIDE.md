@@ -18,6 +18,11 @@ HumanRes は先行パイロットであり、既存コードを `springboot-comm
    ```
 3. `ofbiz2spring.py` を Gradle の生成タスクから呼び、対象の entitymodel/service XML を `--entity-model` / `--service-def` として渡す。パッケージは `--entity-package`、`--repository-package`、`--service-package` で指定し、`--report` も build ディレクトリへ出す。実行時カタログを `build/generated/sources` に生成し、生成物はコミットしない。
 4. 全 entity-auto サービスを登録し、業務上必要な simple service の主要フローを Java/Groovy に移植する。コンポーネント間の Java サービス呼び出しは直接結合せず、インターフェースを持つ Port と当該コンポーネントの adapter を用意する。
+   ```java
+   registry.registerHandler("ordermgr", "approveOrder", "UPDATE", input -> approve(input));
+   registry.registerHandler("accounting", "findPayHistory", "VIEW", "PayHistory", input -> find(input));
+   ```
+   権限には `VIEW` / `UPDATE` などの action または `ORDERMGR_UPDATE` のような authority を指定する。省略時は `<service-permission-prefix>_ADMIN` のみ許可する。結果が機微 Entity を含む handler は Entity 名も登録し、handler 実行前の `HUMANRES_SENSITIVE_VIEW` 等の確認を有効にする。
 5. `migration.security.base-permissions` と service catalog の `permissionMainAction` / invoke 権限を設定する。読み取り・書き込み対象の機微 Entity を `migration.security.sensitive-entities` に列挙し、正規 Entity 名による認可、秘密情報のマスキング、multi-service 全 rollback、HTTPS 要件をテストする。
 6. H2 で Entity/Service/API のテストを実行し、必要な PostgreSQL/Testcontainers テストも用意する。local 起動スクリプトを追加し、Swagger UI の `Authorize` と主要 API を用いた E2E 手順を記録する。
 7. spec、notes、review、テスト結果、未対応 Entity XML を `docs/migration/<comp>/` に記録する。PR の変更は対象コンポーネントに限定する。

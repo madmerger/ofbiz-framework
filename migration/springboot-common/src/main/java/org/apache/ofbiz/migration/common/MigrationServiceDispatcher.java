@@ -53,21 +53,45 @@ public class MigrationServiceDispatcher {
     public Map<String, Object> execute(String component, String serviceName, Map<String, ?> input) {
         ServiceHandlerRegistry.ServiceDefinition definition = registry.find(component, serviceName)
                 .orElse(null);
-        requireServicePermission(definition);
-        if (definition != null && !definition.entity().isBlank()) {
-            entityRegistry.requireSensitiveView(entityRegistry.entityClass(definition.entity()));
+        ServiceHandlerRegistry.HandlerRegistration handler = registry.handler(component, serviceName)
+                .orElse(null);
+        if (definition == null && handler == null) {
+            throw new MigrationException(HttpStatus.NOT_FOUND, "Unknown service: " + serviceName);
         }
-        Map<String, Object> output = registry.handler(component, serviceName)
-                .map(handler -> handler.execute(new LinkedHashMap<>(input)))
-                .orElseGet(() -> {
-                    if (definition == null) {
-                        throw new MigrationException(HttpStatus.NOT_FOUND, "Unknown service: " + serviceName);
-                    }
-                    return entityAutoService.execute(definition, input);
-                });
+        if (definition != null) {
+            requireServicePermission(definition);
+            if (!definition.entity().isBlank()) {
+                entityRegistry.requireSensitiveView(entityRegistry.entityClass(definition.entity()));
+            }
+        }
+        if (handler != null) {
+            requireHandlerPermission(handler.requiredPermission());
+            if (handler.sensitiveResultEntity() != null && !handler.sensitiveResultEntity().isBlank()) {
+                entityRegistry.requireSensitiveView(entityRegistry.entityClass(handler.sensitiveResultEntity()));
+            }
+        }
+        Map<String, Object> output = handler == null
+                ? entityAutoService.execute(definition, input)
+                : handler.handler().execute(new LinkedHashMap<>(input));
         Map<String, Object> response = new LinkedHashMap<>(output);
         response.put("responseMessage", "success");
         return response;
+    }
+
+    private void requireHandlerPermission(String requiredPermission) {
+        String prefix = securityProperties.getServicePermissionPrefix();
+        String requiredAuthority = requiredPermission == null || requiredPermission.isBlank()
+                ? prefix + "_ADMIN"
+                : requiredPermission.contains("_")
+                        ? requiredPermission.toUpperCase(Locale.ROOT)
+                        : prefix + "_" + requiredPermission.toUpperCase(Locale.ROOT);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Set<String> authorities = authentication == null
+                ? Set.of()
+                : AuthorityUtils.authorityListToSet(authentication.getAuthorities());
+        if (!authorities.contains(prefix + "_ADMIN") && !authorities.contains(requiredAuthority)) {
+            throw new MigrationException(HttpStatus.FORBIDDEN, "Service permission denied");
+        }
     }
 
     private void requireServicePermission(ServiceHandlerRegistry.ServiceDefinition definition) {
@@ -98,6 +122,9 @@ public class MigrationServiceDispatcher {
     @Transactional
     public List<Map<String, Object>> executeMulti(
             String component, String serviceName, List<Map<String, Object>> inputs) {
+        if (registry.find(component, serviceName).isEmpty() && registry.handler(component, serviceName).isEmpty()) {
+            throw new MigrationException(HttpStatus.NOT_FOUND, "Unknown service: " + serviceName);
+        }
         List<Map<String, Object>> results = new ArrayList<>();
         List<Map<String, Object>> errors = new ArrayList<>();
         for (int index = 0; index < inputs.size(); index++) {

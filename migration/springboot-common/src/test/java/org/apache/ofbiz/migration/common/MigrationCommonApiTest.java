@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +65,12 @@ import org.springframework.test.web.servlet.MockMvc;
             "migration.security.users[3].password=both-password",
             "migration.security.users[3].authorities[0]=OFBTOOLS_VIEW",
             "migration.security.users[3].authorities[1]=TEST_VIEW",
+            "migration.security.users[4].username=admin",
+            "migration.security.users[4].password=admin-password",
+            "migration.security.users[4].authorities[0]=OFBTOOLS_VIEW",
+            "migration.security.users[4].authorities[1]=TEST_ADMIN",
             "migration.security.sensitive-entities[0]=Enumeration",
+            "migration.security.sensitive-entities[1]=PayHistory"
         })
 @AutoConfigureMockMvc
 class MigrationCommonApiTest {
@@ -77,8 +83,15 @@ class MigrationCommonApiTest {
     @Autowired
     private EntityRegistry entityRegistry;
 
+    private final AtomicBoolean handlerInvoked = new AtomicBoolean();
+    private final AtomicBoolean defaultPermissionHandlerInvoked = new AtomicBoolean();
+    private final AtomicBoolean sensitiveResultHandlerInvoked = new AtomicBoolean();
+
     @BeforeEach
     void registerEnumerationServices() {
+        handlerInvoked.set(false);
+        defaultPermissionHandlerInvoked.set(false);
+        sensitiveResultHandlerInvoked.set(false);
         List<ServiceHandlerRegistry.ParamDefinition> parameters = List.of(
                 new ServiceHandlerRegistry.ParamDefinition("enumId", "IN", false, "id"),
                 new ServiceHandlerRegistry.ParamDefinition("enumTypeId", "IN", false, "id"),
@@ -87,6 +100,18 @@ class MigrationCommonApiTest {
                 "createEnumeration",
                 new ServiceHandlerRegistry.ServiceDefinition(
                         "createEnumeration", "Enumeration", "create", null, parameters)));
+        serviceRegistry.registerHandler("test", "handlerOnly", "UPDATE", input -> {
+            handlerInvoked.set(true);
+            return Map.of("handled", true);
+        });
+        serviceRegistry.registerHandler("test", "defaultHandler", input -> {
+            defaultPermissionHandlerInvoked.set(true);
+            return Map.of("handled", true);
+        });
+        serviceRegistry.registerHandler("test", "sensitiveHandler", "VIEW", "PayHistory", input -> {
+            sensitiveResultHandlerInvoked.set(true);
+            return Map.of("handled", true);
+        });
     }
 
     @Test
@@ -153,6 +178,65 @@ class MigrationCommonApiTest {
         mockMvc.perform(get("/api/test/entities/Geo")
                         .with(httpBasic("both", "both-password")))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void handlerOnlyServiceRequiresItsActionAndDefaultsToAdmin() throws Exception {
+        mockMvc.perform(post("/api/test/services/handlerOnly")
+                        .with(httpBasic("readonly", "readonly-password"))
+                        .contentType("application/json")
+                        .content("{}"))
+                .andExpect(status().isForbidden());
+        org.junit.jupiter.api.Assertions.assertFalse(handlerInvoked.get());
+
+        mockMvc.perform(post("/api/test/services/defaultHandler")
+                        .with(httpBasic("writer", "writer-password"))
+                        .contentType("application/json")
+                        .content("{}"))
+                .andExpect(status().isForbidden());
+        org.junit.jupiter.api.Assertions.assertFalse(defaultPermissionHandlerInvoked.get());
+
+        mockMvc.perform(post("/api/test/services/defaultHandler")
+                        .with(httpBasic("admin", "admin-password"))
+                        .contentType("application/json")
+                        .content("{}"))
+                .andExpect(status().isOk());
+        org.junit.jupiter.api.Assertions.assertTrue(defaultPermissionHandlerInvoked.get());
+    }
+
+    @Test
+    void handlerSensitiveResultRequiresSensitiveViewPermission() throws Exception {
+        mockMvc.perform(post("/api/test/services/sensitiveHandler")
+                        .with(httpBasic("readonly", "readonly-password"))
+                        .contentType("application/json")
+                        .content("{}"))
+                .andExpect(status().isForbidden());
+        org.junit.jupiter.api.Assertions.assertFalse(sensitiveResultHandlerInvoked.get());
+
+        mockMvc.perform(post("/api/test/services/sensitiveHandler")
+                        .with(httpBasic("writer", "writer-password"))
+                        .contentType("application/json")
+                        .content("{}"))
+                .andExpect(status().isOk());
+        org.junit.jupiter.api.Assertions.assertTrue(sensitiveResultHandlerInvoked.get());
+    }
+
+    @Test
+    void unknownServiceIsNotFoundAfterAuthentication() throws Exception {
+        mockMvc.perform(post("/api/test/services/notRegistered")
+                        .with(httpBasic("writer", "writer-password"))
+                        .contentType("application/json")
+                        .content("{}"))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(post("/api/test/services/notRegistered/multi")
+                        .with(httpBasic("writer", "writer-password"))
+                        .contentType("application/json")
+                        .content("[]"))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(post("/api/test/services/notRegistered")
+                        .contentType("application/json")
+                        .content("{}"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
