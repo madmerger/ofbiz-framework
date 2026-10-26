@@ -107,6 +107,34 @@ class PaymentMethodServicesTest {
         org.junit.jupiter.api.Assertions.assertNotNull(entities.get(expired, "thruDate"));
     }
 
+    @Test
+    void createPaymentApplicationDefaultsToTheRemainingPaymentBalance() throws Exception {
+        Object billingAccount = entities.newEntity(entities.entityClass("BillingAccount"));
+        entities.set(billingAccount, "billingAccountId", "MIG_PM_BILLING");
+        entities.set(billingAccount, "accountCurrencyUomId", "USD");
+        entityManager.persist(billingAccount);
+
+        Object payment = entities.newEntity(entities.entityClass("Payment"));
+        entities.set(payment, "paymentId", "MIG_PM_DEFAULT_APP");
+        entities.set(payment, "paymentTypeId", "CUSTOMER_PAYMENT");
+        entities.set(payment, "paymentMethodTypeId", "CREDIT_CARD");
+        entities.set(payment, "paymentMethodId", "MIG_DEMO_PM");
+        entities.set(payment, "partyIdFrom", "MIG_DEMO_CUSTOMER");
+        entities.set(payment, "partyIdTo", "MIG_DEMO_VENDOR");
+        entities.set(payment, "statusId", "PMNT_RECEIVED");
+        entities.set(payment, "currencyUomId", "USD");
+        entities.set(payment, "amount", "12.34");
+        entityManager.persist(payment);
+        entityManager.flush();
+
+        postService("createPaymentApplication", "{\"paymentId\":\"MIG_PM_DEFAULT_APP\","
+                + "\"billingAccountId\":\"MIG_PM_BILLING\",\"amountApplied\":\"2.34\"}")
+                .andExpect(status().isOk());
+        postService("createPaymentApplication", "{\"paymentId\":\"MIG_PM_DEFAULT_APP\","
+                + "\"billingAccountId\":\"MIG_PM_BILLING\"}")
+                .andExpect(status().isOk()).andExpect(jsonPath("$.amountApplied").value(10.00));
+    }
+
     private org.springframework.test.web.servlet.ResultActions postService(String service, String body)
             throws Exception {
         return mockMvc.perform(post("/api/accounting/services/" + service)

@@ -325,8 +325,21 @@ public class AccountingServiceHandlers {
                     "Currencies of invoice and payment are not compatible");
             invoiceAvailable = invoiceNotApplied(invoice);
         }
-        BigDecimal amount = input.get("amountApplied") == null
-                ? paymentAvailable.min(invoiceAvailable) : money(input.get("amountApplied"));
+        String toPaymentId = nonBlank(input.get("toPaymentId"));
+        Object toPayment = toPaymentId == null ? null : requireEntity("Payment", "paymentId", Map.of(
+                "paymentId", toPaymentId));
+        BigDecimal amount;
+        if (input.get("amountApplied") == null || money(input.get("amountApplied")).signum() == 0) {
+            if (invoice != null) {
+                amount = paymentAvailable.min(invoiceAvailable);
+            } else if (toPayment != null) {
+                amount = paymentAvailable.min(paymentNotApplied(text(value(toPayment, "paymentId"))));
+            } else {
+                amount = paymentAvailable;
+            }
+        } else {
+            amount = money(input.get("amountApplied"));
+        }
         if (invoice != null) {
             require(amount.signum() >= 0 && amount.compareTo(invoiceAvailable) <= 0
                             && amount.compareTo(paymentAvailable) <= 0,
