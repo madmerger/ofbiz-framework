@@ -64,9 +64,9 @@ API は `POST /api/commonext/services/{serviceName}`。entity-auto の追加サ�
 | 機微 Entity | datamodel の機密フィールド | 許可対象の `UserLogin` は entity endpoint で追加認可し、`currentPassword` をマスク |
 
 PostgreSQL 運用では `COMMONEXT_DB_URL`、`COMMONEXT_DB_USERNAME`、
-`COMMONEXT_DB_PASSWORD` と `COMMONEXT_ADMIN_PASSWORD_HASH` を環境変数に設定する。
-admin の hash は `{bcrypt}...` 形式で、権限は local profile の admin と同じ。
-hash 値を設定ファイルやリポジトリに保存しない。
+`COMMONEXT_DB_PASSWORD` と `COMMONEXT_ADMIN_PASSWORD` を環境変数に設定する。
+admin の password は環境変数から渡し、共通基盤が起動時に BCrypt 化する。
+実値を設定ファイルやリポジトリに保存しない。権限は local profile の admin と同じ。
 
 ## 4. REST 面
 

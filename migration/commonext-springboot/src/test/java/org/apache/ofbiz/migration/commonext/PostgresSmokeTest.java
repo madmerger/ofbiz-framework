@@ -19,18 +19,23 @@ package org.apache.ofbiz.migration.commonext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Map;
 import org.apache.ofbiz.migration.commonext.service.SystemInfoNoteService;
 import org.apache.ofbiz.migration.datamodel.entity.NoteData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -39,13 +44,9 @@ import jakarta.persistence.EntityManager;
 @Testcontainers(disabledWithoutDocker = true)
 @SpringBootTest(properties = {
         "migration.security.require-https=false",
-        "migration.security.users[0].username=postgres-admin",
-        "migration.security.users[0].password=test-password",
-        "migration.security.users[0].password-hash=",
-        "migration.security.users[0].authorities[0]=OFBTOOLS_VIEW",
-        "migration.security.users[0].authorities[1]=SETUP_ADMIN",
-        "migration.security.users[0].authorities[2]=COMMONEXT_PUBLMSG"
+        "COMMONEXT_ADMIN_PASSWORD=postgres-test-password"
 })
+@AutoConfigureMockMvc
 @ActiveProfiles("postgres")
 @Transactional
 class PostgresSmokeTest {
@@ -65,6 +66,16 @@ class PostgresSmokeTest {
     private SystemInfoNoteService noteService;
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    void ac02postgresAdminAuthenticatesWithEnvironmentPassword() throws Exception {
+        mockMvc.perform(get("/api/commonext/entities/Party")
+                        .with(httpBasic("admin", "postgres-test-password")))
+                .andExpect(status().isOk());
+    }
 
     @Test
     @WithMockUser(username = "postgres-user", authorities = {"SETUP_ADMIN"})

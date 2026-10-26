@@ -23,7 +23,7 @@ migration:
     trusted-proxies: ${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}
     users:
       - username: admin
-        password-hash: ${COMMONEXT_ADMIN_PASSWORD_HASH}
+        password: ${COMMONEXT_ADMIN_PASSWORD}
         authorities:
           - OFBTOOLS_VIEW
           - SETUP_ADMIN
