@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:humanres-local;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+server:
+  forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      internal-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:127\.\d{1,3}\.\d{1,3}\.\d{1,3}|::1}'
+humanres:
+  security:
+    users:
+      - username: admin
+        password: ${HUMANRES_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+          - OFBTOOLS_ADMIN
+          - HUMANRES_VIEW
+          - HUMANRES_ADMIN
+          - HUMANRES_CREATE
+          - HUMANRES_UPDATE
+          - HUMANRES_DELETE
+          - HUMANRES_SENSITIVE_VIEW
+      - username: nohumanres
+        password: ${HUMANRES_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+      - username: readonly
+        password: ${HUMANRES_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+          - HUMANRES_VIEW

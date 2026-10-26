@@ -62,3 +62,5 @@ activeComponents().each { File component ->
         include subProject.replaceAll(fileSep, ':')
     
 }
+
+include 'migration:humanres-springboot'
