@@ -447,17 +447,20 @@ public class InventoryServices extends UnportedSimpleMethodFile {
 
     /** applications/product/minilang/product/inventory/InventoryServices.xml:498-612; inlines checkOrderIsOnBackOrder; reservation services return 501. */
     private Map<String, Object> reassignInventoryReservations(Map<String, Object> input) {
+        Object fromDate = input.get("fromDate");
         String query = "select r, i from OrderItemShipGrpInvRes r join InventoryItem i "
                 + "on i.inventoryItemId = r.inventoryItemId where i.productId = :product "
                 + "and i.facilityId = :facility and i.inventoryItemTypeId = 'NON_SERIAL_INV_ITEM' "
-                + "and ((:fromDate is not null and r.currentPromisedDate > :fromDate) "
-                + "or r.quantityNotAvailable > 0 or i.availableToPromiseTotal is null "
+                + "and (" + (fromDate == null ? "" : "r.currentPromisedDate > :fromDate or ")
+                + "r.quantityNotAvailable > 0 or i.availableToPromiseTotal is null "
                 + "or i.availableToPromiseTotal < 0) "
                 + "order by r.priority, r.currentPromisedDate, r.reservedDatetime, r.sequenceId";
         var reservationQuery = entityManager.createQuery(query)
                 .setParameter("product", input.get("productId"))
-                .setParameter("facility", input.get("facilityId"))
-                .setParameter("fromDate", input.get("fromDate"));
+                .setParameter("facility", input.get("facilityId"));
+        if (fromDate != null) {
+            reservationQuery.setParameter("fromDate", fromDate);
+        }
         List<?> rows = reservationQuery.getResultList();
         List<Object> privileged = new ArrayList<>();
         List<Object> reservations = new ArrayList<>();
