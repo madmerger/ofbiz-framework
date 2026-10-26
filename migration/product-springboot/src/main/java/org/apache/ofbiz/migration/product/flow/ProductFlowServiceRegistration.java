@@ -34,6 +34,7 @@ public class ProductFlowServiceRegistration {
     private final UpdateShipmentFlow updateShipment;
     private final QuickShipEntireOrderFlow quickShipEntireOrder;
     private final CalculateProductPriceFlow calculateProductPrice;
+    private final ProductInventoryFlow productInventory;
 
     public ProductFlowServiceRegistration(
             ServiceHandlerRegistry registry,
@@ -41,13 +42,15 @@ public class ProductFlowServiceRegistration {
             ProductPermissions permissions,
             UpdateShipmentFlow updateShipment,
             QuickShipEntireOrderFlow quickShipEntireOrder,
-            CalculateProductPriceFlow calculateProductPrice) {
+            CalculateProductPriceFlow calculateProductPrice,
+            ProductInventoryFlow productInventory) {
         this.registry = registry;
         this.policy = policy;
         this.permissions = permissions;
         this.updateShipment = updateShipment;
         this.quickShipEntireOrder = quickShipEntireOrder;
         this.calculateProductPrice = calculateProductPrice;
+        this.productInventory = productInventory;
     }
 
     @PostConstruct
@@ -58,6 +61,15 @@ public class ProductFlowServiceRegistration {
         register("quickShipEntireOrder", new ProductServiceMetadata.ServiceMetadata(
                 "services_shipment.xml", "facility", ""),
                 "UPDATE", null, quickShipEntireOrder::execute);
+        register("createProduct", new ProductServiceMetadata.ServiceMetadata(
+                "services.xml", "catalog", ""),
+                "CREATE", null, productInventory::createProduct);
+        register("createInventoryItem", new ProductServiceMetadata.ServiceMetadata(
+                "services_facility.xml", "facility", "facilityGenericPermission"),
+                "CREATE", null, productInventory::createInventoryItem);
+        register("receiveInventoryProduct", new ProductServiceMetadata.ServiceMetadata(
+                "services_shipment.xml", "facility", "facilityGenericPermission"),
+                "CREATE", null, productInventory::receiveInventoryProduct);
         registry.registerHandler("product", "calculateProductPrice", "OFBTOOLS_VIEW", null,
                 calculateProductPrice::execute);
     }
