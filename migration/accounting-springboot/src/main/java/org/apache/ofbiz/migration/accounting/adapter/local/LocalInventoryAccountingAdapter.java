@@ -19,7 +19,9 @@ package org.apache.ofbiz.migration.accounting.adapter.local;
 
 import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.ofbiz.migration.accounting.AccountingEntityQueries;
@@ -80,11 +82,13 @@ public class LocalInventoryAccountingAdapter implements InventoryAccountingPort 
     public BigDecimal averageCost(Map<String, Object> inventoryItem) {
         Object ownerPartyId = inventoryItem.get("ownerPartyId");
         if (ownerPartyId != null) {
-            List<?> costs = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("ProductAverageCost"), Map.of(
-                    "productAverageCostTypeId", "SIMPLE_AVG_COST",
-                    "organizationPartyId", ownerPartyId,
-                    "productId", inventoryItem.get("productId"),
-                    "facilityId", inventoryItem.get("facilityId")));
+            Map<String, Object> filters = new LinkedHashMap<>();
+            filters.put("productAverageCostTypeId", "SIMPLE_AVG_COST");
+            filters.put("organizationPartyId", ownerPartyId);
+            filters.put("productId", inventoryItem.get("productId"));
+            filters.put("facilityId", inventoryItem.get("facilityId"));
+            List<?> costs = AccountingEntityQueries.findByEquality(
+                    entityManager, entities.entityClass("ProductAverageCost"), filters);
             Date now = new Date();
             for (Object cost : costs) {
                 Date fromDate = date(entities.get(cost, "fromDate"));
@@ -118,7 +122,7 @@ public class LocalInventoryAccountingAdapter implements InventoryAccountingPort 
                 entities.set(detail, "effectiveDate", entities.get(issuance, "issuedDateTime"));
             }
         } else {
-            entities.set(detail, "effectiveDate", new Date());
+            entities.set(detail, "effectiveDate", new Timestamp(System.currentTimeMillis()));
         }
         for (String field : List.of(
                 "availableToPromiseDiff", "quantityOnHandDiff", "accountingQuantityDiff")) {

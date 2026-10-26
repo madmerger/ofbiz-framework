@@ -30,6 +30,7 @@ import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -320,6 +321,215 @@ class GlPostingServicesTest {
     }
 
     @Test
+    void createAcctgTransForSalesShipmentIssuanceCreatesBalancedSalesShipmentPosting() throws Exception {
+        String inventoryItemId = createInventoryItem("MIG_DEMO_VENDOR", "3.00", "2.50");
+        String shipmentId = createShipment();
+        String itemIssuanceId = createItemIssuance(inventoryItemId, shipmentId, "3.00");
+
+        postGl("createAcctgTransForSalesShipmentIssuance",
+                "{\"itemIssuanceId\":\"" + itemIssuanceId + "\"}").andExpect(status().isOk());
+
+        assertPosting("SALES_SHIPMENT", "shipmentId", shipmentId, new BigDecimal("7.50"), List.of(
+                new EntryExpectation("COGS_ACCOUNT", "D"),
+                new EntryExpectation("INVENTORY_ACCOUNT", "C")));
+    }
+
+    @Test
+    void createAcctgTransForCanceledSalesShipmentIssuanceCreatesBalancedReversalPosting() throws Exception {
+        String inventoryItemId = createInventoryItem("MIG_DEMO_VENDOR", "3.00", "2.50");
+        String shipmentId = createShipment();
+        String itemIssuanceId = createItemIssuance(inventoryItemId, shipmentId, "3.00");
+
+        postGl("createAcctgTransForCanceledSalesShipmentIssuance",
+                "{\"itemIssuanceId\":\"" + itemIssuanceId + "\",\"canceledQuantity\":\"2.00\"}")
+                .andExpect(status().isOk());
+
+        assertPosting("SALES_SHIPMENT", "shipmentId", shipmentId, new BigDecimal("5.00"), List.of(
+                new EntryExpectation("INVENTORY_ACCOUNT", "D"),
+                new EntryExpectation("COGS_ACCOUNT", "C")));
+    }
+
+    @Test
+    void createAcctgTransForInventoryItemCostChangeCreatesBalancedInventoryPosting() throws Exception {
+        String inventoryItemId = createInventoryItem("MIG_DEMO_VENDOR", "3.00", "2.50");
+        persistEntity("InventoryItemDetail", Map.of(
+                "inventoryItemId", inventoryItemId,
+                "inventoryItemDetailSeqId", "00001",
+                "effectiveDate", Timestamp.from(Instant.now().minusSeconds(60)),
+                "unitCost", new BigDecimal("4.00")));
+        persistEntity("InventoryItemDetail", Map.of(
+                "inventoryItemId", inventoryItemId,
+                "inventoryItemDetailSeqId", "00002",
+                "effectiveDate", Timestamp.from(Instant.now()),
+                "unitCost", new BigDecimal("2.50")));
+
+        postGl("createAcctgTransForInventoryItemCostChange",
+                "{\"inventoryItemId\":\"" + inventoryItemId + "\",\"inventoryItemDetailSeqId\":\"00002\"}")
+                .andExpect(status().isOk());
+
+        assertPosting("INVENTORY", "inventoryItemId", inventoryItemId, new BigDecimal("4.50"), List.of(
+                new EntryExpectation("INV_ADJ_VAL", "D"),
+                new EntryExpectation("INVENTORY_ACCOUNT", "C")));
+    }
+
+    @Test
+    void createAcctgTransForShipmentReceiptCreatesBalancedReceiptPosting() throws Exception {
+        String inventoryItemId = createInventoryItem("MIG_DEMO_VENDOR", "3.00", "2.50");
+        String shipmentId = createShipment();
+        String receiptId = id("MIG_GL_RECEIPT");
+        persistEntity("ShipmentReceipt", Map.of(
+                "receiptId", receiptId,
+                "inventoryItemId", inventoryItemId,
+                "productId", "MIG_DEMO_PRODUCT_1",
+                "shipmentId", shipmentId,
+                "quantityAccepted", new BigDecimal("2.00")));
+
+        postGl("createAcctgTransForShipmentReceipt", "{\"receiptId\":\"" + receiptId + "\"}")
+                .andExpect(status().isOk());
+
+        assertPosting("SHIPMENT_RECEIPT", "shipmentId", shipmentId, new BigDecimal("5.00"), List.of(
+                new EntryExpectation("INVENTORY_ACCOUNT", "D"),
+                new EntryExpectation("UNINVOICED_SHIP_RCPT", "C")));
+    }
+
+    @Test
+    void createAcctgTransForWorkEffortIssuanceCreatesBalancedInventoryPosting() throws Exception {
+        String inventoryItemId = createInventoryItem("MIG_DEMO_VENDOR", "3.00", "2.50");
+        String workEffortHeaderId = id("MIG_GL_WE_HEADER");
+        String workEffortId = id("MIG_GL_WE_TASK");
+        createWorkEffort(workEffortHeaderId, "PROD_ORDER_HEADER", null, null);
+        createWorkEffort(workEffortId, "PROD_ORDER_TASK", workEffortHeaderId, null);
+        persistWorkEffortGoodStandard(workEffortHeaderId, "MIG_DEMO_PRODUCT_2");
+        persistEntity("WorkEffortInventoryAssign", Map.of(
+                "workEffortId", workEffortId,
+                "inventoryItemId", inventoryItemId,
+                "quantity", new BigDecimal("2.00")));
+
+        postGl("createAcctgTransForWorkEffortIssuance", "{\"workEffortId\":\"" + workEffortId
+                + "\",\"inventoryItemId\":\"" + inventoryItemId + "\"}").andExpect(status().isOk());
+
+        assertPosting("INVENTORY", "workEffortId", workEffortId, new BigDecimal("5.00"), List.of(
+                new EntryExpectation("WIP_INVENTORY", "D"),
+                new EntryExpectation("RAWMAT_INVENTORY", "C")));
+        assertEntryProduct("workEffortId", workEffortId, "WIP_INVENTORY", "D", "MIG_DEMO_PRODUCT_2");
+    }
+
+    @Test
+    void createAcctgTransForPhysicalInventoryVarianceCreatesBalancedVariancePosting() throws Exception {
+        String inventoryItemId = createInventoryItem("MIG_DEMO_VENDOR", "3.00", "2.50");
+        String physicalInventoryId = id("MIG_GL_PHYSICAL");
+        ensureGlAccountType("VAR_LOST");
+        persistEntity("PhysicalInventory", Map.of("physicalInventoryId", physicalInventoryId));
+        persistEntity("InventoryItemDetail", Map.of(
+                "inventoryItemId", inventoryItemId,
+                "inventoryItemDetailSeqId", "00001",
+                "physicalInventoryId", physicalInventoryId,
+                "quantityOnHandDiff", new BigDecimal("2.00"),
+                "reasonEnumId", "VAR_LOST"));
+
+        postGl("createAcctgTransForPhysicalInventoryVariance",
+                "{\"physicalInventoryId\":\"" + physicalInventoryId + "\"}").andExpect(status().isOk());
+
+        assertPosting("ITEM_VARIANCE", "physicalInventoryId", physicalInventoryId, new BigDecimal("5.00"), List.of(
+                new EntryExpectation("VAR_LOST", "C"),
+                new EntryExpectation("INVENTORY_ACCOUNT", "D")));
+    }
+
+    @Test
+    void createAcctgTransForWorkEffortInventoryProducedCreatesBalancedInventoryPosting() throws Exception {
+        String inventoryItemId = createInventoryItem("MIG_DEMO_VENDOR", "3.00", "2.50");
+        String workEffortId = id("MIG_GL_WE_PRODUCED");
+        createWorkEffort(workEffortId, "PROD_ORDER_HEADER", null, null);
+        persistEntity("WorkEffortInventoryProduced", Map.of(
+                "workEffortId", workEffortId,
+                "inventoryItemId", inventoryItemId));
+
+        postGl("createAcctgTransForWorkEffortInventoryProduced",
+                "{\"workEffortId\":\"" + workEffortId + "\",\"inventoryItemId\":\"" + inventoryItemId + "\"}")
+                .andExpect(status().isOk());
+
+        assertPosting("INVENTORY", "workEffortId", workEffortId, new BigDecimal("7.50"), List.of(
+                new EntryExpectation("INVENTORY_ACCOUNT", "D"),
+                new EntryExpectation("WIP_INVENTORY", "C")));
+    }
+
+    @Test
+    void createAcctgTransForWorkEffortCostCreatesBalancedManufacturingPosting() throws Exception {
+        String facilityId = id("MIG_GL_FACILITY");
+        String workEffortId = id("MIG_GL_WE_COST");
+        String costComponentCalcId = id("MIG_GL_COST_CALC");
+        String costComponentId = id("MIG_GL_COST");
+        persistEntity("Facility", Map.of("facilityId", facilityId, "ownerPartyId", "MIG_DEMO_VENDOR"));
+        createWorkEffort(workEffortId, "PROD_ORDER_HEADER", null, facilityId);
+        persistWorkEffortGoodStandard(workEffortId, "MIG_DEMO_PRODUCT_2");
+        persistEntity("CostComponentCalc", Map.of(
+                "costComponentCalcId", costComponentCalcId,
+                "costGlAccountTypeId", "OPERATING_EXPENSE",
+                "offsettingGlAccountTypeId", "WIP_INVENTORY"));
+        persistEntity("CostComponent", Map.of(
+                "costComponentId", costComponentId,
+                "workEffortId", workEffortId,
+                "costComponentCalcId", costComponentCalcId,
+                "cost", new BigDecimal("12.34"),
+                "costUomId", "USD"));
+
+        postGl("createAcctgTransForWorkEffortCost", "{\"workEffortId\":\"" + workEffortId
+                + "\",\"costComponentId\":\"" + costComponentId + "\"}").andExpect(status().isOk());
+
+        assertPosting("MANUFACTURING", "workEffortId", workEffortId, new BigDecimal("12.34"), List.of(
+                new EntryExpectation("WIP_INVENTORY", "D"),
+                new EntryExpectation("OPERATING_EXPENSE", "C")));
+        assertEntryProduct("workEffortId", workEffortId, "OPERATING_EXPENSE", "C", "MIG_DEMO_PRODUCT_2");
+    }
+
+    @Test
+    void createAcctgTransForInventoryItemOwnerChangeCreatesBalancedFourEntryPosting() throws Exception {
+        String oldOwnerPartyId = id("MIG_GL_OLD_OWNER");
+        persistEntity("Party", Map.of("partyId", oldOwnerPartyId, "partyTypeId", "PARTY_GROUP"));
+        persistEntity("PartyRole", Map.of(
+                "partyId", oldOwnerPartyId, "roleTypeId", "INTERNAL_ORGANIZATIO"));
+        String inventoryItemId = createInventoryItem("MIG_DEMO_VENDOR", "3.00", "2.50");
+
+        postGl("createAcctgTransForInventoryItemOwnerChange", "{\"inventoryItemId\":\""
+                + inventoryItemId + "\",\"oldOwnerPartyId\":\"" + oldOwnerPartyId + "\"}")
+                .andExpect(status().isOk());
+
+        assertPosting("INVENTORY", "inventoryItemId", inventoryItemId, new BigDecimal("15.00"), List.of(
+                new EntryExpectation("INVENTORY_XFER_IN", "C", new BigDecimal("7.50"), 2),
+                new EntryExpectation("INVENTORY_ACCOUNT", "D", new BigDecimal("7.50"), 2)));
+        Object transaction = AccountingEntityQueries.findByEquality(entityManager,
+                entities.entityClass("AcctgTrans"), Map.of("inventoryItemId", inventoryItemId)).get(0);
+        List<?> entries = AccountingEntityQueries.findByEquality(entityManager,
+                entities.entityClass("AcctgTransEntry"),
+                Map.of("acctgTransId", entities.get(transaction, "acctgTransId")));
+        assertEquals(2, entries.stream().filter(entry -> oldOwnerPartyId.equals(
+                entities.get(entry, "organizationPartyId"))).count());
+        assertEquals(2, entries.stream().filter(entry -> "MIG_DEMO_VENDOR".equals(
+                entities.get(entry, "organizationPartyId"))).count());
+    }
+
+    @Test
+    void createAcctgTransForFixedAssetMaintIssuanceCreatesBalancedInventoryPosting() throws Exception {
+        String inventoryItemId = createInventoryItem("MIG_DEMO_VENDOR", "3.00", "2.50");
+        String shipmentId = createShipment();
+        String fixedAssetId = id("MIG_GL_FIXED_ASSET");
+        String maintHistSeqId = "00001";
+        persistEntity("FixedAsset", Map.of("fixedAssetId", fixedAssetId));
+        persistEntity("FixedAssetMaint", Map.of(
+                "fixedAssetId", fixedAssetId,
+                "maintHistSeqId", maintHistSeqId));
+        String itemIssuanceId = createItemIssuance(
+                inventoryItemId, shipmentId, "3.00", fixedAssetId, maintHistSeqId);
+
+        postGl("createAcctgTransForFixedAssetMaintIssuance",
+                "{\"itemIssuanceId\":\"" + itemIssuanceId + "\"}").andExpect(status().isOk());
+
+        assertPosting("INVENTORY", "fixedAssetId", fixedAssetId, new BigDecimal("7.50"), List.of(
+                new EntryExpectation("FIXED_ASSET_MAINT", "D"),
+                new EntryExpectation("INVENTORY_ACCOUNT", "C")));
+    }
+
+    @Test
     void commitPostingFailuresAreIsolatedFromTheCallingOperation() {
         assertDoesNotThrow(() -> postingEca.paymentCreated("MISSING_PAYMENT", "PMNT_RECEIVED"));
     }
@@ -477,6 +687,100 @@ class GlPostingServicesTest {
         entityManager.persist(entry);
     }
 
+    private String createInventoryItem(String ownerPartyId, String quantity, String unitCost) {
+        String inventoryItemId = id("MIG_GL_ITEM");
+        BigDecimal itemQuantity = new BigDecimal(quantity);
+        persistEntity("InventoryItem", Map.of(
+                "inventoryItemId", inventoryItemId,
+                "productId", "MIG_DEMO_PRODUCT_1",
+                "ownerPartyId", ownerPartyId,
+                "currencyUomId", "USD",
+                "quantityOnHandTotal", itemQuantity,
+                "accountingQuantityTotal", itemQuantity,
+                "availableToPromiseTotal", itemQuantity,
+                "unitCost", new BigDecimal(unitCost)));
+        return inventoryItemId;
+    }
+
+    private String createShipment() {
+        String shipmentId = id("MIG_GL_SHIPMENT");
+        persistEntity("Shipment", Map.of(
+                "shipmentId", shipmentId,
+                "partyIdFrom", "MIG_DEMO_VENDOR"));
+        return shipmentId;
+    }
+
+    private String createItemIssuance(String inventoryItemId, String shipmentId, String quantity) {
+        return createItemIssuance(inventoryItemId, shipmentId, quantity, null, null);
+    }
+
+    private String createItemIssuance(String inventoryItemId, String shipmentId, String quantity,
+            String fixedAssetId, String maintHistSeqId) {
+        String itemIssuanceId = id("MIG_GL_ISSUANCE");
+        Map<String, Object> values = new LinkedHashMap<>();
+        values.put("itemIssuanceId", itemIssuanceId);
+        values.put("inventoryItemId", inventoryItemId);
+        values.put("shipmentId", shipmentId);
+        values.put("issuedDateTime", Timestamp.from(Instant.now()));
+        values.put("quantity", new BigDecimal(quantity));
+        if (fixedAssetId != null) {
+            values.put("fixedAssetId", fixedAssetId);
+            values.put("maintHistSeqId", maintHistSeqId);
+        }
+        persistEntity("ItemIssuance", values);
+        return itemIssuanceId;
+    }
+
+    private void createWorkEffort(String workEffortId, String typeId, String parentId, String facilityId) {
+        Map<String, Object> values = new LinkedHashMap<>();
+        values.put("workEffortId", workEffortId);
+        values.put("workEffortTypeId", typeId);
+        if (parentId != null) {
+            values.put("workEffortParentId", parentId);
+        }
+        if (facilityId != null) {
+            values.put("facilityId", facilityId);
+        }
+        persistEntity("WorkEffort", values);
+    }
+
+    private void persistWorkEffortGoodStandard(String workEffortId, String productId) {
+        persistEntity("WorkEffortGoodStandard", Map.of(
+                "workEffortId", workEffortId,
+                "productId", productId,
+                "workEffortGoodStdTypeId", "PRUN_PROD_DELIV",
+                "fromDate", Timestamp.from(Instant.now())));
+    }
+
+    private void ensureGlAccountType(String glAccountTypeId) {
+        if (AccountingEntityQueries.findByEquality(entityManager,
+                entities.entityClass("GlAccountType"), Map.of("glAccountTypeId", glAccountTypeId)).isEmpty()) {
+            persistEntity("GlAccountType", Map.of("glAccountTypeId", glAccountTypeId));
+        }
+    }
+
+    private void persistEntity(String entityName, Map<String, ?> values) {
+        inTransaction(() -> {
+            Object entity = entities.newEntity(entities.entityClass(entityName));
+            values.forEach((name, value) -> entities.set(entity, name, value));
+            entityManager.persist(entity);
+            entityManager.flush();
+        });
+    }
+
+    private void assertEntryProduct(String sourceField, String sourceId, String glAccountTypeId,
+            String debitCreditFlag, String productId) {
+        Object transaction = AccountingEntityQueries.findByEquality(entityManager,
+                entities.entityClass("AcctgTrans"), Map.of(sourceField, sourceId)).get(0);
+        List<?> entries = AccountingEntityQueries.findByEquality(entityManager,
+                entities.entityClass("AcctgTransEntry"),
+                Map.of("acctgTransId", entities.get(transaction, "acctgTransId")));
+        assertEquals(1, entries.stream().filter(entry ->
+                glAccountTypeId.equals(entities.get(entry, "glAccountTypeId"))
+                        && debitCreditFlag.equals(entities.get(entry, "debitCreditFlag"))
+                        && productId.equals(entities.get(entry, "productId"))).count());
+    }
+
     private void assertPosting(String type, String sourceField, String sourceId, BigDecimal total,
             List<EntryExpectation> expectedEntries) {
         List<?> transactions = AccountingEntityQueries.findByEquality(entityManager,
@@ -488,7 +792,7 @@ class GlPostingServicesTest {
         String transactionId = entities.get(transaction, "acctgTransId").toString();
         List<?> entries = AccountingEntityQueries.findByEquality(entityManager,
                 entities.entityClass("AcctgTransEntry"), Map.of("acctgTransId", transactionId));
-        assertEquals(expectedEntries.size(), entries.size());
+        assertEquals(expectedEntries.stream().mapToInt(EntryExpectation::count).sum(), entries.size());
 
         BigDecimal debit = BigDecimal.ZERO;
         BigDecimal credit = BigDecimal.ZERO;
@@ -503,12 +807,13 @@ class GlPostingServicesTest {
         assertEquals(0, total.compareTo(debit));
         assertEquals(0, debit.compareTo(credit));
         for (EntryExpectation expected : expectedEntries) {
+            BigDecimal expectedAmount = expected.amount() == null ? total : expected.amount();
             long matches = entries.stream().filter(entry ->
                     Objects.equals(expected.glAccountTypeId(), entities.get(entry, "glAccountTypeId"))
                             && expected.debitCreditFlag().equals(entities.get(entry, "debitCreditFlag"))
-                            && total.compareTo(new BigDecimal(entities.get(entry, "amount").toString())) == 0)
+                            && expectedAmount.compareTo(new BigDecimal(entities.get(entry, "amount").toString())) == 0)
                     .count();
-            assertEquals(1, matches, "Expected " + expected + " entry in " + type);
+            assertEquals(expected.count(), matches, "Expected " + expected + " entries in " + type);
         }
     }
 
@@ -562,5 +867,14 @@ class GlPostingServicesTest {
                 .contentType(MediaType.APPLICATION_JSON).content(body));
     }
 
-    private record EntryExpectation(String glAccountTypeId, String debitCreditFlag) { }
+    private record EntryExpectation(
+            String glAccountTypeId, String debitCreditFlag, BigDecimal amount, int count) {
+        EntryExpectation(String glAccountTypeId, String debitCreditFlag) {
+            this(glAccountTypeId, debitCreditFlag, null, 1);
+        }
+
+        EntryExpectation(String glAccountTypeId, String debitCreditFlag, BigDecimal amount) {
+            this(glAccountTypeId, debitCreditFlag, amount, 1);
+        }
+    }
 }
