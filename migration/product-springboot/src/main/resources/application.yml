@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: product-springboot
+  datasource:
+    url: jdbc:h2:mem:product;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+server:
+  forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      internal-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}'
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+migration:
+  security:
+    component: product
+    base-permissions:
+      - OFBTOOLS
+    require-https: true
+    service-permission-prefix: PRODUCT
+    sensitive-entities:
+      - ShipmentGatewayConfig
+      - ProductStorePaymentSetting
+      - ProductStoreFinActSetting
+      - ProductStoreVendorPayment
+      - ProductPaymentMethodType
+    users: []

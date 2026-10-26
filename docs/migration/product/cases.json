@@ -1,0 +1,330 @@
+{
+  "component": "product",
+  "baseUrl": "http://localhost:8080",
+  "auth": "HTTP Basic。パスワードは環境変数 PRODUCT_DEMO_PASSWORD（画面・録画に表示しない）",
+  "cases": [
+    {
+      "id": "PRODUCT-E2E-01",
+      "name": "未認証アクセスは 401",
+      "request": {
+        "method": "GET",
+        "path": "/api/product/entities/ProductType",
+        "user": null,
+        "body": null
+      },
+      "expected": {
+        "status": 401
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-02",
+      "name": "権限不足（閲覧専用ユーザーの作成）は 403",
+      "request": {
+        "method": "POST",
+        "path": "/api/product/services/createProductType",
+        "user": "readonly",
+        "body": {
+          "productTypeId": "E2E_TYPE_RO",
+          "description": "readonly create"
+        }
+      },
+      "expected": {
+        "status": 403
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-03a",
+      "name": "機密エンティティ: 閲覧専用ユーザーは 403",
+      "request": {
+        "method": "GET",
+        "path": "/api/product/entities/ShipmentGatewayConfig",
+        "user": "readonly",
+        "body": null
+      },
+      "expected": {
+        "status": 403
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-03b",
+      "name": "機密エンティティ: 専用権限ユーザーは 200",
+      "request": {
+        "method": "GET",
+        "path": "/api/product/entities/ShipmentGatewayConfig",
+        "user": "sensitive",
+        "body": null
+      },
+      "expected": {
+        "status": 200,
+        "body": "JSON 配列"
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-04a",
+      "name": "entity-auto 作成 createProductType",
+      "request": {
+        "method": "POST",
+        "path": "/api/product/services/createProductType",
+        "user": "admin",
+        "body": {
+          "productTypeId": "E2E_TYPE",
+          "description": "E2E 作成",
+          "isPhysical": "Y",
+          "isDigital": "N"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "productTypeId": "E2E_TYPE"
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-04b",
+      "name": "entity-auto 取得",
+      "request": {
+        "method": "GET",
+        "path": "/api/product/entities/ProductType/one?productTypeId=E2E_TYPE",
+        "user": "admin",
+        "body": null
+      },
+      "expected": {
+        "status": 200,
+        "description": "E2E 作成"
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-04c",
+      "name": "entity-auto 更新 updateProductType",
+      "request": {
+        "method": "POST",
+        "path": "/api/product/services/updateProductType",
+        "user": "admin",
+        "body": {
+          "productTypeId": "E2E_TYPE",
+          "description": "E2E 更新"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "afterGet.description": "E2E 更新"
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-04d",
+      "name": "entity-auto 削除 deleteProductType",
+      "request": {
+        "method": "POST",
+        "path": "/api/product/services/deleteProductType",
+        "user": "admin",
+        "body": {
+          "productTypeId": "E2E_TYPE"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "afterGet.status": 404
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-05",
+      "name": "simple: facilityPermissionCheck",
+      "request": {
+        "method": "POST",
+        "path": "/api/product/services/facilityPermissionCheck",
+        "user": "readonly",
+        "body": {
+          "mainAction": "UPDATE"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "hasPermission": false
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-06a",
+      "name": "主要フロー: 商品登録 createProduct",
+      "request": {
+        "method": "POST",
+        "path": "/api/product/services/createProduct",
+        "user": "admin",
+        "body": {
+          "productId": "E2E_PROD",
+          "productTypeId": "FINISHED_GOOD",
+          "internalName": "E2E Demo Product"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "productId": "E2E_PROD"
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-06b",
+      "name": "主要フロー: 在庫入荷 receiveInventoryProduct（10個）",
+      "request": {
+        "method": "POST",
+        "path": "/api/product/services/receiveInventoryProduct",
+        "user": "admin",
+        "body": {
+          "productId": "E2E_PROD",
+          "facilityId": "E2E_WH",
+          "inventoryItemTypeId": "NON_SERIAL_INV_ITEM",
+          "quantityAccepted": 10,
+          "quantityRejected": 0,
+          "unitCost": 1.25
+        }
+      },
+      "expected": {
+        "status": 200,
+        "inventoryItemId": "採番値（非空）",
+        "receiptId": "採番値（非空）"
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-05b",
+      "name": "simple: countProductInventoryOnHand（入荷直後の手持在庫）",
+      "request": {
+        "method": "POST",
+        "path": "/api/product/services/countProductInventoryOnHand",
+        "user": "admin",
+        "body": {
+          "productId": "E2E_PROD",
+          "facilityId": "E2E_WH",
+          "inventoryCountDate": "2099-12-31 23:59:59"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "quantityOnHandTotal": 10
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-06c",
+      "name": "主要フロー: 在庫引当 reserveProductInventoryByFacility（2個）",
+      "request": {
+        "method": "POST",
+        "path": "/api/product/services/reserveProductInventoryByFacility",
+        "user": "admin",
+        "body": {
+          "productId": "E2E_PROD",
+          "facilityId": "E2E_WH",
+          "orderId": "E2E_ORDER",
+          "orderItemSeqId": "00001",
+          "shipGroupSeqId": "00001",
+          "quantity": 2,
+          "reserveOrderEnumId": "INVRO_FIFO_REC",
+          "requireInventory": "N"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "quantityNotReserved": 0,
+        "afterGet": "GET /api/product/entities/InventoryItem/one?inventoryItemId={{inventoryItemId}} で availableToPromiseTotal=8, quantityOnHandTotal=10"
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-06d",
+      "name": "主要フロー: 出荷作成 createShipment",
+      "request": {
+        "method": "POST",
+        "path": "/api/product/services/createShipment",
+        "user": "admin",
+        "body": {
+          "shipmentTypeId": "SALES_SHIPMENT",
+          "statusId": "SHIPMENT_INPUT",
+          "originFacilityId": "E2E_WH",
+          "primaryOrderId": "E2E_ORDER",
+          "primaryShipGroupSeqId": "00001"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "shipmentId": "採番値（非空）"
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-06e",
+      "name": "主要フロー: 出庫 issueOrderItemShipGrpInvResToShipment（2個）",
+      "request": {
+        "method": "POST",
+        "path": "/api/product/services/issueOrderItemShipGrpInvResToShipment",
+        "user": "admin",
+        "body": {
+          "shipmentId": "{{shipmentId}}",
+          "orderId": "E2E_ORDER",
+          "orderItemSeqId": "00001",
+          "shipGroupSeqId": "00001",
+          "inventoryItemId": "{{inventoryItemId}}",
+          "quantity": 2
+        }
+      },
+      "expected": {
+        "status": 200,
+        "shipmentItemSeqId": "00001",
+        "itemIssuanceId": "採番値（非空）",
+        "afterGet": "InventoryItem の availableToPromiseTotal=8, quantityOnHandTotal=8"
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-06f",
+      "name": "主要フロー: 梱包済み updateShipment → SHIPMENT_PACKED",
+      "request": {
+        "method": "POST",
+        "path": "/api/product/services/updateShipment",
+        "user": "admin",
+        "body": {
+          "shipmentId": "{{shipmentId}}",
+          "statusId": "SHIPMENT_PACKED"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "oldStatusId": "SHIPMENT_INPUT"
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-06g",
+      "name": "主要フロー: 出荷済み updateShipment → SHIPMENT_SHIPPED",
+      "request": {
+        "method": "POST",
+        "path": "/api/product/services/updateShipment",
+        "user": "admin",
+        "body": {
+          "shipmentId": "{{shipmentId}}",
+          "statusId": "SHIPMENT_SHIPPED"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "oldStatusId": "SHIPMENT_PACKED",
+        "afterGet": "GET /api/product/entities/Shipment/one?shipmentId={{shipmentId}} で statusId=SHIPMENT_SHIPPED"
+      }
+    },
+    {
+      "id": "PRODUCT-E2E-07",
+      "name": "multi: 2件目の重複で 409、1件目もロールバック",
+      "request": {
+        "method": "POST",
+        "path": "/api/product/services/createProductType/multi",
+        "user": "admin",
+        "body": [
+          {
+            "productTypeId": "E2E_MULTI",
+            "description": "1件目"
+          },
+          {
+            "productTypeId": "E2E_MULTI",
+            "description": "2件目（重複）"
+          }
+        ]
+      },
+      "expected": {
+        "status": 409,
+        "afterGet": "GET /api/product/entities/ProductType/one?productTypeId=E2E_MULTI は 404"
+      }
+    }
+  ],
+  "variables": "{{inventoryItemId}} は PRODUCT-E2E-06b、{{shipmentId}} は PRODUCT-E2E-06d のレスポンスから取得して後続ケースに代入する",
+  "preconditions": "local プロファイル起動時に ProductLocalSeed が E2E_WH / E2E_STORE / E2E_ORDER（明細 00001 数量2、ITEM_APPROVED）とステータス遷移を投入済み。E2E_PROD と在庫は未登録"
+}

@@ -1,0 +1,366 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+ext['testcontainers.version'] = '1.21.4'
+
+group = 'org.apache.ofbiz.migration'
+version = '0.1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':migration:springboot-common')
+    implementation project(':migration:springboot-datamodel')
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+def modelFiles = rootProject.fileTree(rootProject.projectDir) {
+    include 'framework/common/entitydef/entitymodel*.xml'
+    include 'framework/*/entitydef/entitymodel*.xml'
+    include 'applications/datamodel/entitydef/*entitymodel*.xml'
+    include 'applications/*/entitydef/entitymodel*.xml'
+    exclude '**/*_test.xml'
+}
+def serviceFiles = rootProject.fileTree(rootProject.projectDir) {
+    include 'applications/product/servicedef/services*.xml'
+}
+def inheritedServiceFiles = rootProject.fileTree(rootProject.projectDir) {
+    include 'framework/common/servicedef/**/*.xml'
+    include 'framework/service/servicedef/**/*.xml'
+}
+def minilangFiles = rootProject.fileTree(rootProject.projectDir) {
+    include 'applications/product/minilang/**/*.xml'
+}
+def scopedEntityModelFiles = [
+        rootProject.file('applications/datamodel/entitydef/product-entitymodel.xml'),
+        rootProject.file('applications/datamodel/entitydef/shipment-entitymodel.xml')
+]
+def generatedRoot = layout.buildDirectory.dir('generated/sources/ofbiz2spring/main/java')
+def reportFile = layout.buildDirectory.file('generated/product-ofbiz2spring-report.json')
+
+tasks.register('generateProductCatalog', Exec) {
+    inputs.files(modelFiles, serviceFiles, minilangFiles)
+    inputs.files(inheritedServiceFiles)
+    inputs.files(scopedEntityModelFiles)
+    inputs.file(rootProject.file('migration/tools/ofbiz2spring.py'))
+    inputs.file(rootProject.file('migration/tools/ofbiz_inventory.py'))
+    outputs.dir(generatedRoot)
+    outputs.file(reportFile)
+
+    doFirst {
+        def arguments = [
+                'python3',
+                rootProject.file('migration/tools/ofbiz2spring.py').absolutePath,
+                '--out', generatedRoot.get().asFile.absolutePath,
+                '--entity-package', 'org.apache.ofbiz.migration.product.generated.unusedentity',
+                '--repository-package', 'org.apache.ofbiz.migration.product.generated.unusedrepo',
+                '--service-package', 'org.apache.ofbiz.migration.product.generated',
+                '--report', reportFile.get().asFile.absolutePath
+        ]
+        modelFiles.files.sort().each { File model ->
+            arguments.addAll(['--entity-model', model.absolutePath])
+        }
+        serviceFiles.files.sort().each { File service ->
+            arguments.addAll(['--service-def', service.absolutePath])
+        }
+        commandLine arguments
+    }
+
+    doLast {
+        def serviceMetadata = [:]
+        def simpleServiceMetadata = [:]
+        def serviceDefinitions = [:]
+        def componentByFile = [:]
+        def entityOwners = [:].withDefault { new TreeSet<String>() }
+        def modelEntityNames = new TreeSet<String>()
+        def productModelEntityNames = new TreeSet<String>()
+        def shipmentModelEntityNames = new TreeSet<String>()
+        def facilityFiles = [
+                'services_facility.xml', 'services_inventory.xml', 'services_picklist.xml',
+                'services_shipment.xml', 'services_shipmentgateway.xml', 'services_perm.xml',
+                'services_maint.xml'
+        ] as Set
+        serviceFiles.files.sort().each { File serviceFile ->
+            String fileName = serviceFile.name
+            String component = facilityFiles.contains(fileName) ? 'facility' : 'catalog'
+            componentByFile[fileName] = component
+            new groovy.xml.XmlSlurper(false, false).parse(serviceFile).service.each { service ->
+                String serviceName = service.'@name'.text()
+                String engine = service.'@engine'.text()
+                serviceDefinitions[serviceName] = [definition: service, fileName: fileName, component: component]
+                Set<String> referencedEntities = new LinkedHashSet<String>()
+                String defaultEntityName = service.'@default-entity-name'.text()
+                if (defaultEntityName) {
+                    referencedEntities.add(defaultEntityName)
+                }
+                service.'auto-attributes'.each { automatic ->
+                    String entityName = automatic.'@entity-name'.text() ?: defaultEntityName
+                    if (entityName) {
+                        referencedEntities.add(entityName)
+                    }
+                }
+                referencedEntities.each { entityOwners[it].add(component) }
+                if (engine == 'entity-auto') {
+                    String permissionService = service.'permission-service'.'@service-name'.text()
+                    serviceMetadata[serviceName] = [
+                            serviceFile: fileName,
+                            component: component,
+                            permissionService: permissionService
+                    ]
+                } else if (engine == 'simple') {
+                    String permissionService = service.'permission-service'.'@service-name'.text()
+                    String permissionMainAction = service.'permission-service'.'@main-action'.text()
+                    simpleServiceMetadata[serviceName] = [
+                            serviceFile: fileName,
+                            component: component,
+                            permissionService: permissionService,
+                            permissionMainAction: permissionMainAction,
+                            location: service.'@location'.text(),
+                            invoke: service.'@invoke'.text(),
+                            defaultEntityName: service.'@default-entity-name'.text()
+                    ]
+                }
+            }
+        }
+        inheritedServiceFiles.files.sort().each { File serviceFile ->
+            new groovy.xml.XmlSlurper(false, false).parse(serviceFile).service.each { service ->
+                if (service.'@engine'.text() == 'interface') {
+                    String serviceName = service.'@name'.text()
+                    serviceDefinitions.putIfAbsent(serviceName, [
+                            definition: service,
+                            fileName: serviceFile.name,
+                            component: 'common'
+                    ])
+                }
+            }
+        }
+        def entityFields = [:]
+        modelFiles.files.sort().each { File modelFile ->
+            new groovy.xml.XmlSlurper(false, false).parse(modelFile).entity.each { entity ->
+                String entityName = entity.'@entity-name'.text()
+                entityFields[entityName] = [
+                        primaryKeys: entity.'prim-key'.collect { it.'@field'.text() } as Set,
+                        fields: entity.field.collect { field ->
+                            [name: field.'@name'.text(), type: field.'@type'.text()]
+                        }
+                ]
+            }
+        }
+        def resolveParameters
+        resolveParameters = { String serviceName, Set<String> resolving ->
+            if (resolving.contains(serviceName)) {
+                throw new GradleException("Cyclic service implementation: ${resolving} -> ${serviceName}")
+            }
+            def serviceEntry = serviceDefinitions[serviceName]
+            if (serviceEntry == null) {
+                throw new GradleException("Unknown implemented service: ${serviceName}")
+            }
+            Set<String> nextResolving = new LinkedHashSet<>(resolving)
+            nextResolving.add(serviceName)
+            def params = new LinkedHashMap<String, Map>()
+            serviceEntry.definition.'implements'.each { implementation ->
+                resolveParameters(implementation.'@service'.text(), nextResolving).each { param ->
+                    params[param.name] = param
+                }
+            }
+            serviceEntry.definition.attribute.each { attribute ->
+                String name = attribute.'@name'.text()
+                params[name] = [
+                        name: name,
+                        mode: attribute.'@mode'.text() ?: 'INOUT',
+                        optional: attribute.'@optional'.text() == 'true',
+                        type: attribute.'@type'.text() ?: 'String'
+                ]
+            }
+            serviceEntry.definition.'auto-attributes'.each { automatic ->
+                String entityName = automatic.'@entity-name'.text()
+                        ?: serviceEntry.definition.'@default-entity-name'.text()
+                def entity = entityFields[entityName]
+                if (entity == null) {
+                    throw new GradleException(
+                            "Cannot resolve auto-attributes for ${serviceName}: unknown entity ${entityName}")
+                }
+                String include = automatic.'@include'.text() ?: 'all'
+                Set<String> excludedFields = automatic.exclude.collect { it.'@field-name'.text() } as Set<String>
+                entity.fields.each { field ->
+                    boolean primaryKey = entity.primaryKeys.contains(field.name)
+                    if (!excludedFields.contains(field.name)
+                            && (include == 'all' || include == 'pk' && primaryKey
+                                    || include == 'nonpk' && !primaryKey)) {
+                        params[field.name] = [
+                                name: field.name,
+                                mode: automatic.'@mode'.text() ?: 'INOUT',
+                                optional: automatic.'@optional'.text() == 'true',
+                                type: field.type ?: 'String'
+                        ]
+                    }
+                }
+            }
+            serviceEntry.definition.override.each { override ->
+                String name = override.'@name'.text()
+                if (params.containsKey(name)) {
+                    Map parameter = new LinkedHashMap(params[name])
+                    if (override.'@mode'.text()) {
+                        parameter.mode = override.'@mode'.text()
+                    }
+                    if (override.'@optional'.text()) {
+                        parameter.optional = override.'@optional'.text() == 'true'
+                    }
+                    if (override.'@type'.text()) {
+                        parameter.type = override.'@type'.text()
+                    }
+                    params[name] = parameter
+                }
+            }
+            return params.values().toList()
+        }
+        simpleServiceMetadata.each { serviceName, metadata ->
+            metadata.params = resolveParameters(serviceName, new LinkedHashSet<String>())
+        }
+        scopedEntityModelFiles.each { File modelFile ->
+            new groovy.xml.XmlSlurper(false, false).parse(modelFile).entity.each { entity ->
+                String entityName = entity.'@entity-name'.text()
+                modelEntityNames.add(entityName)
+                if (modelFile.name == 'product-entitymodel.xml') {
+                    productModelEntityNames.add(entityName)
+                } else if (modelFile.name == 'shipment-entitymodel.xml') {
+                    shipmentModelEntityNames.add(entityName)
+                }
+            }
+        }
+        productModelEntityNames.each { entityName ->
+            if (entityOwners[entityName].isEmpty()) {
+                entityOwners[entityName].add('catalog')
+            }
+        }
+        shipmentModelEntityNames.each { entityName ->
+            if (entityOwners[entityName].isEmpty()) {
+                entityOwners[entityName].add('facility')
+            }
+        }
+        def javaString = { String value ->
+            '"' + value.replace('\\', '\\\\').replace('"', '\\"') + '"'
+        }
+        def metadataEntries = serviceMetadata.sort().collect { name, metadata ->
+            "        Map.entry(${javaString(name)}, new ServiceMetadata(" +
+                    "${javaString(metadata.serviceFile)}, ${javaString(metadata.component)}, " +
+                    "${javaString(metadata.permissionService)}))"
+        }.join(',\n')
+        def componentEntries = componentByFile.sort().collect { name, component ->
+            "        Map.entry(${javaString(name)}, ${javaString(component)})"
+        }.join(',\n')
+        def modelEntityEntries = modelEntityNames.collect { name -> "        ${javaString(name)}" }.join(',\n')
+        def entityOwnerEntries = entityOwners.sort().collect { name, owners ->
+            "        Map.entry(${javaString(name)}, Set.of(" +
+                    owners.collect { javaString(it) }.join(', ') + "))"
+        }.join(',\n')
+        def simpleEntries = simpleServiceMetadata.sort().collect { name, metadata ->
+            def params = metadata.params.collect { param ->
+                "new SimpleParam(${javaString(param.name)}, ${javaString(param.mode)}, " +
+                        "${param.optional}, ${javaString(param.type)})"
+            }.join(', ')
+            "        Map.entry(${javaString(name)}, new SimpleServiceMetadata(" +
+                    "${javaString(metadata.serviceFile)}, ${javaString(metadata.component)}, " +
+                    "${javaString(metadata.permissionService)}, ${javaString(metadata.permissionMainAction)}, " +
+                    "${javaString(metadata.location)}, ${javaString(metadata.invoke)}, " +
+                    "${javaString(metadata.defaultEntityName)}, List.of(${params})))"
+        }.join(',\n')
+        File metadataFile = new File(
+                generatedRoot.get().asFile,
+                'org/apache/ofbiz/migration/product/generated/ProductServiceMetadata.java')
+        metadataFile.parentFile.mkdirs()
+        metadataFile.text = """\
+/*******************************************************************************
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *******************************************************************************/
+package org.apache.ofbiz.migration.product.generated;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+public final class ProductServiceMetadata {
+    public record ServiceMetadata(String serviceFile, String component, String permissionService) { }
+    public record SimpleParam(String name, String mode, boolean optional, String type) { }
+    public record SimpleServiceMetadata(
+            String serviceFile,
+            String component,
+            String permissionService,
+            String permissionMainAction,
+            String location,
+            String invoke,
+            String defaultEntityName,
+            List<SimpleParam> params) { }
+
+    private static final Map<String, ServiceMetadata> SERVICES = Map.ofEntries(
+${metadataEntries});
+    private static final Map<String, SimpleServiceMetadata> SIMPLE_SERVICES = Map.ofEntries(
+${simpleEntries});
+    private static final Map<String, String> COMPONENTS_BY_FILE = Map.ofEntries(
+${componentEntries});
+    private static final Map<String, Set<String>> ENTITY_OWNERS = Map.ofEntries(
+${entityOwnerEntries});
+    private static final Set<String> ENTITY_MODEL_NAMES = Set.of(
+${modelEntityEntries});
+
+    private ProductServiceMetadata() { }
+
+    public static Map<String, ServiceMetadata> all() { return SERVICES; }
+    public static Map<String, SimpleServiceMetadata> simpleServices() { return SIMPLE_SERVICES; }
+    public static Map<String, String> componentsByFile() { return COMPONENTS_BY_FILE; }
+    public static Map<String, Set<String>> entityOwners() { return ENTITY_OWNERS; }
+    public static Set<String> entityModelNames() { return ENTITY_MODEL_NAMES; }
+}
+""".stripIndent()
+    }
+}
+
+sourceSets.main.java.srcDir(generatedRoot.map { it.dir('org/apache/ofbiz/migration/product/generated') })
+tasks.named('compileJava') {
+    dependsOn tasks.named('generateProductCatalog')
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    maxHeapSize = '4g'
+    systemProperty 'ofbiz.root', rootProject.projectDir.absolutePath
+}
