@@ -234,7 +234,19 @@ class EntityAutoAcceptanceTest {
         "CATALOG_DELETE", "FACILITY_CREATE", "FACILITY_UPDATE", "FACILITY_DELETE"
     })
     @Transactional
-    void ac04_updateShipmentItemBillingHasNoWritableNonKeyFields() throws Exception {
+    void ac04_entityAutoUpdatesReturnPreviousStatusOutputs() throws Exception {
+        assertPreviousStatusOutput("updatePicklist", "Picklist", "statusId", "oldStatusId");
+        assertPreviousStatusOutput("updatePicklistItem", "PicklistItem", "itemStatusId", "oldItemStatusId");
+    }
+
+    @Test
+    @WithMockUser(username = "admin", authorities = {
+        "OFBTOOLS_ADMIN", "CATALOG_ADMIN", "FACILITY_ADMIN", "PRODUCT_ADMIN",
+        "PRODUCT_SENSITIVE_VIEW", "CATALOG_PRICE_MAINT", "CATALOG_CREATE", "CATALOG_UPDATE",
+        "CATALOG_DELETE", "FACILITY_CREATE", "FACILITY_UPDATE", "FACILITY_DELETE"
+    })
+    @Transactional
+    void ac05_updateShipmentItemBillingHasNoWritableNonKeyFields() throws Exception {
         ServiceCatalog.ServiceDefinition update = ServiceCatalog.all().get("updateShipmentItemBilling");
         Map<String, Object> input = ProductTestSupport.input(
                 update, entities, "shipment-item-billing", true);
@@ -253,6 +265,27 @@ class EntityAutoAcceptanceTest {
         Object after = entities.findByPrimaryKey(entities.entityClass(update.entity()), keys);
         assertNotNull(after);
         assertEquals(before, entities.toMap(after));
+    }
+
+    private void assertPreviousStatusOutput(
+            String serviceName, String entityName, String statusField, String oldStatusOutput) throws Exception {
+        ServiceCatalog.ServiceDefinition update = ServiceCatalog.all().get(serviceName);
+        Map<String, Object> input = ProductTestSupport.input(update, entities, serviceName, true);
+        String oldStatus = "OLD";
+        String newStatus = "NEW";
+        input.put(statusField, newStatus);
+        Object row = entities.newEntity(entities.entityClass(entityName));
+        ProductTestSupport.keys(update, entities, input)
+                .forEach((name, value) -> entities.set(row, name, value));
+        entities.set(row, statusField, oldStatus);
+        entityManager.persist(row);
+        entityManager.flush();
+
+        String body = postService(serviceName, input)
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        Map<String, Object> output = JSON.readValue(body, new TypeReference<>() { });
+        assertEquals(oldStatus, output.get(oldStatusOutput));
+        assertEquals(newStatus, output.get(statusField));
     }
 
     private org.springframework.test.web.servlet.ResultActions postService(

@@ -19,6 +19,8 @@
 package org.apache.ofbiz.migration.product;
 
 import jakarta.annotation.PostConstruct;
+import java.beans.Introspector;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -104,7 +106,11 @@ public class ProductEntityAutoRegistration {
                         if ("productPriceGenericPermission".equals(metadata.permissionService())) {
                             productPermissions.require("CATALOG", action);
                         }
-                        return entityAutoService.execute(handlerDefinition, input);
+                        Map<String, Object> previousValues = previousOutputValues(definition, entityType, input);
+                        Map<String, Object> output = new LinkedHashMap<>(
+                                entityAutoService.execute(handlerDefinition, input));
+                        output.putAll(previousValues);
+                        return output;
                     });
         });
         securityProperties.getExtraEntities().clear();
@@ -144,6 +150,30 @@ public class ProductEntityAutoRegistration {
         }
         throw new IllegalStateException("Unknown product permission service: " + permissionService
                 + " for " + metadata.serviceFile());
+    }
+
+    private Map<String, Object> previousOutputValues(
+            ServiceCatalog.ServiceDefinition definition, Class<?> entityType, Map<String, Object> input) {
+        if (!"update".equalsIgnoreCase(definition.invoke())) {
+            return Map.of();
+        }
+        List<ServiceCatalog.ParamDefinition> previousValueParams = definition.params().stream()
+                .filter(param -> "OUT".equalsIgnoreCase(param.mode()))
+                .filter(param -> param.name().startsWith("old") && param.name().length() > 3)
+                .filter(param -> new BeanWrapperImpl(entityRegistry.newEntity(entityType))
+                        .isReadableProperty(Introspector.decapitalize(param.name().substring(3))))
+                .toList();
+        if (previousValueParams.isEmpty()) {
+            return Map.of();
+        }
+        Object entity = entityRegistry.findByPrimaryKey(entityType, input);
+        if (entity == null) {
+            return Map.of();
+        }
+        Map<String, Object> output = new LinkedHashMap<>();
+        previousValueParams.forEach(param -> output.put(
+                param.name(), entityRegistry.get(entity, Introspector.decapitalize(param.name().substring(3)))));
+        return output;
     }
 
     void checkShipmentStatus(String permissionService, Map<String, Object> input) {
