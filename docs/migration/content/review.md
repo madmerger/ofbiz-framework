@@ -8,7 +8,7 @@
 | PostgreSQL（Testcontainers 1.21.4、postgres:16-alpine） | 上に含まれる | 1 件 pass（skip なし） |
 | 静的解析 | `./gradlew :migration:content-springboot:checkstyleMain :migration:content-springboot:checkstyleTest` | BUILD SUCCESSFUL（ルートの `config/checkstyle/checkstyle.xml` を適用。Groovy ソースはないため CodeNarc の対象なし） |
 | 起動と疎通 | `CONTENT_DEMO_PASSWORD=... ./migration/content-springboot/run-local.sh` + `cases.json` を curl で実行 | health UP、CONTENT-E2E-01〜26 すべて期待どおり |
-| E2E（Swagger UI、testing agent） | `cases.json` の順に実行 | `e2e-report.md` を参照 |
+| E2E（Swagger UI、testing agent） | `cases.json` の順に実行 | **26/26 合格**（`e2e-report.md`） |
 
 件数: entity-auto 176（全量）、simple 7（全量）、移植した java 4 / groovy 7（+ route 2 / group 2）、未移植サービス 90（java 53 / groovy 30 / group 4 / interface 3）。詳細は `unported.md`。
 
