@@ -1,0 +1,108 @@
+plugins {
+    id 'java'
+    id 'checkstyle'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+ext['testcontainers.version'] = '1.21.4'
+
+group = 'org.apache.ofbiz.migration'
+version = '0.1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':migration:springboot-common')
+    implementation project(':migration:springboot-datamodel')
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+checkstyle {
+    toolVersion = '10.20.2'
+    configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+    maxErrors = 0
+}
+
+// content の servicedef は party（CommunicationEvent 等）など他コンポーネントの Entity も参照するため全 entitymodel を渡す
+def contentModelFiles = rootProject.fileTree(rootProject.projectDir) {
+    include 'framework/*/entitydef/entitymodel*.xml'
+    include 'applications/datamodel/entitydef/*entitymodel*.xml'
+    include 'applications/*/entitydef/entitymodel*.xml'
+    exclude '**/*_test.xml'
+}
+def contentServiceFiles = rootProject.fileTree(rootProject.file('applications/content/servicedef')) {
+    include 'services*.xml'
+}
+def generatedRoot = layout.buildDirectory.dir('generated/sources/ofbiz2spring-content')
+def generatedCatalogPackage = 'org/apache/ofbiz/migration/content/generated'
+
+// content の servicedef だけから entity-auto カタログを生成する（Entity/Repository は共通 datamodel を使う）
+tasks.register('generateContentCatalog', Exec) {
+    inputs.files(contentModelFiles, contentServiceFiles)
+    inputs.file(rootProject.file('migration/tools/ofbiz2spring.py'))
+    outputs.dir(generatedRoot)
+
+    doFirst {
+        def out = generatedRoot.get().asFile
+        project.delete(out)
+        def arguments = [
+                'python3',
+                rootProject.file('migration/tools/ofbiz2spring.py').absolutePath,
+                '--out', new File(out, 'all').absolutePath,
+                '--entity-package', 'org.apache.ofbiz.migration.content.unused.entity',
+                '--repository-package', 'org.apache.ofbiz.migration.content.unused.repository',
+                '--service-package', 'org.apache.ofbiz.migration.content.generated',
+                '--report', new File(out, 'ofbiz2spring-content-report.json').absolutePath
+        ]
+        contentModelFiles.files.sort().each { File model -> arguments.addAll(['--entity-model', model.absolutePath]) }
+        contentServiceFiles.files.sort().each { File service -> arguments.addAll(['--service-def', service.absolutePath]) }
+        commandLine arguments
+    }
+    doLast {
+        project.copy {
+            from(new File(generatedRoot.get().asFile, "all/${generatedCatalogPackage}"))
+            include 'ServiceCatalog.java'
+            into(new File(generatedRoot.get().asFile, "java/${generatedCatalogPackage}"))
+        }
+    }
+}
+
+sourceSets.main.java.srcDir(generatedRoot.map { it.dir('java') })
+tasks.named('compileJava') {
+    dependsOn tasks.named('generateContentCatalog')
+}
+// ルートの checkstyle 実行時に共通基盤・カタログ生成のコンパイルを連鎖させない（ソースのみ検査）
+tasks.named('checkstyleMain') {
+    source = fileTree('src/main/java')
+    classpath = files()
+}
+tasks.named('checkstyleTest') {
+    source = fileTree('src/test/java')
+    classpath = files()
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    // 835 エンティティの JPA コンテキストを複数プロファイルで保持するため
+    maxHeapSize = '3g'
+    systemProperty 'ofbiz.root', rootProject.projectDir.absolutePath
+}

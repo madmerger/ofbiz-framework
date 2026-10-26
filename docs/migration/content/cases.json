@@ -1,0 +1,499 @@
+{
+  "component": "content",
+  "description": "content Spring Boot モジュールの E2E ケース。local プロファイル（http://localhost:8080、Swagger UI /swagger-ui/index.html）で、ケース順に実行する。ユーザーのパスワードはすべて環境変数 CONTENT_DEMO_PASSWORD。",
+  "baseUrl": "http://localhost:8080",
+  "swaggerUi": "/swagger-ui/index.html",
+  "users": {
+    "admin": "全権限（CONTENTMGR_ADMIN、CONTENTMGR_SUPER_ADMIN、CONTENTMGR_SENSITIVE_VIEW）",
+    "editor": "CONTENTMGR_VIEW/CREATE/UPDATE/DELETE",
+    "readonly": "CONTENTMGR_VIEW のみ",
+    "auditor": "CONTENTMGR_VIEW + CONTENTMGR_SENSITIVE_VIEW",
+    "nocontent": "OFBTOOLS_VIEW のみ"
+  },
+  "cases": [
+    {
+      "id": "CONTENT-E2E-01",
+      "group": "未認証 401",
+      "name": "未認証で entity-auto を呼ぶと 401",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/createContentType",
+        "user": null,
+        "body": {
+          "contentTypeId": "E2E_TYPE_ANON"
+        }
+      },
+      "expected": {
+        "status": 401
+      }
+    },
+    {
+      "id": "CONTENT-E2E-02",
+      "group": "権限不足 403",
+      "name": "閲覧専用ユーザーで entity-auto 作成は 403",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/createContentType",
+        "user": "readonly",
+        "body": {
+          "contentTypeId": "E2E_TYPE_DENIED"
+        }
+      },
+      "expected": {
+        "status": 403
+      }
+    },
+    {
+      "id": "CONTENT-E2E-03",
+      "group": "権限不足 403",
+      "name": "CONTENTMGR 権限なしユーザーの Entity 取得は 403",
+      "request": {
+        "method": "GET",
+        "path": "/api/content/entities/Content",
+        "user": "nocontent"
+      },
+      "expected": {
+        "status": 403
+      }
+    },
+    {
+      "id": "CONTENT-E2E-04",
+      "group": "機密エンティティ",
+      "name": "機密エンティティ SurveyResponseAnswer: 閲覧専用ユーザーは 403",
+      "request": {
+        "method": "GET",
+        "path": "/api/content/entities/SurveyResponseAnswer",
+        "user": "readonly"
+      },
+      "expected": {
+        "status": 403
+      }
+    },
+    {
+      "id": "CONTENT-E2E-05",
+      "group": "機密エンティティ",
+      "name": "機密エンティティ SurveyResponseAnswer: CONTENTMGR_SENSITIVE_VIEW ありは 200",
+      "request": {
+        "method": "GET",
+        "path": "/api/content/entities/SurveyResponseAnswer",
+        "user": "auditor"
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$": "配列（JSON array）"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-06",
+      "group": "entity-auto CRUD",
+      "name": "entity-auto 作成 createContentType",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/createContentType",
+        "user": "editor",
+        "body": {
+          "contentTypeId": "E2E_TYPE",
+          "description": "E2E 種別"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$.contentTypeId": "E2E_TYPE",
+          "$.responseMessage": "success"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-07",
+      "group": "entity-auto CRUD",
+      "name": "entity-auto 取得（作成後）",
+      "request": {
+        "method": "GET",
+        "path": "/api/content/entities/ContentType?contentTypeId=E2E_TYPE",
+        "user": "readonly"
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$[0].description": "E2E 種別"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-08",
+      "group": "entity-auto CRUD",
+      "name": "entity-auto 更新 updateContentType",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/updateContentType",
+        "user": "editor",
+        "body": {
+          "contentTypeId": "E2E_TYPE",
+          "description": "E2E 種別 更新"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$.description": "E2E 種別 更新"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-09",
+      "group": "entity-auto CRUD",
+      "name": "entity-auto 取得（更新後）",
+      "request": {
+        "method": "GET",
+        "path": "/api/content/entities/ContentType?contentTypeId=E2E_TYPE",
+        "user": "readonly"
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$[0].description": "E2E 種別 更新"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-10",
+      "group": "entity-auto CRUD",
+      "name": "entity-auto 削除 removeContentType",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/removeContentType",
+        "user": "editor",
+        "body": {
+          "contentTypeId": "E2E_TYPE"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$.responseMessage": "success"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-11",
+      "group": "entity-auto CRUD",
+      "name": "entity-auto 取得（削除後は 0 件）",
+      "request": {
+        "method": "GET",
+        "path": "/api/content/entities/ContentType?contentTypeId=E2E_TYPE",
+        "user": "readonly"
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$.length()": 0
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-12",
+      "group": "simple サービス",
+      "name": "simple createSurveyQuestion: ENUMERATION で enumTypeId なしは 400",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/createSurveyQuestion",
+        "user": "editor",
+        "body": {
+          "surveyQuestionTypeId": "ENUMERATION",
+          "question": "E2E 列挙"
+        }
+      },
+      "expected": {
+        "status": 400,
+        "values": {
+          "$.errorMessage": "ContentQuestionTypeRequiredField: enumTypeId"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-13",
+      "group": "simple サービス",
+      "name": "simple createSurveyQuestion: TEXT_SHORT は採番して作成",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/createSurveyQuestion",
+        "user": "editor",
+        "body": {
+          "surveyQuestionTypeId": "TEXT_SHORT",
+          "question": "E2E お名前"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$.surveyQuestionId": "採番された数値 ID"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-14",
+      "group": "simple サービス",
+      "name": "simple genericDataResourcePermission: テンプレート（FTL）は CONTENTMGR_SUPER がない editor では false",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/genericDataResourcePermission",
+        "user": "editor",
+        "body": {
+          "mainAction": "CREATE",
+          "dataTemplateTypeId": "FTL"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$.hasPermission": false
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-15",
+      "group": "主要フロー",
+      "name": "主要フロー: DataResource + ElectronicText 作成 createDataResourceAndText",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/createDataResourceAndText",
+        "user": "editor",
+        "body": {
+          "dataResourceId": "E2E_DR_1",
+          "dataResourceTypeId": "ELECTRONIC_TEXT",
+          "dataResourceName": "E2E 本文",
+          "textData": "E2E 本文テキスト"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$.dataResourceId": "E2E_DR_1"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-16",
+      "group": "主要フロー",
+      "name": "主要フロー: 子 Content 作成 createContent（DataResource を参照）",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/createContent",
+        "user": "editor",
+        "body": {
+          "contentId": "E2E_CNT_CHILD",
+          "contentName": "E2E 子コンテンツ",
+          "dataResourceId": "E2E_DR_1"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$.contentId": "E2E_CNT_CHILD",
+          "$.contentTypeId": "DOCUMENT",
+          "$.statusId": "CTNT_IN_PROGRESS"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-17",
+      "group": "主要フロー",
+      "name": "主要フロー: 親 Content 作成 createContent",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/createContent",
+        "user": "editor",
+        "body": {
+          "contentId": "E2E_CNT_PARENT",
+          "contentName": "E2E 親コンテンツ"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$.contentId": "E2E_CNT_PARENT"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-18",
+      "group": "主要フロー",
+      "name": "主要フロー: 関連付け createContentAssoc（SUB_CONTENT）",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/createContentAssoc",
+        "user": "editor",
+        "body": {
+          "contentId": "E2E_CNT_PARENT",
+          "contentIdTo": "E2E_CNT_CHILD",
+          "contentAssocTypeId": "SUB_CONTENT",
+          "fromDate": "2026-01-01 00:00:00"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$.contentIdTo": "E2E_CNT_CHILD"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-19",
+      "group": "主要フロー",
+      "name": "主要フロー: 取得 getContent（ContentDataResourceView 相当）",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/getContent",
+        "user": "readonly",
+        "body": {
+          "contentId": "E2E_CNT_CHILD"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$.view.contentName": "E2E 子コンテンツ",
+          "$.view.drDataResourceTypeId": "ELECTRONIC_TEXT"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-20",
+      "group": "主要フロー",
+      "name": "主要フロー: 取得 getContentAndDataResource（本文込み）",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/getContentAndDataResource",
+        "user": "readonly",
+        "body": {
+          "contentId": "E2E_CNT_CHILD"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$.resultData.electronicText.textData": "E2E 本文テキスト"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-21",
+      "group": "主要フロー",
+      "name": "主要フロー: 関連の取得（ContentAssoc）",
+      "request": {
+        "method": "GET",
+        "path": "/api/content/entities/ContentAssoc?contentId=E2E_CNT_PARENT",
+        "user": "readonly"
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$[0].contentIdTo": "E2E_CNT_CHILD"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-22",
+      "group": "主要フロー",
+      "name": "主要フロー: 本文更新 updateDataResourceAndText",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/updateDataResourceAndText",
+        "user": "editor",
+        "body": {
+          "dataResourceId": "E2E_DR_1",
+          "dataResourceTypeId": "ELECTRONIC_TEXT",
+          "textData": "E2E 本文テキスト 更新"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$.dataResourceId": "E2E_DR_1"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-23",
+      "group": "主要フロー",
+      "name": "主要フロー: 更新後の本文取得 getElectronicText",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/getElectronicText",
+        "user": "readonly",
+        "body": {
+          "contentId": "E2E_CNT_CHILD"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$.textData": "E2E 本文テキスト 更新"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-24",
+      "group": "multi 409 とロールバック",
+      "name": "multi: 3 行中 3 行目が重複で 409",
+      "request": {
+        "method": "POST",
+        "path": "/api/content/services/createContentType/multi",
+        "user": "editor",
+        "body": [
+          {
+            "contentTypeId": "E2E_M_A"
+          },
+          {
+            "contentTypeId": "E2E_M_B"
+          },
+          {
+            "contentTypeId": "E2E_M_A"
+          }
+        ]
+      },
+      "expected": {
+        "status": 409,
+        "values": {
+          "$.errors[0].index": 2,
+          "$.errors[0].errorMessage": "ServiceValueFound"
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-25",
+      "group": "multi 409 とロールバック",
+      "name": "multi: 1 行目（E2E_M_A）もロールバックされ 0 件",
+      "request": {
+        "method": "GET",
+        "path": "/api/content/entities/ContentType?contentTypeId=E2E_M_A",
+        "user": "readonly"
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$.length()": 0
+        }
+      }
+    },
+    {
+      "id": "CONTENT-E2E-26",
+      "group": "multi 409 とロールバック",
+      "name": "multi: 2 行目（E2E_M_B）もロールバックされ 0 件",
+      "request": {
+        "method": "GET",
+        "path": "/api/content/entities/ContentType?contentTypeId=E2E_M_B",
+        "user": "readonly"
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "$.length()": 0
+        }
+      }
+    }
+  ]
+}
