@@ -25,6 +25,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -441,7 +442,7 @@ public class FacilityContactMechServices extends UnportedSimpleMethodFile {
     }
 
     private static Timestamp now() {
-        return Timestamp.from(Instant.now());
+        return Timestamp.from(Instant.now().truncatedTo(ChronoUnit.MILLIS));
     }
 
     private static Map<String, Object> result(String name, Object value) {
