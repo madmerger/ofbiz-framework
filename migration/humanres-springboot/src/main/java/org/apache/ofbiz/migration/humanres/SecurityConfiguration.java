@@ -43,9 +43,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class SecurityConfiguration {
     private static final String HUMANRES_ADMIN = "HUMANRES_ADMIN";
     private final ObjectMapper objectMapper;
+    private final MigrationSecurityProperties migrationSecurityProperties;
 
-    public SecurityConfiguration(ObjectMapper objectMapper) {
+    public SecurityConfiguration(ObjectMapper objectMapper, MigrationSecurityProperties migrationSecurityProperties) {
         this.objectMapper = objectMapper;
+        this.migrationSecurityProperties = migrationSecurityProperties;
     }
 
     @Bean
@@ -92,6 +94,9 @@ public class SecurityConfiguration {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider)
             throws Exception {
+        if (migrationSecurityProperties.isRequireHttps()) {
+            http.requiresChannel(channel -> channel.anyRequest().requiresSecure());
+        }
         http.authenticationProvider(authenticationProvider)
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/humanres/**"))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -121,7 +126,15 @@ public class SecurityConfiguration {
 
         String path = context.getRequest().getRequestURI();
         String method = context.getRequest().getMethod();
-        if (path.startsWith("/api/humanres/entities/") || path.equals("/api/humanres/hr-tree")) {
+        if (path.startsWith("/api/humanres/entities/")) {
+            String[] parts = path.split("/");
+            if (parts.length > 4 && migrationSecurityProperties.isSensitiveEntity(parts[4])) {
+                return new AuthorizationDecision(
+                        hasAny(authorities, "HUMANRES_SENSITIVE_VIEW", HUMANRES_ADMIN));
+            }
+            return new AuthorizationDecision(hasAny(authorities, "HUMANRES_VIEW", HUMANRES_ADMIN));
+        }
+        if (path.equals("/api/humanres/hr-tree")) {
             return new AuthorizationDecision(hasAny(authorities, "HUMANRES_VIEW", HUMANRES_ADMIN));
         }
         if (path.startsWith("/api/humanres/services/")) {

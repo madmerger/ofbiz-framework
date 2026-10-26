@@ -17,6 +17,8 @@ spring:
   jackson:
     serialization:
       write-dates-as-timestamps: false
+server:
+  forward-headers-strategy: framework
 springdoc:
   api-docs:
     enabled: false
@@ -30,3 +32,12 @@ management:
 humanres:
   security:
     users: []
+migration:
+  security:
+    sensitive-entities:
+      - PayHistory
+      - PayrollPreference
+      - SalaryStep
+      - PayGrade
+      - PartyBenefit
+      - UnemploymentClaim

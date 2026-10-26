@@ -19,6 +19,7 @@ humanres:
           - HUMANRES_CREATE
           - HUMANRES_UPDATE
           - HUMANRES_DELETE
+          - HUMANRES_SENSITIVE_VIEW
       - username: nohumanres
         password: ${HUMANRES_DEMO_PASSWORD}
         authorities:

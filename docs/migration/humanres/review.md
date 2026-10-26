@@ -4,7 +4,7 @@
 
 | 検証 | コマンド | 結果 |
 | --- | --- | --- |
-| Spring Boot モジュールの全テスト | `./gradlew :migration:humanres-springboot:test` | **158 件 pass / 0 fail / 0 skip**（EntityAutoAcceptanceTest 136、HrTreeSecurityTest 7、HumanResBusinessServicesTest 13、PostgresSmokeTest 1、SpringdocProfileTest 1） |
+| Spring Boot モジュールの全テスト | `./gradlew :migration:humanres-springboot:test` | **160 件 pass / 0 fail / 0 skip**（EntityAutoAcceptanceTest 136、HrTreeSecurityTest 8、HumanResBusinessServicesTest 13、HttpsSecurityTest 1、PostgresSmokeTest 1、SpringdocProfileTest 1） |
 | PostgreSQL（Testcontainers） | 上に含まれる | 1 件 pass（skip なし） |
 | 棚卸しツール・生成器 | `python3 -m unittest discover -s migration/tools -p 'test_*.py'` | 6 件 pass |
 | 既存 OFBiz テスト（回帰） | `./gradlew test --tests 'org.apache.ofbiz.humanres.HumanResEventsTest'` | 3 件 pass |
@@ -50,6 +50,9 @@
 | B-06 | エラーメッセージの文言 | UiLabels でローカライズ | 英語固定のキー（`ServiceValueFound` 等） | i18n は未対応 |
 | B-07 | ECA / SECA | humanres に独自の ECA は無いが、呼び出し先の party サービスなどの SECA は動く | アダプタは SECA を実行しない | 全体移行時に party 側の移行で吸収 |
 | B-08 | permission-service 未定義の entity-auto サービス | 認証＋base-permission(VIEW) のみで実行可能 | invoke 種別に応じた HUMANRES_CREATE/UPDATE/DELETE を要求 | セキュリティ強化のための意図的差分 |
+| B-09 | センシティブな給与・給付エンティティの参照 | 画面権限や画面実装により制御 | `migration.security.sensitive-entities` に列挙し、`HUMANRES_SENSITIVE_VIEW` または `HUMANRES_ADMIN` を要求 | 汎用 API の閲覧範囲を明示的に制限する意図的な強化 |
+| B-10 | API の通信経路 | OFBiz のデプロイ構成に依存 | PostgreSQL プロファイルでは HTTPS を必須化し、転送プロキシの `X-Forwarded-Proto` を解釈 | HTTP Basic の資格情報を平文 HTTP で送らない |
+| B-11 | 内部組織関係の削除 | パーティー ID の組だけで最初の関係を削除 | `GROUP_ROLLUP` かつ両側が `INTERNAL_ORGANIZATIO` の関係に限定して削除 | 別種の関係を誤って消さないための意図的な強化 |
 
 ## 4. 既知の制約・未対応項目
 

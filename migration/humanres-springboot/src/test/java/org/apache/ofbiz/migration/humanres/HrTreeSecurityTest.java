@@ -111,4 +111,14 @@ class HrTreeSecurityTest {
                 .andExpect(status().isForbidden());
         verify(entityAutoService, never()).execute(anyString(), anyMap());
     }
+
+    @Test
+    void sensitiveEntityReadsRequireSensitiveViewAuthority() throws Exception {
+        mockMvc.perform(get("/api/humanres/entities/PayHistory")
+                        .with(httpBasic("view", "view")))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/humanres/entities/PayHistory")
+                        .with(httpBasic("admin", "admin")))
+                .andExpect(status().isOk());
+    }
 }

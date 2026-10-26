@@ -152,6 +152,7 @@ DeepWiki の使い方: 「<component> の主要ユースケース、エンティ
 | `@IdClass` だと `EntityType.getIdType()` が null | 生成メタデータから PK を組み立てる |
 | deny-list（`deniedWebShellTokens`）の誤検知 | OFBiz と同じ挙動にとどめ、改善は全体で一括して判断する |
 | StatusValidChange のシードが別コンポーネントにある | 必要な遷移をシードに明示する |
+| センシティブな Entity を汎用 API から公開する | `migration.security.sensitive-entities` に列挙し、`<BASE>_SENSITIVE_VIEW` と HTTPS を設定してテストする |
 | DeepWiki の誤り | コードで裏取りし、spec の「DeepWiki との差分」に記録 |
 | 相互依存（party ⇔ humanres の画面） | 画面を移植しないので API 層では切れる。UI 再構築時に対応する |
 

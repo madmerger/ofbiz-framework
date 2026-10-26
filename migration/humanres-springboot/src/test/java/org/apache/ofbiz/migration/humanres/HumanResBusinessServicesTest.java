@@ -258,35 +258,35 @@ class HumanResBusinessServicesTest {
     }
 
     @Test
-    void ac27_internalOrganizationRemovalDeletesFirstRelationshipByPartyOrder() {
-        Timestamp firstFromDate = Timestamp.valueOf("2026-03-02 00:00:00");
-        Timestamp remainingFromDate = Timestamp.valueOf("2026-03-01 00:00:00");
+    void ac27_internalOrganizationRemovalPreservesOtherRelationshipTypes() {
+        Timestamp organizationFromDate = Timestamp.valueOf("2026-03-02 00:00:00");
+        Timestamp otherFromDate = Timestamp.valueOf("2026-03-01 00:00:00");
         partyPort.createRelationship(
-                "AC27_ROLE_PARENT", "AC27_ROLE_CHILD", "GROUP_ROLLUP",
-                "OTHER_ROLE_FROM", "OTHER_ROLE_TO", null, firstFromDate);
+                "AC27_REL_PARENT", "AC27_REL_CHILD", "GROUP_ROLLUP",
+                "INTERNAL_ORGANIZATIO", "INTERNAL_ORGANIZATIO", null, organizationFromDate);
         partyPort.createRelationship(
-                "AC27_ROLE_PARENT", "AC27_ROLE_CHILD", "GROUP_ROLLUP",
-                "INTERNAL_ORGANIZATIO", "INTERNAL_ORGANIZATIO", null, remainingFromDate);
+                "AC27_REL_PARENT", "AC27_REL_CHILD", "OTHER_RELATIONSHIP",
+                "OTHER_ROLE_FROM", "OTHER_ROLE_TO", null, otherFromDate);
 
         businessServices.execute("removeInternalOrg", Map.of(
-                "parentpartyId", "AC27_ROLE_PARENT", "partyId", "AC27_ROLE_CHILD"));
+                "parentpartyId", "AC27_REL_PARENT", "partyId", "AC27_REL_CHILD"));
 
-        PartyRelationshipRecord.Key removed = new PartyRelationshipRecord.Key();
-        removed.partyIdFrom = "AC27_ROLE_PARENT";
-        removed.partyIdTo = "AC27_ROLE_CHILD";
-        removed.roleTypeIdFrom = "OTHER_ROLE_FROM";
-        removed.roleTypeIdTo = "OTHER_ROLE_TO";
-        removed.fromDate = firstFromDate;
+        PartyRelationshipRecord.Key organization = new PartyRelationshipRecord.Key();
+        organization.partyIdFrom = "AC27_REL_PARENT";
+        organization.partyIdTo = "AC27_REL_CHILD";
+        organization.roleTypeIdFrom = "INTERNAL_ORGANIZATIO";
+        organization.roleTypeIdTo = "INTERNAL_ORGANIZATIO";
+        organization.fromDate = organizationFromDate;
 
-        PartyRelationshipRecord.Key remaining = new PartyRelationshipRecord.Key();
-        remaining.partyIdFrom = "AC27_ROLE_PARENT";
-        remaining.partyIdTo = "AC27_ROLE_CHILD";
-        remaining.roleTypeIdFrom = "INTERNAL_ORGANIZATIO";
-        remaining.roleTypeIdTo = "INTERNAL_ORGANIZATIO";
-        remaining.fromDate = remainingFromDate;
+        PartyRelationshipRecord.Key other = new PartyRelationshipRecord.Key();
+        other.partyIdFrom = "AC27_REL_PARENT";
+        other.partyIdTo = "AC27_REL_CHILD";
+        other.roleTypeIdFrom = "OTHER_ROLE_FROM";
+        other.roleTypeIdTo = "OTHER_ROLE_TO";
+        other.fromDate = otherFromDate;
 
-        assertNull(entityManager.find(PartyRelationshipRecord.class, removed));
-        assertNotNull(entityManager.find(PartyRelationshipRecord.class, remaining));
+        assertNull(entityManager.find(PartyRelationshipRecord.class, organization));
+        assertNotNull(entityManager.find(PartyRelationshipRecord.class, other));
     }
 
     @Test
