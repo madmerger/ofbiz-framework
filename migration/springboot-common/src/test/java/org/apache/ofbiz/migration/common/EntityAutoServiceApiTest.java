@@ -139,6 +139,35 @@ class EntityAutoServiceApiTest {
     }
 
     @Test
+    void ignoresSuppliedOutPrimaryKeyAndGeneratesFromGeneratedCatalog() throws Exception {
+        serviceRegistry.registerCatalog("test", Map.of(
+                "createEnumeration", ServiceCatalog.find("createEnumeration").orElseThrow()));
+
+        mockMvc.perform(post("/api/test/services/createEnumeration")
+                        .with(httpBasic("writer", "writer-password"))
+                        .contentType("application/json")
+                        .content("{\"enumId\":\"CALLER_ENUM_ID\", \"enumTypeId\":\"TEST_ENUM_TYPE\","
+                                + "\"description\":\"Generated enumeration\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.enumId").value(org.hamcrest.Matchers.notNullValue()))
+                .andExpect(jsonPath("$.enumId").value(org.hamcrest.Matchers.not("CALLER_ENUM_ID")));
+    }
+
+    @Test
+    void ignoresSuppliedOutSubSequenceAndGeneratesFromGeneratedCatalog() throws Exception {
+        serviceRegistry.registerCatalog("test", Map.of(
+                "createBudgetItem", ServiceCatalog.find("createBudgetItem").orElseThrow()));
+        String budgetId = "B" + Long.toString(System.nanoTime(), 36);
+
+        mockMvc.perform(post("/api/test/services/createBudgetItem")
+                        .with(httpBasic("writer", "writer-password"))
+                        .contentType("application/json")
+                        .content("{\"budgetId\":\"" + budgetId + "\", \"budgetItemSeqId\":\"CALLER_SEQ\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.budgetItemSeqId").value("00001"));
+    }
+
+    @Test
     void requiresNonOptionalInoutParametersAndRejectsUndeclaredUpdateFields() throws Exception {
         serviceRegistry.registerCatalog("test", Map.of(
                 "createRequiredInout",
