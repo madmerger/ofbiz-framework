@@ -1,0 +1,70 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+ext['testcontainers.version'] = '1.21.4'
+
+group = 'org.apache.ofbiz.migration'
+version = '0.1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':migration:springboot-common')
+    implementation project(':migration:springboot-datamodel')
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('processResources') {
+    from(rootProject.file('applications/datamodel/data/seed/AccountingSeedData.xml')) {
+        into 'ofbiz-seed'
+    }
+    from(rootProject.file('applications/datamodel/data/seed/CommonExtSeedData.xml')) {
+        into 'ofbiz-seed'
+    }
+    from(rootProject.file('applications/datamodel/data/seed/OrderSeedData.xml')) {
+        into 'ofbiz-seed'
+    }
+    from(rootProject.file('applications/datamodel/data/seed/PartySeedData.xml')) {
+        into 'ofbiz-seed'
+    }
+    from(rootProject.file('applications/datamodel/data/seed/ProductSeedData.xml')) {
+        into 'ofbiz-seed'
+    }
+    from(rootProject.file('applications/accounting/servicedef')) {
+        include 'services_*.xml'
+        into 'ofbiz-servicedef/accounting'
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    systemProperty 'ofbiz.root', rootProject.projectDir.absolutePath
+}
+
+bootRun {
+    systemProperty 'spring.profiles.active', System.getProperty('spring.profiles.active', 'local')
+}

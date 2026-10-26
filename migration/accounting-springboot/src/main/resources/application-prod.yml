@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: ${ACCOUNTING_DB_URL:jdbc:postgresql://localhost:5432/accounting}
+    username: ${ACCOUNTING_DB_USERNAME:accounting}
+    password: ${ACCOUNTING_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+migration:
+  security:
+    require-https: true
+    trusted-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}'
