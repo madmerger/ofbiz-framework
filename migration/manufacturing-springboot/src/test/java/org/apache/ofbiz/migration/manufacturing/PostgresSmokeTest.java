@@ -78,14 +78,15 @@ class PostgresSmokeTest {
         workEfforts.createWorkEffort(Map.of("workEffortId", "PG_ROUTING", "workEffortTypeId", "ROUTING"));
         workEfforts.createWorkEffort(Map.of("workEffortId", "PG_TASK", "workEffortTypeId", "ROU_TASK",
                 "estimatedSetupMillis", BigDecimal.ONE, "estimatedMilliSeconds", BigDecimal.ONE));
-        Timestamp date = Timestamp.from(Instant.now());
+        Timestamp date = Timestamp.from(Instant.now().minusSeconds(1));
+        Timestamp start = Timestamp.from(Instant.now());
         workEfforts.createWorkEffortAssoc(Map.of("workEffortIdFrom", "PG_ROUTING", "workEffortIdTo", "PG_TASK",
                 "workEffortAssocTypeId", "ROUTING_COMPONENT", "sequenceNum", BigDecimal.TEN, "fromDate", date));
         workEfforts.createWorkEffortGoodStandard(Map.of("workEffortId", "PG_ROUTING", "productId", "PG_FG",
                 "workEffortGoodStdTypeId", "ROU_PROD_TEMPLATE", "fromDate", date));
         Map<String, Object> result = dispatcher.execute("manufacturing", "createProductionRun",
                 Map.of("productId", "PG_FG", "pRQuantity", BigDecimal.ONE,
-                        "startDate", date, "facilityId", "PG_PLANT"));
+                        "startDate", start, "facilityId", "PG_PLANT"));
         assertFalse(String.valueOf(result.get("productionRunId")).isBlank());
     }
 

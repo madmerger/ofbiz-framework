@@ -110,19 +110,20 @@ class ManufacturingAcceptanceTest {
 
     @Test
     void ac04_productionRunCompletesAfterItsTasks() {
+        Timestamp bomFromDate = Timestamp.from(Instant.now().minusSeconds(1));
         Timestamp start = Timestamp.from(Instant.now());
         call("createBOMAssoc", Map.of(
                 "productId", "MFG_FG",
                 "productIdTo", "MFG_RAW1",
                 "productAssocTypeId", "MANUF_COMPONENT",
-                "fromDate", start,
+                "fromDate", bomFromDate,
                 "quantity", new BigDecimal("2"),
                 "scrapFactor", new BigDecimal("10")));
         call("createBOMAssoc", Map.of(
                 "productId", "MFG_FG",
                 "productIdTo", "MFG_RAW2",
                 "productAssocTypeId", "MANUF_COMPONENT",
-                "fromDate", start,
+                "fromDate", bomFromDate,
                 "quantity", new BigDecimal("3"),
                 "scrapFactor", new BigDecimal("-10"),
                 "routingWorkEffortId", "MFG_TASK_20"));

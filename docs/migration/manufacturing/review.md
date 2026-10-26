@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | Manufacturing acceptance | `ManufacturingAcceptanceTest` 5件 | 成功 |
 | Entity-auto lifecycle | `EntityAutoAcceptanceTest` 9件（7 parameterized cases + catalog / INOUT checks） | 成功 |
-| Simple services | `SimpleServicesAcceptanceTest` 11件 | 成功 |
+| Simple services | `SimpleServicesAcceptanceTest` 10件 | 成功 |
 | Production flow | `ProductionRunFlowTest` 12件 | 成功 |
 | Security / HTTPS / multi rollback | `ManufacturingSecurityTest` 7件、`ManufacturingHttpsSecurityTest` 3件、`MultiRollbackTest` 2件 | 成功 |
 | PostgreSQL smoke | `PostgresSmokeTest` 1件（Testcontainers） | 成功 |
