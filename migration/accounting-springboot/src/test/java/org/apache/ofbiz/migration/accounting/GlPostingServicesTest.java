@@ -20,6 +20,7 @@ package org.apache.ofbiz.migration.accounting;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -194,15 +195,30 @@ class GlPostingServicesTest {
     @Test
     void createAcctgTransAndEntriesForOutgoingPaymentCreatesBalancedDisbursementPosting() throws Exception {
         String paymentId = id("MIG_GL_OUTGOING");
-        ensurePaymentMap("SUPPLIER_PAYMENT", "ACCOUNTS_PAYABLE");
-        persistPayment(paymentId, "SUPPLIER_PAYMENT", "MIG_DEMO_VENDOR",
+        ensurePaymentMap("VENDOR_PAYMENT", "ACCPAYABLE_UNAPPLIED");
+        persistPayment(paymentId, "VENDOR_PAYMENT", "MIG_DEMO_VENDOR",
                 "MIG_DEMO_CUSTOMER", "PMNT_SENT", "30.00");
 
         postGl("createAcctgTransAndEntriesForOutgoingPayment", "{\"paymentId\":\"" + paymentId + "\"}")
                 .andExpect(status().isOk());
 
         assertPosting("OUTGOING_PAYMENT", "paymentId", paymentId, new BigDecimal("30.00"), List.of(
-                new EntryExpectation("ACCOUNTS_PAYABLE", "D"),
+                new EntryExpectation("ACCPAYABLE_UNAPPLIED", "D"),
+                new EntryExpectation(null, "C")));
+    }
+
+    @Test
+    void customerRefundSentPaymentCreatesOutgoingDisbursementPosting() throws Exception {
+        String paymentId = id("MIG_GL_REFUND_SENT");
+        ensurePaymentMap("CUSTOMER_REFUND", "ACCREC_UNAPPLIED");
+        persistPayment(paymentId, "CUSTOMER_REFUND", "MIG_DEMO_VENDOR",
+                "MIG_DEMO_CUSTOMER", "PMNT_SENT", "30.00");
+
+        postGl("createAcctgTransAndEntriesForOutgoingPayment", "{\"paymentId\":\"" + paymentId + "\"}")
+                .andExpect(status().isOk());
+
+        assertPosting("OUTGOING_PAYMENT", "paymentId", paymentId, new BigDecimal("30.00"), List.of(
+                new EntryExpectation("ACCREC_UNAPPLIED", "D"),
                 new EntryExpectation(null, "C")));
     }
 
@@ -223,6 +239,46 @@ class GlPostingServicesTest {
     }
 
     @Test
+    void vendorPaymentApplicationUsesPayableDebitMappedCreditAndPaymentOverride() throws Exception {
+        String invoiceId = createInvoice("PURCHASE_INVOICE", "MIG_DEMO_VENDOR", "MIG_DEMO_CUSTOMER");
+        String paymentId = id("MIG_GL_VENDOR_APP");
+        ensurePaymentMap("VENDOR_PAYMENT", "ACCPAYABLE_UNAPPLIED");
+        persistPayment(paymentId, "VENDOR_PAYMENT", "MIG_DEMO_VENDOR",
+                "MIG_DEMO_CUSTOMER", "PMNT_SENT", "30.00", "122000");
+        String applicationId = persistPaymentApplication(paymentId, invoiceId, "30.00", "400000");
+
+        postGl("createAcctgTransAndEntriesForPaymentApplication",
+                "{\"paymentApplicationId\":\"" + applicationId + "\"}").andExpect(status().isOk());
+
+        assertPosting("PAYMENT_APPL", "paymentId", paymentId, new BigDecimal("30.00"), List.of(
+                new EntryExpectation("ACCOUNTS_PAYABLE", "D"),
+                new EntryExpectation("ACCPAYABLE_UNAPPLIED", "C")));
+        assertEntryGlAccountId(paymentId, "D", "400000");
+        assertEntryGlAccountId(paymentId, "C", "122000");
+        assertPaymentApplicationPartyAndRole(
+                paymentId, "MIG_DEMO_CUSTOMER", "BILL_FROM_VENDOR", "MIG_DEMO_VENDOR");
+    }
+
+    @Test
+    void incomingPaymentApplicationUsesPaymentOverrideOnDebit() throws Exception {
+        String invoiceId = createInvoice();
+        String paymentId = id("MIG_GL_RECEIPT_OVERRIDE");
+        ensurePaymentMap("CUSTOMER_PAYMENT", "ACCREC_UNAPPLIED");
+        persistPayment(paymentId, "CUSTOMER_PAYMENT", "MIG_DEMO_CUSTOMER",
+                "MIG_DEMO_VENDOR", "PMNT_RECEIVED", "30.00", "126000");
+        String applicationId = persistPaymentApplication(paymentId, invoiceId, "30.00", "400000");
+
+        postGl("createAcctgTransAndEntriesForPaymentApplication",
+                "{\"paymentApplicationId\":\"" + applicationId + "\"}").andExpect(status().isOk());
+
+        assertPosting("PAYMENT_APPL", "paymentId", paymentId, new BigDecimal("30.00"), List.of(
+                new EntryExpectation("ACCREC_UNAPPLIED", "D"),
+                new EntryExpectation("ACCOUNTS_RECEIVABLE", "C")));
+        assertEntryGlAccountId(paymentId, "D", "126000");
+        assertEntryGlAccountId(paymentId, "C", "120000");
+    }
+
+    @Test
     void createAcctgTransAndEntriesForCustomerRefundPaymentApplicationCreatesBalancedRefundPosting()
             throws Exception {
         String invoiceId = createInvoice();
@@ -238,6 +294,8 @@ class GlPostingServicesTest {
         assertPosting("PAYMENT_APPL", "paymentId", paymentId, new BigDecimal("30.00"), List.of(
                 new EntryExpectation("ACCOUNTS_RECEIVABLE", "D"),
                 new EntryExpectation("ACCREC_UNAPPLIED", "C")));
+        assertPaymentApplicationPartyAndRole(
+                paymentId, "MIG_DEMO_CUSTOMER", "BILL_TO_CUSTOMER", "MIG_DEMO_VENDOR");
     }
 
     @Test
@@ -567,6 +625,11 @@ class GlPostingServicesTest {
 
     private void persistPayment(String paymentId, String paymentTypeId, String partyIdFrom,
             String partyIdTo, String statusId, String amount) {
+        persistPayment(paymentId, paymentTypeId, partyIdFrom, partyIdTo, statusId, amount, null);
+    }
+
+    private void persistPayment(String paymentId, String paymentTypeId, String partyIdFrom,
+            String partyIdTo, String statusId, String amount, String overrideGlAccountId) {
         inTransaction(() -> {
             Object payment = entities.newEntity(entities.entityClass("Payment"));
             entities.set(payment, "paymentId", paymentId);
@@ -581,6 +644,9 @@ class GlPostingServicesTest {
             entities.set(payment, "currencyUomId", "USD");
             entities.set(payment, "actualCurrencyAmount", new BigDecimal(amount));
             entities.set(payment, "actualCurrencyUomId", "USD");
+            if (overrideGlAccountId != null) {
+                entities.set(payment, "overrideGlAccountId", overrideGlAccountId);
+            }
             entityManager.persist(payment);
             entityManager.flush();
         });
@@ -606,6 +672,11 @@ class GlPostingServicesTest {
     }
 
     private String persistPaymentApplication(String paymentId, String invoiceId, String amount) {
+        return persistPaymentApplication(paymentId, invoiceId, amount, null);
+    }
+
+    private String persistPaymentApplication(
+            String paymentId, String invoiceId, String amount, String overrideGlAccountId) {
         String applicationId = id("MIG_GL_APP");
         inTransaction(() -> {
             Object application = entities.newEntity(entities.entityClass("PaymentApplication"));
@@ -613,6 +684,9 @@ class GlPostingServicesTest {
             entities.set(application, "paymentId", paymentId);
             entities.set(application, "invoiceId", invoiceId);
             entities.set(application, "amountApplied", new BigDecimal(amount));
+            if (overrideGlAccountId != null) {
+                entities.set(application, "overrideGlAccountId", overrideGlAccountId);
+            }
             entityManager.persist(application);
             entityManager.flush();
         });
@@ -814,6 +888,39 @@ class GlPostingServicesTest {
                             && expectedAmount.compareTo(new BigDecimal(entities.get(entry, "amount").toString())) == 0)
                     .count();
             assertEquals(expected.count(), matches, "Expected " + expected + " entries in " + type);
+        }
+    }
+
+    private void assertEntryGlAccountId(String paymentId, String debitCreditFlag, String expectedGlAccountId) {
+        Object transaction = AccountingEntityQueries.findByEquality(entityManager,
+                entities.entityClass("AcctgTrans"), Map.of("paymentId", paymentId)).get(0);
+        List<?> entries = AccountingEntityQueries.findByEquality(entityManager,
+                entities.entityClass("AcctgTransEntry"),
+                Map.of("acctgTransId", entities.get(transaction, "acctgTransId")));
+        Object entry = entries.stream()
+                .filter(candidate -> debitCreditFlag.equals(entities.get(candidate, "debitCreditFlag")))
+                .findFirst().orElse(null);
+        assertNotNull(entry);
+        if (expectedGlAccountId == null) {
+            assertNull(entities.get(entry, "glAccountId"));
+        } else {
+            assertEquals(expectedGlAccountId, entities.get(entry, "glAccountId"));
+        }
+    }
+
+    private void assertPaymentApplicationPartyAndRole(
+            String paymentId, String partyId, String roleTypeId, String organizationPartyId) {
+        Object transaction = AccountingEntityQueries.findByEquality(entityManager,
+                entities.entityClass("AcctgTrans"), Map.of("paymentId", paymentId)).get(0);
+        assertEquals(partyId, entities.get(transaction, "partyId"));
+        assertEquals(roleTypeId, entities.get(transaction, "roleTypeId"));
+        List<?> entries = AccountingEntityQueries.findByEquality(entityManager,
+                entities.entityClass("AcctgTransEntry"),
+                Map.of("acctgTransId", entities.get(transaction, "acctgTransId")));
+        for (Object entry : entries) {
+            assertEquals(organizationPartyId, entities.get(entry, "organizationPartyId"));
+            assertEquals(partyId, entities.get(entry, "partyId"));
+            assertEquals(roleTypeId, entities.get(entry, "roleTypeId"));
         }
     }
 

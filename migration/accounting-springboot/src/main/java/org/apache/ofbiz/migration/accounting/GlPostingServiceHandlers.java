@@ -211,7 +211,8 @@ public class GlPostingServiceHandlers {
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:2189. */
     private Map<String, Object> paymentPosting(Map<String, Object> input, boolean receipt) {
         Object payment = one("Payment", Map.of("paymentId", required(input, "paymentId")));
-        if (receipt != isReceipt(value(payment, "paymentTypeId"))) {
+        Object paymentTypeId = value(payment, "paymentTypeId");
+        if (receipt ? !isReceipt(paymentTypeId) : !isDisbursement(paymentTypeId)) {
             return Map.of();
         }
         String organization = text(value(payment, receipt ? "partyIdTo" : "partyIdFrom"));
@@ -277,7 +278,7 @@ public class GlPostingServiceHandlers {
             return Map.of();
         }
         boolean receipt = isReceipt(value(payment, "paymentTypeId"));
-        String organization = text(value(payment, refund ? "partyIdFrom" : receipt ? "partyIdTo" : "partyIdFrom"));
+        String organization = text(value(payment, receipt && !refund ? "partyIdTo" : "partyIdFrom"));
         Object mapping = first("PaymentGlAccountTypeMap", Map.of(
                 "organizationPartyId", organization, "paymentTypeId", value(payment, "paymentTypeId")));
         String mappedType = text(value(mapping, "glAccountTypeId"));
@@ -287,10 +288,10 @@ public class GlPostingServiceHandlers {
         }
         BigDecimal amount = money(value(application, "amountApplied")).setScale(4, RoundingMode.HALF_UP);
         String currency = text(value(payment, "currencyUomId"));
-        String partner = text(value(payment, receipt ? "partyIdFrom" : "partyIdTo"));
-        String role = receipt ? "BILL_TO_CUSTOMER" : "BILL_FROM_VENDOR";
-        String debitType = refund || !receipt ? "ACCOUNTS_RECEIVABLE" : mappedType;
-        String creditType = refund || !receipt ? mappedType : "ACCOUNTS_RECEIVABLE";
+        String partner = text(value(payment, receipt && !refund ? "partyIdFrom" : "partyIdTo"));
+        String role = receipt || refund ? "BILL_TO_CUSTOMER" : "BILL_FROM_VENDOR";
+        String debitType = refund ? "ACCOUNTS_RECEIVABLE" : receipt ? mappedType : "ACCOUNTS_PAYABLE";
+        String creditType = receipt ? "ACCOUNTS_RECEIVABLE" : mappedType;
         Map<String, Object> debit = entry("D", organization, amount, currency, debitType);
         Map<String, Object> credit = entry("C", organization, amount, currency, creditType);
         for (Map<String, Object> row : List.of(debit, credit)) {
@@ -299,14 +300,13 @@ public class GlPostingServiceHandlers {
             row.put("paymentId", value(payment, "paymentId"));
             resolveAccount(row, "PAYMENT_APPL", value(application, "invoiceId"));
         }
-        putIfPresent(debit, "glAccountId", refund
-                ? value(application, "overrideGlAccountId")
-                : receipt ? value(payment, "overrideGlAccountId") : value(application, "overrideGlAccountId"));
-        putIfPresent(credit, "glAccountId", refund ? value(payment, "overrideGlAccountId") : null);
+        putIfPresent(debit, "glAccountId", receipt && !refund
+                ? value(payment, "overrideGlAccountId") : value(application, "overrideGlAccountId"));
+        putIfPresent(credit, "glAccountId", receipt && !refund ? null : value(payment, "overrideGlAccountId"));
         Map<String, Object> header = new LinkedHashMap<>();
         header.put("paymentId", value(payment, "paymentId"));
         header.put("invoiceId", value(application, "invoiceId"));
-        header.put("partyId", value(payment, receipt ? "partyIdFrom" : "partyIdTo"));
+        header.put("partyId", partner);
         header.put("roleTypeId", role);
         return createTransaction("PAYMENT_APPL", payment, List.of(debit, credit), header);
     }
@@ -727,8 +727,27 @@ public class GlPostingServiceHandlers {
     }
 
     private boolean isReceipt(Object paymentTypeId) {
-        return paymentTypeId != null && Set.of("CUSTOMER_PAYMENT", "CUSTOMER_DEPOSIT", "CUSTOMER_REFUND",
-                "GC_DEPOSIT", "INTEREST_RECEIPT").contains(paymentTypeId);
+        return isPaymentTypeInHierarchy(paymentTypeId, "RECEIPT");
+    }
+
+    private boolean isDisbursement(Object paymentTypeId) {
+        return isPaymentTypeInHierarchy(paymentTypeId, "DISBURSEMENT");
+    }
+
+    private boolean isPaymentTypeInHierarchy(Object paymentTypeId, String parentTypeId) {
+        Set<String> visited = new java.util.HashSet<>();
+        String current = text(paymentTypeId);
+        while (current != null && visited.add(current)) {
+            if (parentTypeId.equals(current)) {
+                return true;
+            }
+            Object paymentType = first("PaymentType", Map.of("paymentTypeId", current));
+            if (paymentType == null) {
+                return false;
+            }
+            current = text(value(paymentType, "parentTypeId"));
+        }
+        return false;
     }
 
     private ArithmeticSettings getGlArithmeticSettingsInline() {
