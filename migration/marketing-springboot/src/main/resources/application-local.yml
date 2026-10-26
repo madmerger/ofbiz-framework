@@ -8,6 +8,7 @@ springdoc:
     enabled: true
 migration:
   security:
+    require-https: false
     # パスワードは記載しない。共通基盤が環境変数 MIGRATION_DEMO_PASSWORD から BCrypt で設定する
     users:
       - username: admin

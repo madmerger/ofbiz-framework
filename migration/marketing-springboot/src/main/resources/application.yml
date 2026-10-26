@@ -36,12 +36,27 @@ migration:
       - OFBTOOLS
       - MARKETING
     service-permission-prefix: MARKETING
+    # URL の {component} と Entity API の対象範囲（共通基盤 d6254e03b3 以降必須）
+    component: marketing
+    # entity-auto catalog が参照しない marketing の Entity（simple/Java サービスが扱う）も Entity API で参照可能にする
+    extra-entities:
+      - ContactListCommStatus
+      - ContactListParty
+      - ContactListPartyStatus
+      - SalesForecast
+      - SalesForecastHistory
+      - SalesOpportunityHistory
+      - TrackingCodeVisit
+      - WebSiteContactList
     # 既定では信頼するプロキシなし（正規表現 a^ はどの IP にも一致しない）
     trusted-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}'
-    require-https: false
+    # 既定は HTTPS 必須（共通基盤の既定値 true）。local プロファイルとテストのみ false にする
+    require-https: true
     users: []
     # 決済・カード・口座・給与・認証情報などの機密 Entity。閲覧には MARKETING_SENSITIVE_VIEW が必要
     sensitive-entities:
+      # 購読確認コード（optInVerifyCode）を保持するため認証情報として扱う
+      - ContactListPartyStatus
       - UserLogin
       - UserLoginHistory
       - UserLoginPasswordHistory
