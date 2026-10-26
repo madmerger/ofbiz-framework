@@ -34,7 +34,7 @@ AC-01〜AC-15 はすべて PASS（対応テストは spec §4）。
 | D-05 | `createSalesForecastDetail` の `salesForecastDetailId` を marketing 側でサブシーケンス採番 | 共通基盤の採番条件（`*SeqId`）に合わないため |
 | D-06 | 非推奨エイリアス 8 件は実装先のパラメータを継承 | OFBiz の `implements` と同じ |
 | D-07 | ContactListPartyStatus を機密エンティティにした | 確認コードの漏えい防止 |
-| D-08 | `updateContactListPartyNoUserLogin` は、現在の状態から許される遷移（PENDING→ACCEPTED/REJECTED、UNSUBS_PENDING→UNSUBSCRIBED）だけを受け付け、最新の PENDING の確認コードと照合する | OFBiz は履歴に一致するコードがあれば任意の statusId を受け付けるため、古いコードで解除済みの購読を再承認できた（Devin Review の指摘で強化） |
+| D-08 | `updateContactListPartyNoUserLogin` は、購読確認（PENDING→ACCEPTED/REJECTED）だけを受け付け、最新の PENDING の確認コードと照合する。解除の確定は認証付きの `updateContactListParty` で行う | OFBiz は履歴に一致するコードがあれば任意の statusId を受け付けるため、古いコードで解除済みの購読を再承認したり、購読時のコードで解除を確定したりできた（Devin Review の指摘で強化） |
 | D-09 | `createContact` で Person に書き込めるのは、party の `person` マップ処理（PartyMapProcs.xml）が許可する属性だけ | OFBiz の map-processor と同じ制限 |
 | D-10 | メールスタブは直近 100 件だけを保持する | 長時間起動したときのメモリ増加を防ぐ |
 

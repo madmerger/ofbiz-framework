@@ -164,13 +164,7 @@ public class ContactListServices {
     }
 
     private static Set<String> allowedVerifiedTransitions(String currentStatusId) {
-        if (PENDING.equals(currentStatusId)) {
-            return Set.of(ACCEPTED, REJECTED);
-        }
-        if (UNSUBS_PENDING.equals(currentStatusId)) {
-            return Set.of(UNSUBSCRIBED);
-        }
-        return Set.of();
+        return PENDING.equals(currentStatusId) ? Set.of(ACCEPTED, REJECTED) : Set.of();
     }
 
     public Map<String, Object> unsubscribeContactListParty(Map<String, Object> input) {
