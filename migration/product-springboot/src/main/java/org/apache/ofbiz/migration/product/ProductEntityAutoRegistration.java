@@ -22,7 +22,6 @@ import jakarta.annotation.PostConstruct;
 import java.beans.Introspector;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -38,39 +37,26 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ProductEntityAutoRegistration {
-    private static final Set<String> FACILITY_PERMISSION_SERVICES = Set.of(
-            "facilityGenericPermission",
-            "facilityPermissionCheck",
-            "checkProductFacilityRelatedPermission");
-    private static final Set<String> CATALOG_PERMISSION_SERVICES = Set.of(
-            "productGenericPermission",
-            "catalogPermissionCheck",
-            "checkProductRelatedPermission",
-            "checkCategoryPermissionWithViewPurchaseAllow",
-            "prodCatalogToPartyPermissionCheck",
-            "subscriptionPermissionCheck",
-            "productStoreGenericPermission",
-            "genericContentPermission",
-            "contentManagerPermission",
-            "productCategoryGenericPermission");
-
     private final ServiceHandlerRegistry registry;
     private final ProductEntityAutoService entityAutoService;
     private final EntityRegistry entityRegistry;
     private final MigrationSecurityProperties securityProperties;
     private final ProductPermissions productPermissions;
+    private final ProductServicePolicy servicePolicy;
 
     public ProductEntityAutoRegistration(
             ServiceHandlerRegistry registry,
             ProductEntityAutoService entityAutoService,
             EntityRegistry entityRegistry,
             MigrationSecurityProperties securityProperties,
-            ProductPermissions productPermissions) {
+            ProductPermissions productPermissions,
+            ProductServicePolicy servicePolicy) {
         this.registry = registry;
         this.entityAutoService = entityAutoService;
         this.entityRegistry = entityRegistry;
         this.securityProperties = securityProperties;
         this.productPermissions = productPermissions;
+        this.servicePolicy = servicePolicy;
     }
 
     @PostConstruct
@@ -86,8 +72,8 @@ public class ProductEntityAutoRegistration {
             if (definition.entity().isBlank()) {
                 throw new IllegalStateException("Missing default entity for " + definition.name());
             }
-            String action = action(definition);
-            String requiredAuthority = requiredAuthority(metadata, action);
+            String action = servicePolicy.action(definition);
+            String requiredAuthority = servicePolicy.requiredAuthority(metadata, action);
             Class<?> entityType = entityRegistry.entityClass(definition.entity());
             BeanWrapperImpl entityProperties = new BeanWrapperImpl(entityRegistry.newEntity(entityType));
             List<ServiceHandlerRegistry.ParamDefinition> params = definition.params().stream()
@@ -102,6 +88,7 @@ public class ProductEntityAutoRegistration {
             extraEntities.add(definition.entity());
             registry.registerHandler("product", definition.name(), requiredAuthority,
                     definition.entity(), input -> {
+                        servicePolicy.require(productPermissions, requiredAuthority);
                         checkShipmentStatus(metadata.permissionService(), input);
                         if ("productPriceGenericPermission".equals(metadata.permissionService())) {
                             productPermissions.require("CATALOG", action);
@@ -115,41 +102,6 @@ public class ProductEntityAutoRegistration {
         });
         securityProperties.getExtraEntities().clear();
         securityProperties.getExtraEntities().addAll(extraEntities);
-    }
-
-    private static String action(ServiceCatalog.ServiceDefinition definition) {
-        String declaredAction = definition.permissionMainAction();
-        if (declaredAction != null && !declaredAction.isBlank()) {
-            return declaredAction.toUpperCase(Locale.ROOT);
-        }
-        return switch (definition.invoke().toLowerCase(Locale.ROOT)) {
-            case "create" -> "CREATE";
-            case "update", "expire" -> "UPDATE";
-            case "delete" -> "DELETE";
-            default -> "VIEW";
-        };
-    }
-
-    private static String requiredAuthority(
-            ProductServiceMetadata.ServiceMetadata metadata, String action) {
-        String permissionService = metadata.permissionService();
-        if (permissionService == null || permissionService.isBlank()) {
-            return metadata.component().toUpperCase(Locale.ROOT) + "_" + action;
-        }
-        if (permissionService.startsWith("checkCanChangeShipmentStatus")) {
-            return "FACILITY_" + action;
-        }
-        if (FACILITY_PERMISSION_SERVICES.contains(permissionService)) {
-            return "FACILITY_" + action;
-        }
-        if (CATALOG_PERMISSION_SERVICES.contains(permissionService)) {
-            return "CATALOG_" + action;
-        }
-        if ("productPriceGenericPermission".equals(permissionService)) {
-            return "CATALOG_PRICE_MAINT";
-        }
-        throw new IllegalStateException("Unknown product permission service: " + permissionService
-                + " for " + metadata.serviceFile());
     }
 
     private Map<String, Object> previousOutputValues(

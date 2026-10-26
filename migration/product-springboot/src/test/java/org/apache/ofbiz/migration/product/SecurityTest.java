@@ -198,6 +198,19 @@ class SecurityTest {
         verify(entityAutoService, never()).execute(any(), anyMap());
     }
 
+    @Test
+    void ac10_productAdminDoesNotBypassFacilityCreatePermission() throws Exception {
+        ServiceCatalog.ServiceDefinition create = ServiceCatalog.all().get("createShipment");
+        Map<String, Object> input = ProductTestSupport.input(create, entities, "product-admin", false);
+        mockMvc.perform(post("/api/product/services/createShipment")
+                        .with(user("product-admin").authorities(authorities(
+                                "OFBTOOLS_VIEW", "CATALOG_VIEW", "PRODUCT_ADMIN")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JSON.writeValueAsBytes(input)))
+                .andExpect(status().isForbidden());
+        verify(entityAutoService, never()).execute(any(), anyMap());
+    }
+
     private static GrantedAuthority[] authorities(String... names) {
         return java.util.Arrays.stream(names).map(SimpleGrantedAuthority::new).toArray(GrantedAuthority[]::new);
     }

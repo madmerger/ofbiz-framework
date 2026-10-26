@@ -45,4 +45,14 @@ public class ProductPermissions {
             throw new MigrationException(HttpStatus.FORBIDDEN, "Service permission denied");
         }
     }
+
+    public void requireAuthority(String authority) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Set<String> authorities = authentication == null
+                ? Set.of()
+                : AuthorityUtils.authorityListToSet(authentication.getAuthorities());
+        if (!authorities.contains(authority)) {
+            throw new MigrationException(HttpStatus.FORBIDDEN, "Service permission denied");
+        }
+    }
 }
