@@ -80,7 +80,7 @@ public class MigrationController {
         entities.requireSensitiveView(type);
         filters.remove("page");
         filters.remove("size");
-        return entities.findByEquality(type, filters).stream().map(entities::toMap).toList();
+        return entities.findByEquality(type, filters, 100).stream().map(entities::toMap).toList();
     }
 
     @GetMapping("/entities/{entityName}/one")
