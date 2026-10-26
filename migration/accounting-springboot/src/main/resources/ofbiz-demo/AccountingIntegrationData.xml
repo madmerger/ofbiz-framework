@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-engine-xml>
+    <Party partyId="Company" partyTypeId="PARTY_GROUP" preferredCurrencyUomId="USD"/>
+    <PartyGroup partyId="Company" groupName="Integration Demo Company"/>
+    <PartyRole partyId="Company" roleTypeId="INTERNAL_ORGANIZATIO"/>
+    <PartyAcctgPreference partyId="Company" baseCurrencyUomId="USD" cogsMethodId="COGS_AVG_COST"
+                          enableAccounting="Y"/>
+    <GlAccountOrganization organizationPartyId="Company" glAccountId="120000"
+                           fromDate="2001-01-01 00:00:00.0"/>
+    <GlAccountOrganization organizationPartyId="Company" glAccountId="126000"
+                           fromDate="2001-01-01 00:00:00.0"/>
+    <GlAccountOrganization organizationPartyId="Company" glAccountId="122000"
+                           fromDate="2001-01-01 00:00:00.0"/>
+    <GlAccountOrganization organizationPartyId="Company" glAccountId="400000"
+                           fromDate="2001-01-01 00:00:00.0"/>
+    <GlAccountTypeDefault organizationPartyId="Company" glAccountTypeId="ACCOUNTS_RECEIVABLE"
+                          glAccountId="120000"/>
+    <GlAccountTypeDefault organizationPartyId="Company" glAccountTypeId="ACCREC_UNAPPLIED"
+                          glAccountId="126000"/>
+    <GlAccountTypeDefault organizationPartyId="Company" glAccountTypeId="SALES_ACCOUNT"
+                          glAccountId="400000"/>
+    <PaymentGlAccountTypeMap organizationPartyId="Company" paymentTypeId="CUSTOMER_PAYMENT"
+                              glAccountTypeId="ACCREC_UNAPPLIED"/>
+    <PaymentMethodTypeGlAccount organizationPartyId="Company" paymentMethodTypeId="CREDIT_CARD"
+                                glAccountId="122000"/>
+</entity-engine-xml>

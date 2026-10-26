@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
@@ -46,10 +48,12 @@ public class SeedDataLoader implements ApplicationRunner {
     private static final Logger LOG = LoggerFactory.getLogger(SeedDataLoader.class);
     private final EntityManager entityManager;
     private final EntityRegistry entities;
+    private final Environment environment;
 
-    public SeedDataLoader(EntityManager entityManager, EntityRegistry entities) {
+    public SeedDataLoader(EntityManager entityManager, EntityRegistry entities, Environment environment) {
         this.entityManager = entityManager;
         this.entities = entities;
+        this.environment = environment;
     }
 
     @Override
@@ -66,6 +70,13 @@ public class SeedDataLoader implements ApplicationRunner {
                 .getResource("classpath:ofbiz-demo/AccountingDemoData.xml");
         if (demo.exists()) {
             load(demo);
+        }
+        if (environment.acceptsProfiles(Profiles.of("integration"))) {
+            Resource integration = new PathMatchingResourcePatternResolver()
+                    .getResource("classpath:ofbiz-demo/AccountingIntegrationData.xml");
+            if (integration.exists()) {
+                load(integration);
+            }
         }
     }
 
