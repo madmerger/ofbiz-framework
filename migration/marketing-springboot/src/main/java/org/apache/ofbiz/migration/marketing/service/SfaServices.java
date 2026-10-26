@@ -1,3 +1,21 @@
+/*******************************************************************************
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *******************************************************************************/
 package org.apache.ofbiz.migration.marketing.service;
 
 import java.util.HashMap;
@@ -44,7 +62,8 @@ public class SfaServices {
             }
             contactMechId = party.createPartyEmailAddress(partyId, email, "PRIMARY_EMAIL", MarketingData.now());
         }
-        String partyIdFrom = MarketingData.text(input, "partyIdFrom");
+        String partyIdFrom = party.loginPartyId(MarketingData.currentUserLoginId())
+                .orElse(MarketingData.text(input, "partyIdFrom"));
         if (partyIdFrom != null) {
             party.ensurePartyRole(partyIdFrom, "_NA_");
             party.createPartyRelationship(partyIdFrom, partyId, "_NA_", roleTypeId, "CONTACT_REL");
@@ -60,23 +79,26 @@ public class SfaServices {
         String partyIdTo = MarketingData.requireText(input, "partyIdTo");
         String partyId = MarketingData.requireText(input, "partyId");
         if (!partyIdTo.equals(partyId)) {
-            merge(input, partyIdTo, partyId, "useAddress2", "addrContactMechId", "addrContactMechIdTo");
-            merge(input, partyIdTo, partyId, "useContactNum2", "phoneContactMechId", "phoneContactMechIdTo");
-            merge(input, partyIdTo, partyId, "useEmail2", "emailContactMechId", "emailContactMechIdTo");
+            merge(input, partyIdTo, partyId, "useAddress2", "addrContactMechId", "addrContactMechIdTo",
+                    "GENERAL_LOCATION");
+            merge(input, partyIdTo, partyId, "useContactNum2", "phoneContactMechId", "phoneContactMechIdTo",
+                    "PRIMARY_PHONE");
+            merge(input, partyIdTo, partyId, "useEmail2", "emailContactMechId", "emailContactMechIdTo",
+                    "PRIMARY_EMAIL");
             party.setPartyStatus(partyId, "PARTY_DISABLED");
         }
         return Map.of("partyId", partyIdTo);
     }
 
     private void merge(Map<String, Object> input, String partyIdTo, String partyId,
-            String flag, String mechField, String mechToField) {
+            String flag, String mechField, String mechToField, String purposeTypeId) {
         String mech = MarketingData.text(input, mechField);
         if (!"Y".equals(MarketingData.text(input, flag)) || mech == null) {
             return;
         }
         String mechTo = MarketingData.text(input, mechToField);
         if (mechTo != null) {
-            party.updatePartyContactMech(partyIdTo, mechTo, mech, null);
+            party.updatePartyContactMech(partyIdTo, mechTo, mech, purposeTypeId);
         }
         party.deletePartyContactMech(partyId, mech);
     }

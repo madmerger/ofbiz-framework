@@ -1,6 +1,25 @@
+/*******************************************************************************
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *******************************************************************************/
 package org.apache.ofbiz.migration.marketing.adapter;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,6 +34,7 @@ import org.apache.ofbiz.migration.datamodel.entity.PartyContactMechPurpose;
 import org.apache.ofbiz.migration.datamodel.entity.PartyRelationship;
 import org.apache.ofbiz.migration.datamodel.entity.PartyRole;
 import org.apache.ofbiz.migration.datamodel.entity.Person;
+import org.apache.ofbiz.migration.datamodel.entity.UserLogin;
 import org.apache.ofbiz.migration.marketing.MarketingData;
 import org.apache.ofbiz.migration.marketing.port.PartyPort;
 import org.springframework.http.HttpStatus;
@@ -25,6 +45,15 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LocalPartyAdapter implements PartyPort {
+
+    /** Fields accepted by the party "person" map processor (PartyMapProcs.xml). */
+    private static final Set<String> PERSON_FIELDS = Set.of("salutation", "firstName", "middleName", "lastName",
+            "personalTitle", "suffix", "nickname", "firstNameLocal", "middleNameLocal", "lastNameLocal",
+            "otherLocal", "memberId", "gender", "birthDate", "deceasedDate", "height", "weight",
+            "mothersMaidenName", "maritalStatusTypeId", "socialSecurityNumber", "passportNumber",
+            "passportExpireDate", "totalYearsWorkExperience", "comments", "employmentStatusEnumId",
+            "residenceStatusEnumId", "occupation", "yearsWithEmployer", "monthsWithEmployer", "existingCustomer",
+            "cardId");
 
     private static final String EMAIL = "EMAIL_ADDRESS";
     private final MarketingData data;
@@ -122,10 +151,17 @@ public class LocalPartyAdapter implements PartyPort {
         }
         ensureParty(partyId, "PERSON");
         Person person = new Person();
-        data.copyFields(person, input, Set.of("partyId"));
+        Map<String, Object> personFields = new HashMap<>(input);
+        personFields.keySet().retainAll(PERSON_FIELDS);
+        data.copyFields(person, personFields, Set.of("partyId"));
         person.setPartyId(partyId);
         data.persist(person);
         return partyId;
+    }
+
+    @Override
+    public Optional<String> loginPartyId(String userLoginId) {
+        return data.one(UserLogin.class, Map.of("userLoginId", userLoginId)).map(UserLogin::getPartyId);
     }
 
     @Override
@@ -161,6 +197,11 @@ public class LocalPartyAdapter implements PartyPort {
         for (PartyContactMech link : activeLinks(partyId, contactMechId, now)) {
             link.setThruDate(now);
         }
+        data.query(PartyContactMechPurpose.class,
+                        "select p from PartyContactMechPurpose p where p.partyId = ?1 and p.contactMechId = ?2",
+                        partyId, contactMechId).stream()
+                .filter(purpose -> MarketingData.active(purpose.getFromDate(), purpose.getThruDate(), now))
+                .forEach(purpose -> purpose.setThruDate(now));
         PartyContactMech replacement = new PartyContactMech();
         replacement.setPartyId(partyId);
         replacement.setContactMechId(newContactMechId);
