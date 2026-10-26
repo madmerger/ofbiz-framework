@@ -1,0 +1,91 @@
+plugins {
+    id 'java'
+    id 'checkstyle'
+    id 'codenarc'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+ext['testcontainers.version'] = '1.21.4'
+
+group = 'org.apache.ofbiz.migration'
+version = '0.1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+def generatedJavaRoot = layout.buildDirectory.dir('generated/sources/ofbiz2spring/main/java')
+def generatedCatalogPackage = generatedJavaRoot.map {
+    it.dir('org/apache/ofbiz/migration/workeffort/generated')
+}
+def workEffortCatalog = generatedCatalogPackage.map { it.file('ServiceCatalog.java') }
+def ofbizRoot = rootProject.projectDir
+
+tasks.register('generateWorkEffortServiceCatalog', Exec) {
+    inputs.files(
+            file("$ofbizRoot/applications/datamodel/entitydef/workeffort-entitymodel.xml"),
+            file("$ofbizRoot/applications/workeffort/entitydef/entitymodel_view.xml"),
+            file("$ofbizRoot/applications/workeffort/servicedef/services.xml"),
+            file("$ofbizRoot/applications/workeffort/servicedef/services_timesheet.xml"),
+            file("$ofbizRoot/applications/workeffort/servicedef/services_workeffort.xml"),
+            file("$ofbizRoot/migration/tools/ofbiz2spring.py"))
+    outputs.file(workEffortCatalog)
+    commandLine 'python3', "$ofbizRoot/migration/tools/ofbiz2spring.py",
+            '--entity-model', "$ofbizRoot/applications/datamodel/entitydef/workeffort-entitymodel.xml",
+            '--entity-model', "$ofbizRoot/applications/workeffort/entitydef/entitymodel_view.xml",
+            '--service-def', "$ofbizRoot/applications/workeffort/servicedef/services.xml",
+            '--service-def', "$ofbizRoot/applications/workeffort/servicedef/services_timesheet.xml",
+            '--service-def', "$ofbizRoot/applications/workeffort/servicedef/services_workeffort.xml",
+            '--out', generatedJavaRoot.get().asFile.absolutePath,
+            '--entity-package', 'org.apache.ofbiz.migration.workeffort.generated.entity',
+            '--repository-package', 'org.apache.ofbiz.migration.workeffort.generated.repository',
+            '--service-package', 'org.apache.ofbiz.migration.workeffort.generated',
+            '--report', "$buildDir/reports/ofbiz2spring-workeffort.json"
+}
+
+sourceSets.main.java {
+    srcDir(generatedCatalogPackage)
+    exclude 'entity/**', 'repository/**'
+}
+
+tasks.named('checkstyleMain') {
+    setSource(fileTree('src/main/java'))
+}
+
+tasks.withType(JavaCompile).configureEach {
+    dependsOn tasks.named('generateWorkEffortServiceCatalog')
+}
+
+dependencies {
+    implementation project(':migration:springboot-common')
+    implementation project(':migration:springboot-datamodel')
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    systemProperty 'ofbiz.root', rootProject.projectDir.absolutePath
+    maxHeapSize = '2g'
+    systemProperty 'spring.test.context.cache.maxSize', '2'
+    forkEvery = 1
+}
