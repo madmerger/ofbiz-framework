@@ -4,7 +4,7 @@
 
 | 検証 | コマンド | 結果 |
 | --- | --- | --- |
-| モジュールの全テスト | `./gradlew :migration:marketing-springboot:test` | **168 件 pass / 0 fail / 0 skip**（EntityAutoAcceptanceTest 151、MarketingServicesTest 8、MarketingSecurityTest 6、HttpsAndDocsProfileTest 2、PostgresSmokeTest 1） |
+| モジュールの全テスト | `./gradlew :migration:marketing-springboot:test` | **170 件 pass / 0 fail / 0 skip**（EntityAutoAcceptanceTest 151、MarketingServicesTest 10、MarketingSecurityTest 6、HttpsAndDocsProfileTest 2、PostgresSmokeTest 1） |
 | PostgreSQL（Testcontainers 1.21.4） | 上に含まれる | 1 件 pass |
 | 静的解析 | `./gradlew checkstyleMain checkstyleTest codenarcMain codenarcTest` | BUILD SUCCESSFUL（ルートプロジェクトが対象。移行モジュールは humanres と同じく対象外） |
 | E2E（Swagger UI） | `docs/migration/marketing/cases.json` を testing agent で実行 | `e2e-report.md` を参照 |
@@ -34,6 +34,9 @@ AC-01〜AC-15 はすべて PASS（対応テストは spec §4）。
 | D-05 | `createSalesForecastDetail` の `salesForecastDetailId` を marketing 側でサブシーケンス採番 | 共通基盤の採番条件（`*SeqId`）に合わないため |
 | D-06 | 非推奨エイリアス 8 件は実装先のパラメータを継承 | OFBiz の `implements` と同じ |
 | D-07 | ContactListPartyStatus を機密エンティティにした | 確認コードの漏えい防止 |
+| D-08 | `updateContactListPartyNoUserLogin` は、現在の状態から許される遷移（PENDING→ACCEPTED/REJECTED、UNSUBS_PENDING→UNSUBSCRIBED）だけを受け付け、最新の PENDING の確認コードと照合する | OFBiz は履歴に一致するコードがあれば任意の statusId を受け付けるため、古いコードで解除済みの購読を再承認できた（Devin Review の指摘で強化） |
+| D-09 | `createContact` で Person に書き込めるのは、party の `person` マップ処理（PartyMapProcs.xml）が許可する属性だけ | OFBiz の map-processor と同じ制限 |
+| D-10 | メールスタブは直近 100 件だけを保持する | 長時間起動したときのメモリ増加を防ぐ |
 
 ## 5. 既知の制約
 

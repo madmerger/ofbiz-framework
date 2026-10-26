@@ -36,7 +36,7 @@
 | 遷移 | トリガ | 振る舞い | OFBiz 参照 | 移行先 |
 | --- | --- | --- | --- | --- |
 | （なし）→ CLPT_PENDING | `signUpForContactList` / `createContactListParty`（`ContactList.optInVerify=Y` など） | メール形式検証、リスト存在確認、メールの ContactMech を作成、既存の PENDING を削除して新規作成。ステータス行に 10 桁の確認コードを採番し、確認メール（VERIFY_CONT_LIST）を送る | `MarketingServices.java:52`、`ContactListServices.xml:57,261,330`、`secas.xml` | `MarketingJavaServices.java:34`、`ContactListServices.java:52,185,210` |
-| PENDING → CLPT_ACCEPTED | `updateContactListPartyNoUserLogin`（確認コード一致が必須） | コード不一致は拒否。購読通知メール（SUB_CONT_LIST_NOTI） | `ContactListServices.xml:158,494` | `ContactListServices.java:123,226` |
+| PENDING → CLPT_ACCEPTED | `updateContactListPartyNoUserLogin`（最新 PENDING の確認コード一致が必須。現在の状態から許される遷移のみ） | コード不一致・許されない遷移は拒否。購読通知メール（SUB_CONT_LIST_NOTI） | `ContactListServices.xml:158,494` | `ContactListServices.java:123,226` |
 | ACCEPTED → CLPT_UNSUBS_PENDING | `unsubscribeContactListParty`（email 指定） | 解除確認メール（UNSUBS_CONT_LIST_VERI）と CommunicationEvent | `ContactListServices.xml:182,545` | `ContactListServices.java:139,230` |
 | → CLPT_UNSUBSCRIBED / CLPT_REJECTED | `updateContactListParty` | 解除通知メール（UNSUB_CONT_LIST_NOTI） | `ContactListServices.xml:111,623` | `ContactListServices.java:84,234` |
 | 削除 | `deleteContactListParty` | ステータス履歴と本体を削除 | `MarketingServices.java:158` | `MarketingJavaServices.java:78` |
