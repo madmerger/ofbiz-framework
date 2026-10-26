@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: ${MANUFACTURING_DB_URL:jdbc:postgresql://localhost:5432/manufacturing}
+    username: ${MANUFACTURING_DB_USERNAME:manufacturing}
+    password: ${MANUFACTURING_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+server:
+  tomcat:
+    remoteip:
+      internal-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}'
+migration:
+  security:
+    require-https: true
+    users:
+      - username: mfgadmin
+        password-hash: ${MANUFACTURING_ADMIN_PASSWORD_HASH}
+        authorities: [OFBTOOLS_VIEW, MANUFACTURING_ADMIN]
