@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:marketing-local;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+migration:
+  security:
+    # パスワードは記載しない。共通基盤が環境変数 MIGRATION_DEMO_PASSWORD から BCrypt で設定する
+    users:
+      - username: admin
+        authorities:
+          - OFBTOOLS_VIEW
+          - MARKETING_VIEW
+          - MARKETING_ADMIN
+      - username: marketer
+        authorities:
+          - OFBTOOLS_VIEW
+          - MARKETING_VIEW
+          - MARKETING_CREATE
+          - MARKETING_UPDATE
+          - MARKETING_DELETE
+      - username: readonly
+        authorities:
+          - OFBTOOLS_VIEW
+          - MARKETING_VIEW
+      - username: sensitive
+        authorities:
+          - OFBTOOLS_VIEW
+          - MARKETING_VIEW
+          - MARKETING_SENSITIVE_VIEW
+      - username: nomarketing
+        authorities:
+          - OFBTOOLS_VIEW
