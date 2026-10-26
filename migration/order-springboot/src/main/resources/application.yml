@@ -41,6 +41,7 @@ migration:
     service-permission-prefix: ORDERMGR
     trusted-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}'
     extra-entities:
+      - CustRequest
       - OrderItem
       - OrderStatus
       - Shipment

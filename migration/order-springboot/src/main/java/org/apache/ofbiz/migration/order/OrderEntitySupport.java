@@ -19,6 +19,11 @@
 package org.apache.ofbiz.migration.order;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.ofbiz.migration.common.EntityRegistry;
@@ -47,7 +52,25 @@ public final class OrderEntitySupport {
     }
 
     public List<?> find(String entityName, Map<String, ?> filters) {
-        return entities.findByEquality(entities.entityClass(entityName), filters);
+        return findUnbounded(entities.entityClass(entityName), filters);
+    }
+
+    private <T> List<T> findUnbounded(Class<T> type, Map<String, ?> filters) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<T> query = builder.createQuery(type);
+        Root<T> root = query.from(type);
+        List<Predicate> predicates = new ArrayList<>();
+        T probe = type.cast(entities.newEntity(type));
+        filters.forEach((field, value) -> {
+            if (value == null) {
+                predicates.add(builder.isNull(root.get(field)));
+            } else {
+                entities.set(probe, field, value);
+                predicates.add(builder.equal(root.get(field), entities.get(probe, field)));
+            }
+        });
+        query.select(root).where(predicates.toArray(Predicate[]::new));
+        return entityManager.createQuery(query).getResultList();
     }
 
     public Object create(String entityName, Map<String, ?> values) {
@@ -72,6 +95,10 @@ public final class OrderEntitySupport {
 
     public void remove(Object entity) {
         entityManager.remove(entity);
+    }
+
+    public void flush() {
+        entityManager.flush();
     }
 
     public boolean hasField(Object entity, String field) {

@@ -31,5 +31,5 @@
 | P-06 | 初期 Order shipment group は既に存在する | entity-auto の空 INOUT 採番回帰では別の `createOrderItemShipGroup` を呼び、返却キーで照会する |
 | P-07 | cart session は REST 実行時に利用できない | `createCustRequestFromCart` の入力代替を spec/review に明記 |
 | P-08 | OUT 主キーに caller value が含まれても採番結果を優先する | `createCustRequestStatus` で返却 ID の行だけを照会するテストを追加 |
-| P-09 | 一部 entity-auto update/delete に entity-auto create fixture がない | 4 update・4 delete の成功経路は未検証。実行済み件数とサービス名は `review.md` に列挙し、全 220 CRUD を実行したとは扱わない |
+| P-09 | 一部 entity-auto update/delete に entity-auto create fixture がない | 該当する8サービスは `storeOrder` または `OrderEntitySupport` で前提行を作り、create 81・update 62・expire 4・delete 73 の成功経路をすべて実行する |
 | P-10 | Order サブプロジェクトには Checkstyle/CodeNarc task がない | root の静的解析は migration source を対象にしない。AC テスト名 `acNN_...` は指定形式を維持し、Spring transaction proxy が必要な非 final bean も Checkstyle の DesignForExtension 警告に合わせて変更しない |

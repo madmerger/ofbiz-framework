@@ -112,7 +112,7 @@ OFBiz セッションの ShoppingCart は API 実行環境に存在しないた�
 
 ## 10. テストが保証する振る舞い
 
-`OrderApiAcceptanceTest` は AC 番号付きの H2/MockMvc テスト。生成カタログの 220 entity-auto 照合、全機密 Entity の存在、注文ライフサイクル、キャンセル、multi の 409/400、認可、機密 Entity、INOUT/OUT 主キー採番、simple service の正常経路を検査する。`OrderEntityAutoAcceptanceTest` は 81 create と、対応する auto-create fixture がある update/expire/delete の成功経路を実行する。entity-auto create が存在しない entity に対する update 4 件・delete 4 件の成功経路は未検証であり、全 CRUD 定義を実行したものではない。`OrderHttpsSecurityTest` は HTTPS 必須時に未信頼 `X-Forwarded-Proto` で迂回できないことを検査する。`PostgresSmokeTest` は Testcontainers で PostgreSQL の作成・承認を検査する。
+`OrderApiAcceptanceTest` は AC 番号付きの H2/MockMvc テスト。生成カタログの 220 entity-auto 照合、全機密 Entity の存在、注文ライフサイクル、キャンセル、multi の 409/400、readonly multi create の 403 と未永続化、認可、機密 Entity、INOUT/OUT 主キー採番、simple service の正常経路を検査する。`OrderEntityAutoAcceptanceTest` は entity-auto の create 81、update 62、expire 4、delete 73 の全220件で成功経路を実行する。対応する entity-auto create がない update/delete は、別の作成フローまたは `OrderEntitySupport` によりテスト内で前提行を作成する。`OrderHttpsSecurityTest` は HTTPS 必須時に未信頼 `X-Forwarded-Proto` で迂回できないことを検査する。`PostgresSmokeTest` は Testcontainers で PostgreSQL の作成・承認を検査する。
 
 テストの実測件数・結果・既知の制約は `review.md` に記録する。
 
@@ -130,6 +130,7 @@ OFBiz セッションの ShoppingCart は API 実行環境に存在しないた�
 | AC-07 | 過剰キャンセルを 400 で拒否 | `ac05_cancelAccumulatesAndRejectsOverCancellation` |
 | AC-08 | multi で 409 を保持し、それ以前の変更も rollback | `ac06_multiPreservesConflictAndRollsBackEarlierCalls` |
 | AC-08b | multi の入力エラーを 400 で返す | `ac06b_multiReturnsBadRequestForInvalidInput` |
+| AC-08c | readonly の multi create を 403 とし、行を永続化しない | `ac06c_readonlyMultiCreateIsForbiddenAndDoesNotPersist` |
 | AC-09 | 19 simple service の handler 登録と顧客依頼の正常経路 | `ac13_everySimpleServiceHasARegisteredHandler`, `ac18_simpleServicesSupportNormalCustomerRequestPaths` |
 | AC-10 | 未認証は 401、Order 権限なし/読み取り専用書込みは 403 | `ac09_*`, `ac10_*`, `ac15_*` |
 | AC-11 | 機密 Entity/API は追加権限なしに拒否 | `ac07_*`, `ac08_*`, `ac14_*` |

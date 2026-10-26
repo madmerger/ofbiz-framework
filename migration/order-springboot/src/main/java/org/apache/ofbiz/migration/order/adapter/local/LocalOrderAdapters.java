@@ -56,10 +56,13 @@ public class LocalOrderAdapters implements
                 "productPriceTypeId", "DEFAULT_PRICE",
                 "productPricePurposeId", productPricePurposeId,
                 "currencyUomId", currencyUomId));
+        Timestamp now = Timestamp.from(Instant.now());
         return prices.stream()
                 .filter(price -> {
+                    Object fromDate = data.get(price, "fromDate");
                     Object thruDate = data.get(price, "thruDate");
-                    return thruDate == null || ((Timestamp) thruDate).toInstant().isAfter(Instant.now());
+                    return (fromDate == null || !((Timestamp) fromDate).after(now))
+                            && (thruDate == null || ((Timestamp) thruDate).after(now));
                 })
                 .max(Comparator.comparing(price -> {
                     Object fromDate = data.get(price, "fromDate");
@@ -70,46 +73,73 @@ public class LocalOrderAdapters implements
 
     @Override
     public List<String> quickShipEntireOrder(String orderId, String userLoginId) {
-        Object order = data.require("OrderHeader", Map.of("orderId", orderId));
-        String shipmentId = sequences.nextId("Shipment");
-        Map<String, Object> shipment = new LinkedHashMap<>();
-        shipment.put("shipmentId", shipmentId);
-        shipment.put("shipmentTypeId", "SALES_SHIPMENT");
-        shipment.put("statusId", "SHIPMENT_SHIPPED");
-        shipment.put("primaryOrderId", orderId);
-        shipment.put("primaryShipGroupSeqId", "00001");
-        shipment.put("createdDate", Timestamp.from(Instant.now()));
-        shipment.put("createdByUserLoginId", userLoginId);
-        data.create("Shipment", shipment);
-
-        List<?> items = data.find("OrderItem", Map.of("orderId", orderId));
+        data.require("OrderHeader", Map.of("orderId", orderId));
+        Map<String, Object> itemsBySequence = new LinkedHashMap<>();
+        for (Object item : data.find("OrderItem", Map.of("orderId", orderId))) {
+            itemsBySequence.put(data.get(item, "orderItemSeqId").toString(), item);
+        }
+        Map<String, List<Object>> associationsByItem = new LinkedHashMap<>();
+        for (Object association : data.find("OrderItemShipGroupAssoc", Map.of("orderId", orderId))) {
+            String itemSequence = data.get(association, "orderItemSeqId").toString();
+            associationsByItem.computeIfAbsent(itemSequence, ignored -> new ArrayList<>()).add(association);
+        }
+        Map<String, List<ShipmentLine>> linesByGroup = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : itemsBySequence.entrySet()) {
+            Object item = entry.getValue();
+            if ("ITEM_CANCELLED".equals(data.get(item, "statusId")) || remainingQuantity(item).signum() <= 0) {
+                continue;
+            }
+            List<Object> associations = associationsByItem.getOrDefault(entry.getKey(), List.of());
+            if (associations.isEmpty()) {
+                linesByGroup.computeIfAbsent("00001", ignored -> new ArrayList<>())
+                        .add(new ShipmentLine(item, remainingQuantity(item)));
+                continue;
+            }
+            for (Object association : associations) {
+                BigDecimal quantity = decimal(data.get(association, "quantity"))
+                        .subtract(decimal(data.get(association, "cancelQuantity")));
+                if (quantity.signum() > 0) {
+                    String group = data.get(association, "shipGroupSeqId").toString();
+                    linesByGroup.computeIfAbsent(group, ignored -> new ArrayList<>())
+                            .add(new ShipmentLine(item, quantity));
+                }
+            }
+        }
         List<String> shipmentIds = new ArrayList<>();
-        shipmentIds.add(shipmentId);
-        int nextItem = 0;
-        for (Object orderItem : items) {
-            String orderItemSeqId = data.get(orderItem, "orderItemSeqId").toString();
-            String shipmentItemSeqId = String.format("%05d", ++nextItem);
-            BigDecimal quantity = decimal(data.get(orderItem, "quantity"))
-                    .subtract(decimal(data.get(orderItem, "cancelQuantity")));
-            Map<String, Object> shipmentItem = new LinkedHashMap<>();
-            shipmentItem.put("shipmentId", shipmentId);
-            shipmentItem.put("shipmentItemSeqId", shipmentItemSeqId);
-            shipmentItem.put("productId", data.get(orderItem, "productId"));
-            shipmentItem.put("quantity", quantity);
-            data.create("ShipmentItem", shipmentItem);
+        for (Map.Entry<String, List<ShipmentLine>> group : linesByGroup.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey()).toList()) {
+            String shipmentId = sequences.nextId("Shipment");
+            Map<String, Object> shipment = new LinkedHashMap<>();
+            shipment.put("shipmentId", shipmentId);
+            shipment.put("shipmentTypeId", "SALES_SHIPMENT");
+            shipment.put("statusId", "SHIPMENT_SHIPPED");
+            shipment.put("primaryOrderId", orderId);
+            shipment.put("primaryShipGroupSeqId", group.getKey());
+            shipment.put("createdDate", Timestamp.from(Instant.now()));
+            shipment.put("createdByUserLoginId", userLoginId);
+            data.create("Shipment", shipment);
+            shipmentIds.add(shipmentId);
+            int nextItem = 0;
+            for (ShipmentLine line : group.getValue()) {
+                Object orderItem = line.orderItem();
+                String orderItemSeqId = data.get(orderItem, "orderItemSeqId").toString();
+                String shipmentItemSeqId = String.format("%05d", ++nextItem);
+                Map<String, Object> shipmentItem = new LinkedHashMap<>();
+                shipmentItem.put("shipmentId", shipmentId);
+                shipmentItem.put("shipmentItemSeqId", shipmentItemSeqId);
+                shipmentItem.put("productId", data.get(orderItem, "productId"));
+                shipmentItem.put("quantity", line.quantity());
+                data.create("ShipmentItem", shipmentItem);
 
-            List<?> groups = data.find("OrderItemShipGroupAssoc", Map.of(
-                    "orderId", orderId, "orderItemSeqId", orderItemSeqId));
-            String shipGroupSeqId = groups.isEmpty()
-                    ? "00001" : data.get(groups.get(0), "shipGroupSeqId").toString();
-            Map<String, Object> orderShipment = new LinkedHashMap<>();
-            orderShipment.put("orderId", orderId);
-            orderShipment.put("orderItemSeqId", orderItemSeqId);
-            orderShipment.put("shipGroupSeqId", shipGroupSeqId);
-            orderShipment.put("shipmentId", shipmentId);
-            orderShipment.put("shipmentItemSeqId", shipmentItemSeqId);
-            orderShipment.put("quantity", quantity);
-            data.create("OrderShipment", orderShipment);
+                Map<String, Object> orderShipment = new LinkedHashMap<>();
+                orderShipment.put("orderId", orderId);
+                orderShipment.put("orderItemSeqId", orderItemSeqId);
+                orderShipment.put("shipGroupSeqId", group.getKey());
+                orderShipment.put("shipmentId", shipmentId);
+                orderShipment.put("shipmentItemSeqId", shipmentItemSeqId);
+                orderShipment.put("quantity", line.quantity());
+                data.create("OrderShipment", orderShipment);
+            }
         }
         return shipmentIds;
     }
@@ -132,14 +162,17 @@ public class LocalOrderAdapters implements
 
         int nextItem = 0;
         for (Object orderItem : data.find("OrderItem", Map.of("orderId", orderId))) {
+            if ("ITEM_CANCELLED".equals(data.get(orderItem, "statusId"))
+                    || remainingQuantity(orderItem).signum() <= 0) {
+                continue;
+            }
             String orderItemSeqId = data.get(orderItem, "orderItemSeqId").toString();
             if (!data.find("OrderItemBilling", Map.of(
                     "orderId", orderId, "orderItemSeqId", orderItemSeqId)).isEmpty()) {
                 continue;
             }
             String invoiceItemSeqId = String.format("%05d", ++nextItem);
-            BigDecimal quantity = decimal(data.get(orderItem, "quantity"))
-                    .subtract(decimal(data.get(orderItem, "cancelQuantity")));
+            BigDecimal quantity = remainingQuantity(orderItem);
             BigDecimal unitPrice = decimal(data.get(orderItem, "unitPrice"));
             Map<String, Object> invoiceItem = new LinkedHashMap<>();
             invoiceItem.put("invoiceId", invoiceId);
@@ -199,7 +232,14 @@ public class LocalOrderAdapters implements
         return roles.isEmpty() ? null : data.get(roles.get(0), "partyId");
     }
 
+    private BigDecimal remainingQuantity(Object orderItem) {
+        return decimal(data.get(orderItem, "quantity"))
+                .subtract(decimal(data.get(orderItem, "cancelQuantity")));
+    }
+
     private static BigDecimal decimal(Object value) {
         return value == null ? BigDecimal.ZERO : new BigDecimal(value.toString());
     }
+
+    private record ShipmentLine(Object orderItem, BigDecimal quantity) { }
 }

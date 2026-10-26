@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.SequenceService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -185,6 +186,11 @@ public class OrderSimpleServices {
             }
         }
         data.remove(request);
+        try {
+            data.flush();
+        } catch (DataIntegrityViolationException exception) {
+            throw conflict("顧客依頼に削除できない関連データがあります");
+        }
         return Map.of("custRequestId", custRequestId);
     }
 

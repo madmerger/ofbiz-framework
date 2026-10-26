@@ -177,6 +177,14 @@ public class OrderFlowService {
         if (!"ORDER_APPROVED".equals(data.get(order, "statusId"))) {
             throw new MigrationException(HttpStatus.CONFLICT, "出荷には承認済み注文が必要です");
         }
+        List<?> activeItems = data.find("OrderItem", Map.of("orderId", orderId)).stream()
+                .filter(this::hasRemainingQuantity)
+                .filter(item -> !"ITEM_CANCELLED".equals(data.get(item, "statusId")))
+                .toList();
+        if (activeItems.isEmpty() || activeItems.stream()
+                .anyMatch(item -> !"ITEM_APPROVED".equals(data.get(item, "statusId")))) {
+            throw new MigrationException(HttpStatus.CONFLICT, "出荷には全明細の承認が必要です");
+        }
         List<String> shipmentIds = shipments.quickShipEntireOrder(orderId, currentUser());
         itemStatuses.changeItemStatus(orderId, null, null, "ITEM_COMPLETED", null);
         orderStatuses.changeHeaderStatus(orderId, "ORDER_COMPLETED", false, null);
@@ -191,6 +199,8 @@ public class OrderFlowService {
             throw new MigrationException(HttpStatus.CONFLICT, "請求書作成には承認済みまたは完了済み注文が必要です");
         }
         boolean unbilled = data.find("OrderItem", Map.of("orderId", orderId)).stream()
+                .filter(this::hasRemainingQuantity)
+                .filter(item -> !"ITEM_CANCELLED".equals(data.get(item, "statusId")))
                 .anyMatch(item -> data.find("OrderItemBilling", Map.of(
                         "orderId", orderId,
                         "orderItemSeqId", data.get(item, "orderItemSeqId"))).isEmpty());
@@ -198,6 +208,13 @@ public class OrderFlowService {
             throw new MigrationException(HttpStatus.CONFLICT, "未請求の注文明細がありません");
         }
         return Map.of("orderId", orderId, "invoiceId", invoices.createInvoiceForOrder(orderId));
+    }
+
+    private boolean hasRemainingQuantity(Object item) {
+        BigDecimal quantity = decimal(data.get(item, "quantity"), "quantity");
+        BigDecimal cancelled = data.get(item, "cancelQuantity") == null
+                ? BigDecimal.ZERO : decimal(data.get(item, "cancelQuantity"), "cancelQuantity");
+        return quantity.subtract(cancelled).signum() > 0;
     }
 
     private Map<String, Object> cancelOrderItems(Map<String, Object> input) {
@@ -229,6 +246,9 @@ public class OrderFlowService {
             if (cancelQuantity.signum() <= 0 || cancelQuantity.compareTo(remaining) > 0) {
                 throw badRequest("キャンセル数量が残数量を超えています");
             }
+            applyShipGroupCancellation(
+                    orderId, text(data.get(item, "orderItemSeqId")), cancelQuantity,
+                    text(input.get("shipGroupSeqId")));
             BigDecimal updatedCancelled = alreadyCancelled.add(cancelQuantity);
             data.set(item, "cancelQuantity", updatedCancelled);
             if (updatedCancelled.compareTo(quantity) >= 0) {
@@ -246,6 +266,40 @@ public class OrderFlowService {
             orderStatuses.changeHeaderStatus(orderId, "ORDER_CANCELLED", false, text(input.get("changeReason")));
         }
         return Map.of("orderId", orderId, "cancelledOrderItemSeqIds", cancelledItems);
+    }
+
+    private void applyShipGroupCancellation(
+            String orderId, String itemSeqId, BigDecimal cancelQuantity, String requestedGroup) {
+        List<?> associations = data.find("OrderItemShipGroupAssoc", Map.of(
+                "orderId", orderId, "orderItemSeqId", itemSeqId)).stream()
+                .sorted(java.util.Comparator.comparing(association ->
+                        text(data.get(association, "shipGroupSeqId"))))
+                .toList();
+        if (requestedGroup != null) {
+            associations = associations.stream()
+                    .filter(association -> requestedGroup.equals(text(data.get(association, "shipGroupSeqId"))))
+                    .toList();
+        }
+        if (associations.isEmpty()) {
+            throw badRequest("配送グループの明細が見つかりません");
+        }
+        BigDecimal remainingToCancel = cancelQuantity;
+        for (Object association : associations) {
+            BigDecimal groupQuantity = decimal(data.get(association, "quantity"), "quantity");
+            BigDecimal groupCancelled = data.get(association, "cancelQuantity") == null
+                    ? BigDecimal.ZERO : decimal(data.get(association, "cancelQuantity"), "cancelQuantity");
+            BigDecimal available = groupQuantity.subtract(groupCancelled);
+            if (available.signum() <= 0) {
+                continue;
+            }
+            BigDecimal cancelledHere = available.min(remainingToCancel);
+            data.set(association, "cancelQuantity", groupCancelled.add(cancelledHere));
+            remainingToCancel = remainingToCancel.subtract(cancelledHere);
+            if (remainingToCancel.signum() == 0) {
+                return;
+            }
+        }
+        throw badRequest("配送グループの残数量を超えています");
     }
 
     private void createOrderRoles(

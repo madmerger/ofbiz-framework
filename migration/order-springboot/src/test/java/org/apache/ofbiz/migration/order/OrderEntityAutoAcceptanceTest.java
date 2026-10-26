@@ -53,12 +53,15 @@ class OrderEntityAutoAcceptanceTest {
     @Autowired
     private EntityRegistry entities;
 
+    @Autowired
+    private OrderEntitySupport data;
+
     @Test
     @Transactional
     @WithMockUser(authorities = {
         "OFBTOOLS_VIEW", "ORDERMGR_ADMIN", "ORDERMGR_SENSITIVE_VIEW"
     })
-    void ac01_exercisesEntityAutoOperationsWithAvailableCreateFixtures() {
+    void ac01_exercisesAll220EntityAutoSuccessPaths() {
         List<ServiceCatalog.ServiceDefinition> definitions = ServiceCatalog.all().values().stream()
                 .filter(definition -> definition.entity() != null
                         && Set.of("create", "update", "expire", "delete")
@@ -75,6 +78,7 @@ class OrderEntityAutoAcceptanceTest {
         assertEquals(4, count(definitions, "expire"));
         assertEquals(73, count(definitions, "delete"));
 
+        Map<String, Integer> successfulByInvoke = new LinkedHashMap<>();
         Map<String, Map<String, Object>> createdByEntity = new LinkedHashMap<>();
         int sequence = 1;
         for (ServiceCatalog.ServiceDefinition definition : definitions) {
@@ -86,6 +90,7 @@ class OrderEntityAutoAcceptanceTest {
             Map<String, Object> keys = primaryKeyValues(definition.entity(), created);
             assertEquals(entities.primaryKeys(entities.entityClass(definition.entity())).size(), keys.size());
             createdByEntity.putIfAbsent(definition.entity(), keys);
+            successfulByInvoke.merge("create", 1, Integer::sum);
         }
 
         for (ServiceCatalog.ServiceDefinition definition : definitions) {
@@ -95,9 +100,8 @@ class OrderEntityAutoAcceptanceTest {
             }
             Map<String, Object> keys = createdByEntity.get(definition.entity());
             if (keys == null) {
-                continue;
-            }
-            if ("delete".equals(invoke)
+                keys = createFixture(definition.entity(), sequence++);
+            } else if ("delete".equals(invoke)
                     && hasEntityAutoDefinition(byEntity, definition.entity(), "create")) {
                 ServiceCatalog.ServiceDefinition create = findDefinition(byEntity, definition.entity(), "create");
                 Map<String, Object> created = dispatcher.execute(
@@ -110,7 +114,70 @@ class OrderEntityAutoAcceptanceTest {
             } catch (RuntimeException exception) {
                 throw new AssertionError(definition.name() + " " + input, exception);
             }
+            successfulByInvoke.merge(invoke, 1, Integer::sum);
         }
+
+        for (String invoke : List.of("create", "update", "expire", "delete")) {
+            assertEquals(count(definitions, invoke), successfulByInvoke.getOrDefault(invoke, 0).longValue(), invoke);
+        }
+    }
+
+    private Map<String, Object> createFixture(String entity, int sequence) {
+        return switch (entity) {
+            case "OrderHeader" -> {
+                Map<String, Object> order = storeOrderFixture();
+                yield Map.of("orderId", order.get("orderId"));
+            }
+            case "OrderItemShipGroupAssoc" -> {
+                Map<String, Object> order = storeOrderFixture();
+                yield Map.of(
+                        "orderId", order.get("orderId"),
+                        "orderItemSeqId", "00001",
+                        "shipGroupSeqId", "00001");
+            }
+            case "OrderHeaderNote" -> {
+                Map<String, Object> order = storeOrderFixture();
+                String noteId = String.format("AUTONOTE%05d", sequence);
+                data.create("NoteData", Map.of("noteId", noteId));
+                data.create("OrderHeaderNote", Map.of(
+                        "orderId", order.get("orderId"),
+                        "noteId", noteId,
+                        "internalNote", "N"));
+                yield Map.of("orderId", order.get("orderId"), "noteId", noteId);
+            }
+            case "Requirement" -> {
+                String requirementId = String.format("AUTOREQ%05d", sequence);
+                data.create("Requirement", Map.of("requirementId", requirementId));
+                yield Map.of("requirementId", requirementId);
+            }
+            case "QuoteAdjustment" -> {
+                String adjustmentId = String.format("AUTOQUOTE%05d", sequence);
+                data.create("QuoteAdjustment", Map.of("quoteAdjustmentId", adjustmentId));
+                yield Map.of("quoteAdjustmentId", adjustmentId);
+            }
+            case "ReturnAdjustment" -> {
+                String adjustmentId = String.format("AUTORETURN%05d", sequence);
+                data.create("ReturnAdjustment", Map.of("returnAdjustmentId", adjustmentId));
+                yield Map.of("returnAdjustmentId", adjustmentId);
+            }
+            case "ShoppingList" -> {
+                String shoppingListId = String.format("AUTOLIST%05d", sequence);
+                data.create("ShoppingList", Map.of("shoppingListId", shoppingListId));
+                yield Map.of("shoppingListId", shoppingListId);
+            }
+            default -> throw new AssertionError("Missing entity-auto create fixture for " + entity);
+        };
+    }
+
+    private Map<String, Object> storeOrderFixture() {
+        return dispatcher.execute("order", "storeOrder", Map.of(
+                "partyId", "DemoCustomer",
+                "orderTypeId", "SALES_ORDER",
+                "productStoreId", "DEMO_ORDER_STORE",
+                "orderItems", List.of(Map.of(
+                        "productId", "DEMO_ORDER_PRODUCT_1",
+                        "quantity", "1",
+                        "unitPrice", "1"))));
     }
 
     private static long count(List<ServiceCatalog.ServiceDefinition> definitions, String invoke) {
@@ -185,6 +252,9 @@ class OrderEntityAutoAcceptanceTest {
             return 1;
         }
         if (type.contains("indicator") || type.contains("boolean")) {
+            return "N";
+        }
+        if ("internalNote".equals(parameter.name())) {
             return "N";
         }
         if (parameter.name().endsWith("SeqId") || parameter.name().equals("sequenceId")) {

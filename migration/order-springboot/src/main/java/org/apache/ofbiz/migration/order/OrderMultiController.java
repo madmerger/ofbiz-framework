@@ -24,6 +24,7 @@ import java.util.Map;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
 import org.apache.ofbiz.migration.common.ServiceHandlerRegistry;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -58,7 +59,15 @@ public final class OrderMultiController {
                     "status", HttpStatus.NOT_FOUND.value(),
                     "errorMessage", "Unknown service: " + serviceName)));
         }
-        MultiResult result = transactionTemplate.execute(status -> executeInTransaction(status, serviceName, inputs));
+        MultiResult result;
+        try {
+            result = transactionTemplate.execute(status -> executeInTransaction(status, serviceName, inputs));
+        } catch (DataIntegrityViolationException exception) {
+            return failure(HttpStatus.CONFLICT, List.of(Map.of(
+                    "index", -1,
+                    "status", HttpStatus.CONFLICT.value(),
+                    "errorMessage", "Data integrity violation")));
+        }
         if (result == null) {
             return failure(HttpStatus.INTERNAL_SERVER_ERROR, List.of(Map.of(
                     "index", -1,
@@ -82,9 +91,8 @@ public final class OrderMultiController {
         for (int index = 0; index < inputs.size(); index++) {
             try {
                 results.add(dispatcher.execute("order", serviceName, inputs.get(index)));
-            } catch (RuntimeException exception) {
-                HttpStatus status = exception instanceof MigrationException migrationException
-                        ? migrationException.getStatus() : HttpStatus.BAD_REQUEST;
+            } catch (MigrationException exception) {
+                HttpStatus status = exception.getStatus();
                 Map<String, Object> error = new LinkedHashMap<>();
                 error.put("index", index);
                 error.put("status", status.value());

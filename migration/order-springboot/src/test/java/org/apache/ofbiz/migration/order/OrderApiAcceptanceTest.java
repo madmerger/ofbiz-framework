@@ -125,11 +125,132 @@ class OrderApiAcceptanceTest {
     }
 
     @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void ac03a_priceSelectionIgnoresFutureEffectiveRows() throws Exception {
+        data.create("ProductPrice", Map.of(
+                "productId", "DEMO_ORDER_PRODUCT_1",
+                "productPriceTypeId", "DEFAULT_PRICE",
+                "productPricePurposeId", "PURCHASE",
+                "currencyUomId", "USD",
+                "productStoreGroupId", "_NA_",
+                "fromDate", Timestamp.from(Instant.now().plusSeconds(86_400)),
+                "price", "999.00"));
+        String orderId = storeOrder();
+        Object item = data.find("OrderItem", Map.of("orderId", orderId)).get(0);
+        assertEquals(0, new BigDecimal(data.get(item, "unitPrice").toString())
+                .compareTo(new BigDecimal("25.00")));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void ac03b_ordersWith101ItemsShipAndBillEveryItem() throws Exception {
+        List<Map<String, Object>> orderItems = new ArrayList<>();
+        for (int index = 0; index < 101; index++) {
+            orderItems.add(Map.of(
+                    "productId", "DEMO_ORDER_PRODUCT_1",
+                    "quantity", "1",
+                    "unitPrice", "1"));
+        }
+        String orderId = storeOrder(orderItems);
+        postService("changeOrderStatus", Map.of(
+                "orderId", orderId, "statusId", "ORDER_APPROVED", "setItemStatus", "Y"))
+                .andExpect(status().isOk());
+        postService("quickShipEntireOrder", Map.of("orderId", orderId)).andExpect(status().isOk());
+        List<?> shipments = data.find("Shipment", Map.of("primaryOrderId", orderId));
+        assertEquals(1, shipments.size());
+        String shipmentId = data.get(shipments.get(0), "shipmentId").toString();
+        assertEquals(101, data.find("ShipmentItem", Map.of("shipmentId", shipmentId)).size());
+        postService("createInvoiceForOrder", Map.of("orderId", orderId)).andExpect(status().isOk());
+        assertEquals(101, data.find("OrderItemBilling", Map.of("orderId", orderId)).size());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void ac03c_quickShipCreatesOneShipmentPerShipGroup() throws Exception {
+        String orderId = storeOrder(List.of(Map.of(
+                "productId", "DEMO_ORDER_PRODUCT_1",
+                "quantity", "2",
+                "unitPrice", "1")));
+        Object firstAssociation = data.find("OrderItemShipGroupAssoc", Map.of(
+                "orderId", orderId, "orderItemSeqId", "00001")).get(0);
+        data.set(firstAssociation, "quantity", new BigDecimal("1"));
+        Object firstGroup = data.find("OrderItemShipGroup", Map.of(
+                "orderId", orderId, "shipGroupSeqId", "00001")).get(0);
+        Map<String, Object> secondGroup = new LinkedHashMap<>(data.toMap(firstGroup));
+        secondGroup.put("shipGroupSeqId", "00002");
+        data.create("OrderItemShipGroup", secondGroup);
+        data.create("OrderItemShipGroupAssoc", Map.of(
+                "orderId", orderId,
+                "orderItemSeqId", "00001",
+                "shipGroupSeqId", "00002",
+                "quantity", new BigDecimal("1")));
+        postService("changeOrderStatus", Map.of(
+                "orderId", orderId, "statusId", "ORDER_APPROVED", "setItemStatus", "Y"))
+                .andExpect(status().isOk());
+        postService("quickShipEntireOrder", Map.of("orderId", orderId)).andExpect(status().isOk());
+        List<?> shipments = data.find("Shipment", Map.of("primaryOrderId", orderId));
+        assertEquals(2, shipments.size());
+        assertTrue(shipments.stream().map(shipment -> data.get(shipment, "primaryShipGroupSeqId").toString())
+                .toList().containsAll(List.of("00001", "00002")));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void ac05c_cancellationUpdatesAndDistributesShipGroupQuantities() throws Exception {
+        String orderId = storeOrder(List.of(Map.of(
+                "productId", "DEMO_ORDER_PRODUCT_1",
+                "quantity", "3",
+                "unitPrice", "1")));
+        Object firstAssociation = data.find("OrderItemShipGroupAssoc", Map.of(
+                "orderId", orderId, "orderItemSeqId", "00001")).get(0);
+        data.set(firstAssociation, "quantity", new BigDecimal("1"));
+        Object firstGroup = data.find("OrderItemShipGroup", Map.of(
+                "orderId", orderId, "shipGroupSeqId", "00001")).get(0);
+        Map<String, Object> secondGroup = new LinkedHashMap<>(data.toMap(firstGroup));
+        secondGroup.put("shipGroupSeqId", "00002");
+        data.create("OrderItemShipGroup", secondGroup);
+        data.create("OrderItemShipGroupAssoc", Map.of(
+                "orderId", orderId,
+                "orderItemSeqId", "00001",
+                "shipGroupSeqId", "00002",
+                "quantity", new BigDecimal("2")));
+        postService("cancelOrderItem", Map.of(
+                "orderId", orderId, "orderItemSeqId", "00001", "cancelQuantity", "2"))
+                .andExpect(status().isOk());
+        List<?> associations = data.find("OrderItemShipGroupAssoc", Map.of(
+                "orderId", orderId, "orderItemSeqId", "00001"));
+        assertEquals(0, new BigDecimal(data.get(associations.get(0), "cancelQuantity").toString())
+                .compareTo(BigDecimal.ONE));
+        Object secondAssociation = associations.stream()
+                .filter(association -> "00002".equals(data.get(association, "shipGroupSeqId")))
+                .findFirst().orElseThrow();
+        assertEquals(0, new BigDecimal(data.get(secondAssociation, "cancelQuantity").toString())
+                .compareTo(BigDecimal.ONE));
+        postService("cancelOrderItem", Map.of(
+                "orderId", orderId,
+                "orderItemSeqId", "00001",
+                "shipGroupSeqId", "00002",
+                "cancelQuantity", "1")).andExpect(status().isOk());
+        assertEquals(0, new BigDecimal(data.get(secondAssociation, "cancelQuantity").toString())
+                .compareTo(new BigDecimal("2")));
+    }
+
+    @Test
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
     void ac04_invalidStatusAndUnapprovedShipmentReturnConflict() throws Exception {
         String orderId = storeOrder();
         postService("quickShipEntireOrder", Map.of("orderId", orderId)).andExpect(status().isConflict());
         postService("changeOrderStatus", Map.of("orderId", orderId, "statusId", "ORDER_COMPLETED"))
+                .andExpect(status().isConflict());
+        String unapprovedItemOrder = storeOrder();
+        postService("changeOrderStatus", Map.of(
+                "orderId", unapprovedItemOrder, "statusId", "ORDER_APPROVED"))
+                .andExpect(status().isOk());
+        postService("quickShipEntireOrder", Map.of("orderId", unapprovedItemOrder))
                 .andExpect(status().isConflict());
     }
 
@@ -146,6 +267,34 @@ class OrderApiAcceptanceTest {
         postService("cancelOrderItemNoActions", Map.of(
                 "orderId", orderId, "orderItemSeqId", "00001", "cancelQuantity", "1"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void ac05b_shipAndBillOnlyTheRemainingUncancelledQuantity() throws Exception {
+        String orderId = storeOrder(List.of(
+                Map.of("productId", "DEMO_ORDER_PRODUCT_1", "quantity", "3", "unitPrice", "1"),
+                Map.of("productId", "DEMO_ORDER_PRODUCT_2", "quantity", "3", "unitPrice", "1")));
+        postService("cancelOrderItem", Map.of(
+                "orderId", orderId, "orderItemSeqId", "00001", "cancelQuantity", "3"))
+                .andExpect(status().isOk());
+        postService("cancelOrderItem", Map.of(
+                "orderId", orderId, "orderItemSeqId", "00002", "cancelQuantity", "1"))
+                .andExpect(status().isOk());
+        postService("changeOrderStatus", Map.of(
+                "orderId", orderId, "statusId", "ORDER_APPROVED", "setItemStatus", "Y"))
+                .andExpect(status().isOk());
+        postService("quickShipEntireOrder", Map.of("orderId", orderId)).andExpect(status().isOk());
+        List<?> shipments = data.find("Shipment", Map.of("primaryOrderId", orderId));
+        String shipmentId = data.get(shipments.get(0), "shipmentId").toString();
+        List<?> shippedItems = data.find("ShipmentItem", Map.of("shipmentId", shipmentId));
+        assertEquals(1, shippedItems.size());
+        assertEquals(new BigDecimal("2"), data.get(shippedItems.get(0), "quantity"));
+        postService("createInvoiceForOrder", Map.of("orderId", orderId)).andExpect(status().isOk());
+        List<?> billing = data.find("OrderItemBilling", Map.of("orderId", orderId));
+        assertEquals(1, billing.size());
+        assertEquals(new BigDecimal("2"), data.get(billing.get(0), "quantity"));
     }
 
     @Test
@@ -179,6 +328,41 @@ class OrderApiAcceptanceTest {
                 .andReturn();
         assertEquals(400, JSON.readTree(result.getResponse().getContentAsString())
                 .get("errors").get(0).get("status").asInt());
+    }
+
+    @Test
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void ac06e_multiMapsDataIntegrityViolationToConflict() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/order/services/createCustRequestStatus/multi")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JSON.writeValueAsString(List.of(Map.of(
+                                "custRequestId", "AC06E_MISSING_REQUEST",
+                                "statusId", "CRQ_DRAFT")))))
+                .andExpect(status().isConflict())
+                .andReturn();
+        assertEquals(409, JSON.readTree(result.getResponse().getContentAsString())
+                .get("errors").get(0).get("status").asInt());
+    }
+
+    @Test
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_VIEW"})
+    void ac06c_readonlyMultiCreateIsForbiddenAndDoesNotPersist() throws Exception {
+        String orderItemTypeId = "AC06C_READONLY_CREATE";
+        mockMvc.perform(post("/api/order/services/createOrderItemType/multi")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JSON.writeValueAsString(List.of(Map.of("orderItemTypeId", orderItemTypeId)))))
+                .andExpect(status().isForbidden());
+        MvcResult result = mockMvc.perform(get("/api/order/entities/OrderItemType")
+                        .param("orderItemTypeId", orderItemTypeId))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertEquals(0, JSON.readTree(result.getResponse().getContentAsString()).size());
+    }
+
+    @Test
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_VIEW"})
+    void ac06d_readonlyCanReadCustRequestEntity() throws Exception {
+        mockMvc.perform(get("/api/order/entities/CustRequest")).andExpect(status().isOk());
     }
 
     @Test
@@ -430,6 +614,42 @@ class OrderApiAcceptanceTest {
         assertTrue(!cartRequestId.isBlank());
     }
 
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void ac18b_deleteCustRequestLeavesItemsLikeOFBiz() throws Exception {
+        String requestId = createCustRequest("AC18_DELETE_WITH_ITEM", "request item");
+        assertTrue(!data.find("CustRequestItem", Map.of("custRequestId", requestId)).isEmpty());
+        postService("deleteCustRequest", Map.of("custRequestId", requestId))
+                .andExpect(status().isOk());
+        assertTrue(data.find("CustRequest", Map.of("custRequestId", requestId)).isEmpty());
+        assertTrue(!data.find("CustRequestItem", Map.of("custRequestId", requestId)).isEmpty());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void ac19_getCustRequestsByRoleDoesNotAcceptAnotherLogin() throws Exception {
+        data.create("UserLogin", Map.of("userLoginId", "AC19_OTHER_LOGIN", "partyId", "Company"));
+        MvcResult created = postService("createCustRequest", Map.of(
+                "fromPartyId", "Company", "custRequestName", "AC19_OTHER_REQUEST"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String otherRequestId = JSON.readTree(created.getResponse().getContentAsString())
+                .get("custRequestId").asText();
+        data.create("CustRequestParty", Map.of(
+                "custRequestId", otherRequestId,
+                "partyId", "Company",
+                "roleTypeId", "AC19_ROLE",
+                "fromDate", Timestamp.from(Instant.now())));
+        MvcResult lookup = postService("getCustRequestsByRole", Map.of(
+                "roleTypeId", "AC19_ROLE", "userLoginId", "AC19_OTHER_LOGIN")).andReturn();
+        int responseStatus = lookup.getResponse().getStatus();
+        assertTrue(responseStatus == 400
+                || (responseStatus == 200
+                        && !lookup.getResponse().getContentAsString().contains(otherRequestId)));
+    }
+
     private String createCustRequest(String name, String story) throws Exception {
         Map<String, Object> input = new LinkedHashMap<>();
         input.put("fromPartyId", "DemoCustomer");
@@ -455,13 +675,17 @@ class OrderApiAcceptanceTest {
     }
 
     private String storeOrder() throws Exception {
+        return storeOrder(List.of(Map.of(
+                "productId", "DEMO_ORDER_PRODUCT_1",
+                "quantity", "2")));
+    }
+
+    private String storeOrder(List<Map<String, Object>> orderItems) throws Exception {
         MvcResult result = postService("storeOrder", Map.of(
                 "partyId", "DemoCustomer",
                 "orderTypeId", "SALES_ORDER",
                 "productStoreId", "DEMO_ORDER_STORE",
-                "orderItems", List.of(Map.of(
-                        "productId", "DEMO_ORDER_PRODUCT_1",
-                        "quantity", "2"))))
+                "orderItems", orderItems))
                 .andExpect(status().isOk())
                 .andReturn();
         return JSON.readTree(result.getResponse().getContentAsString()).get("orderId").asText();
