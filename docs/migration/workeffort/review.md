@@ -24,19 +24,19 @@ Inventory JSON の `services` は service definition files 上のユニーク数
 ./gradlew --console=plain :migration:workeffort-springboot:test :migration:workeffort-springboot:checkstyleMain :migration:workeffort-springboot:checkstyleTest
 ```
 
-結果: `BUILD SUCCESSFUL in 1m 42s`、21 actionable tasks（3 executed / 18 up-to-date）。Test XML 合計は170 passed / 0 failed / 0 errors / 0 skipped。`checkstyleMain` / `checkstyleTest` とも成功。
+結果: `BUILD SUCCESSFUL in 1m 43s`、21 actionable tasks（5 executed / 16 up-to-date）。Test XML 合計は171 passed / 0 failed / 0 errors / 0 skipped。`checkstyleMain` / `checkstyleTest` とも成功。
 
 | Test class | Cases | Passed | Failed | Skipped |
 |---|---:|---:|---:|---:|
 | `EntityAutoExecutionAcceptanceTest` | 95 | 95 | 0 | 0 |
-| `WorkEffortAcceptanceTest` | 37 | 37 | 0 | 0 |
+| `WorkEffortAcceptanceTest` | 38 | 38 | 0 | 0 |
 | `WorkEffortSimpleServicesTest` | 33 | 33 | 0 | 0 |
 | `HttpsSecurityTest` | 1 | 1 | 0 | 0 |
 | `LocalSpringdocProfileTest` | 1 | 1 | 0 | 0 |
 | `SpringdocProfileTest` | 1 | 1 | 0 | 0 |
 | `PostgresSmokeTest` | 1 | 1 | 0 | 0 |
 | `WorkEffortServiceRegistrationTest` | 1 | 1 | 0 | 0 |
-| **合計** | **170** | **170** | **0** | **0** |
+| **合計** | **171** | **171** | **0** | **0** |
 
 ## local profile curl 実測
 

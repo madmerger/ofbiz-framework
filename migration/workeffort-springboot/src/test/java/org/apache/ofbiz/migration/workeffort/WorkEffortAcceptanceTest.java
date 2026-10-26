@@ -529,6 +529,37 @@ class WorkEffortAcceptanceTest {
     @Test
     @Transactional
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
+    void workEffortInvoiceCurrencyUsesReceivingPartyPreference() {
+        Timestamp now = Timestamp.from(Instant.now().minusSeconds(60));
+        persistPartyCurrency("DemoCustomer", "EUR");
+        persistWorkEffort("WE-INV-EUR", "Euro invoice task", now);
+        persistTimesheet("TS-INV-EUR", "DemoEmployee", "TIMESHEET_IN_PROCESS");
+        persistInvoice("INV-WE-EUR", "INVOICE_IN_PROCESS");
+        Object invoice = entities.findByPrimaryKey(
+                entities.entityClass("Invoice"), Map.of("invoiceId", "INV-WE-EUR"));
+        entities.set(invoice, "partyId", "DemoCustomer");
+        Timestamp oldInvoiceDate = Timestamp.valueOf("2020-01-01 00:00:00");
+        entities.set(invoice, "invoiceDate", oldInvoiceDate);
+        persistRateAmount("WE-INV-EUR", now, "EUR", "250.00");
+        persistTimeEntry("TE-INV-EUR", "TS-INV-EUR",
+                "WE-INV-EUR", 1.0d, "Euro invoice entry", null, now);
+
+        Map<String, Object> result = services.execute("addWorkEffortTimeToInvoice", Map.of(
+                "workEffortId", "WE-INV-EUR",
+                "invoiceId", "INV-WE-EUR",
+                "combineInvoiceItem", "N"));
+
+        assertThat(result.get("currencyUomId")).isEqualTo("EUR");
+        assertInvoiceItemAmount("INV-WE-EUR", 250.0d);
+        assertTimeEntryInvoice("TE-INV-EUR", "INV-WE-EUR");
+        Object updatedInvoice = entities.findByPrimaryKey(
+                entities.entityClass("Invoice"), Map.of("invoiceId", "INV-WE-EUR"));
+        assertThat(entities.get(updatedInvoice, "invoiceDate")).isNotEqualTo(oldInvoiceDate);
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
     void invoiceServicesReturnBadRequestForMissingRequiredIds() throws Exception {
         Timestamp now = Timestamp.from(Instant.now().minusSeconds(60));
         persistWorkEffort("WE-INVOICE-REQUIRED", "Invoice validation task", now);

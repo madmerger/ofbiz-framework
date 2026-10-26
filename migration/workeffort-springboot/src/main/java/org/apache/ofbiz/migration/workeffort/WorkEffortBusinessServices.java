@@ -907,7 +907,7 @@ public final class WorkEffortBusinessServices {
         Map<String, Object> invoice = createInvoiceIfNeeded(service, input,
                 "addWorkEffortTimeToNewInvoice");
         if (invoice.isEmpty()) throw new MigrationException(HttpStatus.NOT_FOUND, "Invoice not found");
-        invoice = ensureInvoiceCurrency(invoice, input);
+        invoice = updateInvoiceCurrency(invoice);
         addTimeEntryInvoiceItems(null, workEffort, invoice, input);
         return invoice;
     }
@@ -942,6 +942,23 @@ public final class WorkEffortBusinessServices {
         Map<String, Object> update = new LinkedHashMap<>();
         update.put("invoiceId", invoice.get("invoiceId"));
         update.put("currencyUomId", currencyUomId);
+        invoices.updateInvoice(update);
+        return invoices.findInvoice(string(invoice.get("invoiceId")));
+    }
+
+    private Map<String, Object> updateInvoiceCurrency(Map<String, Object> invoice) {
+        String currencyUomId = null;
+        String partyId = string(invoice.get("partyId"));
+        Object party = partyId == null ? null : findNullable("Party", Map.of("partyId", partyId));
+        if (party != null) currencyUomId = string(property(party, "preferredCurrencyUomId"));
+        if (currencyUomId == null || currencyUomId.isBlank()) {
+            currencyUomId = string(invoice.get("currencyUomId"));
+        }
+        if (currencyUomId == null || currencyUomId.isBlank()) currencyUomId = "USD";
+        Map<String, Object> update = new LinkedHashMap<>();
+        update.put("invoiceId", invoice.get("invoiceId"));
+        update.put("currencyUomId", currencyUomId);
+        update.put("invoiceDate", Timestamp.from(Instant.now()));
         invoices.updateInvoice(update);
         return invoices.findInvoice(string(invoice.get("invoiceId")));
     }
