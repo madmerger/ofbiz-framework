@@ -218,7 +218,7 @@ public class LocalPartyAdapter implements PartyPort {
         for (String type : purposeTypes) {
             if (data.query(PartyContactMechPurpose.class, "select p from PartyContactMechPurpose p where p.partyId = ?1"
                     + " and p.contactMechId = ?2 and p.contactMechPurposeTypeId = ?3", partyId, newContactMechId, type)
-                    .isEmpty()) {
+                    .stream().noneMatch(p -> MarketingData.active(p.getFromDate(), p.getThruDate(), now))) {
                 PartyContactMechPurpose purpose = new PartyContactMechPurpose();
                 purpose.setPartyId(partyId);
                 purpose.setContactMechId(newContactMechId);

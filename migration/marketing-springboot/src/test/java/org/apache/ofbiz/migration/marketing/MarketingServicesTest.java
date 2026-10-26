@@ -282,6 +282,13 @@ class MarketingServicesTest {
             billing.setContactMechPurposeTypeId("BILLING_EMAIL");
             billing.setFromDate(Timestamp.from(Instant.now().minusSeconds(60)));
             entityManager.persist(billing);
+            PartyContactMechPurpose expired = new PartyContactMechPurpose();
+            expired.setPartyId((String) a.get("partyId"));
+            expired.setContactMechId((String) b.get("contactMechId"));
+            expired.setContactMechPurposeTypeId("PRIMARY_EMAIL");
+            expired.setFromDate(Timestamp.from(Instant.now().minusSeconds(120)));
+            expired.setThruDate(Timestamp.from(Instant.now().minusSeconds(60)));
+            entityManager.persist(expired);
         });
         Map<String, Object> merged = run("mergeContacts", Map.of("partyIdTo", a.get("partyId"),
                 "partyId", b.get("partyId"), "useEmail2", "Y", "emailContactMechId", b.get("contactMechId"),
