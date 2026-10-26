@@ -47,6 +47,8 @@ import org.springframework.test.web.servlet.MockMvc;
             "spring.datasource.password=",
             "spring.jpa.hibernate.ddl-auto=create-drop",
             "spring.jpa.open-in-view=false",
+            "migration.security.component=test",
+            "migration.security.require-https=false",
             "migration.security.service-permission-prefix=TEST",
             "migration.security.users[0].username=writer",
             "migration.security.users[0].password=writer-password",
@@ -70,7 +72,8 @@ import org.springframework.test.web.servlet.MockMvc;
             "migration.security.users[4].authorities[0]=OFBTOOLS_VIEW",
             "migration.security.users[4].authorities[1]=TEST_ADMIN",
             "migration.security.sensitive-entities[0]=Enumeration",
-            "migration.security.sensitive-entities[1]=PayHistory"
+            "migration.security.sensitive-entities[1]=PayHistory",
+            "migration.security.extra-entities[0]=GeoType"
         })
 @AutoConfigureMockMvc
 class MigrationCommonApiTest {
@@ -171,11 +174,11 @@ class MigrationCommonApiTest {
 
     @Test
     void requiresEveryConfiguredBaseAndComponentPermission() throws Exception {
-        mockMvc.perform(get("/api/test/entities/Geo")
+        mockMvc.perform(get("/api/test/entities/GeoType")
                         .with(httpBasic("ofbtools-only", "ofbtools-password")))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(get("/api/test/entities/Geo")
+        mockMvc.perform(get("/api/test/entities/GeoType")
                         .with(httpBasic("both", "both-password")))
                 .andExpect(status().isOk());
     }
