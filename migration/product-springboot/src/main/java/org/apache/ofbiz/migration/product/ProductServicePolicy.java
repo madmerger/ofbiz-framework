@@ -60,7 +60,11 @@ public class ProductServicePolicy {
             return declaredAction.toUpperCase(Locale.ROOT);
         }
         String normalized = serviceName.toLowerCase(Locale.ROOT);
-        return normalized.startsWith("find") || normalized.startsWith("get") ? "VIEW" : "UPDATE";
+        return normalized.endsWith("permissioncheck")
+                || normalized.startsWith("find")
+                || normalized.startsWith("get")
+                ? "VIEW"
+                : "UPDATE";
     }
 
     public String component(ProductServiceMetadata.ServiceMetadata metadata) {

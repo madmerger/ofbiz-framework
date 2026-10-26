@@ -44,11 +44,11 @@ class PermissionServicesTest {
         mockMvc.perform(post("/api/product/services/facilityPermissionCheck")
                         .with(user("facility").authorities(
                                 new SimpleGrantedAuthority("OFBTOOLS_VIEW"),
-                                new SimpleGrantedAuthority("FACILITY_UPDATE"),
-                                new SimpleGrantedAuthority("FACILITY_VIEW")))
+                                new SimpleGrantedAuthority("FACILITY_VIEW"),
+                                new SimpleGrantedAuthority("FACILITY_UPDATE")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"mainAction":"VIEW"}
+                                {"mainAction":"UPDATE"}
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.hasPermission").value(true));
@@ -59,15 +59,29 @@ class PermissionServicesTest {
         mockMvc.perform(post("/api/product/services/facilityPermissionCheck")
                         .with(user("facility").authorities(
                                 new SimpleGrantedAuthority("OFBTOOLS_VIEW"),
-                                new SimpleGrantedAuthority("FACILITY_VIEW"),
-                                new SimpleGrantedAuthority("FACILITY_UPDATE")))
+                                new SimpleGrantedAuthority("FACILITY_VIEW")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"mainAction":"DELETE","resourceDescription":"inventory"}
+                                {"mainAction":"UPDATE","resourceDescription":"inventory"}
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.hasPermission").value(false))
                 .andExpect(jsonPath("$.failMessage").value(
-                        org.hamcrest.Matchers.containsString("FACILITY_DELETE")));
+                        org.hamcrest.Matchers.containsString("FACILITY_UPDATE")));
+    }
+
+    @Test
+    void ac03_returnsTrueForTheAlternatePermission() throws Exception {
+        mockMvc.perform(post("/api/product/services/facilityPermissionCheck")
+                        .with(user("facility").authorities(
+                                new SimpleGrantedAuthority("OFBTOOLS_VIEW"),
+                                new SimpleGrantedAuthority("FACILITY_VIEW"),
+                                new SimpleGrantedAuthority("CATALOG_UPDATE")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"mainAction":"UPDATE","altPermission":"CATALOG"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.hasPermission").value(true));
     }
 }
