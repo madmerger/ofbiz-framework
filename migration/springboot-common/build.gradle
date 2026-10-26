@@ -49,7 +49,7 @@ def generatedRoot = layout.buildDirectory.dir('generated/sources/ofbiz2spring/ma
 def reportFile = layout.buildDirectory.file('generated/ofbiz2spring-report.json')
 
 tasks.register('generateCommonCatalog', Exec) {
-    inputs.files(modelFiles, serviceFiles)
+    inputs.files(modelFiles.files, serviceFiles.files)
     inputs.file(rootProject.file('migration/tools/ofbiz2spring.py'))
     inputs.file(rootProject.file('migration/tools/ofbiz_inventory.py'))
     outputs.dir(generatedRoot)
