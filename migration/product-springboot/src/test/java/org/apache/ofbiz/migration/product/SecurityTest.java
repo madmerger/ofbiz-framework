@@ -211,6 +211,26 @@ class SecurityTest {
         verify(entityAutoService, never()).execute(any(), anyMap());
     }
 
+    @Test
+    void ac11_entityReadsRequireTheEntityOwnersBasePermission() throws Exception {
+        var catalogUser = user("catalog")
+                .authorities(authorities("OFBTOOLS_VIEW", "CATALOG_VIEW"));
+        mockMvc.perform(get("/api/product/entities/Shipment").with(catalogUser))
+                .andExpect(status().isForbidden());
+        verify(entities, never()).findByEquality(any(), anyMap());
+        mockMvc.perform(get("/api/product/entities/shipment").with(catalogUser))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/product/entities/Product").with(catalogUser))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/product/entities/Product")
+                        .with(user("facility").authorities(authorities("OFBTOOLS_VIEW", "FACILITY_VIEW"))))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/product/entities/DefinitelyMissing")
+                        .with(user("tools-only").authorities(authorities("OFBTOOLS_VIEW"))))
+                .andExpect(status().isNotFound());
+    }
+
     private static GrantedAuthority[] authorities(String... names) {
         return java.util.Arrays.stream(names).map(SimpleGrantedAuthority::new).toArray(GrantedAuthority[]::new);
     }

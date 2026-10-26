@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.apache.ofbiz.migration.product;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Set;
 import org.apache.ofbiz.migration.common.MigrationSecurityProperties;
 import org.springframework.context.annotation.Bean;
@@ -35,26 +36,55 @@ public class ProductSecurityConfiguration {
     @Bean
     @Order(1)
     SecurityFilterChain productSecurityFilterChain(
-            HttpSecurity http, MigrationSecurityProperties properties) throws Exception {
+            HttpSecurity http,
+            MigrationSecurityProperties properties,
+            ProductEntityOwnership entityOwnership) throws Exception {
         http.securityMatcher("/api/**")
                 .csrf(csrf -> csrf.disable())
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize -> authorize.anyRequest()
                         .access((authentication, context) ->
-                                new AuthorizationDecision(hasApiAccess(authentication.get()))));
+                                new AuthorizationDecision(hasApiAccess(
+                                        authentication.get(), context.getRequest(), entityOwnership))));
         if (properties.isRequireHttps()) {
             http.requiresChannel(channel -> channel.anyRequest().requiresSecure());
         }
         return http.build();
     }
 
-    private static boolean hasApiAccess(Authentication authentication) {
+    private static boolean hasApiAccess(
+            Authentication authentication, HttpServletRequest request, ProductEntityOwnership entityOwnership) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return false;
         }
         Set<String> authorities = AuthorityUtils.authorityListToSet(authentication.getAuthorities());
-        return hasViewOrAdmin(authorities, "OFBTOOLS")
-                && (hasViewOrAdmin(authorities, "CATALOG") || hasViewOrAdmin(authorities, "FACILITY"));
+        if (!hasViewOrAdmin(authorities, "OFBTOOLS")) {
+            return false;
+        }
+        String entityName = entityName(request);
+        if (entityName != null) {
+            Set<String> owners = entityOwnership.ownerBases(entityName);
+            if (owners != null) {
+                return owners.stream().anyMatch(owner -> hasViewOrAdmin(authorities, owner));
+            }
+            return true;
+        }
+        return hasViewOrAdmin(authorities, "CATALOG") || hasViewOrAdmin(authorities, "FACILITY");
+    }
+
+    private static String entityName(HttpServletRequest request) {
+        if (!"GET".equalsIgnoreCase(request.getMethod())) {
+            return null;
+        }
+        String path = request.getRequestURI().substring(request.getContextPath().length());
+        String prefix = "/api/product/entities/";
+        if (!path.startsWith(prefix)) {
+            return null;
+        }
+        String remainder = path.substring(prefix.length());
+        int slash = remainder.indexOf('/');
+        String name = slash < 0 ? remainder : remainder.substring(0, slash);
+        return name.isBlank() ? null : name;
     }
 
     private static boolean hasViewOrAdmin(Set<String> authorities, String base) {
