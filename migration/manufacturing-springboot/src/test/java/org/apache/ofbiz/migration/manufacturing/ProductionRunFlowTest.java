@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.ofbiz.migration.common.MigrationException;
@@ -41,6 +42,8 @@ import org.springframework.transaction.annotation.Transactional;
 class ProductionRunFlowTest {
     @Autowired
     private MigrationServiceDispatcher dispatcher;
+    @Autowired
+    private ProductPort products;
     @Autowired
     private WorkEffortPort workEfforts;
 
@@ -62,6 +65,22 @@ class ProductionRunFlowTest {
         MigrationException missing = assertThrows(MigrationException.class, () -> call("createProductionRun", Map.of(
                 "productId", "MFG_FG", "startDate", start, "facilityId", "MFG_PLANT")));
         assertEquals(400, missing.getStatus().value());
+    }
+
+    @Test
+    void ac04_routingIdMustBelongToProductOrItsVariantParent() {
+        MigrationException unrelatedRouting = assertThrows(MigrationException.class,
+                () -> createRun("MFG_RAW1", "MFG_ROUTING"));
+        assertEquals(400, unrelatedRouting.getStatus().value());
+
+        Map<String, Object> ownRoutingRun = createRun("MFG_FG", "MFG_ROUTING");
+        assertEquals(2, taskIds(String.valueOf(ownRoutingRun.get("productionRunId"))).size());
+
+        products.createProductAssoc(Map.of(
+                "productId", "MFG_FG", "productIdTo", "MFG_RAW1",
+                "productAssocTypeId", "PRODUCT_VARIANT", "fromDate", Timestamp.from(Instant.now())));
+        Map<String, Object> variantRoutingRun = createRun("MFG_RAW1", "MFG_ROUTING");
+        assertEquals(2, taskIds(String.valueOf(variantRoutingRun.get("productionRunId"))).size());
     }
 
     @Test
@@ -156,11 +175,19 @@ class ProductionRunFlowTest {
     }
 
     private Map<String, Object> createRun(String productId) {
-        return call("createProductionRun", Map.of(
-                "productId", productId,
-                "pRQuantity", BigDecimal.ONE,
-                "startDate", Timestamp.from(Instant.now()),
-                "facilityId", "MFG_PLANT"));
+        return createRun(productId, null);
+    }
+
+    private Map<String, Object> createRun(String productId, String routingId) {
+        Map<String, Object> input = new LinkedHashMap<>();
+        input.put("productId", productId);
+        input.put("pRQuantity", BigDecimal.ONE);
+        input.put("startDate", Timestamp.from(Instant.now()));
+        input.put("facilityId", "MFG_PLANT");
+        if (routingId != null) {
+            input.put("routingId", routingId);
+        }
+        return call("createProductionRun", input);
     }
 
     private void printRun(String runId) {

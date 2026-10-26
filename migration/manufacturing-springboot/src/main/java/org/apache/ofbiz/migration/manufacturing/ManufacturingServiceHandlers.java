@@ -303,30 +303,54 @@ public class ManufacturingServiceHandlers {
     }
 
     private Map<String, Object> getProductRouting(Map<String, Object> input) {
-        String id = text(input.get("workEffortId"));
+        String productId = required(input, "productId");
+        String requestedWorkEffortId = text(input.get("workEffortId"));
         Timestamp requestedDate = timestamp(input.get("applicableDate"));
         Timestamp applicableDate = requestedDate == null ? Timestamp.from(Instant.now()) : requestedDate;
-        if (id.isBlank()) {
-            String productId = required(input, "productId");
-            List<Map<String, Object>> standards = workEfforts.findWorkEffortGoodStandards(
-                    Map.of("productId", productId, "workEffortGoodStdTypeId", "ROU_PROD_TEMPLATE"));
-            standards = standards.stream().filter(value -> activeOn(value, applicableDate)).toList();
-            if (!standards.isEmpty()) {
-                id = text(standards.get(0).get("workEffortId"));
-            } else if (!Boolean.TRUE.equals(input.get("ignoreDefaultRouting"))) {
-                id = "DEFAULT_ROUTING";
+        Map<String, Object> standardFilters = new LinkedHashMap<>();
+        standardFilters.put("productId", productId);
+        standardFilters.put("workEffortGoodStdTypeId", "ROU_PROD_TEMPLATE");
+        if (!requestedWorkEffortId.isBlank()) {
+            standardFilters.put("workEffortId", requestedWorkEffortId);
+        }
+        Map<String, Object> routingStandard = findRoutingStandard(standardFilters, applicableDate);
+        if (routingStandard == null) {
+            Map<String, Object> variantParent = products.findProductAssocs(Map.of(
+                    "productIdTo", productId, "productAssocTypeId", "PRODUCT_VARIANT"))
+                    .stream().filter(value -> activeOn(value, applicableDate)).findFirst().orElse(null);
+            if (variantParent != null) {
+                standardFilters.put("productId", text(variantParent.get("productId")));
+                routingStandard = findRoutingStandard(standardFilters, applicableDate);
             }
         }
-        Map<String, Object> routing = id.isBlank() ? null : workEfforts.findWorkEffort(id);
-        if (routing == null) {
-            throw badRequest("Manufacturing product routing not found");
+        Map<String, Object> routing;
+        if (routingStandard != null) {
+            routing = workEfforts.findWorkEffort(text(routingStandard.get("workEffortId")));
+        } else {
+            String ignoreDefaultRouting = text(input.get("ignoreDefaultRouting"));
+            routing = "Y".equalsIgnoreCase(ignoreDefaultRouting)
+                    ? null : workEfforts.findWorkEffort("DEFAULT_ROUTING");
         }
-        List<Map<String, Object>> tasks = workEfforts.findWorkEffortAssocs(Map.of(
-                "workEffortIdFrom", id, "workEffortAssocTypeId", "ROUTING_COMPONENT"));
-        tasks = tasks.stream().filter(value -> activeOn(value, applicableDate))
-                .sorted((left, right) -> decimal(left.get("sequenceNum")).compareTo(decimal(right.get("sequenceNum"))))
-                .toList();
-        return Map.of("workEffortId", id, "routing", routing, "tasks", tasks);
+        List<Map<String, Object>> tasks = null;
+        Map<String, Object> result = new LinkedHashMap<>();
+        if (routing != null) {
+            String workEffortId = text(routing.get("workEffortId"));
+            tasks = workEfforts.findWorkEffortAssocs(Map.of(
+                    "workEffortIdFrom", workEffortId, "workEffortAssocTypeId", "ROUTING_COMPONENT"));
+            tasks = tasks.stream().filter(value -> activeOn(value, applicableDate))
+                    .sorted((left, right) -> decimal(left.get("sequenceNum"))
+                            .compareTo(decimal(right.get("sequenceNum"))))
+                    .toList();
+            result.put("workEffortId", workEffortId);
+        }
+        result.put("routing", routing);
+        result.put("tasks", tasks);
+        return result;
+    }
+
+    private Map<String, Object> findRoutingStandard(Map<String, ?> filters, Timestamp date) {
+        return workEfforts.findWorkEffortGoodStandards(filters).stream()
+                .filter(value -> activeOn(value, date)).findFirst().orElse(null);
     }
 
     private Map<String, Object> getManufacturingComponents(Map<String, Object> input) {
@@ -367,9 +391,12 @@ public class ManufacturingServiceHandlers {
         } catch (MigrationException exception) {
             throw badRequest("Manufacturing routing not found for product " + productId);
         }
+        if (routing.get("routing") == null) {
+            throw badRequest("Manufacturing routing not found for product " + productId);
+        }
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> routingTasks = (List<Map<String, Object>>) routing.get("tasks");
-        if (routingTasks.isEmpty()) {
+        if (routingTasks == null || routingTasks.isEmpty()) {
             throw badRequest("Manufacturing routing has no tasks");
         }
         Map<String, Object> componentInput = Map.of("productId", productId, "quantity", quantity,
