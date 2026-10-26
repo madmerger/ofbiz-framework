@@ -9,12 +9,13 @@
 | `AccountingFlowTest` | 3 pass / 0 fail / 0 skip |
 | `AccountingSecurityTest` | 3 pass / 0 fail / 0 skip |
 | `AcctgTransServicesTest` | 10 pass / 0 fail / 0 skip |
-| `FinAccountServicesTest` | 35 pass / 0 fail / 0 skip |
+| `FinAccountServicesTest` | 38 pass / 0 fail / 0 skip |
 | `GeneralLedgerServicesTest` | 28 pass / 0 fail / 0 skip |
 | `PaymentGatewayConfigServicesTest` | 1 pass / 0 fail / 0 skip |
 | `PaymentMethodServicesTest` | 7 pass / 0 fail / 0 skip |
-| `HttpsSecurityTest` / `PostgresSmokeTest` / `SpringdocProfileTest` | 各1 pass / 0 fail / 0 skip |
-| 合計 | **590 pass / 0 fail / 0 skip** |
+| `HttpsSecurityTest` / `SpringdocProfileTest` | 各1 pass / 0 fail / 0 skip |
+| `PostgresSmokeTest` | 2 pass / 0 fail / 0 skip |
+| 合計 | **594 pass / 0 fail / 0 skip** |
 | local bootRun と `cases.json` の E2E 予行 | ID順に21/21ケースが期待どおり。予行後にサーバ停止を確認 |
 | inventory 再生成 | service 705、entity-auto 386、request 551、entity 147、指定 accounting entitymodel のview-entity 37 |
 

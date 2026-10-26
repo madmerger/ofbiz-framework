@@ -20,6 +20,9 @@ package org.apache.ofbiz.migration.accounting;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import java.math.BigDecimal;
 import java.util.Map;
 import org.apache.ofbiz.migration.common.EntityAutoService;
 import org.apache.ofbiz.migration.common.EntityRegistry;
@@ -30,6 +33,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -55,6 +59,9 @@ class PostgresSmokeTest {
     private EntityAutoService entityAuto;
 
     @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
     private EntityRegistry entities;
 
     @Autowired
@@ -71,5 +78,23 @@ class PostgresSmokeTest {
                 entities.entityClass("PaymentType"), Map.of("paymentTypeId", created.get("paymentTypeId")));
         assertNotNull(loaded);
         assertEquals("PostgreSQL accounting smoke", entities.get(loaded, "description"));
+    }
+
+    @Test
+    @Transactional
+    void takesPessimisticWriteLockOnFinAccountInPostgres() {
+        String accountId = "PG_FA_" + Long.toString(System.nanoTime(), 36);
+        Object account = entities.newEntity(entities.entityClass("FinAccount"));
+        entities.set(account, "finAccountId", accountId);
+        entities.set(account, "statusId", "FNACT_ACTIVE");
+        entities.set(account, "currencyUomId", "USD");
+        entities.set(account, "actualBalance", new BigDecimal("0.00"));
+        entities.set(account, "availableBalance", new BigDecimal("0.00"));
+        entityManager.persist(account);
+        entityManager.flush();
+
+        Object locked = entityManager.find(
+                entities.entityClass("FinAccount"), accountId, LockModeType.PESSIMISTIC_WRITE);
+        assertNotNull(locked);
     }
 }

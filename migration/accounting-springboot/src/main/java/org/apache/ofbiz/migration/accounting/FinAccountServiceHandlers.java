@@ -19,6 +19,7 @@ package org.apache.ofbiz.migration.accounting;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
@@ -174,21 +175,20 @@ public class FinAccountServiceHandlers {
     private Map<String, Object> createFinAccountTrans(Map<String, Object> input) {
         String id = sequences.nextId("FinAccountTrans");
         BigDecimal amount = new BigDecimal(required(input, "amount"));
-        Object account = requiredOne("FinAccount", "finAccountId", input);
+        String accountId = required(input, "finAccountId");
+        Object account = lockFinAccount(accountId);
         requireActiveForTransaction(account);
         Object trans = newEntity("FinAccountTrans");
         copy(trans, input, Set.of("finAccountTransId", "performedByPartyId"));
         entities.set(trans, "finAccountTransId", id);
-        entities.set(trans, "finAccountId", input.get("finAccountId"));
+        entities.set(trans, "finAccountId", accountId);
         entities.set(trans, "statusId", input.getOrDefault("statusId", "FINACT_TRNS_APPROVED"));
         entities.set(trans, "entryDate", input.getOrDefault("entryDate", now()));
         entities.set(trans, "transactionDate", input.getOrDefault("transactionDate", now()));
         entities.set(trans, "performedByPartyId", currentUserPartyId());
         entities.set(trans, "amount", round(amount));
         entityManager.persist(trans);
-        if ("FINACT_TRNS_APPROVED".equals(entities.get(trans, "statusId"))) {
-            updateBalancesFromTrans(Map.of("finAccountTransId", id));
-        }
+        updateBalancesForApprovedTransaction(trans);
         return Map.of("finAccountTransId", id);
     }
 
@@ -212,7 +212,7 @@ public class FinAccountServiceHandlers {
     /** Migrated from applications/accounting/minilang/finaccount/FinAccountServices.xml:221. */
     private Map<String, Object> createFinAccountAuth(Map<String, Object> input) {
         String id = sequences.nextId("FinAccountAuth");
-        requiredOne("FinAccount", "finAccountId", input);
+        lockFinAccount(required(input, "finAccountId"));
         BigDecimal amount = new BigDecimal(required(input, "amount"));
         Object auth = newEntity("FinAccountAuth");
         copy(auth, input, Set.of("finAccountAuthId"));
@@ -229,6 +229,7 @@ public class FinAccountServiceHandlers {
     private Map<String, Object> expireFinAccountAuth(Map<String, Object> input) {
         Object auth = requiredOne("FinAccountAuth", "finAccountAuthId", input);
         entities.set(auth, "thruDate", input.getOrDefault("expireDateTime", now()));
+        updateBalancesFromAuth(Map.of("finAccountAuthId", entities.get(auth, "finAccountAuthId")));
         return Map.of();
     }
 
@@ -265,6 +266,7 @@ public class FinAccountServiceHandlers {
                 throw badRequest("Invalid FinAccount transaction status change");
             }
             entities.set(trans, "statusId", newStatus);
+            updateBalancesForApprovedTransaction(trans);
         }
         if ("FINACT_TRNS_CANCELED".equals(newStatus)) {
             Map<String, Object> canceledTrans = Map.of(
@@ -483,6 +485,7 @@ public class FinAccountServiceHandlers {
             throw badRequest("Only created financial transactions can be reconciled");
         }
         entities.set(trans, "glReconciliationId", input.get("glReconciliationId"));
+        updateBalancesForApprovedTransaction(trans);
         for (Object payment : paymentsFor(trans)) {
             if (!Set.of("PMNT_SENT", "PMNT_RECEIVED", "PMNT_CONFIRMED").contains(text(entities.get(payment, "statusId")))) {
                 throw badRequest("Payment has an invalid status for reconciliation");
@@ -498,6 +501,7 @@ public class FinAccountServiceHandlers {
             throw badRequest("Only created transactions can be removed from reconciliation");
         }
         entities.set(trans, "glReconciliationId", null);
+        updateBalancesForApprovedTransaction(trans);
         return Map.of();
     }
 
@@ -517,6 +521,7 @@ public class FinAccountServiceHandlers {
         for (Object trans : AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("FinAccountTrans"),
                 Map.of("glReconciliationId", id, "statusId", "FINACT_TRNS_CREATED"))) {
             entities.set(trans, "glReconciliationId", null);
+            updateBalancesForApprovedTransaction(trans);
         }
         return Map.of();
     }
@@ -661,7 +666,7 @@ public class FinAccountServiceHandlers {
     }
 
     private void recalculateBalances(String accountId) {
-        Object account = requiredOne("FinAccount", "finAccountId", Map.of("finAccountId", accountId));
+        Object account = lockFinAccount(accountId);
         BigDecimal actual = BigDecimal.ZERO;
         List<?> transactions = AccountingEntityQueries.findByEquality(entityManager,
                 entities.entityClass("FinAccountTrans"), Map.of("finAccountId", accountId));
@@ -687,6 +692,18 @@ public class FinAccountServiceHandlers {
         }
         entities.set(account, "actualBalance", actual);
         entities.set(account, "availableBalance", available);
+    }
+
+    private Object lockFinAccount(String accountId) {
+        Object account = requiredOne("FinAccount", "finAccountId", Map.of("finAccountId", accountId));
+        entityManager.lock(account, LockModeType.PESSIMISTIC_WRITE);
+        return account;
+    }
+
+    private void updateBalancesForApprovedTransaction(Object trans) {
+        if ("FINACT_TRNS_APPROVED".equals(entities.get(trans, "statusId"))) {
+            updateBalancesFromTrans(Map.of("finAccountTransId", entities.get(trans, "finAccountTransId")));
+        }
     }
 
     private void createStatus(String id, String status, String oldStatus) {

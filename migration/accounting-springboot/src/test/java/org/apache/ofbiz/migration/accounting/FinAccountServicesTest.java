@@ -19,6 +19,7 @@ package org.apache.ofbiz.migration.accounting;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -30,6 +31,12 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.junit.jupiter.api.Test;
@@ -41,6 +48,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(classes = AccountingMigrationApplication.class)
@@ -125,6 +133,76 @@ class FinAccountServicesTest {
                 Map.of("finAccountId", "MIG_FA_AUTH_ECA")).get(0);
         assertEquals(new BigDecimal("0.00"), entities.get(account, "actualBalance"));
         assertEquals(new BigDecimal("-3.00"), entities.get(account, "availableBalance"));
+    }
+
+    @Test
+    void expiringFinAccountAuthRestoresAvailableBalance() throws Exception {
+        persistAccount("MIG_FA_AUTH_EXPIRE");
+        postService("createFinAccountAuth", "{\"finAccountId\":\"MIG_FA_AUTH_EXPIRE\",\"amount\":3.00}")
+                .andExpect(status().isOk());
+        Object authorization = entities.findByEquality(entities.entityClass("FinAccountAuth"),
+                Map.of("finAccountId", "MIG_FA_AUTH_EXPIRE")).get(0);
+        String authorizationId = entities.get(authorization, "finAccountAuthId").toString();
+        Object account = entities.findByEquality(entities.entityClass("FinAccount"),
+                Map.of("finAccountId", "MIG_FA_AUTH_EXPIRE")).get(0);
+        assertEquals(new BigDecimal("-3.00"), entities.get(account, "availableBalance"));
+
+        postService("expireFinAccountAuth", "{\"finAccountAuthId\":\"" + authorizationId + "\"}")
+                .andExpect(status().isOk());
+
+        assertEquals(new BigDecimal("0.00"), entities.get(account, "availableBalance"));
+    }
+
+    @Test
+    void approvingFinAccountTransUpdatesBalances() throws Exception {
+        persistAccount("MIG_FA_APPROVE");
+        persistTransaction("MIG_FA_APPROVE", "MIG_FA_APPROVE_TX", "DEPOSIT", "FINACT_TRNS_CREATED", "9.00");
+        persistValidStatusChange("FINACT_TRNS_CREATED", "FINACT_TRNS_APPROVED");
+        Object account = entities.findByEquality(entities.entityClass("FinAccount"),
+                Map.of("finAccountId", "MIG_FA_APPROVE")).get(0);
+        assertEquals(new BigDecimal("0.00"), entities.get(account, "actualBalance"));
+
+        postService("setFinAccountTransStatus", "{\"finAccountTransId\":\"MIG_FA_APPROVE_TX\","
+                + "\"statusId\":\"FINACT_TRNS_APPROVED\"}")
+                .andExpect(status().isOk());
+
+        assertEquals(new BigDecimal("9.00"), entities.get(account, "actualBalance"));
+        assertEquals(new BigDecimal("9.00"), entities.get(account, "availableBalance"));
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void concurrentTransactionAndAuthorizationCreationPreservesBothBalances() throws Exception {
+        String accountId = "MIG_FA_LOCK_" + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+        postService("createFinAccount", "{\"finAccountId\":\"" + accountId
+                + "\",\"statusId\":\"FNACT_ACTIVE\",\"currencyUomId\":\"USD\"}")
+                .andExpect(status().isOk());
+
+        CountDownLatch ready = new CountDownLatch(2);
+        CountDownLatch start = new CountDownLatch(1);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        Future<Integer> transaction = executor.submit(() -> postServiceAfterStart(
+                ready, start, "createFinAccountTrans", "{\"finAccountId\":\"" + accountId
+                        + "\",\"finAccountTransTypeId\":\"DEPOSIT\",\"amount\":10.00}"));
+        Future<Integer> authorization = executor.submit(() -> postServiceAfterStart(
+                ready, start, "createFinAccountAuth", "{\"finAccountId\":\"" + accountId
+                        + "\",\"amount\":4.00}"));
+        try {
+            assertTrue(ready.await(10, TimeUnit.SECONDS));
+            start.countDown();
+            assertEquals(200, transaction.get(30, TimeUnit.SECONDS));
+            assertEquals(200, authorization.get(30, TimeUnit.SECONDS));
+        } finally {
+            start.countDown();
+            executor.shutdownNow();
+        }
+
+        mockMvc.perform(get("/api/accounting/entities/FinAccount")
+                        .with(httpBasic("acct-admin", "test"))
+                        .param("finAccountId", accountId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].actualBalance").value(10.00))
+                .andExpect(jsonPath("$[0].availableBalance").value(6.00));
     }
 
     @Test
@@ -450,5 +528,14 @@ class FinAccountServicesTest {
                 .with(httpBasic("acct-admin", "test"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body));
+    }
+
+    private int postServiceAfterStart(
+            CountDownLatch ready, CountDownLatch start, String name, String body) throws Exception {
+        ready.countDown();
+        if (!start.await(10, TimeUnit.SECONDS)) {
+            throw new IllegalStateException("Timed out waiting to start concurrent FinAccount service");
+        }
+        return postService(name, body).andReturn().getResponse().getStatus();
     }
 }
