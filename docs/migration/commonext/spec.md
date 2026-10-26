@@ -39,7 +39,7 @@ API は `POST /api/commonext/services/{serviceName}`。entity-auto の追加サ�
 ### ノート作成・削除・一覧
 
 - 作成時に `noteName`、`noteDateTime`、`noteId` をサーバーで決める。未知キー・PK・stamp は無視する。
-- 文字列は `(?i)<[a-z!/]|javascript:|on[a-z]+\\s*=` を拒否し、`moreInfoUrl` は `/` で始まる相対 path（`//` は不可）か HTTP(S) URL のみ許可する。
+- 文字列は `(?i)<[a-z!/]|javascript:|on[a-z]+\\s*=` を拒否する。`moreInfoUrl` は `/` で始まる相対 path（`//` は不可）か HTTP(S) URL のみ許可し、ASCII 制御文字 (0x00-0x1F, 0x7F)、whitespace、バックスラッシュを含む URL は 400 とする。
 - 明示 `noteParty` が現在の party と異なる場合は作成権限として `COMMONEXT_PUBLMSG` または `SETUP_ADMIN` を要求する。他 party の SYSTEMNOTE 削除は `SETUP_ADMIN` のみ許可する。現在のユーザーに party が無ければ作成・一覧・削除一括・status は 403。`getLastSystemInfoNote` はレガシーの `_NA_` 検索を維持する。
 - 単件削除は `CustRequestItemNote`、`CustRequestNote`、`MarketingCampaignNote`、`OrderHeaderNote`、`PartyNote`、`QuoteNote`、`WorkEffortNote` を先に削除する。
 - 削除対象の `noteName` が `SYSTEMNOTE` でなければ、owner/admin 権限に関係なく 404 (`System note not found`) を返す。SYSTEMNOTE は owner または `SETUP_ADMIN` に限って削除し、他 party 分の削除に `COMMONEXT_PUBLMSG` は使えない。関連7表も削除する。OFBiz にない対象種別・アクセス制御を追加した。

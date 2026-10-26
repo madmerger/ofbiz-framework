@@ -234,6 +234,15 @@ public class SystemInfoNoteService implements SystemInfoNoteOperations {
     }
 
     private static boolean isSafeUrl(String value) {
+        boolean containsUnsafeCharacter = value.codePoints().anyMatch(codePoint ->
+                codePoint <= 0x1f
+                        || codePoint == 0x7f
+                        || Character.isWhitespace(codePoint)
+                        || Character.isSpaceChar(codePoint)
+                        || codePoint == '\\');
+        if (containsUnsafeCharacter) {
+            return false;
+        }
         return (value.startsWith("/") && !value.startsWith("//"))
                 || value.matches("(?i)^https?://[^\\s]+$");
     }

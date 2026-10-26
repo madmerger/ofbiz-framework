@@ -22,7 +22,7 @@
 | delete-all レスポンス | 空 success map | `deletedCount` を返す |
 | `getLastSystemInfoNote` | service `auth=false` | REST API は認証必須 |
 | multi 失敗 | 共通 runtime は HTTP 400 | HTTP 400 と全件 rollback。409 は適用しない |
-| 入力検証 | service に HTML / URL 制限なし | 指定 deny-list と URL scheme 制限を追加 |
+| 入力検証 | service に HTML / URL 制限なし | 指定 deny-list と URL scheme 制限に加え、ASCII 制御文字・whitespace・バックスラッシュを含む URL を 400 で拒否 |
 | status communication | view の CE.statusId に `COM_ROLE_COMPLETED` を比較 | レガシー条件を意図的に再現 |
 | latest note | 2件目・3件目の off-by-one | 互換性のため条件を再現 |
 | 認証 provider | OFBiz user login / permission data | Basic 認証と profile 定義の in-memory user |
@@ -35,7 +35,7 @@
 - `NoteData` は generic Entity API から除外し、ノートのアクセス制御を service 経由に限定する。readonly / admin の entity endpoint がともに 404 となることを確認する。
 - allowlist 内の機密 Entity `UserLogin` は `SETUP_SENSITIVE_VIEW` または `SETUP_ADMIN` を要求し、`currentPassword` を `[REDACTED]` にする。`CreditCard` / `PayHistory` は allowlist 外のため 404。
 - PostgreSQL HTTPS 必須時は信頼済み proxy CIDR を環境側で明示する。未指定の `a^` は信頼対象なし。
-- HTML/URL deny-list は移行仕様の保護措置であり、ブラウザ出力時の適切な escaping の代替ではない。
+- HTML/URL deny-list と URL の ASCII 制御文字・whitespace・バックスラッシュ拒否は移行仕様の保護措置であり、ブラウザ出力時の適切な escaping の代替ではない。
 
 ## 4. 実装差分 / 残作業
 

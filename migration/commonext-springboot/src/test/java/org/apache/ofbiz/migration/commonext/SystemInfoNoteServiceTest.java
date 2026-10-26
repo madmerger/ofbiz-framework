@@ -88,13 +88,17 @@ class SystemInfoNoteServiceTest {
     @Test
     @WithMockUser(username = "admin", authorities = {"SETUP_ADMIN"})
     void ac02createAcceptsExplicitSamePartyAndSafeHttpUrls() {
-        Map<String, Object> input = Map.of(
-                "noteParty", "admin",
-                "noteInfo", "Link",
-                "moreInfoUrl", "https://example.invalid/info");
-        Map<String, Object> result = service.createSystemInfoNote(input);
+        for (String url : List.of("/setup/control/main", "https://example.com/x")) {
+            Map<String, Object> input = Map.of(
+                    "noteParty", "admin",
+                    "noteInfo", "Link",
+                    "moreInfoUrl", url);
+            Map<String, Object> result = service.createSystemInfoNote(input);
 
-        assertEquals("admin", entityManager.find(NoteData.class, result.get("noteId")).getNoteParty());
+            NoteData saved = entityManager.find(NoteData.class, result.get("noteId"));
+            assertEquals("admin", saved.getNoteParty());
+            assertEquals(url, saved.getMoreInfoUrl());
+        }
     }
 
     @Test
@@ -110,8 +114,14 @@ class SystemInfoNoteServiceTest {
 
     @Test
     @WithMockUser(username = "admin", authorities = {"SETUP_ADMIN"})
-    void ac04createRejectsJavascriptAndProtocolRelativeUrls() {
-        for (String url : List.of("javascript:alert(1)", "//example.invalid/x", "data:text/html,x")) {
+    void ac04createRejectsUnsafeUrls() {
+        for (String url : List.of(
+                "javascript:alert(1)",
+                "//example.invalid/x",
+                "data:text/html,x",
+                "/\tjavascript:alert(1)",
+                "/\\evil.example",
+                "http://a b")) {
             MigrationException exception = assertThrows(
                     MigrationException.class, () -> service.createSystemInfoNote(
                             Map.of("moreInfoUrl", url)));
