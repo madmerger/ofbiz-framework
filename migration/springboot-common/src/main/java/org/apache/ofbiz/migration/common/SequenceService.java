@@ -18,8 +18,10 @@
  *******************************************************************************/
 package org.apache.ofbiz.migration.common;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,9 +51,24 @@ public class SequenceService {
     }
 
     public String nextSubSequence(String entityName, Map<String, ?> parentKeys, String sequenceField) {
-        List<?> rows = entityRegistry.findByEquality(entityRegistry.entityClass(entityName), parentKeys);
-        long max = rows.stream().map(row -> entityRegistry.get(row, sequenceField))
-                .filter(value -> value != null).mapToLong(value -> Long.parseLong(value.toString())).max().orElse(0);
+        Class<?> type = entityRegistry.entityClass(entityName);
+        List<String> keys = entityRegistry.primaryKeys(type);
+        if (!keys.contains(sequenceField)) {
+            throw new MigrationException(HttpStatus.BAD_REQUEST, "Not a primary key: " + sequenceField);
+        }
+        Map<String, Object> parent = new LinkedHashMap<>();
+        for (String key : keys) {
+            if (key.equals(sequenceField)) {
+                continue;
+            }
+            Object value = parentKeys.get(key);
+            if (value == null || value.toString().isBlank()) {
+                throw new MigrationException(HttpStatus.BAD_REQUEST, "Missing primary key: " + key);
+            }
+            parent.put(key, value);
+        }
+        Long maximum = entityRegistry.maxNumericFieldByEquality(type, sequenceField, parent);
+        long max = maximum == null ? 0 : maximum;
         return String.format("%05d", max + 1);
     }
 }
