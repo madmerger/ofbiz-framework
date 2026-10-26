@@ -1,0 +1,102 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+ext['testcontainers.version'] = '1.21.4'
+
+group = 'org.apache.ofbiz.migration'
+version = '0.1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':migration:springboot-common')
+    implementation project(':migration:springboot-datamodel')
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+def marketingModelFiles = rootProject.files('applications/datamodel/entitydef/marketing-entitymodel.xml')
+def marketingServiceFiles = rootProject.fileTree(rootProject.file('applications/marketing/servicedef')) {
+    include 'services*.xml'
+}
+def generatedRoot = layout.buildDirectory.dir('generated/sources/ofbiz2spring/main/java')
+def reportFile = layout.buildDirectory.file('generated/ofbiz2spring-report.json')
+
+tasks.register('generateMarketingCatalog', Exec) {
+    inputs.files(marketingModelFiles, marketingServiceFiles)
+    inputs.file(rootProject.file('migration/tools/ofbiz2spring.py'))
+    inputs.file(rootProject.file('migration/tools/ofbiz_inventory.py'))
+    outputs.dir(generatedRoot)
+    outputs.file(reportFile)
+
+    doFirst {
+        def arguments = [
+                'python3',
+                rootProject.file('migration/tools/ofbiz2spring.py').absolutePath,
+                '--out', generatedRoot.get().asFile.absolutePath,
+                '--entity-package', 'org.apache.ofbiz.migration.marketing.generated.unused.entity',
+                '--repository-package', 'org.apache.ofbiz.migration.marketing.generated.unused.repository',
+                '--service-package', 'org.apache.ofbiz.migration.marketing.generated',
+                '--report', reportFile.get().asFile.absolutePath
+        ]
+        marketingModelFiles.files.sort().each { File model ->
+            arguments.addAll(['--entity-model', model.absolutePath])
+        }
+        marketingServiceFiles.files.sort().each { File service ->
+            arguments.addAll(['--service-def', service.absolutePath])
+        }
+        commandLine arguments
+    }
+}
+
+sourceSets.main.java.srcDir(generatedRoot.map { it.file('org/apache/ofbiz/migration/marketing/generated') })
+tasks.named('compileJava') {
+    dependsOn tasks.named('generateMarketingCatalog')
+}
+
+tasks.named('test') {
+    maxHeapSize = "3g"
+    useJUnitPlatform()
+    systemProperty 'ofbiz.root', rootProject.projectDir.absolutePath
+}

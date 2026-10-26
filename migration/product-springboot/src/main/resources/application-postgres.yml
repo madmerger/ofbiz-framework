@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: ${PRODUCT_DB_URL:jdbc:postgresql://localhost:5432/product}
+    username: ${PRODUCT_DB_USERNAME:product}
+    password: ${PRODUCT_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+migration:
+  security:
+    require-https: true
+    trusted-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}'

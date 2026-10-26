@@ -1,0 +1,58 @@
+# Local integration testing only.
+spring:
+  datasource:
+    url: "${INTEGRATION_DB_URL:jdbc:postgresql://localhost:5432/ofbiz_integration}"
+    username: ${INTEGRATION_DB_USERNAME}
+    password: ${INTEGRATION_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+server:
+  port: 8082
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+migration:
+  security:
+    require-https: false
+    users:
+      - username: admin
+        password: ${PRODUCT_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_ADMIN
+          - CATALOG_ADMIN
+          - FACILITY_ADMIN
+          - PRODUCT_ADMIN
+          - PRODUCT_SENSITIVE_VIEW
+          - CATALOG_PRICE_MAINT
+          - CATALOG_VIEW
+          - CATALOG_CREATE
+          - CATALOG_UPDATE
+          - CATALOG_DELETE
+          - FACILITY_VIEW
+          - FACILITY_CREATE
+          - FACILITY_UPDATE
+          - FACILITY_DELETE
+      - username: readonly
+        password: ${PRODUCT_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+          - CATALOG_VIEW
+          - FACILITY_VIEW
+      - username: nofacility
+        password: ${PRODUCT_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+          - CATALOG_VIEW
+      - username: sensitive
+        password: ${PRODUCT_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+          - CATALOG_VIEW
+          - FACILITY_VIEW
+          - FACILITY_CREATE
+          - FACILITY_UPDATE
+          - PRODUCT_SENSITIVE_VIEW

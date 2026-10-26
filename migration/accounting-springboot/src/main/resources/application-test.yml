@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:accounting-test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+migration:
+  security:
+    require-https: false
+    users:
+      - username: acct-admin
+        password: test
+        authorities: [OFBTOOLS_VIEW, ACCOUNTING_ADMIN]
+      - username: acct-clerk
+        password: test
+        authorities: [OFBTOOLS_VIEW, ACCOUNTING_VIEW, ACCOUNTING_CREATE, ACCOUNTING_UPDATE, ACCOUNTING_DELETE]
+      - username: acct-viewer
+        password: test
+        authorities: [OFBTOOLS_VIEW, ACCOUNTING_VIEW]
+      - username: acct-sensitive
+        password: test
+        authorities: [OFBTOOLS_VIEW, ACCOUNTING_VIEW, ACCOUNTING_SENSITIVE_VIEW]
+      - username: acct-nobase
+        password: test
+        authorities: [OFBTOOLS_VIEW]

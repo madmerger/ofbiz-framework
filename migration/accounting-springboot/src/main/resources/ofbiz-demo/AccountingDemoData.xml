@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-engine-xml>
+    <Party partyId="MIG_DEMO_CUSTOMER" partyTypeId="PERSON" preferredCurrencyUomId="USD"/>
+    <Party partyId="MIG_DEMO_VENDOR" partyTypeId="PARTY_GROUP" preferredCurrencyUomId="USD"/>
+    <PartyRole partyId="MIG_DEMO_CUSTOMER" roleTypeId="CUSTOMER"/>
+    <PartyRole partyId="MIG_DEMO_CUSTOMER" roleTypeId="BILL_TO_CUSTOMER"/>
+    <PartyRole partyId="MIG_DEMO_VENDOR" roleTypeId="BILL_FROM_VENDOR"/>
+    <PartyRole partyId="MIG_DEMO_VENDOR" roleTypeId="INTERNAL_ORGANIZATIO"/>
+    <PartyAcctgPreference partyId="MIG_DEMO_VENDOR" baseCurrencyUomId="USD" cogsMethodId="COGS_AVG_COST"
+                          enableAccounting="Y"/>
+    <GlAccount glAccountId="120000" accountCode="120000" glAccountClassId="CURRENT_ASSET"
+               glAccountTypeId="ACCOUNTS_RECEIVABLE" glResourceTypeId="MONEY"
+               accountName="ACCOUNTS RECEIVABLE"/>
+    <GlAccount glAccountId="126000" accountCode="126000" glAccountClassId="CURRENT_LIABILITY"
+               glAccountTypeId="ACCREC_UNAPPLIED" glResourceTypeId="MONEY"
+               accountName="ACCOUNTS RECEIVABLE UNAPPLIED"/>
+    <GlAccount glAccountId="122000" accountCode="122000" glAccountClassId="CURRENT_ASSET"
+               glResourceTypeId="MONEY" accountName="PAYMENT CLEARING"/>
+    <GlAccount glAccountId="400000" accountCode="400000" glAccountClassId="REVENUE"
+               glResourceTypeId="MONEY" accountName="SALES"/>
+    <GlAccountOrganization organizationPartyId="MIG_DEMO_VENDOR" glAccountId="120000"
+                           fromDate="2001-01-01 00:00:00.0"/>
+    <GlAccountOrganization organizationPartyId="MIG_DEMO_VENDOR" glAccountId="126000"
+                           fromDate="2001-01-01 00:00:00.0"/>
+    <GlAccountOrganization organizationPartyId="MIG_DEMO_VENDOR" glAccountId="122000"
+                           fromDate="2001-01-01 00:00:00.0"/>
+    <GlAccountOrganization organizationPartyId="MIG_DEMO_VENDOR" glAccountId="400000"
+                           fromDate="2001-01-01 00:00:00.0"/>
+    <GlAccountTypeDefault organizationPartyId="MIG_DEMO_VENDOR"
+                          glAccountTypeId="ACCOUNTS_RECEIVABLE" glAccountId="120000"/>
+    <GlAccountTypeDefault organizationPartyId="MIG_DEMO_VENDOR"
+                          glAccountTypeId="ACCREC_UNAPPLIED" glAccountId="126000"/>
+    <GlAccountTypeDefault organizationPartyId="MIG_DEMO_VENDOR"
+                          glAccountTypeId="SALES_ACCOUNT" glAccountId="400000"/>
+    <PaymentGlAccountTypeMap organizationPartyId="MIG_DEMO_VENDOR"
+                              paymentTypeId="CUSTOMER_PAYMENT" glAccountTypeId="ACCREC_UNAPPLIED"/>
+    <PaymentMethodTypeGlAccount organizationPartyId="MIG_DEMO_VENDOR"
+                                paymentMethodTypeId="CREDIT_CARD" glAccountId="122000"/>
+    <Product productId="MIG_DEMO_PRODUCT_1" productTypeId="FINISHED_GOOD" internalName="Demo item one" description="Demo item one"/>
+    <Product productId="MIG_DEMO_PRODUCT_2" productTypeId="FINISHED_GOOD" internalName="Demo item two" description="Demo item two"/>
+    <ProductStore productStoreId="MIG_DEMO_STORE" storeName="Migration demo store" payToPartyId="MIG_DEMO_VENDOR" defaultCurrencyUomId="USD"/>
+    <OrderHeader orderId="MIG_DEMO_ORDER" orderTypeId="SALES_ORDER" currencyUom="USD" productStoreId="MIG_DEMO_STORE" statusId="ORDER_APPROVED"/>
+    <OrderRole orderId="MIG_DEMO_ORDER" partyId="MIG_DEMO_CUSTOMER" roleTypeId="BILL_TO_CUSTOMER"/>
+    <OrderRole orderId="MIG_DEMO_ORDER" partyId="MIG_DEMO_VENDOR" roleTypeId="BILL_FROM_VENDOR"/>
+    <OrderItem orderId="MIG_DEMO_ORDER" orderItemSeqId="00001" orderItemTypeId="PRODUCT_ORDER_ITEM" productId="MIG_DEMO_PRODUCT_1" quantity="1" unitPrice="10.00" itemDescription="Demo item one"/>
+    <OrderItem orderId="MIG_DEMO_ORDER" orderItemSeqId="00002" orderItemTypeId="PRODUCT_ORDER_ITEM" productId="MIG_DEMO_PRODUCT_2" quantity="1" unitPrice="20.00" itemDescription="Demo item two"/>
+    <PaymentMethodType paymentMethodTypeId="MIG_DEMO_CHECK" description="Migration test payment"/>
+    <PaymentMethod paymentMethodId="MIG_DEMO_PM" paymentMethodTypeId="CREDIT_CARD" partyId="MIG_DEMO_CUSTOMER" description="Test fixture" fromDate="2024-01-01 00:00:00.000"/>
+    <CreditCard paymentMethodId="MIG_DEMO_PM" cardType="VISA" cardNumber="4111111111111111" expireDate="2099-12" firstNameOnCard="Demo" lastNameOnCard="User"/>
+</entity-engine-xml>

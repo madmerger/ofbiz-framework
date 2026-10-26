@@ -1,0 +1,148 @@
+/*******************************************************************************
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+package org.apache.ofbiz.migration.accounting.adapter.local;
+
+import jakarta.persistence.EntityManager;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import org.apache.ofbiz.migration.accounting.AccountingEntityQueries;
+import org.apache.ofbiz.migration.accounting.InventoryAccountingPort;
+import org.apache.ofbiz.migration.common.EntityRegistry;
+import org.apache.ofbiz.migration.common.SequenceService;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+@Repository
+@Transactional
+public class LocalInventoryAccountingAdapter implements InventoryAccountingPort {
+    private final EntityRegistry entities;
+    private final EntityManager entityManager;
+    private final SequenceService sequences;
+
+    public LocalInventoryAccountingAdapter(
+            EntityRegistry entities, EntityManager entityManager, SequenceService sequences) {
+        this.entities = entities;
+        this.entityManager = entityManager;
+        this.sequences = sequences;
+    }
+
+    @Override
+    public Map<String, Object> findInventoryItem(String inventoryItemId) {
+        Object item = entities.findByPrimaryKey(
+                entities.entityClass("InventoryItem"), Map.of("inventoryItemId", inventoryItemId));
+        if (item == null) {
+            return null;
+        }
+        Map<String, Object> values = entities.toMap(item);
+        if (values.get("ownerPartyId") == null && values.get("facilityId") != null) {
+            Object facility = entities.findByPrimaryKey(
+                    entities.entityClass("Facility"), Map.of("facilityId", values.get("facilityId")));
+            if (facility != null) {
+                values.put("ownerPartyId", entities.get(facility, "ownerPartyId"));
+            }
+        }
+        return values;
+    }
+
+    @Override
+    public List<Map<String, Object>> findProductInventoryItems() {
+        return entityManager.createQuery("select item from InventoryItem item", Object.class)
+                .setMaxResults(10000).getResultList().stream().map(item -> {
+                    Map<String, Object> values = entities.toMap(item);
+                    Object productId = values.get("productId");
+                    Object product = productId == null ? null : entities.findByPrimaryKey(
+                            entities.entityClass("Product"), Map.of("productId", productId));
+                    if (product != null) {
+                        values.put("primaryProductCategoryId", entities.get(product, "primaryProductCategoryId"));
+                    }
+                    return values;
+                }).toList();
+    }
+
+    @Override
+    public BigDecimal averageCost(Map<String, Object> inventoryItem) {
+        Object ownerPartyId = inventoryItem.get("ownerPartyId");
+        if (ownerPartyId != null) {
+            Map<String, Object> filters = new LinkedHashMap<>();
+            filters.put("productAverageCostTypeId", "SIMPLE_AVG_COST");
+            filters.put("organizationPartyId", ownerPartyId);
+            filters.put("productId", inventoryItem.get("productId"));
+            filters.put("facilityId", inventoryItem.get("facilityId"));
+            List<?> costs = AccountingEntityQueries.findByEquality(
+                    entityManager, entities.entityClass("ProductAverageCost"), filters);
+            Date now = new Date();
+            for (Object cost : costs) {
+                Date fromDate = date(entities.get(cost, "fromDate"));
+                Date thruDate = date(entities.get(cost, "thruDate"));
+                if ((fromDate == null || !now.before(fromDate)) && (thruDate == null || now.before(thruDate))) {
+                    return decimal(entities.get(cost, "averageCost"));
+                }
+            }
+        }
+        return decimal(inventoryItem.get("unitCost"));
+    }
+
+    @Override
+    public Map<String, Object> createInventoryItemDetail(Map<String, Object> input) {
+        Object detail = entities.newEntity(entities.entityClass("InventoryItemDetail"));
+        Map<String, Object> fields = entities.toMap(detail);
+        for (String field : fields.keySet()) {
+            if (input.containsKey(field) && input.get(field) != null) {
+                entities.set(detail, field, input.get(field));
+            }
+        }
+        String inventoryItemId = input.get("inventoryItemId").toString();
+        String sequenceId = sequences.nextId("InventoryItemDetail");
+        entities.set(detail, "inventoryItemId", inventoryItemId);
+        entities.set(detail, "inventoryItemDetailSeqId", sequenceId);
+        Object issuanceId = input.get("itemIssuanceId");
+        if (issuanceId != null) {
+            Object issuance = entities.findByPrimaryKey(entities.entityClass("ItemIssuance"),
+                    Map.of("itemIssuanceId", issuanceId));
+            if (issuance != null) {
+                entities.set(detail, "effectiveDate", entities.get(issuance, "issuedDateTime"));
+            }
+        } else {
+            entities.set(detail, "effectiveDate", new Timestamp(System.currentTimeMillis()));
+        }
+        for (String field : List.of(
+                "availableToPromiseDiff", "quantityOnHandDiff", "accountingQuantityDiff")) {
+            if (entities.get(detail, field) == null) {
+                entities.set(detail, field, BigDecimal.ZERO);
+            }
+        }
+        entityManager.persist(detail);
+        return Map.of("inventoryItemDetailSeqId", sequenceId);
+    }
+
+    private static Date date(Object value) {
+        if (value instanceof Date date) {
+            return date;
+        }
+        return value == null ? null : java.sql.Timestamp.valueOf(value.toString());
+    }
+
+    private static BigDecimal decimal(Object value) {
+        return value == null ? BigDecimal.ZERO
+                : value instanceof BigDecimal amount ? amount : new BigDecimal(value.toString());
+    }
+}

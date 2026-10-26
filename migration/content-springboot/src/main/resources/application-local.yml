@@ -1,0 +1,49 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:content-local;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+server:
+  tomcat:
+    remoteip:
+      internal-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}'
+migration:
+  security:
+    require-https: false
+    # パスワードは環境変数 CONTENT_DEMO_PASSWORD から渡す（リポジトリには保存しない）
+    users:
+      - username: admin
+        password: ${CONTENT_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+          - OFBTOOLS_ADMIN
+          - CONTENTMGR_VIEW
+          - CONTENTMGR_ADMIN
+          - CONTENTMGR_SUPER_ADMIN
+          - CONTENTMGR_SENSITIVE_VIEW
+      - username: editor
+        password: ${CONTENT_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+          - CONTENTMGR_VIEW
+          - CONTENTMGR_CREATE
+          - CONTENTMGR_UPDATE
+          - CONTENTMGR_DELETE
+      - username: readonly
+        password: ${CONTENT_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+          - CONTENTMGR_VIEW
+      - username: auditor
+        password: ${CONTENT_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW
+          - CONTENTMGR_VIEW
+          - CONTENTMGR_SENSITIVE_VIEW
+      - username: nocontent
+        password: ${CONTENT_DEMO_PASSWORD}
+        authorities:
+          - OFBTOOLS_VIEW

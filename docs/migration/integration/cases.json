@@ -1,0 +1,283 @@
+{
+  "component": "shared-postgresql-integration",
+  "profile": "integration",
+  "users": {
+    "orderclerk": {"passwordEnv": "MIGRATION_DEMO_PASSWORD"},
+    "readonly": {"passwordEnv": "MIGRATION_DEMO_PASSWORD"},
+    "admin": {"passwordEnv": "PRODUCT_DEMO_PASSWORD"},
+    "acct-clerk": {"passwordEnv": "MIGRATION_DEMO_PASSWORD"}
+  },
+  "cases": [
+    {
+      "id": "INTEGRATION-01",
+      "name": "未認証の Order API は 401",
+      "request": {
+        "method": "GET",
+        "path": "http://localhost:8081/api/order/entities/OrderHeader",
+        "user": null,
+        "body": null
+      },
+      "expected": {"status": 401}
+    },
+    {
+      "id": "INTEGRATION-02",
+      "name": "閲覧専用ユーザーの Order 作成は 403",
+      "request": {
+        "method": "POST",
+        "path": "http://localhost:8081/api/order/services/storeOrder",
+        "user": "readonly",
+        "body": {
+          "partyId": "DemoCustomer",
+          "orderTypeId": "SALES_ORDER",
+          "productStoreId": "DEMO_ORDER_STORE",
+          "orderItems": [{"productId": "DEMO_ORDER_PRODUCT_1", "quantity": 2}]
+        }
+      },
+      "expected": {"status": 403}
+    },
+    {
+      "id": "INTEGRATION-03",
+      "name": "Order API で受注を作成",
+      "request": {
+        "method": "POST",
+        "path": "http://localhost:8081/api/order/services/storeOrder",
+        "user": "orderclerk",
+        "body": {
+          "partyId": "DemoCustomer",
+          "orderTypeId": "SALES_ORDER",
+          "productStoreId": "DEMO_ORDER_STORE",
+          "orderItems": [{"productId": "DEMO_ORDER_PRODUCT_1", "quantity": 2}]
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "orderId": "採番値（以降 {{orderId}}）",
+          "grandTotal": 50.0,
+          "statusId": "ORDER_CREATED"
+        }
+      }
+    },
+    {
+      "id": "INTEGRATION-04",
+      "name": "Order API で受注を承認",
+      "request": {
+        "method": "POST",
+        "path": "http://localhost:8081/api/order/services/changeOrderStatus",
+        "user": "orderclerk",
+        "body": {
+          "orderId": "{{orderId}}",
+          "statusId": "ORDER_APPROVED",
+          "setItemStatus": "Y"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "oldStatusId": "ORDER_CREATED",
+          "statusId": "ORDER_APPROVED"
+        }
+      }
+    },
+    {
+      "id": "INTEGRATION-05",
+      "name": "Product API で在庫を入荷（fromDate 省略）",
+      "request": {
+        "method": "POST",
+        "path": "http://localhost:8082/api/product/services/receiveInventoryProduct",
+        "user": "admin",
+        "body": {
+          "productId": "DEMO_ORDER_PRODUCT_1",
+          "facilityId": "E2E_WH",
+          "inventoryItemTypeId": "NON_SERIAL_INV_ITEM",
+          "quantityAccepted": 10,
+          "quantityRejected": 0,
+          "unitCost": 1.25
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "inventoryItemId": "採番値（非空）",
+          "receiptId": "採番値（非空）"
+        }
+      }
+    },
+    {
+      "id": "INTEGRATION-06",
+      "name": "Product API で受注分を在庫引当",
+      "request": {
+        "method": "POST",
+        "path": "http://localhost:8082/api/product/services/reserveProductInventoryByFacility",
+        "user": "admin",
+        "body": {
+          "productId": "DEMO_ORDER_PRODUCT_1",
+          "facilityId": "E2E_WH",
+          "orderId": "{{orderId}}",
+          "orderItemSeqId": "00001",
+          "shipGroupSeqId": "00001",
+          "quantity": 2,
+          "reserveOrderEnumId": "INVRO_FIFO_REC",
+          "requireInventory": "N"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {"quantityNotReserved": 0.0}
+      }
+    },
+    {
+      "id": "INTEGRATION-07",
+      "name": "Product API で受注を出荷",
+      "request": {
+        "method": "POST",
+        "path": "http://localhost:8082/api/product/services/quickShipEntireOrder",
+        "user": "admin",
+        "body": {"orderId": "{{orderId}}"}
+      },
+      "expected": {
+        "status": 200,
+        "values": {"shipmentIds": "1件（以降 {{shipmentId}}）"}
+      }
+    },
+    {
+      "id": "INTEGRATION-08",
+      "name": "Product API で Shipment が SHIPMENT_SHIPPED",
+      "request": {
+        "method": "GET",
+        "path": "http://localhost:8082/api/product/entities/Shipment/one?shipmentId={{shipmentId}}",
+        "user": "admin",
+        "body": null
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "primaryOrderId": "{{orderId}}",
+          "statusId": "SHIPMENT_SHIPPED"
+        }
+      }
+    },
+    {
+      "id": "INTEGRATION-09",
+      "name": "Accounting API で受注から請求書を作成",
+      "request": {
+        "method": "POST",
+        "path": "http://localhost:8083/api/accounting/services/createInvoiceForOrder",
+        "user": "acct-clerk",
+        "body": {"orderId": "{{orderId}}"}
+      },
+      "expected": {
+        "status": 200,
+        "values": {"invoiceId": "採番値（以降 {{invoiceId}}）"}
+      }
+    },
+    {
+      "id": "INTEGRATION-10",
+      "name": "Accounting API で請求書を READY にし、売上 GL を自動作成",
+      "request": {
+        "method": "POST",
+        "path": "http://localhost:8083/api/accounting/services/setInvoiceStatus",
+        "user": "acct-clerk",
+        "body": {"invoiceId": "{{invoiceId}}", "statusId": "INVOICE_READY"}
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "oldStatusId": "INVOICE_IN_PROCESS",
+          "invoiceTypeId": "SALES_INVOICE"
+        },
+        "afterCheck": "GET http://localhost:8083/api/accounting/entities/AcctgTrans?invoiceId={{invoiceId}} に invoiceId={{invoiceId}}, acctgTransTypeId=SALES_INVOICE が1件ある"
+      }
+    },
+    {
+      "id": "INTEGRATION-11",
+      "name": "Accounting API で入金を作成",
+      "request": {
+        "method": "POST",
+        "path": "http://localhost:8083/api/accounting/services/createPayment",
+        "user": "acct-clerk",
+        "body": {
+          "paymentTypeId": "CUSTOMER_PAYMENT",
+          "paymentMethodTypeId": "CREDIT_CARD",
+          "paymentMethodId": "MIG_DEMO_PM",
+          "partyIdFrom": "DemoCustomer",
+          "partyIdTo": "Company",
+          "currencyUomId": "USD",
+          "amount": "50.00",
+          "statusId": "PMNT_RECEIVED"
+        }
+      },
+      "expected": {
+        "status": 200,
+        "values": {"paymentId": "採番値（以降 {{paymentId}}）"}
+      }
+    },
+    {
+      "id": "INTEGRATION-12",
+      "name": "Accounting API で入金を請求書に適用",
+      "request": {
+        "method": "POST",
+        "path": "http://localhost:8083/api/accounting/services/createPaymentApplication",
+        "user": "acct-clerk",
+        "body": {"invoiceId": "{{invoiceId}}", "paymentId": "{{paymentId}}"}
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "amountApplied": 50.0,
+          "paymentApplicationId": "採番値",
+          "paymentTypeId": "CUSTOMER_PAYMENT"
+        }
+      }
+    },
+    {
+      "id": "INTEGRATION-13",
+      "name": "請求書が PAID、未適用額が 0",
+      "request": {
+        "method": "GET",
+        "path": "http://localhost:8083/api/accounting/entities/Invoice/one?invoiceId={{invoiceId}}",
+        "user": "acct-clerk",
+        "body": null
+      },
+      "expected": {
+        "status": 200,
+        "values": {"statusId": "INVOICE_PAID"},
+        "afterCheck": "POST http://localhost:8083/api/accounting/services/getInvoiceNotApplied body={\"invoiceId\":\"{{invoiceId}}\"} が notApplied=0.00 を返す"
+      }
+    },
+    {
+      "id": "INTEGRATION-14",
+      "name": "Accounting 後に Order ヘッダ状態を確認",
+      "request": {
+        "method": "GET",
+        "path": "http://localhost:8081/api/order/entities/OrderHeader/one?orderId={{orderId}}",
+        "user": "orderclerk",
+        "body": null
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "statusId": "ORDER_APPROVED",
+          "grandTotal": 50.0
+        }
+      }
+    },
+    {
+      "id": "INTEGRATION-15",
+      "name": "Accounting 後に Order item が完了状態",
+      "request": {
+        "method": "GET",
+        "path": "http://localhost:8081/api/order/entities/OrderItem?orderId={{orderId}}",
+        "user": "orderclerk",
+        "body": null
+      },
+      "expected": {
+        "status": 200,
+        "values": {
+          "orderItemSeqId": "00001",
+          "statusId": "ITEM_COMPLETED"
+        }
+      }
+    }
+  ]
+}

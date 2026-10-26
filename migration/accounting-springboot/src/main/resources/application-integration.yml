@@ -1,0 +1,31 @@
+# Local integration testing only.
+spring:
+  datasource:
+    url: "${INTEGRATION_DB_URL:jdbc:postgresql://localhost:5432/ofbiz_integration}"
+    username: ${INTEGRATION_DB_USERNAME}
+    password: ${INTEGRATION_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+server:
+  port: 8083
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+migration:
+  security:
+    require-https: false
+    users:
+      - username: acct-admin
+        authorities: [OFBTOOLS_VIEW, ACCOUNTING_ADMIN]
+      - username: acct-clerk
+        authorities: [OFBTOOLS_VIEW, ACCOUNTING_VIEW, ACCOUNTING_CREATE, ACCOUNTING_UPDATE, ACCOUNTING_DELETE]
+      - username: acct-viewer
+        authorities: [OFBTOOLS_VIEW, ACCOUNTING_VIEW]
+      - username: acct-sensitive
+        authorities: [OFBTOOLS_VIEW, ACCOUNTING_VIEW, ACCOUNTING_SENSITIVE_VIEW]
+      - username: acct-nobase
+        authorities: [OFBTOOLS_VIEW]

@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:commonext-test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+
+migration:
+  security:
+    require-https: false
+    users:
+      - username: admin
+        password: commonext-test-password
+        authorities:
+          - OFBTOOLS_VIEW
+          - SETUP_ADMIN
+          - COMMONEXT_PUBLMSG
+          - SETUP_SENSITIVE_VIEW
+      - username: editor
+        password: commonext-test-password
+        authorities:
+          - OFBTOOLS_VIEW
+          - SETUP_VIEW
+          - SETUP_UPDATE
+          - SETUP_SENSITIVE_VIEW
+      - username: readonly
+        password: commonext-test-password
+        authorities:
+          - OFBTOOLS_VIEW
+          - SETUP_VIEW
+      - username: nosetup
+        password: commonext-test-password
+        authorities:
+          - OFBTOOLS_VIEW

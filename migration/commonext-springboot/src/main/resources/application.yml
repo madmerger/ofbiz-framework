@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: commonext-springboot
+  datasource:
+    url: jdbc:h2:mem:commonext;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  security:
+    user:
+      name: disabled
+      password: disabled
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+migration:
+  security:
+    component: commonext
+    base-permissions:
+      - OFBTOOLS
+      - SETUP
+    service-permission-prefix: SETUP
+    trusted-proxies: ${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}
+    extra-entities:
+      - ProductStore
+      - Facility
+      - WebSite
+      - Party
+      - PartyRole
+      - PartyGroup
+      - ProdCatalog
+      - ProductCategory
+      - Product
+      - UserLogin
+    sensitive-entities:
+      - UserLogin
+      - UserLoginHistory
+      - UserLoginPasswordHistory
+      - UserLoginSession
+      - CreditCard
+      - EftAccount
+      - GiftCard
+      - CheckAccount
+      - PaymentMethod
+      - PayPalPaymentMethod
+      - BillingAccount
+      - FinAccount
+      - FinAccountTrans
+      - PaymentGatewayResponse
+      - PaymentGatewayConfig
+      - PaymentGatewayConfigType
+      - PaymentGatewayRespMsg
+      - PayHistory
+      - PayrollPreference
+      - SalaryStep
+      - PayGrade
+      - PartyBenefit
+      - UnemploymentClaim
+      - X509IssuerProvision
+    users: []
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
