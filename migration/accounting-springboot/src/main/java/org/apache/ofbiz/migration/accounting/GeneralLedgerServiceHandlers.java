@@ -32,6 +32,7 @@ import java.util.Set;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
+import org.apache.ofbiz.migration.common.SequenceService;
 import org.apache.ofbiz.migration.common.ServiceHandlerRegistry;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -48,6 +49,7 @@ public class GeneralLedgerServiceHandlers {
     private final PartyAccountingPort parties;
     private final ProductPort products;
     private final MigrationServiceDispatcher dispatcher;
+    private final SequenceService sequences;
     private final ServiceHandlerRegistry registry;
 
     public GeneralLedgerServiceHandlers(
@@ -57,6 +59,7 @@ public class GeneralLedgerServiceHandlers {
             PartyAccountingPort parties,
             ProductPort products,
             MigrationServiceDispatcher dispatcher,
+            SequenceService sequences,
             ServiceHandlerRegistry registry) {
         this.entityManager = entityManager;
         this.entities = entities;
@@ -64,6 +67,7 @@ public class GeneralLedgerServiceHandlers {
         this.parties = parties;
         this.products = products;
         this.dispatcher = dispatcher;
+        this.sequences = sequences;
         this.registry = registry;
     }
 
@@ -96,7 +100,21 @@ public class GeneralLedgerServiceHandlers {
 
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:25. */
     private Map<String, Object> quickCreate(Map<String, Object> input) {
-        return Map.of();
+        String transactionId = createTransactionHeader(input);
+        Map<String, Object> debitEntry = new LinkedHashMap<>(input);
+        debitEntry.put("acctgTransId", transactionId);
+        debitEntry.put("glAccountId", required(input, "debitGlAccountId"));
+        debitEntry.put("debitCreditFlag", "D");
+        debitEntry.put("acctgTransEntryTypeId", "_NA_");
+        createTransactionEntry(debitEntry);
+
+        Map<String, Object> creditEntry = new LinkedHashMap<>(input);
+        creditEntry.put("acctgTransId", transactionId);
+        creditEntry.put("glAccountId", required(input, "creditGlAccountId"));
+        creditEntry.put("debitCreditFlag", "C");
+        creditEntry.put("acctgTransEntryTypeId", "_NA_");
+        createTransactionEntry(creditEntry);
+        return Map.of("acctgTransId", transactionId);
     }
 
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:59. */
@@ -228,7 +246,7 @@ public class GeneralLedgerServiceHandlers {
             if (roles.isEmpty()) {
                 continue;
             }
-            Object preference = findOne("PartyAcctgPreference", Map.of("organizationPartyId", organization));
+            Object preference = findOne("PartyAcctgPreference", Map.of("partyId", organization));
             if (preference != null && "N".equals(entities.get(preference, "enableAccounting"))) {
                 return Map.of();
             }
@@ -236,6 +254,13 @@ public class GeneralLedgerServiceHandlers {
             if (amount == null && entry.get("origAmount") != null) {
                 String originalCurrency = text(entry.get("origCurrencyUomId"));
                 Object baseCurrency = preference == null ? null : entities.get(preference, "baseCurrencyUomId");
+                if (originalCurrency == null && baseCurrency != null) {
+                    originalCurrency = baseCurrency.toString();
+                    entry.put("origCurrencyUomId", originalCurrency);
+                }
+                if (baseCurrency != null) {
+                    entry.put("currencyUomId", baseCurrency);
+                }
                 if (originalCurrency != null && baseCurrency != null && !originalCurrency.equals(baseCurrency)) {
                     return Map.of();
                 }
@@ -252,7 +277,28 @@ public class GeneralLedgerServiceHandlers {
         if (normalized.isEmpty()) {
             return Map.of();
         }
-        return Map.of();
+        String transactionId = createTransactionHeader(input);
+        for (Map<String, Object> entry : normalized) {
+            Map<String, Object> values = new LinkedHashMap<>(entry);
+            values.put("acctgTransId", transactionId);
+            BigDecimal original = decimal(values.get("origAmount"));
+            if (original.signum() < 0) {
+                values.put("origAmount", original.abs());
+                if (values.get("amount") != null) {
+                    values.put("amount", decimal(values.get("amount")).abs());
+                }
+                if ("D".equals(values.get("debitCreditFlag"))) {
+                    values.put("debitCreditFlag", "C");
+                } else if ("C".equals(values.get("debitCreditFlag"))) {
+                    values.put("debitCreditFlag", "D");
+                }
+            }
+            if (values.get("origAmount") == null && values.get("amount") != null) {
+                values.put("origAmount", values.get("amount"));
+            }
+            createTransactionEntry(values);
+        }
+        return Map.of("acctgTransId", transactionId);
     }
 
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:543. */
@@ -653,8 +699,60 @@ public class GeneralLedgerServiceHandlers {
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:2459. */
     private Map<String, Object> copyTransaction(Map<String, Object> input) {
         String sourceId = required(input, "fromAcctgTransId");
-        requireOne("AcctgTrans", Map.of("acctgTransId", sourceId));
-        return Map.of();
+        Object source = requireOne("AcctgTrans", Map.of("acctgTransId", sourceId));
+        Map<String, Object> header = new LinkedHashMap<>(entities.toMap(source));
+        header.remove("acctgTransId");
+        header.remove("createdDate");
+        header.remove("createdByUserLogin");
+        header.remove("lastModifiedDate");
+        header.remove("lastModifiedByUserLogin");
+        header.put("transactionDate", Timestamp.from(Instant.now()));
+        String transactionId = createTransactionHeader(header);
+        List<?> entries = entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+                Map.of("acctgTransId", sourceId));
+        boolean revert = "Y".equals(input.get("revert"));
+        for (Object entry : entries) {
+            Map<String, Object> values = new LinkedHashMap<>(entities.toMap(entry));
+            values.remove("acctgTransEntrySeqId");
+            values.put("acctgTransId", transactionId);
+            String debitCreditFlag = text(values.get("debitCreditFlag"));
+            if (revert && "D".equals(debitCreditFlag)) {
+                values.put("debitCreditFlag", "C");
+            } else if (revert && "C".equals(debitCreditFlag)) {
+                values.put("debitCreditFlag", "D");
+            }
+            createTransactionEntry(values);
+        }
+        return Map.of("acctgTransId", transactionId);
+    }
+
+    private String createTransactionHeader(Map<String, Object> values) {
+        Object transaction = entities.newEntity(entities.entityClass("AcctgTrans"));
+        Set<String> fields = entities.toMap(transaction).keySet();
+        values.forEach((name, value) -> {
+            if (fields.contains(name) && value != null && !Set.of("acctgTransId", "isPosted").contains(name)) {
+                entities.set(transaction, name, value);
+            }
+        });
+        entities.set(transaction, "acctgTransId", sequences.nextId("AcctgTrans"));
+        entities.set(transaction, "isPosted", "N");
+        if (entities.get(transaction, "transactionDate") == null) {
+            entities.set(transaction, "transactionDate", Timestamp.from(Instant.now()));
+        }
+        entityManager.persist(transaction);
+        entityManager.flush();
+        return text(entities.get(transaction, "acctgTransId"));
+    }
+
+    private void createTransactionEntry(Map<String, Object> values) {
+        Set<String> fields = entities.toMap(entities.newEntity(entities.entityClass("AcctgTransEntry"))).keySet();
+        Map<String, Object> entry = new LinkedHashMap<>();
+        values.forEach((name, value) -> {
+            if (fields.contains(name) && value != null) {
+                entry.put(name, value);
+            }
+        });
+        dispatcher.execute(COMPONENT, "createAcctgTransEntry", entry);
     }
 
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:2779. */

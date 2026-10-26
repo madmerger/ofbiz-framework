@@ -22,10 +22,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import java.sql.Timestamp;
 import java.util.Map;
 import org.apache.ofbiz.migration.common.EntityRegistry;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -49,12 +51,22 @@ class GeneralLedgerServicesTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Test
-    void quickCreateAcctgTransAndEntriesSkipsTheUnportedTransactionCreationCall() throws Exception {
+    void quickCreateAcctgTransAndEntriesPersistsHeaderAndOffsettingEntries() throws Exception {
         persist("GlAccount", Map.of("glAccountId", "MIG_GL_DEBIT"));
         persist("GlAccount", Map.of("glAccountId", "MIG_GL_CREDIT"));
-        post("quickCreateAcctgTransAndEntries", "{\"debitGlAccountId\":\"MIG_GL_DEBIT\","
-                + "\"creditGlAccountId\":\"MIG_GL_CREDIT\",\"amount\":\"10.00\"}").andExpect(status().isOk());
+        ensureInternalOrganizationRole();
+        String response = post("quickCreateAcctgTransAndEntries", "{\"organizationPartyId\":\"MIG_DEMO_VENDOR\","
+                + "\"debitGlAccountId\":\"MIG_GL_DEBIT\",\"creditGlAccountId\":\"MIG_GL_CREDIT\","
+                + "\"amount\":\"10.00\"}").andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String transactionId = objectMapper.readTree(response).get("acctgTransId").asText();
+        Assertions.assertEquals(1, entities.findByEquality(entities.entityClass("AcctgTrans"),
+                Map.of("acctgTransId", transactionId)).size());
+        Assertions.assertEquals(2, entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+                Map.of("acctgTransId", transactionId)).size());
     }
 
     @Test
@@ -112,6 +124,24 @@ class GeneralLedgerServicesTest {
     void createAcctgTransAndEntriesReturnsWithoutCreatingAnEmptyTransaction() throws Exception {
         post("createAcctgTransAndEntries", "{\"acctgTransEntries\":[]}")
                 .andExpect(status().isOk()).andExpect(jsonPath("$.acctgTransId").doesNotExist());
+    }
+
+    @Test
+    void createAcctgTransAndEntriesPersistsHeaderAndEntries() throws Exception {
+        ensureInternalOrganizationRole();
+        persist("GlAccount", Map.of("glAccountId", "MIG_GL_CREATE_DEBIT"));
+        persist("GlAccount", Map.of("glAccountId", "MIG_GL_CREATE_CREDIT"));
+        String response = post("createAcctgTransAndEntries", "{\"acctgTransEntries\":["
+                + "{\"organizationPartyId\":\"MIG_DEMO_VENDOR\",\"debitCreditFlag\":\"D\","
+                + "\"glAccountId\":\"MIG_GL_CREATE_DEBIT\",\"amount\":\"10.00\"},"
+                + "{\"organizationPartyId\":\"MIG_DEMO_VENDOR\",\"debitCreditFlag\":\"C\","
+                + "\"glAccountId\":\"MIG_GL_CREATE_CREDIT\",\"amount\":\"10.00\"}]}")
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String transactionId = objectMapper.readTree(response).get("acctgTransId").asText();
+        Assertions.assertEquals(1, entities.findByEquality(entities.entityClass("AcctgTrans"),
+                Map.of("acctgTransId", transactionId)).size());
+        Assertions.assertEquals(2, entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+                Map.of("acctgTransId", transactionId)).size());
     }
 
     @Test
@@ -216,10 +246,22 @@ class GeneralLedgerServicesTest {
     }
 
     @Test
-    void copyAcctgTransAndEntriesSkipsTheUnportedTransactionCreationCall() throws Exception {
+    void copyAcctgTransAndEntriesPersistsCopiedTransactionAndEntries() throws Exception {
         transaction("MIG_GL_COPY_SOURCE", "N");
-        post("copyAcctgTransAndEntries", "{\"fromAcctgTransId\":\"MIG_GL_COPY_SOURCE\"}")
-                .andExpect(status().isOk());
+        persist("GlAccount", Map.of("glAccountId", "MIG_GL_COPY_DEBIT"));
+        persist("AcctgTransEntry", Map.of("acctgTransId", "MIG_GL_COPY_SOURCE",
+                "acctgTransEntrySeqId", "00001", "organizationPartyId", "MIG_DEMO_VENDOR",
+                "glAccountId", "MIG_GL_COPY_DEBIT", "debitCreditFlag", "D", "amount", "2.00"));
+        String response = post("copyAcctgTransAndEntries",
+                "{\"fromAcctgTransId\":\"MIG_GL_COPY_SOURCE\",\"revert\":\"Y\"}")
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String copiedTransactionId = objectMapper.readTree(response).get("acctgTransId").asText();
+        Assertions.assertNotEquals("MIG_GL_COPY_SOURCE", copiedTransactionId);
+        Assertions.assertEquals(1, entities.findByEquality(entities.entityClass("AcctgTrans"),
+                Map.of("acctgTransId", copiedTransactionId)).size());
+        Object copiedEntry = entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+                Map.of("acctgTransId", copiedTransactionId)).get(0);
+        Assertions.assertEquals("C", entities.get(copiedEntry, "debitCreditFlag"));
     }
 
     @Test
@@ -273,6 +315,13 @@ class GeneralLedgerServicesTest {
     private void transaction(String id, String posted) {
         persist("AcctgTrans", Map.of("acctgTransId", id, "isPosted", posted,
                 "transactionDate", Timestamp.valueOf("2025-01-01 00:00:00")));
+    }
+
+    private void ensureInternalOrganizationRole() {
+        if (entities.findByEquality(entities.entityClass("PartyRole"), Map.of(
+                "partyId", "MIG_DEMO_VENDOR", "roleTypeId", "INTERNAL_ORGANIZATIO")).isEmpty()) {
+            persist("PartyRole", Map.of("partyId", "MIG_DEMO_VENDOR", "roleTypeId", "INTERNAL_ORGANIZATIO"));
+        }
     }
 
     private Object persist(String entityName, Map<String, ?> values) {

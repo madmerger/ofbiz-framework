@@ -103,7 +103,7 @@ public class AcctgTransServiceHandlers {
         if (blank(entities.get(entry, "currencyUomId"))) {
             String organizationPartyId = text(input.get("organizationPartyId"));
             Object preference = organizationPartyId == null ? null : findOne(
-                    "PartyAcctgPreference", Map.of("organizationPartyId", organizationPartyId));
+                    "PartyAcctgPreference", Map.of("partyId", organizationPartyId));
             Object baseCurrency = preference == null ? null : entities.get(preference, "baseCurrencyUomId");
             if (baseCurrency != null) {
                 entities.set(entry, "currencyUomId", baseCurrency);
