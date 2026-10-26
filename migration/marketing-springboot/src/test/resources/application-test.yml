@@ -1,0 +1,20 @@
+# テスト専用ユーザー（パスワードはテスト用の固定値。本番・local では使わない）
+migration:
+  security:
+    require-https: false
+    users:
+      - username: admin
+        password: admin
+        authorities: [OFBTOOLS_VIEW, MARKETING_VIEW, MARKETING_ADMIN]
+      - username: marketer
+        password: marketer
+        authorities: [OFBTOOLS_VIEW, MARKETING_VIEW, MARKETING_CREATE, MARKETING_UPDATE, MARKETING_DELETE]
+      - username: readonly
+        password: readonly
+        authorities: [OFBTOOLS_VIEW, MARKETING_VIEW]
+      - username: sensitive
+        password: sensitive
+        authorities: [OFBTOOLS_VIEW, MARKETING_VIEW, MARKETING_SENSITIVE_VIEW]
+      - username: nomarketing
+        password: nomarketing
+        authorities: [OFBTOOLS_VIEW]

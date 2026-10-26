@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
 /** Uses the default profile as-is: HTTPS required and springdoc disabled. */
-@SpringBootTest(classes = {MarketingMigrationApplication.class, TestUsersConfiguration.class})
+@SpringBootTest(classes = MarketingMigrationApplication.class)
 @AutoConfigureMockMvc
 class HttpsAndDocsProfileTest {
 

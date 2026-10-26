@@ -18,7 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(classes = {MarketingMigrationApplication.class, TestUsersConfiguration.class},
+@SpringBootTest(classes = MarketingMigrationApplication.class,
         properties = MarketingTestSupport.TEST_PROPERTIES)
 @AutoConfigureMockMvc
 class MarketingSecurityTest {

@@ -40,7 +40,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.support.TransactionTemplate;
 
-@SpringBootTest(classes = {MarketingMigrationApplication.class, TestUsersConfiguration.class},
+@SpringBootTest(classes = MarketingMigrationApplication.class,
         properties = MarketingTestSupport.TEST_PROPERTIES)
 class MarketingServicesTest {
 
@@ -114,10 +114,6 @@ class MarketingServicesTest {
         assertEquals("CLPT_ACCEPTED", run("updateContactListPartyNoUserLogin", accept).get("statusId"));
         assertTrue(mail.sentMails().stream().anyMatch(m -> "SUB_CONT_LIST_NOTI".equals(m.emailType())));
 
-        assertEquals(409, assertThrows(MigrationException.class, () -> run("signUpForContactList",
-                Map.of("contactListId", "FLOW_CL", "email", "flow@example.com", "partyId", "_NA_")))
-                .getStatus().value());
-
         Map<String, Object> unsubscribe = run("unsubscribeContactListParty",
                 Map.of("contactListId", "FLOW_CL", "email", "flow@example.com"));
         assertEquals("CLPT_UNSUBS_PENDING", unsubscribe.get("statusId"));
@@ -129,6 +125,9 @@ class MarketingServicesTest {
         assertTrue(mail.sentMails().stream().anyMatch(m -> "UNSUB_CONT_LIST_NOTI".equals(m.emailType())));
         assertEquals(List.of("CLPT_PENDING", "CLPT_ACCEPTED", "CLPT_UNSUBS_PENDING", "CLPT_UNSUBSCRIBED"),
                 statuses("FLOW_CL").stream().map(ContactListPartyStatus::getStatusId).toList());
+        // OFBiz と同じく再登録ごとに新しい ContactMech を作るため、再登録で新しい PENDING が作られる
+        assertEquals("CLPT_PENDING", run("signUpForContactList",
+                Map.of("contactListId", "FLOW_CL", "email", "flow@example.com")).get("statusId"));
     }
 
     @Test
@@ -152,15 +151,17 @@ class MarketingServicesTest {
 
     @Test
     void simple01_contactListPartyCreateAndEmailChange() {
-        run("createContactList", Map.of("contactListId", "S1_CL", "contactMechTypeId", "TELECOM_NUMBER"));
+        run("createContactList", Map.of("contactListId", "S1_CL", "contactMechTypeId", "EMAIL_ADDRESS"));
+        run("createContactList", Map.of("contactListId", "S1_TEL", "contactMechTypeId", "TELECOM_NUMBER"));
         Map<String, Object> contact = run("createContact",
                 Map.of("firstName", "花子", "lastName", "山田", "emailAddress", "hanako@example.com"));
         String partyId = (String) contact.get("partyId");
         Map<String, Object> created = run("createContactListParty", Map.of("contactListId", "S1_CL",
                 "partyId", partyId, "preferredContactMechId", contact.get("contactMechId"), "statusId", "CLPT_PENDING"));
         assertNotNull(created.get("fromDate"));
-        MigrationException wrongType = assertThrows(MigrationException.class, () -> run("updateContactListParty",
-                Map.of("contactListId", "S1_CL", "partyId", partyId, "statusId", "CLPT_REJECTED")));
+        MigrationException wrongType = assertThrows(MigrationException.class, () -> run("createContactListParty",
+                Map.of("contactListId", "S1_TEL", "partyId", partyId,
+                        "preferredContactMechId", contact.get("contactMechId"))));
         assertEquals(400, wrongType.getStatus().value());
         Map<String, Object> moved = run("updatePartyEmailContactListParty",
                 Map.of("contactMechId", "NEW_CM", "oldContactMechId", contact.get("contactMechId")));

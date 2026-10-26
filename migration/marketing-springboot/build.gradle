@@ -78,6 +78,7 @@ tasks.named('compileJava') {
 }
 
 tasks.named('test') {
+    maxHeapSize = "3g"
     useJUnitPlatform()
     systemProperty 'ofbiz.root', rootProject.projectDir.absolutePath
 }

@@ -19,7 +19,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers(disabledWithoutDocker = true)
-@SpringBootTest(classes = {MarketingMigrationApplication.class, TestUsersConfiguration.class},
+@SpringBootTest(classes = MarketingMigrationApplication.class,
         properties = "spring.profiles.active=postgres")
 class PostgresSmokeTest {
 

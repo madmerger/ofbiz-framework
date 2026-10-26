@@ -42,7 +42,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.support.TransactionTemplate;
 
-@SpringBootTest(classes = {MarketingMigrationApplication.class, TestUsersConfiguration.class},
+@SpringBootTest(classes = MarketingMigrationApplication.class,
         properties = MarketingTestSupport.TEST_PROPERTIES)
 @AutoConfigureMockMvc
 class EntityAutoAcceptanceTest {
@@ -110,7 +110,9 @@ class EntityAutoAcceptanceTest {
         Class<?> type = entityRegistry.entityClass(entity);
         Map<String, Object> keys = keyValues(type, name);
         if ("create".equalsIgnoreCase(invoke)) {
-            Map<String, Object> result = MarketingTestSupport.run(dispatcher, name, keys);
+            Map<String, Object> input = new HashMap<>(keys);
+            input.putAll(requiredNonKeyValues(definition, type));
+            Map<String, Object> result = MarketingTestSupport.run(dispatcher, name, input);
             Map<String, Object> created = new HashMap<>(keys);
             for (String key : entityRegistry.primaryKeys(type)) {
                 if (result.get(key) != null) {
@@ -238,6 +240,21 @@ class EntityAutoAcceptanceTest {
             index++;
         }
         return keys;
+    }
+
+    private Map<String, Object> requiredNonKeyValues(ServiceHandlerRegistry.ServiceDefinition definition, Class<?> type) {
+        BeanWrapperImpl wrapper = new BeanWrapperImpl(entityRegistry.newEntity(type));
+        List<String> keys = entityRegistry.primaryKeys(type);
+        Map<String, Object> values = new HashMap<>();
+        for (ServiceHandlerRegistry.ParamDefinition param : definition.params()) {
+            if (param.optional() || keys.contains(param.name()) || "OUT".equalsIgnoreCase(param.mode())) {
+                continue;
+            }
+            Class<?> fieldType = wrapper.getPropertyType(param.name());
+            values.put(param.name(), fieldType == Timestamp.class ? KEY_DATE
+                    : fieldType == BigDecimal.class ? BigDecimal.ONE : fieldType == Long.class ? 1L : "REQ");
+        }
+        return values;
     }
 
     private String updatableField(ServiceHandlerRegistry.ServiceDefinition definition, Class<?> type) {

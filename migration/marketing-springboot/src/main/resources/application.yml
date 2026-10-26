@@ -60,7 +60,6 @@ migration:
       - UserLogin
       - UserLoginHistory
       - UserLoginPasswordHistory
-      - UserLoginSecurityQuestion
       - PaymentMethod
       - CreditCard
       - EftAccount

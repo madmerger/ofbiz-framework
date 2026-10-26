@@ -12,7 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 final class MarketingTestSupport {
 
-    static final String TEST_PROPERTIES = "migration.security.require-https=false";
+    static final String TEST_PROPERTIES = "spring.profiles.active=test";
     private static final ObjectMapper JSON = new ObjectMapper();
 
     private MarketingTestSupport() {
