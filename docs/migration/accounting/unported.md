@@ -8,12 +8,11 @@
 | 区分 | 件数 | 状態 |
 | --- | ---: | --- |
 | entity-auto | 386 | AccountingCatalogRegistrar に登録 |
-| groovy | 88 | 未移植 |
-| java | 109 | 未移植 |
+| groovy | 88 | 主要フロー 6 本を移植、82 本未移植 |
+| java | 109 | 主要フロー 2 本を移植、107 本未移植 |
 | simple 合計 | 93 | 73本を移植、GL自動仕訳20本を意図的に除外 |
 | simple: 移植済み | 73 | FinAccount 27、GL 19、Permission 13、AcctgTrans 8、PaymentMethod 5、GatewayConfig 1 |
 | simple: GL 自動仕訳除外 | 20 | 意図的に未登録・404 |
-
 | group | 10 | 未移植 |
 | interface | 19 | 未移植 |
 | view-entity | 40 | 未移植（JPA view 化なし） |
@@ -24,6 +23,21 @@
 ## 権限スコープの制約
 
 `ACCOUNTING_ROLE_*` による組織／ロール単位の権限は未移植。`ACCOUNTING_*` 権限の保持者は全組織の伝票を操作できる。OFBiz の `acctgInvoicePermissionCheck` と同等の範囲であり、組織所有者による追加制限はない。
+
+## 移植済みの Java / Groovy サービス（主要フロー 8 本）
+
+| service name | engine | location | 状態 |
+| --- | --- | --- | --- |
+| `createInvoice` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | 主要フローとして移植（`AccountingServiceHandlers`） |
+| `setInvoiceStatus` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | 主要フローとして移植（`AccountingServiceHandlers`） |
+| `createInvoiceItem` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | 主要フローとして移植（`AccountingServiceHandlers`） |
+| `createInvoiceForOrder` | java | `org.apache.ofbiz.accounting.invoice.InvoiceServices` | 主要フローとして移植（`AccountingServiceHandlers`） |
+| `checkInvoicePaymentApplications` | java | `org.apache.ofbiz.accounting.invoice.InvoiceServices` | 主要フローとして移植（`AccountingServiceHandlers`） |
+| `createPayment` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/payment/PaymentServices.groovy` | 主要フローとして移植（`AccountingServiceHandlers`） |
+| `setPaymentStatus` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/payment/PaymentServices.groovy` | 主要フローとして移植（`AccountingServiceHandlers`） |
+| `createPaymentApplication` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/payment/PaymentServices.groovy` | 主要フローとして移植（`AccountingServiceHandlers`） |
+
+このほか、OFBiz では servicedef に定義のない `InvoiceWorker` のユーティリティ（`getInvoiceTotal`、`getInvoiceItemTotal`、`getInvoiceNotApplied`、`getInvoiceApplied`）を、照会用サービスとして `AccountingServiceHandlers` に追加した。
 
 ## Java / Groovy サービス
 
@@ -81,18 +95,14 @@
 | `getNextInvoiceId` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `invoiceSequenceEnforced` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `invoiceSequenceRestart` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
-| `createInvoice` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `copyInvoice` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `getInvoice` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `updateInvoice` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
-| `setInvoiceStatus` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `copyInvoiceToTemplate` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `checkInvoiceStatusInProgress` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
-| `createInvoiceItem` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `updateInvoiceItem` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `removeInvoiceItem` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `createInvoiceForOrderAllItems` | java | `org.apache.ofbiz.accounting.invoice.InvoiceServices` | このタスクでの Java/Groovy サービス移植対象外 |
-| `createInvoiceForOrder` | java | `org.apache.ofbiz.accounting.invoice.InvoiceServices` | このタスクでの Java/Groovy サービス移植対象外 |
 | `createInvoiceFromReturn` | java | `org.apache.ofbiz.accounting.invoice.InvoiceServices` | このタスクでの Java/Groovy サービス移植対象外 |
 | `createCommissionInvoices` | java | `org.apache.ofbiz.accounting.invoice.InvoiceServices` | このタスクでの Java/Groovy サービス移植対象外 |
 | `readyInvoices` | java | `org.apache.ofbiz.accounting.invoice.InvoiceServices` | このタスクでの Java/Groovy サービス移植対象外 |
@@ -102,7 +112,6 @@
 | `createInvoicesFromShipments` | java | `org.apache.ofbiz.accounting.invoice.InvoiceServices` | このタスクでの Java/Groovy サービス移植対象外 |
 | `createInvoicesFromReturnShipment` | java | `org.apache.ofbiz.accounting.invoice.InvoiceServices` | このタスクでの Java/Groovy サービス移植対象外 |
 | `sendInvoicePerEmail` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
-| `checkInvoicePaymentApplications` | java | `org.apache.ofbiz.accounting.invoice.InvoiceServices` | このタスクでの Java/Groovy サービス移植対象外 |
 | `calculateInvoicedAdjustmentTotal` | java | `org.apache.ofbiz.accounting.invoice.InvoiceServices` | このタスクでの Java/Groovy サービス移植対象外 |
 | `autoGenerateInvoiceFromExistingInvoice` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `cancelInvoice` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
@@ -121,12 +130,9 @@
 | `findLastClosedDate` | java | `org.apache.ofbiz.accounting.period.PeriodServices` | このタスクでの Java/Groovy サービス移植対象外 |
 | `getPreviousTimePeriod` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/period/GPeriodServices.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `createUpdateCostCenter` | java | `org.apache.ofbiz.accounting.ledger.GeneralLedgerServices` | このタスクでの Java/Groovy サービス移植対象外 |
-| `createPayment` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/payment/PaymentServices.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `updatePayment` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/payment/PaymentServices.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
-| `setPaymentStatus` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/payment/PaymentServices.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `checkPaymentInvoices` | java | `org.apache.ofbiz.accounting.invoice.InvoiceServices` | このタスクでの Java/Groovy サービス移植対象外 |
 | `quickSendPayment` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/payment/PaymentServices.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
-| `createPaymentApplication` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/payment/PaymentServices.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
 | `updatePaymentApplication` | java | `org.apache.ofbiz.accounting.invoice.InvoiceServices` | このタスクでの Java/Groovy サービス移植対象外 |
 | `updatePaymentApplicationDef` | java | `org.apache.ofbiz.accounting.invoice.InvoiceServices` | このタスクでの Java/Groovy サービス移植対象外 |
 | `removePaymentApplication` | groovy | `component://accounting/src/main/groovy/org/apache/ofbiz/accounting/payment/PaymentServices.groovy` | このタスクでの Java/Groovy サービス移植対象外 |
