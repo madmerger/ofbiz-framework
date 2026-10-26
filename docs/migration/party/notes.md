@@ -13,6 +13,7 @@
 ## OFBiz との差分
 
 - `partyIdFrom` 未指定時、OFBiz はログインユーザーの partyId を使う。移行モジュールにはその属性がないため、明示的な必須入力エラー 400 にする。
+- `updatePartyContactMech` と `deletePartyContactMech` も partyId を必須とする。OFBiz は未指定時に userLogin.partyId を補完するが、本モジュールの認証情報には partyId がないため、欠落時は 400 とする。
 - OFBiz は SHA 系のパスワード処理を用いるが、Spring Boot adapter は Spring Security の BCrypt `PasswordEncoder` を使用する。currentPassword は hash のみ保存し、レスポンスでは common EntityRegistry が `[REDACTED]` にする。
 - UserLogin の作成は `UserLoginPort` と local adapter に分離し、確認値一致、最小長 5、重複 ID を検査する。
 - PartyRelationship の複合キーには from/to party、from/to role、fromDate が含まれる。削除条件に role と partyRelationshipTypeId を含め、異なる role / relationship type の行を誤って削除しない。

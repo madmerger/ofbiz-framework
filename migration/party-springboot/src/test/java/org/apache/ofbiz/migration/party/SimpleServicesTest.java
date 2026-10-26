@@ -20,8 +20,10 @@ package org.apache.ofbiz.migration.party;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -93,6 +95,41 @@ class SimpleServicesTest {
     void ac20_everySimpleServiceHasARegisteredHandler() {
         assertEquals(26, MIGRATED_SERVICES.size());
         MIGRATED_SERVICES.forEach(name -> assertNotNull(registry.handler("party", name).orElse(null), name));
+    }
+
+    @Test
+    @Transactional
+    void ac22_partyContactOperationsRequirePartyIdAndStayScoped() throws Exception {
+        call("createPerson", Map.of("partyId", "AC22_OWNER", "firstName", "Owner", "lastName", "Party"));
+        call("createPerson", Map.of("partyId", "AC22_OTHER", "firstName", "Other", "lastName", "Party"));
+        Map<String, Object> ownerLink = call("createPartyContactMech", Map.of(
+                "partyId", "AC22_OWNER",
+                "contactMechTypeId", "EMAIL_ADDRESS",
+                "infoString", "shared@example.test"));
+        String contactMechId = String.valueOf(ownerLink.get("contactMechId"));
+        call("createPartyContactMech", Map.of(
+                "partyId", "AC22_OTHER",
+                "contactMechId", contactMechId,
+                "contactMechTypeId", "EMAIL_ADDRESS"));
+
+        mockMvc.perform(post("/api/party/services/updatePartyContactMech")
+                        .with(httpBasic("admin", "admin-password"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of(
+                                "contactMechId", contactMechId, "comments", "must not update"))))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/party/services/deletePartyContactMech")
+                        .with(httpBasic("admin", "admin-password"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of("contactMechId", contactMechId))))
+                .andExpect(status().isBadRequest());
+
+        for (String partyId : List.of("AC22_OWNER", "AC22_OTHER")) {
+            List<?> links = entities.findByEquality(entities.entityClass("PartyContactMech"),
+                    Map.of("partyId", partyId, "contactMechId", contactMechId));
+            assertEquals(1, links.size());
+            assertNull(entities.get(links.get(0), "thruDate"));
+        }
     }
 
     @Test

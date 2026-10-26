@@ -313,14 +313,11 @@ public class PartyServiceHandlers {
     }
 
     private Map<String, Object> updatePartyContactMech(Map<String, Object> input) {
+        required(input, "partyId", "contactMechId");
         String partyId = text(input, "partyId");
         String oldId = text(input, "contactMechId");
         String newId = text(input, "newContactMechId");
-        if (oldId == null) {
-            throw badRequest("partyId and contactMechId are required");
-        }
-        Map<String, Object> filters = new LinkedHashMap<>();
-        copy(input, filters, "partyId", "contactMechId");
+        Map<String, Object> filters = Map.of("partyId", partyId, "contactMechId", oldId);
         List<?> relationships = entities.findByEquality(entities.entityClass("PartyContactMech"), filters);
         Object relationship = relationships.stream()
                 .filter(candidate -> isCurrent(candidate, now()))
@@ -328,9 +325,6 @@ public class PartyServiceHandlers {
                 .orElse(null);
         if (relationship == null) {
             throw notFound(NOT_FOUND);
-        }
-        if (partyId == null) {
-            partyId = text(entities.toMap(relationship), "partyId");
         }
         if (newId == null && input.containsKey("infoString")) {
             Map<String, Object> contactInput = new LinkedHashMap<>(input);
@@ -352,14 +346,10 @@ public class PartyServiceHandlers {
     }
 
     private Map<String, Object> deletePartyContactMech(Map<String, Object> input) {
+        required(input, "partyId", "contactMechId");
         String partyId = text(input, "partyId");
         String contactMechId = text(input, "contactMechId");
-        required(input, "contactMechId");
-        Map<String, Object> filters = new LinkedHashMap<>();
-        filters.put("contactMechId", contactMechId);
-        if (partyId != null) {
-            filters.put("partyId", partyId);
-        }
+        Map<String, Object> filters = Map.of("partyId", partyId, "contactMechId", contactMechId);
         List<?> matches = entities.findByEquality(entities.entityClass("PartyContactMech"), filters);
         Object link = matches.stream().filter(match -> isCurrent(match, now())).findFirst().orElse(null);
         if (link == null) {

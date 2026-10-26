@@ -48,6 +48,7 @@ entity-auto 件数の受け入れ確認は inventory を参照せず `applicatio
 | AC-03 – AC-05 | 必須欠落 400、重複 create 409、全 entity-auto の実行・DB 反映 | `EntityAutoAcceptanceTest` |
 | AC-06 | 空の INOUT 主キーを省略した create で主キーを採番する | `EntityAutoAcceptanceTest.ac06_optionalInoutPrimaryKeyIsGenerated` |
 | AC-20 – AC-21 | 26 simple services を登録し、各サービスを正常実行する | `SimpleServicesTest` |
+| AC-22 | PartyContactMech の更新・削除に partyId を必須とし、party と contactMech の両方で対象を限定する | `SimpleServicesTest.ac22_partyContactOperationsRequirePartyIdAndStayScoped` |
 | AC-30 | Party/Person/role/relationship/住所/電話/メールを連携し、CONTACT_REL の削除後に EMPLOYMENT のみ残す | `MainFlowTest.ac30_partyGroupRelationshipAndContactFlow` |
 | AC-31 | UserLogin 応答のパスワードを伏せ、DB 保存値が平文ではなく BCrypt 検証に成功する | `MainFlowTest.ac31_userLoginIsHashedAndMasked` |
 | AC-32 | 重複を含む multi は 409 かつ先行行も rollback | `MultiRollbackTest` |
