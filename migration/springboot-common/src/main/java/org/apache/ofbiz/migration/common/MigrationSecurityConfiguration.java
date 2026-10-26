@@ -22,17 +22,22 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.Set;
 import org.apache.catalina.valves.RemoteIpValve;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -40,6 +45,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
 @Configuration
 @EnableMethodSecurity
@@ -90,17 +96,25 @@ public class MigrationSecurityConfiguration {
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/**").hasAnyAuthority(Stream.concat(
-                                        Stream.of(
-                                                properties.getServicePermissionPrefix() + "_VIEW",
-                                                properties.getServicePermissionPrefix() + "_ADMIN"),
-                                        properties.getBasePermissions().stream().map(permission -> permission + "_VIEW"))
-                                .toArray(String[]::new))
+                        .requestMatchers("/api/**").access(requireApiPermissions(properties))
                         .anyRequest().permitAll());
         if (properties.isRequireHttps()) {
             http.requiresChannel(channel -> channel.anyRequest().requiresSecure());
         }
         return http.build();
+    }
+
+    private static AuthorizationManager<RequestAuthorizationContext> requireApiPermissions(
+            MigrationSecurityProperties properties) {
+        Set<String> prefixes = new LinkedHashSet<>(properties.getBasePermissions());
+        prefixes.add(properties.getServicePermissionPrefix());
+        return (authentication, context) -> {
+            Authentication user = authentication.get();
+            Set<String> authorities = AuthorityUtils.authorityListToSet(user.getAuthorities());
+            boolean allowed = prefixes.stream().allMatch(prefix ->
+                    authorities.contains(prefix + "_VIEW") || authorities.contains(prefix + "_ADMIN"));
+            return new AuthorizationDecision(allowed);
+        };
     }
 
     @Bean

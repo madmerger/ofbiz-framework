@@ -52,10 +52,19 @@ import org.springframework.test.web.servlet.MockMvc;
             "migration.security.users[0].authorities[0]=TEST_VIEW",
             "migration.security.users[0].authorities[1]=TEST_CREATE",
             "migration.security.users[0].authorities[2]=TEST_SENSITIVE_VIEW",
+            "migration.security.users[0].authorities[3]=OFBTOOLS_VIEW",
             "migration.security.users[1].username=readonly",
             "migration.security.users[1].password=readonly-password",
             "migration.security.users[1].authorities[0]=TEST_VIEW",
-            "migration.security.sensitive-entities[0]=Enumeration"
+            "migration.security.users[1].authorities[1]=OFBTOOLS_VIEW",
+            "migration.security.users[2].username=ofbtools-only",
+            "migration.security.users[2].password=ofbtools-password",
+            "migration.security.users[2].authorities[0]=OFBTOOLS_VIEW",
+            "migration.security.users[3].username=both",
+            "migration.security.users[3].password=both-password",
+            "migration.security.users[3].authorities[0]=OFBTOOLS_VIEW",
+            "migration.security.users[3].authorities[1]=TEST_VIEW",
+            "migration.security.sensitive-entities[0]=Enumeration",
         })
 @AutoConfigureMockMvc
 class MigrationCommonApiTest {
@@ -132,6 +141,17 @@ class MigrationCommonApiTest {
                 .andExpect(status().isForbidden());
         mockMvc.perform(get("/api/test/entities/Enumeration")
                         .with(httpBasic("writer", "writer-password")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void requiresEveryConfiguredBaseAndComponentPermission() throws Exception {
+        mockMvc.perform(get("/api/test/entities/Geo")
+                        .with(httpBasic("ofbtools-only", "ofbtools-password")))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(get("/api/test/entities/Geo")
+                        .with(httpBasic("both", "both-password")))
                 .andExpect(status().isOk());
     }
 
