@@ -1096,7 +1096,7 @@ invoice READY、payment received/sent、payment application、FinAccountTrans �
 
 ## 主要フロー／simple サービス内で省略した OFBiz 分岐
 
-- 主要 invoice/payment flow: party invoice prefix と個別採番、承認時 payment application matching/capture、order adjustments/billing account/contact-mech/shipment/payment-preference/fees、GL posting/reversal、purchase/return order。
+- 主要 invoice/payment flow: party invoice prefix と個別採番、承認時 payment application matching/capture、order adjustments/billing account/contact-mech/shipment/payment-preference/fees、`cancelInvoice` / `removePaymentApplication` 起点の GL reversal（逆仕訳 service 自体は移植済み）、purchase/return order。
 - simple services: `getPartyAccountingPreferences` Groovy service は公開登録せず、PartyAcctgPreference と親組織への `GROUP_ROLLUP` fallback を持つ内部 helper として利用する。未移植 Java/Groovy・他コンポーネント service 呼出しは実行していない。
 - 再請求: 未請求数量のない受注は追加請求を生成しない。
 - `updatePaymentMethodAddress`: 住所履歴更新を委譲する未移植の `createUpdatePaymentMethodAndCreditCard` Java service 呼び出しのみを省略。PaymentMethod address の他の各 simple handler は実装済み。

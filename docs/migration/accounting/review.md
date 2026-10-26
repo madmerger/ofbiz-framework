@@ -11,13 +11,13 @@
 | `AcctgTransServicesTest` | 10 pass / 0 fail / 0 skip |
 | `FinAccountServicesTest` | 38 pass / 0 fail / 0 skip |
 | `GeneralLedgerServicesTest` | 28 pass / 0 fail / 0 skip |
-| `GlPostingServicesTest` | 27 pass / 0 fail / 0 skip |
+| `GlPostingServicesTest` | 30 pass / 0 fail / 0 skip |
 | `PaymentGatewayConfigServicesTest` | 1 pass / 0 fail / 0 skip |
 | `PaymentMethodServicesTest` | 7 pass / 0 fail / 0 skip |
 | `PostgresSmokeTest` | 2 pass / 0 fail / 0 skip |
 | `HttpsSecurityTest` / `SpringdocProfileTest` | 各1 pass / 0 fail / 0 skip |
-| 合計 | **621 pass / 0 fail / 0 skip** |
-| local bootRun と `cases.json` の E2E 予行 | 以前のE2E-01〜21は21/21成功。GL posting 追加後の01〜23再予行は未実施 |
+| 合計 | **624 pass / 0 fail / 0 skip** |
+| local bootRun と `cases.json` の E2E 予行 | GL posting 追加後、testing_agent の Swagger UI E2E で01〜23を23/23一致（`e2e-report.md`） |
 | inventory 再生成 | service 705、entity-auto 386、request 551、entity 147、指定 accounting entitymodel のview-entity 37 |
 
 entity-auto CRUD acceptance は77件実行、54件スキップ（CRUD三つ組不足23、型・桁・integrity制約22、validation／required依存9）。simple-handlerの登録・404検証とサービス別テストはこの集計とは別に実施した。
@@ -30,7 +30,7 @@ entity-auto CRUD acceptance は77件実行、54件スキップ（CRUD三つ組�
 - `createInvoiceForOrder`: adjustments、billing account、contact-mech、shipment grouping、payment-preference auto-application、fees は未移植。
 - ECA起動元は Accounting 内の invoice READY、received/sent payment、invoice payment application、FinAccountTrans のGL account指定に限定して移植。出荷・入荷・在庫・作業・固定資産、および未移植 Java `cancelInvoice` / `removePaymentApplication` からの起動は未配線。
 - 注文請求: `SALES_ORDER` のみ。purchase order / return order は未移植。未請求数量のない再請求は新しい invoice を作らない。
-- Accounting の simple service 93件にはGL自動仕訳20件を含み、catalog testで登録集合を検証する。commit ECA の内部 ledger entry 作成では、専用実行コンテキストに `ACCTG_ATX_CREATE` のみを付与し、完了後に元の SecurityContext を復元する。GL posting のテスト27件で20サービスすべての正常系、請求書READY、入金・消込、再READY抑止、CUSTOMER_REFUND分岐、逆仕訳、失敗分離、認証コンテキスト復元を確認する。
+- Accounting の simple service 93件にはGL自動仕訳20件を含み、catalog testで登録集合を検証する。commit ECA の内部 ledger entry 作成では、専用実行コンテキストに `ACCTG_ATX_CREATE` のみを付与し、完了後に元の SecurityContext を復元する。GL posting のテスト30件で20サービスすべての正常系、請求書READY、入金・消込、再READY抑止、CUSTOMER_REFUND分岐（PMNT_SENT の出金仕訳を含む）、出金消込の買掛金借方、逆仕訳、失敗分離、認証コンテキスト復元を確認する。
 - `unported.md` の省略分岐節に、PaymentMethod住所更新の未移植Java呼出し、GL/AcctgTransの外貨換算・GROUP_ROLLUP・posting設定とerror journal、FinAccountの未移植Groovy／支払バッチ／GL呼出しの省略を記載。
 - Widget、FTL、view-entity はSpring APIに移植しない。全一覧は `unported.md`。
 - ECA/SECA engine は実装していない。FinAccount の残高を更新するコンポーネント内 ECA は移植したが、それ以外の暗黙のイベント連鎖は発生しない。
