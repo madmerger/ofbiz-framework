@@ -12,7 +12,7 @@
 | PostgreSQL smoke | `PostgresSmokeTest` 1件（Testcontainers） | 成功 |
 | Manufacturing Gradle tests | `MANUFACTURING_DEMO_PASSWORD=<任意値> ./gradlew :migration:manufacturing-springboot:test`（全8クラス、46件） | `BUILD SUCCESSFUL` |
 | 共通基盤 regression | `./gradlew :migration:springboot-common:test` 18件（共通基盤は今回変更なし。前回検証結果） | 成功 |
-| Checkstyle / Codenarc | Manufacturing サブプロジェクトに該当タスクなし。リポジトリ root の `./gradlew checkstyleMain checkstyleTest codenarcMain codenarcTest` も試行 | 未完了: Node 24.16.0 の artifact 解決が Maven Central HTTP 429 で失敗。ローカル init script による Node/npm 回避も試したが task graph 解決を回避できなかった |
+| Checkstyle / Codenarc | リポジトリ root の `./gradlew checkstyleMain checkstyleTest codenarcMain codenarcTest`（local-only で Node/npm asset tasks を除外） | 成功（17 tasks）。初回の除外なし実行は Node 24.16.0 の artifact 解決が Maven Central HTTP 429 で失敗したため、`nodeSetup`、`npmInstall`、Swagger/Redoc asset tasks を除外して再実行。Manufacturing サブプロジェクト自体には該当 task なし |
 | local E2E curl | `python3 /home/ubuntu/work/manufacturing-e2e.py`、`cases.json` 全リクエスト | 29/29 成功 |
 | Swagger UI | `curl http://127.0.0.1:18787/swagger-ui/index.html` | HTTP 200。検証後にサーバー停止 |
 
@@ -31,5 +31,5 @@ OUT モードの主キーを持つ entity-auto create は、Manufacturing の生
 
 - UI / screen / form / menu / FTL、MRP、在庫・注文連携、複雑な BOM 数量計算は対象外。
 - local profile のデモ seed はテストと curl 検証専用。実データ移行ではない。
-- Manufacturing サブプロジェクトには Checkstyle / Codenarc タスクがなく、repository root の style task は外部 Node artifact の HTTP 429 で完了しなかった。
+- Manufacturing サブプロジェクトには Checkstyle / Codenarc タスクがない。root の style task は Node/npm asset tasks をローカルで除外して実行した。
 - 共通基盤・datamodel・tools と settings.gradle は変更していない。
