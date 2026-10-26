@@ -71,6 +71,7 @@ migration:
       - FinAccountAuth
       - FinAccountRole
       - GlReconciliation
+      - AcctgTransEntry
       - GlReconciliationEntry
       - PaymentGroupMember
     sensitive-entities:
