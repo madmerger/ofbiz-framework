@@ -1,0 +1,48 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:workeffort-local;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+server:
+  tomcat:
+    remoteip:
+      internal-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:127\.\d{1,3}\.\d{1,3}\.\d{1,3}|::1}'
+migration:
+  security:
+    require-https: false
+    users:
+      - username: admin
+        authorities:
+          - OFBTOOLS_VIEW
+          - WORKEFFORTMGR_ADMIN
+          - WORKEFFORTMGR_SENSITIVE_VIEW
+      - username: planner
+        authorities:
+          - OFBTOOLS_VIEW
+          - WORKEFFORTMGR_VIEW
+          - WORKEFFORTMGR_CREATE
+          - WORKEFFORTMGR_UPDATE
+          - WORKEFFORTMGR_DELETE
+      - username: readonly
+        authorities:
+          - OFBTOOLS_VIEW
+          - WORKEFFORTMGR_VIEW
+      - username: auditor
+        authorities:
+          - OFBTOOLS_VIEW
+          - WORKEFFORTMGR_VIEW
+          - WORKEFFORTMGR_SENSITIVE_VIEW
+      - username: noworkeffort
+        authorities:
+          - OFBTOOLS_VIEW
+workeffort:
+  security:
+    user-party-ids:
+      admin: admin
+      planner: DemoEmployee
+      readonly: DemoEmployee
+      auditor: DemoAuditor
+      noworkeffort: DemoEmployee
