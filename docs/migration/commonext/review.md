@@ -27,12 +27,12 @@
 | latest note | 2件目・3件目の off-by-one | 互換性のため条件を再現 |
 | 認証 provider | OFBiz user login / permission data | Basic 認証と profile 定義の in-memory user |
 | API component | `/api/{component}` | `migration.security.component=commonext` 固定。異なる component 名は404 |
-| 汎用 Entity API | 画面単位のアクセス | entity-auto catalog と `extra-entities` allowlist のみを read API で公開。機密 Entity は別権限。NoteData は他 party の行も読み取り可能 |
+| 汎用 Entity API | 画面単位のアクセス | entity-auto catalog と `extra-entities` allowlist のみを read API で公開。機密 Entity は別権限。`NoteData` は allowlist 外とし、service 経由に限定 |
 
 ## 3. セキュリティ・既知の制約
 
 - Entity API は read-only だが、一覧・単件検索の範囲を業務 party に自動限定しない。アクセス可能な Entity の分割が必要な運用では個別 API に置き換える。
-- `NoteData` は generic Entity API 経由で他 party の行も読める。本移行では legacy service ACL と汎用 runtime の API 認可を混同しないよう明記した。
+- `NoteData` は generic Entity API から除外し、ノートのアクセス制御を service 経由に限定する。readonly / admin の entity endpoint がともに 404 となることを確認する。
 - allowlist 内の機密 Entity `UserLogin` は `SETUP_SENSITIVE_VIEW` または `SETUP_ADMIN` を要求し、`currentPassword` を `[REDACTED]` にする。`CreditCard` / `PayHistory` は allowlist 外のため 404。
 - PostgreSQL HTTPS 必須時は信頼済み proxy CIDR を環境側で明示する。未指定の `a^` は信頼対象なし。
 - HTML/URL deny-list は移行仕様の保護措置であり、ブラウザ出力時の適切な escaping の代替ではない。

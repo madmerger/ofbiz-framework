@@ -149,4 +149,14 @@ class CommonextSecurityTest {
             entityRegistry.entityClass(entityName);
         }
     }
+
+    @Test
+    void ac10noteDataIsNotAvailableThroughEntityApi() throws Exception {
+        mockMvc.perform(get("/api/commonext/entities/NoteData")
+                        .with(httpBasic("readonly", "commonext-test-password")))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/commonext/entities/NoteData")
+                        .with(httpBasic("admin", "commonext-test-password")))
+                .andExpect(status().isNotFound());
+    }
 }

@@ -15,7 +15,7 @@
 | N-09 | 画面 Widget / controller events は移植しない | Setup events は Party、Product、Accounting の広範なサービスに依存し、本タスクは CommonExt の6 service と読み取り API に限定 |
 | N-10 | service-multi は HTTP 400 と全件 rollback を確認 | 共通 runtime のエラー契約に従う。該当 service は entity-auto でなく、409 の前提となるクライアント PK 衝突を使わない |
 | N-11 | 共通 runtime の `migration.security.component` を `commonext` に固定 | 別 component 名でこの API を呼ぶと 404。共有 runtime が追加した scope 制御に従う |
-| N-12 | generic Entity API は明示 `extra-entities` allowlist を使う | entity-auto catalog が0件でも NoteData と画面読み取り代替だけを公開し、他 Entity は404にする |
+| N-12 | generic Entity API は明示 `extra-entities` allowlist を使い、`NoteData` は除外する | entity-auto catalog が0件でも画面読み取り代替だけを公開し、ノートは owner scope を持つ service 経由に限定する |
 | N-13 | sensitive Entity の実アクセス試験は `UserLogin` で行う | Setup の `createUser` が使う Entity で、`currentPassword` がマスクされることと `SETUP_SENSITIVE_VIEW` を直接確認できる。`CreditCard` は allowlist 外のため 404 として扱う |
 
 ## 2. 実装境界

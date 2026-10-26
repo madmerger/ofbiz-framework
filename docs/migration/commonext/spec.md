@@ -72,7 +72,7 @@ hash 値を設定ファイルやリポジトリに保存しない。
 
 - Service: `POST /api/commonext/services/{serviceName}`。multi: `POST .../{serviceName}/multi`。
 - Generic read-only Entity API: `GET /api/commonext/entities/{Entity}` と `GET .../{Entity}/one`。component は `commonext` に固定し、entity-auto catalog に存在する Entity と `extra-entities` のみを公開する。
-- `extra-entities`: `NoteData`、request-map の読み取り代替用 `ProductStore` / `Facility` / `WebSite` / `Party` / `PartyRole` / `PartyGroup` / `ProdCatalog` / `ProductCategory` / `Product`、Setup の `createUser` が扱う機密 `UserLogin`。機密 Entity の sensitivity 設定は別途維持する。
+- `extra-entities`: request-map の読み取り代替用 `ProductStore` / `Facility` / `WebSite` / `Party` / `PartyRole` / `PartyGroup` / `ProdCatalog` / `ProductCategory` / `Product`、Setup の `createUser` が扱う機密 `UserLogin`。`NoteData` は他 party のノート読み取りを防ぐため含めず、ノート操作は service 経由に限定する。機密 Entity の sensitivity 設定は別途維持する。
 - CommonExt の6 service handler は明示登録し、read-only 3件を `VIEW`、変更3件を `UPDATE` とする。
 - entity-auto catalog 件数は0。生成器の実装は `migration/tools/ofbiz2spring.py` の `generate()` で `engine == "entity-auto"` のみ catalog に含める。
 - multi 失敗は共通 runtime の `MultiServiceException` により HTTP 400 となり、全 item を rollback する。entity-auto / client-supplied PK を持たないため 409 は適用しない。
@@ -147,3 +147,4 @@ preprocessor の `LoginWorker.securedUserLoginByJWTCookie` のみ。
 | AC-27 | PostgreSQL で作成・一覧・削除 | `PostgresSmokeTest.ac01` |
 | AC-28 | admin でも非 SYSTEMNOTE を削除できず行が残る | `SystemInfoNoteServiceTest.ac28adminCannotDeleteNonSystemNoteAndRowRemains` |
 | AC-29 | `COMMONEXT_PUBLMSG` と `SETUP_UPDATE` のみでは他 party の SYSTEMNOTE を削除できず行が残る | `SystemInfoNoteServiceTest.ac29publicPermissionCannotDeleteAnotherPartysNoteAndRowRemains` |
+| AC-30 | readonly と admin の Entity API で `NoteData` が 404 | `CommonextSecurityTest.ac10noteDataIsNotAvailableThroughEntityApi` |

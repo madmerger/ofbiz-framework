@@ -33,7 +33,6 @@ migration:
     service-permission-prefix: SETUP
     trusted-proxies: ${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}
     extra-entities:
-      - NoteData
       - ProductStore
       - Facility
       - WebSite
