@@ -3,7 +3,7 @@
 - 対象: `applications/product/` の現行 OFBiz 実装と `migration/product-springboot/`
 - 目的: サービス名、入出力、権限、トランザクション、Minilang/Groovy/Java の業務意味を保ち、段階的に Spring Boot へ移行する。
 - 一次情報: 現行 OFBiz ソース。棚卸しの全件一覧は `inventory/` と `unported.md` を参照する。
-- 優先事項: **Faithfulness to the minilang is the priority.**
+- 優先事項: **minilang への忠実性を最優先する。**
 
 ## 1. 範囲と構成
 
