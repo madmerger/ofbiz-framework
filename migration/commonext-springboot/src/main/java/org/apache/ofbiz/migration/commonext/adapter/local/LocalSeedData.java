@@ -53,7 +53,7 @@ public class LocalSeedData implements ApplicationRunner {
         seedLogin("readonly", "DemoReadonly");
         seedNote("100", "admin", "Admin system note", Instant.now());
         seedNote("101", "admin", "Older system note", Instant.now().minus(1, ChronoUnit.DAYS));
-        seedNote("102", "editor", "Editor system note", Instant.now());
+        seedNote("102", "DemoEditor", "Editor system note", Instant.now());
         seedEvents();
         seedAssignments();
     }
