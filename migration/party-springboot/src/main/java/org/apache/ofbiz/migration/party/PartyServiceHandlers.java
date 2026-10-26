@@ -618,11 +618,14 @@ public class PartyServiceHandlers {
     }
 
     private Map<String, Object> updateContactMechAndPurposes(Map<String, Object> input) {
-        Map<String, Object> phoneInput = new LinkedHashMap<>(input);
-        phoneInput.putIfAbsent("contactMechId", input.get("phoneContactMechId"));
-        Map<String, Object> updated = updatePartyContact(phoneInput, "TELECOM_NUMBER", "updateTelecomNumber");
-        addPostalPurposes(input, text(updated, "contactMechId"));
-        return updated;
+        Map<String, Object> updatedAddress = updatePostalAddressAndPurposes(input);
+        String phoneContactMechId = text(input, "phoneContactMechId");
+        if (phoneContactMechId != null && !phoneContactMechId.isBlank()) {
+            Map<String, Object> phoneInput = new LinkedHashMap<>(input);
+            phoneInput.put("contactMechId", phoneContactMechId);
+            updatePartyContact(phoneInput, "TELECOM_NUMBER", "updateTelecomNumber");
+        }
+        return updatedAddress;
     }
 
     private Map<String, Object> createOrUpdatePartyContact(Map<String, Object> input, String type) {

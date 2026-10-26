@@ -260,10 +260,38 @@ class SimpleServicesTest {
 
         Map<String, Object> phoneForPurposes = call("createPartyTelecomNumber", Map.of(
                 "partyId", "AC21_CONTACT_PARTY", "contactNumber", "5550104"));
+        Map<String, Object> addressForCombinedUpdate = call("createPartyPostalAddress", Map.of(
+                "partyId", "AC21_CONTACT_PARTY",
+                "address1", "6 Simple Way",
+                "city", "Testville",
+                "postalCode", "10006"));
+        Map<String, Object> combinedUpdate = call("updateContactMechAndPurposes", Map.of(
+                "partyId", "AC21_CONTACT_PARTY",
+                "contactMechId", addressForCombinedUpdate.get("contactMechId"),
+                "phoneContactMechId", phoneForPurposes.get("contactMechId"),
+                "address1", "7 Simple Way",
+                "city", "Testville",
+                "postalCode", "10007",
+                "contactNumber", "5550105"));
+        Object combinedAddress = entities.findByEquality(entities.entityClass("PostalAddress"),
+                Map.of("contactMechId", combinedUpdate.get("contactMechId"))).get(0);
+        assertEquals("7 Simple Way", entities.get(combinedAddress, "address1"));
+        Object combinedPhone = entities.findByEquality(entities.entityClass("TelecomNumber"),
+                Map.of("contactNumber", "5550105")).get(0);
+        assertEquals("5550105", entities.get(combinedPhone, "contactNumber"));
+
+        Map<String, Object> addressWithoutPhoneId = call("createPartyPostalAddress", Map.of(
+                "partyId", "AC21_CONTACT_PARTY",
+                "address1", "8 Simple Way",
+                "city", "Testville",
+                "postalCode", "10008"));
         call("updateContactMechAndPurposes", Map.of(
                 "partyId", "AC21_CONTACT_PARTY",
-                "phoneContactMechId", phoneForPurposes.get("contactMechId"),
-                "contactNumber", "5550105"));
+                "contactMechId", addressWithoutPhoneId.get("contactMechId"),
+                "address1", "9 Simple Way",
+                "city", "Testville",
+                "postalCode", "10009",
+                "contactNumber", "5550199"));
         call("createUpdatePartyTelecomNumber", Map.of(
                 "partyId", "AC21_CONTACT_PARTY", "contactNumber", "5550106"));
         call("createUpdatePartyEmailAddress", Map.of(
