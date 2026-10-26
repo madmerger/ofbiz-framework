@@ -228,11 +228,22 @@ class SimpleServicesTest {
                 "city", "Testville",
                 "postalCode", "10004",
                 "setShippingPurpose", "Y"));
-        call("updatePostalAddressAndPurposes", Map.of(
+        Map<String, Object> updatedPurposeAddress = call("updatePostalAddressAndPurposes", Map.of(
                 "partyId", "AC21_CONTACT_PARTY",
                 "contactMechId", purposeAddress.get("contactMechId"),
                 "address1", "5 Simple Way",
                 "setBillingPurpose", "Y"));
+        String updatedPurposeAddressId = String.valueOf(updatedPurposeAddress.get("contactMechId"));
+        assertEquals(0, entities.findByEquality(entities.entityClass("PartyContactMechPurpose"),
+                Map.of("partyId", "AC21_CONTACT_PARTY",
+                        "contactMechId", purposeAddress.get("contactMechId"),
+                        "contactMechPurposeTypeId", "SHIPPING_LOCATION"))
+                .stream().filter(purpose -> entities.get(purpose, "thruDate") == null).count());
+        assertEquals(1, entities.findByEquality(entities.entityClass("PartyContactMechPurpose"),
+                Map.of("partyId", "AC21_CONTACT_PARTY",
+                        "contactMechId", updatedPurposeAddressId,
+                        "contactMechPurposeTypeId", "SHIPPING_LOCATION"))
+                .stream().filter(purpose -> entities.get(purpose, "thruDate") == null).count());
 
         Map<String, Object> phoneForPurposes = call("createPartyTelecomNumber", Map.of(
                 "partyId", "AC21_CONTACT_PARTY", "contactNumber", "5550104"));

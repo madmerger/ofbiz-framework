@@ -339,6 +339,7 @@ public class PartyServiceHandlers {
             newLink.put("fromDate", now());
             newLink.put("thruDate", null);
             create("PartyContactMech", newLink);
+            transferCurrentPurposes(partyId, oldId, newId);
             return result("contactMechId", newId);
         }
         copyWritable(input, relationship, "contactMechTypeId", "comments", "extension", "allowSolicitation");
@@ -357,6 +358,20 @@ public class PartyServiceHandlers {
         }
         entities.set(link, "thruDate", now());
         return entities.toMap(link);
+    }
+
+    private void transferCurrentPurposes(String partyId, String oldId, String newId) {
+        List<?> purposes = entities.findByEquality(entities.entityClass("PartyContactMechPurpose"),
+                Map.of("partyId", partyId, "contactMechId", oldId));
+        Timestamp changedAt = now();
+        for (Object purpose : purposes) {
+            if (!isCurrent(purpose, changedAt)) {
+                continue;
+            }
+            String purposeTypeId = text(entities.toMap(purpose), "contactMechPurposeTypeId");
+            entities.set(purpose, "thruDate", changedAt);
+            createPurposeIfPresent(partyId, newId, purposeTypeId);
+        }
     }
 
     private Map<String, Object> createPartyPostalAddress(Map<String, Object> input) {
