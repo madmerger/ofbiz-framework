@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -408,14 +409,25 @@ class InventoryServicesTest {
     }
 
     @Test
-    void ac23_reassignInventoryReservationsWithMatchingReservationReturns501() throws Exception {
+    void ac23_reassignInventoryReservationsWithMatchingReservationReallocatesIt() throws Exception {
         Fixture fixture = fixture(true, "NON_SERIAL_INV_ITEM", "INV_AVAILABLE", BigDecimal.ONE, BigDecimal.ONE);
-        seedReservation(fixture, "1", "1");
+        String orderId = id();
+        seedDetail(fixture.inventoryItemId(), "00001", 1, 1,
+                Timestamp.from(Instant.now().minusSeconds(3600)));
+        seedReservation(fixture, orderId, "1");
 
-        MvcResult result = invokeRaw("reassignInventoryReservations", values(
+        JsonNode response = invoke("reassignInventoryReservations", values(
                 "productId", fixture.productId(), "facilityId", fixture.facilityId()));
 
-        assertEquals(501, result.getResponse().getStatus());
+        assertSuccessWithoutOutputs(response);
+        Object reservation = one("OrderItemShipGrpInvRes", values(
+                "orderId", orderId, "orderItemSeqId", "00001",
+                "shipGroupSeqId", "00001", "inventoryItemId", fixture.inventoryItemId()));
+        assertDecimal("1", entities.get(reservation, "quantity"));
+        assertNull(entities.get(reservation, "quantityNotAvailable"));
+        Object inventoryItem = one("InventoryItem", values("inventoryItemId", fixture.inventoryItemId()));
+        assertDecimal("1", entities.get(inventoryItem, "availableToPromiseTotal"));
+        assertDecimal("1", entities.get(inventoryItem, "quantityOnHandTotal"));
     }
 
     @Test

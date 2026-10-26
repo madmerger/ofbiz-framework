@@ -18,10 +18,12 @@
  */
 package org.apache.ofbiz.migration.product;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -33,6 +35,7 @@ import java.math.BigDecimal;
 import java.util.Map;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
+import org.apache.ofbiz.migration.product.adapter.OrderPort;
 import org.apache.ofbiz.migration.product.simple.IssuanceServices;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +69,9 @@ class QuickShipEntireOrderFlowTest {
     @SpyBean
     private MigrationServiceDispatcher dispatcher;
 
+    @SpyBean
+    private OrderPort orderPort;
+
     @Test
     void missingOrderIdReturnsBadRequest() throws Exception {
         mockMvc.perform(post("/api/product/services/quickShipEntireOrder")
@@ -88,30 +94,48 @@ class QuickShipEntireOrderFlowTest {
 
     @Test
     @Transactional
-    void seededReservationCreatesShipmentThenPropagatesIssuance501() throws Exception {
+    void seededReservationCreatesShipmentIssuesInventoryAndShipsSuccessfully() throws Exception {
         seedOrderReservation();
+        doReturn(Map.of()).when(orderPort).invoke(eq("changeOrderItemStatus"), anyMap());
 
-        mockMvc.perform(post("/api/product/services/quickShipEntireOrder")
+        var result = mockMvc.perform(post("/api/product/services/quickShipEntireOrder")
                         .with(user("facility").authorities(authorities()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JSON.writeValueAsBytes(Map.of("orderId", "FLOW_ORDER"))))
-                .andExpect(status().isNotImplemented());
+                .andExpect(status().isOk())
+                .andReturn();
 
+        var response = JSON.readTree(result.getResponse().getContentAsByteArray());
+        String shipmentId = response.path("shipmentIds").get(0).asText();
+        assertFalse(shipmentId.isBlank());
         verify(dispatcher).execute(eq("product"), eq("createShipment"), anyMap());
         verify(issuance).execute(
                 eq("issueOrderItemShipGrpInvResToShipment"),
                 eq("issueOrderItemShipGrpInvResToShipment"),
                 anyMap());
+        verify(orderPort).invoke(eq("changeOrderItemStatus"), anyMap());
         var shipments = entities.findByEquality(
-                entities.entityClass("Shipment"), Map.of("primaryOrderId", "FLOW_ORDER"));
-        assertFalse(shipments.isEmpty());
-        String shipmentId = entities.get(shipments.get(0), "shipmentId").toString();
+                entities.entityClass("Shipment"), Map.of("shipmentId", shipmentId));
+        assertEquals(1, shipments.size());
+        assertEquals("SHIPMENT_SHIPPED", entities.get(shipments.get(0), "statusId"));
+        assertEquals(1, entities.findByEquality(
+                entities.entityClass("ShipmentStatus"),
+                Map.of("shipmentId", shipmentId, "statusId", "SHIPMENT_SHIPPED")).size());
+        assertEquals(1, entities.findByEquality(
+                entities.entityClass("ShipmentItem"), Map.of("shipmentId", shipmentId)).size());
+        assertEquals(1, entities.findByEquality(
+                entities.entityClass("ItemIssuance"),
+                Map.of("shipmentId", shipmentId, "orderId", "FLOW_ORDER")).size());
         assertTrue(entities.findByEquality(
-                        entities.entityClass("ShipmentItem"), Map.of("shipmentId", shipmentId))
+                        entities.entityClass("OrderItemShipGrpInvRes"),
+                        Map.of("orderId", "FLOW_ORDER", "orderItemSeqId", "00001",
+                                "shipGroupSeqId", "00001", "inventoryItemId", "FLOW_INVENTORY"))
                 .isEmpty());
     }
 
     private void seedOrderReservation() {
+        persist("Party", Map.of("partyId", "PARTY_facility", "partyTypeId", "PERSON"));
+        persist("UserLogin", Map.of("userLoginId", "facility", "partyId", "PARTY_facility"));
         persist("ProductStore", Map.of(
                 "productStoreId", "FLOW_STORE",
                 "reserveInventory", "Y",
@@ -150,7 +174,17 @@ class QuickShipEntireOrderFlowTest {
                 "orderItemSeqId", "00001",
                 "inventoryItemId", "FLOW_INVENTORY",
                 "quantity", BigDecimal.ONE));
+        persistTransition("SHIPMENT_INPUT", "SHIPMENT_PACKED");
+        persistTransition("SHIPMENT_PACKED", "SHIPMENT_SHIPPED");
         entityManager.flush();
+    }
+
+    private void persistTransition(String from, String to) {
+        if (!entities.findByEquality(entities.entityClass("StatusValidChange"),
+                Map.of("statusId", from, "statusIdTo", to)).isEmpty()) {
+            return;
+        }
+        persist("StatusValidChange", Map.of("statusId", from, "statusIdTo", to));
     }
 
     private void persist(String entityName, Map<String, Object> values) {
