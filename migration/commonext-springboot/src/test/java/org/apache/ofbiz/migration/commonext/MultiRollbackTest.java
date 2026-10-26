@@ -80,7 +80,7 @@ class MultiRollbackTest {
     }
 
     @Test
-    void ac02deleteMultiReturns400AndRollsBackEarlierDelete() throws Exception {
+    void ac02deleteMultiReturns404AndRollsBackEarlierDelete() throws Exception {
         new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
             NoteData note = new NoteData();
             note.setNoteId("MULTI-DELETE");
@@ -95,7 +95,7 @@ class MultiRollbackTest {
                         .with(httpBasic("admin", "commonext-test-password"))
                         .contentType("application/json")
                         .content("[{\"noteId\":\"MULTI-DELETE\"},{\"noteId\":\"DOES-NOT-EXIST\"}]"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
 
         NoteData remaining = new TransactionTemplate(transactionManager)
                 .execute(status -> entityManager.find(NoteData.class, "MULTI-DELETE"));
