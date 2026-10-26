@@ -1,0 +1,71 @@
+spring:
+  application:
+    name: order-springboot
+  datasource:
+    url: jdbc:h2:mem:order;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+server:
+  forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      internal-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}'
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+migration:
+  security:
+    component: order
+    base-permissions:
+      - OFBTOOLS
+      - ORDERMGR
+    service-permission-prefix: ORDERMGR
+    trusted-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}'
+    extra-entities:
+      - CustRequest
+      - OrderItem
+      - OrderStatus
+      - Shipment
+      - ShipmentItem
+      - Invoice
+      - InvoiceItem
+      - StatusItem
+      - StatusValidChange
+    sensitive-entities:
+      - OrderPaymentPreference
+      - PaymentMethod
+      - CreditCard
+      - EftAccount
+      - GiftCard
+      - CheckAccount
+      - BillingAccount
+      - FinAccount
+      - FinAccountTrans
+      - FinAccountAuth
+      - Payment
+      - PaymentGatewayResponse
+      - PayPalPaymentMethod
+      - UserLogin
+      - UserLoginPasswordHistory
+      - PayHistory
+      - PayrollPreference
+    users: []
