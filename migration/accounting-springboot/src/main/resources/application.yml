@@ -65,6 +65,14 @@ migration:
       - ProductGlAccount
       - ProductCategoryGlAccount
       - ProductCategoryMember
+      - FinAccount
+      - FinAccountStatus
+      - FinAccountTrans
+      - FinAccountAuth
+      - FinAccountRole
+      - GlReconciliation
+      - GlReconciliationEntry
+      - PaymentGroupMember
     sensitive-entities:
       - PaymentMethod
       - CreditCard
