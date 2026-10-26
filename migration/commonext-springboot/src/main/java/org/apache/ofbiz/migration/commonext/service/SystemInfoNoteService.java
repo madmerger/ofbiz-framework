@@ -129,7 +129,7 @@ public class SystemInfoNoteService implements SystemInfoNoteOperations {
         String currentPartyId = currentPartyPort.currentPartyId().orElse(null);
         boolean ownSystemNote = note.getNoteParty() != null
                 && note.getNoteParty().equals(currentPartyId);
-        if (!ownSystemNote && !hasPublicPermission()) {
+        if (!ownSystemNote && !hasAdminPermission()) {
             throw new MigrationException(HttpStatus.FORBIDDEN, "Cannot delete this system note");
         }
         noteAssociationPort.removeNoteAssociations(noteId);
@@ -225,6 +225,12 @@ public class SystemInfoNoteService implements SystemInfoNoteOperations {
         }
         Set<String> authorities = AuthorityUtils.authorityListToSet(authentication.getAuthorities());
         return authorities.contains(PUBLIC_PERMISSION) || authorities.contains(ADMIN_PERMISSION);
+    }
+
+    private boolean hasAdminPermission() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null
+                && AuthorityUtils.authorityListToSet(authentication.getAuthorities()).contains(ADMIN_PERMISSION);
     }
 
     private static boolean isSafeUrl(String value) {

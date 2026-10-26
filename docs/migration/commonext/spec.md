@@ -30,7 +30,7 @@ API は `POST /api/commonext/services/{serviceName}`。entity-auto の追加サ�
 | サービス | 現行入力 | 現行出力 / 振る舞い | 認証 / Spring Boot 対応 |
 | --- | --- | --- | --- |
 | `createSystemInfoNote` | `NoteData` の全 non-PK (`auto-attributes`, 任意) | `noteParty` 既定はログイン party。`noteDateTime=now`、`noteName=SYSTEMNOTE`、採番して保存。OFBiz は空の success map。Groovy: 26-34行 | 認証必須、`SETUP_UPDATE`。入力を検証して `noteId` を返す |
-| `deleteSystemInfoNote` | PK `noteId` 必須 | `noteName=SYSTEMNOTE` の NoteData と関連7表を削除。通常ノートは権限に関係なく 404。Groovy: 36-47行 | 認証必須、`SETUP_UPDATE`。note の存在・種類・所有権を検査 |
+| `deleteSystemInfoNote` | PK `noteId` 必須 | `noteName=SYSTEMNOTE` の NoteData と関連7表を削除。通常ノートは権限に関係なく 404。Groovy: 36-47行 | 認証必須、`SETUP_UPDATE`。note の存在・種類・所有権を検査し、他 party の削除は `SETUP_ADMIN` のみ |
 | `deleteAllSystemNotes` | なし | ログイン party の `SYSTEMNOTE` を全削除。OFBiz は空 map。Groovy: 49-52行 | `auth=true`、`SETUP_UPDATE`。`deletedCount` を返す |
 | `getSystemInfoNotes` | なし | 自 party の `SYSTEMNOTE` を `noteDateTime DESC` で返す。空なら空 map。Groovy: 54-64行 | `auth=true`、`SETUP_VIEW` |
 | `getLastSystemInfoNote` | なし | `lastSystemInfoNote1..3`。添字は[0]、size>2 で[1]、size>3 で[2]。Groovy: 66-83行 | OFBiz は `auth=false`。Spring Boot は API 全体を認証必須にする |
@@ -40,9 +40,9 @@ API は `POST /api/commonext/services/{serviceName}`。entity-auto の追加サ�
 
 - 作成時に `noteName`、`noteDateTime`、`noteId` をサーバーで決める。未知キー・PK・stamp は無視する。
 - 文字列は `(?i)<[a-z!/]|javascript:|on[a-z]+\\s*=` を拒否し、`moreInfoUrl` は `/` で始まる相対 path（`//` は不可）か HTTP(S) URL のみ許可する。
-- 明示 `noteParty` が現在の party と異なる場合は `COMMONEXT_PUBLMSG` または `SETUP_ADMIN` を要求する。現在のユーザーに party が無ければ作成・一覧・削除一括・status は 403。`getLastSystemInfoNote` はレガシーの `_NA_` 検索を維持する。
+- 明示 `noteParty` が現在の party と異なる場合は作成権限として `COMMONEXT_PUBLMSG` または `SETUP_ADMIN` を要求する。他 party の SYSTEMNOTE 削除は `SETUP_ADMIN` のみ許可する。現在のユーザーに party が無ければ作成・一覧・削除一括・status は 403。`getLastSystemInfoNote` はレガシーの `_NA_` 検索を維持する。
 - 単件削除は `CustRequestItemNote`、`CustRequestNote`、`MarketingCampaignNote`、`OrderHeaderNote`、`PartyNote`、`QuoteNote`、`WorkEffortNote` を先に削除する。
-- 削除対象の `noteName` が `SYSTEMNOTE` でなければ、owner/admin 権限に関係なく 404 (`System note not found`) を返す。SYSTEMNOTE は owner または admin に限って削除し、関連7表も削除する。OFBiz にない対象種別・アクセス制御を追加した。
+- 削除対象の `noteName` が `SYSTEMNOTE` でなければ、owner/admin 権限に関係なく 404 (`System note not found`) を返す。SYSTEMNOTE は owner または `SETUP_ADMIN` に限って削除し、他 party 分の削除に `COMMONEXT_PUBLMSG` は使えない。関連7表も削除する。OFBiz にない対象種別・アクセス制御を追加した。
 - `getLastSystemInfoNote` の off-by-one 条件（2件で2番目を返さず、3件で3番目を返さない）を互換性のため再現する。
 
 ### Status 検索
@@ -146,3 +146,4 @@ preprocessor の `LoginWorker.securedUserLoginByJWTCookie` のみ。
 | AC-25〜26 | multi 400 と transaction rollback | `MultiRollbackTest.ac01`〜`ac02` |
 | AC-27 | PostgreSQL で作成・一覧・削除 | `PostgresSmokeTest.ac01` |
 | AC-28 | admin でも非 SYSTEMNOTE を削除できず行が残る | `SystemInfoNoteServiceTest.ac28adminCannotDeleteNonSystemNoteAndRowRemains` |
+| AC-29 | `COMMONEXT_PUBLMSG` と `SETUP_UPDATE` のみでは他 party の SYSTEMNOTE を削除できず行が残る | `SystemInfoNoteServiceTest.ac29publicPermissionCannotDeleteAnotherPartysNoteAndRowRemains` |

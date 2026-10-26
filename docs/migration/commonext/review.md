@@ -17,7 +17,7 @@
 | --- | --- | --- |
 | service permission | Webapp base permission `OFBTOOLS,SETUP` が中心 | base permission に加えて各 service に VIEW / UPDATE を適用 |
 | 公開ノート | `COMMONEXT_PUBLMSG` は公開情報の作成権限 | 別 party 宛て作成時に `COMMONEXT_PUBLMSG` または `SETUP_ADMIN` を要求 |
-| 単件削除 | owner check を持たない | `SYSTEMNOTE` のみ削除可能。非 `SYSTEMNOTE` は権限に関係なく 404 とし、owner または admin のみ削除できる |
+| 単件削除 | owner check を持たない | `SYSTEMNOTE` のみ削除可能。非 `SYSTEMNOTE` は権限に関係なく 404 とし、他 party 分は `SETUP_ADMIN` のみ削除できる（`COMMONEXT_PUBLMSG` は作成専用） |
 | 作成レスポンス | 空 success map | `noteId` を返す |
 | delete-all レスポンス | 空 success map | `deletedCount` を返す |
 | `getLastSystemInfoNote` | service `auth=false` | REST API は認証必須 |

@@ -201,6 +201,20 @@ class SystemInfoNoteServiceTest {
     }
 
     @Test
+    @WithMockUser(username = "editor", authorities = {"COMMONEXT_PUBLMSG", "SETUP_UPDATE"})
+    void ac29publicPermissionCannotDeleteAnotherPartysNoteAndRowRemains() {
+        CommonextTestSupport.seedNote(
+                entityManager, "DELETE-PUBLIC", "admin", "SYSTEMNOTE", "keep", Instant.now());
+
+        MigrationException exception = assertThrows(
+                MigrationException.class, () -> service.deleteSystemInfoNote(
+                        Map.of("noteId", "DELETE-PUBLIC")));
+
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+        assertNotNull(entityManager.find(NoteData.class, "DELETE-PUBLIC"));
+    }
+
+    @Test
     @WithMockUser(username = "admin", authorities = {"SETUP_ADMIN"})
     void ac10deleteReturnsNotFoundAndRequiresNoteId() {
         MigrationException missingId = assertThrows(
