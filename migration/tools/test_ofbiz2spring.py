@@ -20,7 +20,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from ofbiz2spring import PACKAGE_PATH, generate, java_name_to_db_name
+from ofbiz2spring import (
+    PACKAGE_PATH,
+    TYPE_MAPPING,
+    generate,
+    generate_from_xml,
+    java_name_to_db_name,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -75,6 +81,113 @@ class Ofbiz2SpringTest(unittest.TestCase):
     def test_converts_ofbiz_camel_case_table_and_column_names(self):
         self.assertEqual("EMPL_POSITION", java_name_to_db_name("EmplPosition"))
         self.assertEqual("PARTY_ID_FROM", java_name_to_db_name("partyIdFrom"))
+
+    def test_field_type_mappings_cover_requested_ofbiz_types(self):
+        expected = {
+            "id": ("String", 20),
+            "id-long": ("String", 60),
+            "id-vlong": ("String", 255),
+            "indicator": ("String", 1),
+            "very-short": ("String", 10),
+            "short-varchar": ("String", 60),
+            "name": ("String", 100),
+            "value": ("String", 255),
+            "description": ("String", 255),
+            "comment": ("String", 255),
+            "url": ("String", 2000),
+            "email": ("String", 320),
+            "long-varchar": ("String", 255),
+            "credit-card-number": ("String", 255),
+            "credit-card-date": ("String", 7),
+            "currency-amount": ("BigDecimal", None),
+            "currency-precise": ("BigDecimal", None),
+            "fixed-point": ("BigDecimal", None),
+            "floating-point": ("Double", None),
+            "numeric": ("Long", None),
+            "date-time": ("Timestamp", None),
+            "date": ("Date", None),
+            "time": ("Time", None),
+            "blob": ("byte[]", None),
+            "byte-array": ("byte[]", None),
+            "object": ("byte[]", None),
+        }
+        for field_type, (java_type, length) in expected.items():
+            with self.subTest(field_type=field_type):
+                self.assertEqual(java_type, TYPE_MAPPING[field_type]["java_type"])
+                self.assertEqual(length, TYPE_MAPPING[field_type].get("length"))
+        self.assertTrue(TYPE_MAPPING["very-long"]["lob"])
+        self.assertEqual("TEXT", TYPE_MAPPING["very-long"]["column_definition"])
+        self.assertTrue(TYPE_MAPPING["blob"]["lob"])
+
+    def test_xml_inputs_merge_extensions_skip_views_and_expand_catalog(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            model = root / "entitymodel.xml"
+            extension = root / "entitymodel_extension.xml"
+            service_file = root / "services.xml"
+            model.write_text(
+                """<entitymodel>
+                  <entity entity-name="Example">
+                    <field name="exampleId" type="id"/>
+                    <prim-key field="exampleId"/>
+                  </entity>
+                  <view-entity entity-name="ExampleView">
+                    <member-entity entity-alias="E" entity-name="Example"/>
+                    <alias entity-alias="E" name="exampleId"/>
+                  </view-entity>
+                </entitymodel>""",
+                encoding="utf-8",
+            )
+            extension.write_text(
+                """<entitymodel>
+                  <extend-entity entity-name="Example">
+                    <field name="displayName" type="name"/>
+                  </extend-entity>
+                </entitymodel>""",
+                encoding="utf-8",
+            )
+            service_file.write_text(
+                """<services>
+                  <service name="createExample" engine="entity-auto" invoke="create"
+                      default-entity-name="Example">
+                    <implements service-name="baseExample" prefix="base"/>
+                    <auto-attributes include="all" mode="IN" optional="true"/>
+                  </service>
+                </services>""",
+                encoding="utf-8",
+            )
+            output = root / "generated"
+            report_path = root / "report.json"
+            generated, report = generate_from_xml(
+                [extension, model],
+                [service_file],
+                output,
+                "example.entity",
+                "example.repository",
+                "example.service",
+                report_path,
+                root,
+            )
+
+            entity = (output / "example/entity/Example.java").read_text(encoding="utf-8")
+            repository = (output / "example/repository/ExampleRepository.java").read_text(encoding="utf-8")
+            catalog = (output / "example/service/ServiceCatalog.java").read_text(encoding="utf-8")
+            self.assertIn("private String displayName;", entity)
+            self.assertIn("import example.entity.Example;", repository)
+            self.assertIn("displayName", catalog)
+            self.assertIn("baseExample", catalog)
+            self.assertEqual(1, report["entity_count"])
+            self.assertEqual(1, report["view_entity_count"])
+            self.assertEqual(1, report["entity_auto_service_count"])
+            self.assertEqual([], report["errors"])
+            self.assertEqual(4, len(generated))
+            self.assertTrue(report_path.exists())
+            for source in generated:
+                with self.subTest(source=source.name):
+                    self.assertIn(
+                        "Licensed to the Apache Software Foundation (ASF)",
+                        source.read_text(encoding="utf-8"),
+                    )
 
 
 if __name__ == "__main__":

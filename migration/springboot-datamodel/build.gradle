@@ -1,0 +1,75 @@
+plugins {
+    id 'java-library'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'org.apache.ofbiz.migration'
+version = '0.1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencyManagement {
+    imports {
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.5.7'
+    }
+}
+
+dependencies {
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    testImplementation 'com.fasterxml.jackson.core:jackson-databind'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testRuntimeOnly 'com.h2database:h2'
+}
+
+def modelFiles = rootProject.fileTree(rootProject.projectDir) {
+    include 'framework/common/entitydef/entitymodel*.xml'
+    include 'framework/*/entitydef/entitymodel*.xml'
+    include 'applications/datamodel/entitydef/*entitymodel*.xml'
+    include 'applications/*/entitydef/entitymodel*.xml'
+    exclude '**/*_test.xml'
+}
+def generatedRoot = layout.buildDirectory.dir('generated/sources/ofbiz2spring/main/java')
+def reportFile = layout.buildDirectory.file('generated/ofbiz2spring-report.json')
+
+tasks.register('generateOfbizDatamodel', Exec) {
+    inputs.files(modelFiles)
+    inputs.file(rootProject.file('migration/tools/ofbiz2spring.py'))
+    inputs.file(rootProject.file('migration/tools/ofbiz_inventory.py'))
+    outputs.dir(generatedRoot)
+    outputs.file(reportFile)
+
+    doFirst {
+        def arguments = [
+                'python3',
+                rootProject.file('migration/tools/ofbiz2spring.py').absolutePath,
+                '--out', generatedRoot.get().asFile.absolutePath,
+                '--entity-package', 'org.apache.ofbiz.migration.datamodel.entity',
+                '--repository-package', 'org.apache.ofbiz.migration.datamodel.repository',
+                '--report', reportFile.get().asFile.absolutePath
+        ]
+        modelFiles.files.sort().each { File model ->
+            arguments.addAll(['--entity-model', model.absolutePath])
+        }
+        commandLine arguments
+    }
+}
+
+sourceSets.main.java.srcDir(generatedRoot)
+tasks.named('compileJava') {
+    dependsOn tasks.named('generateOfbizDatamodel')
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    dependsOn tasks.named('generateOfbizDatamodel')
+    systemProperty 'datamodel.report', reportFile.get().asFile.absolutePath
+}
