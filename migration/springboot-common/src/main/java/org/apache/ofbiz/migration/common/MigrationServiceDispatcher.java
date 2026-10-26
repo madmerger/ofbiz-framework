@@ -127,30 +127,46 @@ public class MigrationServiceDispatcher {
         }
         List<Map<String, Object>> results = new ArrayList<>();
         List<Map<String, Object>> errors = new ArrayList<>();
+        HttpStatus failureStatus = null;
         for (int index = 0; index < inputs.size(); index++) {
             try {
                 results.add(execute(component, serviceName, inputs.get(index)));
             } catch (RuntimeException exception) {
+                if (failureStatus == null) {
+                    failureStatus = exception instanceof MigrationException migrationException
+                            ? migrationException.getStatus()
+                            : HttpStatus.BAD_REQUEST;
+                }
                 errors.add(Map.of("index", index, "errorMessage",
                         exception.getMessage() == null ? "Service failed" : exception.getMessage()));
             }
         }
         if (!errors.isEmpty()) {
-            throw new MultiServiceException(errors);
+            throw new MultiServiceException(errors, failureStatus);
         }
         return results;
     }
 
     public static class MultiServiceException extends RuntimeException {
         private final List<Map<String, Object>> errors;
+        private final HttpStatus status;
 
         public MultiServiceException(List<Map<String, Object>> errors) {
+            this(errors, HttpStatus.BAD_REQUEST);
+        }
+
+        public MultiServiceException(List<Map<String, Object>> errors, HttpStatus status) {
             super("One or more service calls failed");
             this.errors = List.copyOf(errors);
+            this.status = status;
         }
 
         public List<Map<String, Object>> getErrors() {
             return errors;
+        }
+
+        public HttpStatus getStatus() {
+            return status;
         }
     }
 }

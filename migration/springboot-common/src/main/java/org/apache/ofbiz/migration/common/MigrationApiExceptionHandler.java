@@ -40,7 +40,7 @@ public class MigrationApiExceptionHandler {
         body.put("responseMessage", "error");
         body.put("errorMessage", exception.getMessage());
         body.put("errors", exception.getErrors());
-        return ResponseEntity.badRequest().body(body);
+        return ResponseEntity.status(exception.getStatus()).body(body);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)

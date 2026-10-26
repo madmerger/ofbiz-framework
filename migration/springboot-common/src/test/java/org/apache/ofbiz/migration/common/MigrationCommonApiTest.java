@@ -24,9 +24,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.ofbiz.migration.datamodel.entity.Enumeration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest(
@@ -85,6 +88,9 @@ class MigrationCommonApiTest {
 
     @Autowired
     private EntityRegistry entityRegistry;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private final AtomicBoolean handlerInvoked = new AtomicBoolean();
     private final AtomicBoolean defaultPermissionHandlerInvoked = new AtomicBoolean();
@@ -158,6 +164,62 @@ class MigrationCommonApiTest {
                         .with(httpBasic("writer", "writer-password")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void duplicateMultiCreateReturnsConflictAndRollsBackPriorWrites() throws Exception {
+        String suffix = Long.toString(System.nanoTime(), 36);
+        String existingId = "EX" + suffix;
+        String rolledBackId = "RB" + suffix;
+
+        mockMvc.perform(post("/api/test/services/createEnumeration")
+                        .with(httpBasic("writer", "writer-password"))
+                        .contentType("application/json")
+                        .content("{\"enumId\":\"" + existingId + "\",\"enumTypeId\":\"TEST_TYPE\"}"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/test/services/createEnumeration/multi")
+                        .with(httpBasic("writer", "writer-password"))
+                        .contentType("application/json")
+                        .content("[{\"enumId\":\"" + rolledBackId + "\",\"enumTypeId\":\"TEST_TYPE\"},"
+                                + "{\"enumId\":\"" + existingId + "\",\"enumTypeId\":\"TEST_TYPE\"}]"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.responseMessage").value("error"))
+                .andExpect(jsonPath("$.errorMessage").value("One or more service calls failed"))
+                .andExpect(jsonPath("$.errors[0].index").value(1))
+                .andExpect(jsonPath("$.errors[0].errorMessage").value("ServiceValueFound"));
+
+        mockMvc.perform(get("/api/test/entities/Enumeration")
+                        .param("enumId", rolledBackId)
+                        .with(httpBasic("writer", "writer-password")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+        mockMvc.perform(get("/api/test/entities/Enumeration")
+                        .param("enumId", existingId)
+                        .with(httpBasic("writer", "writer-password")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].enumId").value(existingId));
+    }
+
+    @Test
+    @Transactional
+    void equalityQueriesAreUnlimitedUnlessMaxResultsIsProvided() {
+        String suffix = Long.toString(System.nanoTime(), 36);
+        String enumTypeId = "T" + suffix;
+        String enumIdPrefix = "E" + suffix + "_";
+        for (int index = 0; index < 150; index++) {
+            Enumeration enumeration = new Enumeration();
+            enumeration.setEnumId(enumIdPrefix + index);
+            enumeration.setEnumTypeId(enumTypeId);
+            entityManager.persist(enumeration);
+        }
+        entityManager.flush();
+
+        Map<String, ?> filters = Map.of("enumTypeId", enumTypeId);
+        org.junit.jupiter.api.Assertions.assertEquals(
+                150, entityRegistry.findByEquality(Enumeration.class, filters).size());
+        org.junit.jupiter.api.Assertions.assertEquals(
+                100, entityRegistry.findByEquality(Enumeration.class, filters, 100).size());
     }
 
     @Test

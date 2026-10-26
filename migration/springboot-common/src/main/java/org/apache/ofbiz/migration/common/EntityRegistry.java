@@ -106,6 +106,14 @@ public class EntityRegistry {
     }
 
     public <T> List<T> findByEquality(Class<T> type, Map<String, ?> filters) {
+        return findByEquality(type, filters, null);
+    }
+
+    public <T> List<T> findByEquality(Class<T> type, Map<String, ?> filters, int maxResults) {
+        return findByEquality(type, filters, Integer.valueOf(maxResults));
+    }
+
+    private <T> List<T> findByEquality(Class<T> type, Map<String, ?> filters, Integer maxResults) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<T> query = builder.createQuery(type);
         Root<T> root = query.from(type);
@@ -118,7 +126,11 @@ public class EntityRegistry {
                     root.get(filter.getKey()), convert(filter.getValue(), propertyType(type, filter.getKey()))));
         }
         query.select(root).where(predicates.toArray(Predicate[]::new));
-        return new ArrayList<>(entityManager.createQuery(query).setMaxResults(100).getResultList());
+        var entityQuery = entityManager.createQuery(query);
+        if (maxResults != null) {
+            entityQuery.setMaxResults(maxResults);
+        }
+        return new ArrayList<>(entityQuery.getResultList());
     }
 
     public Long maxNumericFieldByEquality(Class<?> type, String field, Map<String, ?> filters) {

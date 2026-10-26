@@ -23,7 +23,7 @@ HumanRes は先行パイロットであり、既存コードを `springboot-comm
    registry.registerHandler("accounting", "findPayHistory", "VIEW", "PayHistory", input -> find(input));
    ```
    権限には `VIEW` / `UPDATE` などの action または `ORDERMGR_UPDATE` のような authority を指定する。省略時は `<service-permission-prefix>_ADMIN` のみ許可する。結果が機微 Entity を含む handler は Entity 名も登録し、handler 実行前の `HUMANRES_SENSITIVE_VIEW` 等の確認を有効にする。
-5. `migration.security.component` に対象 component 名を設定し、`migration.security.base-permissions` と service catalog の `permissionMainAction` / invoke 権限を設定する。Entity API の許可対象は catalog が参照する Entity と `migration.security.extra-entities` のみ。読み取り・書き込み対象の機微 Entity を `migration.security.sensitive-entities` に列挙し、正規 Entity 名による認可、秘密情報のマスキング、multi-service 全 rollback、HTTPS 要件をテストする。
+5. `migration.security.component` に対象 component 名を設定し、`migration.security.base-permissions` と service catalog の `permissionMainAction` / invoke 権限を設定する。Entity API の許可対象は catalog が参照する Entity と `migration.security.extra-entities` のみ。読み取り・書き込み対象の機微 Entity を `migration.security.sensitive-entities` に列挙し、正規 Entity 名による認可、秘密情報のマスキング、multi-service 全 rollback、HTTPS 要件をテストする。multi-service は失敗時に全 rollback し、最初の失敗行の HTTP status（MigrationException の status、それ以外は 400）を返すため、重複時の 409 用 endpoint をコンポーネントごとに追加する必要はない。EntityRegistry の `findByEquality(type, filters)` は上限なしなので業務ロジックに使い、HTTP Entity 一覧は `findByEquality(type, filters, 100)` を使って既存の上限を維持する。
 6. H2 で Entity/Service/API のテストを実行し、必要な PostgreSQL/Testcontainers テストも用意する。local 起動スクリプトを追加し、Swagger UI の `Authorize` と主要 API を用いた E2E 手順を記録する。
 7. spec、notes、review、テスト結果、未対応 Entity XML を `docs/migration/<comp>/` に記録する。PR の変更は対象コンポーネントに限定する。
 
