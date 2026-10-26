@@ -4,14 +4,14 @@
 
 | 検証 | コマンド | 結果 |
 | --- | --- | --- |
-| Spring Boot モジュールの全テスト | `./gradlew :migration:humanres-springboot:test` | **157 件 pass / 0 fail / 0 skip**（EntityAutoAcceptanceTest 136、HrTreeSecurityTest 7、HumanResBusinessServicesTest 13、PostgresSmokeTest 1） |
+| Spring Boot モジュールの全テスト | `./gradlew :migration:humanres-springboot:test` | **158 件 pass / 0 fail / 0 skip**（EntityAutoAcceptanceTest 136、HrTreeSecurityTest 7、HumanResBusinessServicesTest 13、PostgresSmokeTest 1、SpringdocProfileTest 1） |
 | PostgreSQL（Testcontainers） | 上に含まれる | 1 件 pass（skip なし） |
 | 棚卸しツール・生成器 | `python3 -m unittest discover -s migration/tools -p 'test_*.py'` | 6 件 pass |
 | 既存 OFBiz テスト（回帰） | `./gradlew test --tests 'org.apache.ofbiz.humanres.HumanResEventsTest'` | 3 件 pass |
 | 静的解析 | `./gradlew checkstyleMain checkstyleTest codenarcMain codenarcTest` | BUILD SUCCESSFUL |
 | 起動と疎通 | `HUMANRES_DEMO_PASSWORD=... ./migration/humanres-springboot/run-local.sh` + curl | health 200 / hr-tree（admin）200 / HUMANRES 権限なし 403 / 未認証 401 / create・update・expire 200 / multi の失敗時 400 → ロールバック確認（GET 404） |
 
-操作確認用に Swagger UI（/swagger-ui.html、local プロファイル）を追加。
+操作確認用に Swagger UI（/swagger-ui.html、local プロファイルのみ有効）を追加。
 
 ## 2. 受け入れ基準の判定（spec §11）
 

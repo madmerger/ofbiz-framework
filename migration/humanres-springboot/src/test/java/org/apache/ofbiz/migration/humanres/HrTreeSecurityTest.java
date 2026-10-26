@@ -16,11 +16,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(classes = {HumanResMigrationApplication.class, TestUsersConfiguration.class})
+@SpringBootTest(
+        classes = {HumanResMigrationApplication.class, TestUsersConfiguration.class},
+        properties = "HUMANRES_DEMO_PASSWORD=test-demo-password")
 @AutoConfigureMockMvc
+@ActiveProfiles("local")
 class HrTreeSecurityTest {
     @Autowired
     private MockMvc mockMvc;
@@ -33,6 +37,8 @@ class HrTreeSecurityTest {
 
     @Test
     void ac46_swaggerDocsArePublicAndHumanResApiRemainsProtected() throws Exception {
+        mockMvc.perform(get("/swagger-ui/index.html"))
+                .andExpect(status().isOk());
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("/api/humanres/hr-tree")))
