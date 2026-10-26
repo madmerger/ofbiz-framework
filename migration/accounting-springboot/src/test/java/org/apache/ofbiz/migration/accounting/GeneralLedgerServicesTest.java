@@ -145,6 +145,30 @@ class GeneralLedgerServicesTest {
     }
 
     @Test
+    void createAcctgTransAndEntriesNegatesConvertedAmountWhenOriginalIsNegative() throws Exception {
+        Map<String, Object> entry = createNormalizedEntry("MIG_GL_NEG_ORIG", "-4.00", "4.00");
+        Assertions.assertEquals(new java.math.BigDecimal("4.00"), entry.get("origAmount"));
+        Assertions.assertEquals(new java.math.BigDecimal("-4.00"), entry.get("amount"));
+        Assertions.assertEquals("C", entry.get("debitCreditFlag"));
+    }
+
+    @Test
+    void createAcctgTransAndEntriesNormalizesNegativeAmountWithoutOriginalAmount() throws Exception {
+        Map<String, Object> entry = createNormalizedEntry("MIG_GL_NEG_AMOUNT", null, "-5.00");
+        Assertions.assertEquals(new java.math.BigDecimal("5.00"), entry.get("origAmount"));
+        Assertions.assertEquals(new java.math.BigDecimal("5.00"), entry.get("amount"));
+        Assertions.assertEquals("C", entry.get("debitCreditFlag"));
+    }
+
+    @Test
+    void createAcctgTransAndEntriesNormalizesNegativeOriginalAndAmountTogether() throws Exception {
+        Map<String, Object> entry = createNormalizedEntry("MIG_GL_NEG_BOTH", "-6.00", "-6.00");
+        Assertions.assertEquals(new java.math.BigDecimal("6.00"), entry.get("origAmount"));
+        Assertions.assertEquals(new java.math.BigDecimal("6.00"), entry.get("amount"));
+        Assertions.assertEquals("C", entry.get("debitCreditFlag"));
+    }
+
+    @Test
     void closeFinancialTimePeriodClosesALeafPeriod() throws Exception {
         persist("CustomTimePeriod", Map.of("customTimePeriodId", "MIG_GL_PERIOD",
                 "fromDate", Timestamp.valueOf("2025-01-01 00:00:00"),
@@ -322,6 +346,21 @@ class GeneralLedgerServicesTest {
                 "partyId", "MIG_DEMO_VENDOR", "roleTypeId", "INTERNAL_ORGANIZATIO")).isEmpty()) {
             persist("PartyRole", Map.of("partyId", "MIG_DEMO_VENDOR", "roleTypeId", "INTERNAL_ORGANIZATIO"));
         }
+    }
+
+    private Map<String, Object> createNormalizedEntry(String accountId, String originalAmount, String amount)
+            throws Exception {
+        ensureInternalOrganizationRole();
+        persist("GlAccount", Map.of("glAccountId", accountId));
+        String original = originalAmount == null ? "" : ",\"origAmount\":\"" + originalAmount + "\"";
+        String response = post("createAcctgTransAndEntries", "{\"acctgTransEntries\":["
+                + "{\"organizationPartyId\":\"MIG_DEMO_VENDOR\",\"glAccountId\":\"" + accountId + "\","
+                + "\"debitCreditFlag\":\"D\",\"amount\":\"" + amount + "\"" + original + "}]}")
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String id = objectMapper.readTree(response).get("acctgTransId").asText();
+        Object persisted = entities.findByEquality(entities.entityClass("AcctgTransEntry"),
+                Map.of("acctgTransId", id)).get(0);
+        return entities.toMap(persisted);
     }
 
     private Object persist(String entityName, Map<String, ?> values) {

@@ -266,11 +266,8 @@ public class GeneralLedgerServiceHandlers {
                 }
                 entry.put("amount", entry.get("origAmount"));
             }
-            BigDecimal original = decimal(entry.get("origAmount"));
-            if (original.signum() < 0) {
-                entry.put("origAmount", original.abs());
-                entry.put("amount", decimal(entry.get("amount")).abs());
-                entry.put("debitCreditFlag", "D".equals(entry.get("debitCreditFlag")) ? "C" : "D");
+            if (entry.get("origAmount") == null && entry.get("amount") != null) {
+                entry.put("origAmount", entry.get("amount"));
             }
             normalized.add(entry);
         }
@@ -283,18 +280,15 @@ public class GeneralLedgerServiceHandlers {
             values.put("acctgTransId", transactionId);
             BigDecimal original = decimal(values.get("origAmount"));
             if (original.signum() < 0) {
-                values.put("origAmount", original.abs());
+                values.put("origAmount", original.negate());
                 if (values.get("amount") != null) {
-                    values.put("amount", decimal(values.get("amount")).abs());
+                    values.put("amount", decimal(values.get("amount")).negate());
                 }
                 if ("D".equals(values.get("debitCreditFlag"))) {
                     values.put("debitCreditFlag", "C");
                 } else if ("C".equals(values.get("debitCreditFlag"))) {
                     values.put("debitCreditFlag", "D");
                 }
-            }
-            if (values.get("origAmount") == null && values.get("amount") != null) {
-                values.put("origAmount", values.get("amount"));
             }
             createTransactionEntry(values);
         }
