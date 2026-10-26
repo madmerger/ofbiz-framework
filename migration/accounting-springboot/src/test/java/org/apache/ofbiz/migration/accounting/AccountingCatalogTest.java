@@ -77,6 +77,12 @@ class AccountingCatalogTest {
         assertTrue(registry.find("accounting", name).isPresent(), name);
     }
 
+    @ParameterizedTest(name = "GeneralLedger simple service {0} is registered")
+    @MethodSource("generalLedgerServices")
+    void eachGeneralLedgerSimpleServiceIsRegistered(String name) {
+        assertTrue(registry.handler("accounting", name).isPresent(), name);
+    }
+
     @Test
     void executesEntityAutoCrudWhereCatalogAndSchemaAllowIt() throws Exception {
         List<ServiceHandlerRegistry.ServiceDefinition> definitions = entityAutoServices()
@@ -164,6 +170,29 @@ class AccountingCatalogTest {
 
     private static Stream<String> entityAutoServices() {
         return new AccountingCatalogRegistrar(new ServiceHandlerRegistry()).parseEntityAutoNames().stream();
+    }
+
+    private static Stream<String> generalLedgerServices() {
+        return Stream.of(
+                "quickCreateAcctgTransAndEntries",
+                "calculateGlJournalTrialBalance",
+                "postGlJournal",
+                "updateGlReconciliationLastModified",
+                "createGlReconciliationEntry",
+                "completeAcctgTransEntries",
+                "createAcctgTransAndEntries",
+                "closeFinancialTimePeriod",
+                "computeGlAccountBalanceForTimePeriod",
+                "computeAndStoreGlAccountHistoryBalance",
+                "prepareIncomeStatement",
+                "getGlAccountFromAccountType",
+                "getInventoryItemOwner",
+                "copyAcctgTransAndEntries",
+                "updateGlAccountCategoryMember",
+                "createGlAcctCatMemFromCostCenters",
+                "getGlAcctgAndAmountPercentage",
+                "getInventoryValuationList",
+                "setGlReconciliationStatus");
     }
 
     private Map<String, ServiceHandlerRegistry.ServiceDefinition> byEntityAndAction(
