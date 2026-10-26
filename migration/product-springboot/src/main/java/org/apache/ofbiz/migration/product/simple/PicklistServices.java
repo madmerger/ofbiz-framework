@@ -151,9 +151,9 @@ public class PicklistServices extends UnportedSimpleMethodFile {
             long orderItemCount = count("OrderItem", List.of(eq("orderId", orderHeader.get("orderId"))), null);
             Set<String> locations = new LinkedHashSet<>();
             String noOfOrderItems = null;
-            boolean grouped = isY(parameters.get("groupByShippingMethod"))
-                    || isY(parameters.get("groupByWarehouseArea"))
-                    || isY(parameters.get("groupByNoOfOrderItems"));
+            boolean grouped = notEmpty(parameters.get("groupByShippingMethod"))
+                    || notEmpty(parameters.get("groupByWarehouseArea"))
+                    || notEmpty(parameters.get("groupByNoOfOrderItems"));
             if (!grouped) {
                 groupName = text(orderHeader.get("orderId"));
             } else {
@@ -471,7 +471,7 @@ public class PicklistServices extends UnportedSimpleMethodFile {
                 }
             }
             if (itemsInBin == 0) {
-                callProductService("deletePicklistBin", values("picklistBinId", picklistBinId));
+                remove("PicklistBin", values("picklistBinId", picklistBinId));
             }
         }
         return values("picklistId", picklistId);
@@ -531,14 +531,11 @@ public class PicklistServices extends UnportedSimpleMethodFile {
      */
     private Map<String, Object> editPicklistItem(Map<String, Object> parameters) {
         Map<String, Object> picklistItem = first("PicklistItem", pk("PicklistItem", parameters));
-        if (picklistItem == null) {
-            return new LinkedHashMap<>();
-        }
         List<String> errors = new ArrayList<>();
         BigDecimal quantity = decimal(parameters.get("quantity"));
-        BigDecimal oldQuantity = decimal(picklistItem.get("quantity"));
+        BigDecimal oldQuantity = picklistItem == null ? null : nullableDecimal(picklistItem.get("quantity"));
         // type=Integer in the source converts BigDecimal values through ObjectType's Integer converter.
-        if (quantity.intValue() > oldQuantity.intValue()) {
+        if (oldQuantity != null && quantity.intValue() > oldQuantity.intValue()) {
             errors.add("The quantity entered (" + parameters.get("quantity")
                     + ") is higher than the quantity expected (" + picklistItem.get("quantity") + ").");
         }
@@ -565,6 +562,10 @@ public class PicklistServices extends UnportedSimpleMethodFile {
                 "shipGroupSeqId", parameters.get("shipGroupSeqId"),
                 "orderItemSeqId", parameters.get("orderItemSeqId"),
                 "inventoryItemId", parameters.get("inventoryItemId")));
+        if (picklistItem == null) {
+            // The source dereferences the missing value at remove-value after its validations and availability call.
+            throw notFound("PicklistItem not found");
+        }
         remove("PicklistItem", picklistItem);
         Map<String, Object> cancelInput = filter(parameters, "orderId", "shipGroupSeqId",
                 "orderItemSeqId", "inventoryItemId");
@@ -583,7 +584,7 @@ public class PicklistServices extends UnportedSimpleMethodFile {
                 "reserveOrderEnumId", oldReservation == null ? null : oldReservation.get("reserveOrderEnumId"));
         inventoryReserveServices.execute(
                 "reserveProductInventoryByFacility", "reserveProductInventory", reserveInput);
-        if (quantity.intValue() < oldQuantity.intValue()) {
+        if (oldQuantity != null && quantity.intValue() < oldQuantity.intValue()) {
             Map<String, Object> remainderInput = values(
                     "orderId", parameters.get("orderId"),
                     "shipGroupSeqId", parameters.get("shipGroupSeqId"),
@@ -680,11 +681,12 @@ public class PicklistServices extends UnportedSimpleMethodFile {
         if (viewIndex == null || viewSize == null) {
             throw badRequest("The limit-view view-index and view-size values must be valid integers.");
         }
-        int effectiveIndex = Math.max(0, viewIndex);
-        int offset = viewSize <= 0 ? 0 : effectiveIndex * viewSize;
-        List<Map<String, Object>> picklists = select(
-                "Picklist", conditions, null, List.of("+picklistDate"), offset,
-                viewSize <= 0 ? 0 : viewSize, false);
+        if (viewIndex < 0 || viewSize < 0) {
+            throw badRequest("The limit-view view-index and view-size values must be non-negative.");
+        }
+        int offset = viewIndex * viewSize;
+        List<Map<String, Object>> picklists = viewSize == 0 ? List.of() : select(
+                "Picklist", conditions, null, List.of("+picklistDate"), offset, viewSize, false);
         List<Map<String, Object>> picklistInfoList = new ArrayList<>();
         for (Map<String, Object> picklist : picklists) {
             picklistInfoList.add(getPicklistSingleInfoInline(picklist));
@@ -715,6 +717,10 @@ public class PicklistServices extends UnportedSimpleMethodFile {
      */
     private Map<String, Object> getPickAndPackReportInfo(Map<String, Object> parameters) {
         Map<String, Object> picklist = first("Picklist", values("picklistId", parameters.get("picklistId")));
+        if (picklist == null) {
+            // The source errors when dereferencing a missing Picklist value.
+            throw notFound("Picklist not found");
+        }
         Map<String, Object> picklistInfo = getPicklistSingleInfoInline(picklist);
         Map<String, Object> binsById = new LinkedHashMap<>();
         Map<String, Map<String, Object>> locationsById = new LinkedHashMap<>();
@@ -735,14 +741,12 @@ public class PicklistServices extends UnportedSimpleMethodFile {
                     itemsByLocation.computeIfAbsent(text(locationSeqId), ignored -> new ArrayList<>())
                             .add(itemInfo);
                 } else {
-                    Map<String, Object> product = map(itemInfo.get("product"));
-                    if (!product.isEmpty()) {
+                    Map<String, Object> orderItem = map(itemInfo.get("orderItem"));
+                    if (notEmpty(orderItem.get("productId"))) {
                         Object productIdValue = inventoryLocation.get("productId");
                         String productId = text(productIdValue);
-                        product = first("Product", eq("productId", productIdValue));
-                        if (product == null) {
-                            continue;
-                        }
+                        Map<String, Object> product = productIdValue == null
+                                ? null : first("Product", eq("productId", productIdValue));
                         productsById.put(productId, product);
                         itemsByProduct.computeIfAbsent(productId, ignored -> new ArrayList<>()).add(itemInfo);
                     }
@@ -793,7 +797,8 @@ public class PicklistServices extends UnportedSimpleMethodFile {
         }
 
         List<Map<String, Object>> noLocationProductInfoList = new ArrayList<>();
-        for (String productId : productsById.keySet().stream().sorted().toList()) {
+        for (String productId : productsById.keySet().stream()
+                .sorted(Comparator.nullsFirst(String::compareTo)).toList()) {
             List<Map<String, Object>> itemInfos = itemsByProduct.getOrDefault(productId, List.of());
             BigDecimal pickQuantity = BigDecimal.ZERO;
             Map<String, BigDecimal> byBin = new LinkedHashMap<>();
@@ -823,7 +828,10 @@ public class PicklistServices extends UnportedSimpleMethodFile {
      * @see applications/product/minilang/shipment/picklist/PicklistServices.xml:1175-1252
      */
     private Map<String, Object> getPicklistSingleInfoInline(Map<String, Object> picklist) {
-        Objects.requireNonNull(picklist, "Entity value not found with name: picklist");
+        if (picklist == null) {
+            // The source errors when dereferencing a missing Picklist value.
+            throw notFound("Picklist not found");
+        }
         List<Map<String, Object>> roleInfoList = new ArrayList<>();
         for (Map<String, Object> role : relatedMany("Picklist", picklist, "PicklistRole")) {
             roleInfoList.add(values(
@@ -894,8 +902,15 @@ public class PicklistServices extends UnportedSimpleMethodFile {
      */
     private Map<String, Object> checkPicklistBinItemStatuses(Map<String, Object> parameters) {
         Map<String, Object> bin = first("PicklistBin", pk("PicklistBin", parameters));
-        // The source continues to dereference a missing bin/picklist rather than treating it as a no-op.
+        if (bin == null) {
+            // The source errors when dereferencing a missing PicklistBin value.
+            throw notFound("PicklistBin not found");
+        }
         Map<String, Object> picklist = relatedOne("PicklistBin", bin, "Picklist");
+        if (picklist == null) {
+            // The source errors when dereferencing a missing Picklist value.
+            throw notFound("Picklist not found");
+        }
         List<Map<String, Object>> items = select(
                 "PicklistItemAndBin", List.of(eq("picklistId", picklist.get("picklistId"))),
                 null, List.of(), 0, 0, false);
@@ -974,7 +989,6 @@ public class PicklistServices extends UnportedSimpleMethodFile {
             case "createPicklist" -> Set.of("facilityId", "shipmentMethodTypeId", "statusId", "picklistDate");
             case "createPicklistBin" -> Set.of("picklistId", "binLocationNumber",
                     "primaryOrderId", "primaryShipGroupSeqId");
-            case "deletePicklistBin" -> Set.of("picklistBinId");
             case "createPicklistItem" -> Set.of("picklistBinId", "orderId", "shipGroupSeqId",
                     "orderItemSeqId", "inventoryItemId", "quantity", "itemStatusId");
             case "updatePicklistItem" -> Set.of("picklistBinId", "orderId", "shipGroupSeqId",
@@ -1073,245 +1087,240 @@ public class PicklistServices extends UnportedSimpleMethodFile {
             int offset,
             int limit,
             boolean distinct) {
-        List<Map<String, Object>> rows = switch (entityName) {
-            case "OrderHeaderAndItemFacilityLocation" -> orderHeaderLocationRows();
-            case "OrderItemAndShipGroupAssoc" -> orderItemAssocRows();
-            case "PicklistAndBinAndItem" -> picklistBinItemRows();
-            case "PicklistItemAndBin" -> picklistItemBinRows();
-            case "InventoryItemAndLocation" -> inventoryLocationRows();
-            case "PartyNameView" -> partyNameRows();
-            case "StatusValidChangeToDetail" -> statusValidChangeRows();
+        ViewPlan plan = switch (entityName) {
+            case "OrderHeaderAndItemFacilityLocation" -> new ViewPlan(
+                    "OrderHeader OH join OrderItemShipGrpInvRes R on R.orderId = OH.orderId"
+                            + " join OrderItemShipGroup SG on SG.orderId = R.orderId"
+                            + " and SG.shipGroupSeqId = R.shipGroupSeqId"
+                            + " join InventoryItem II on II.inventoryItemId = R.inventoryItemId"
+                            + " left join FacilityLocation FL on FL.facilityId = II.facilityId"
+                            + " and FL.locationSeqId = II.locationSeqId",
+                    List.of("OH", "R", "SG", "II", "FL"));
+            case "OrderItemAndShipGroupAssoc" -> new ViewPlan(
+                    "OrderItem OI join OrderItemShipGroupAssoc OISGA on OISGA.orderId = OI.orderId"
+                            + " and OISGA.orderItemSeqId = OI.orderItemSeqId",
+                    List.of("OI", "OISGA"));
+            case "PicklistAndBinAndItem" -> new ViewPlan(
+                    "Picklist PL join PicklistBin PB on PB.picklistId = PL.picklistId"
+                            + " join PicklistItem PLI on PLI.picklistBinId = PB.picklistBinId",
+                    List.of("PL", "PB", "PLI"));
+            case "PicklistItemAndBin" -> new ViewPlan(
+                    "PicklistBin PB join PicklistItem PLI on PLI.picklistBinId = PB.picklistBinId",
+                    List.of("PB", "PLI"));
+            case "InventoryItemAndLocation" -> new ViewPlan(
+                    "InventoryItem II left join Product PR on PR.productId = II.productId"
+                            + " left join FacilityLocation FL on FL.facilityId = II.facilityId"
+                            + " and FL.locationSeqId = II.locationSeqId",
+                    List.of("II", "PR", "FL"));
+            case "PartyNameView" -> new ViewPlan(
+                    "Party PTY left join Person PER on PER.partyId = PTY.partyId"
+                            + " left join PartyGroup PTYGRP on PTYGRP.partyId = PTY.partyId",
+                    List.of("PTY", "PER", "PTYGRP"));
+            case "StatusValidChangeToDetail" -> new ViewPlan(
+                    "StatusValidChange SVC join StatusItem SI on SI.statusId = SVC.statusIdTo",
+                    List.of("SVC", "SI"));
             default -> {
                 entities.entityClass(entityName);
-                yield List.of();
+                yield new ViewPlan("", List.of());
             }
         };
-        rows.removeIf(row -> !matches(row, conditions)
-                || anyConditions != null && !anyConditions.isEmpty()
-                && anyConditions.stream().noneMatch(condition -> matches(row, condition)));
-        if (distinct) {
-            rows = new ArrayList<>(new LinkedHashSet<>(rows));
-        }
         List<String> ordering = orderBy == null ? List.of() : orderBy;
         if (ordering.isEmpty() && "StatusValidChangeToDetail".equals(entityName)) {
             ordering = List.of("+sequenceId");
         }
-        for (int index = ordering.size() - 1; index >= 0; index--) {
-            String order = ordering.get(index);
-            boolean ascending = !order.startsWith("-");
-            String field = order.startsWith("+") || order.startsWith("-") ? order.substring(1) : order;
-            Comparator<Map<String, Object>> comparator = Comparator.comparing(
-                    row -> row.get(field), PicklistServices::compareValues);
-            rows.sort(ascending ? comparator : comparator.reversed());
+        boolean projectedDistinct = distinct && "OrderHeaderAndItemFacilityLocation".equals(entityName);
+        StringBuilder hql = new StringBuilder("select ");
+        if (distinct) {
+            hql.append("distinct ");
         }
-        int start = Math.min(Math.max(offset, 0), rows.size());
-        int end = limit > 0 ? Math.min(start + limit, rows.size()) : rows.size();
-        return new ArrayList<>(rows.subList(start, end));
-    }
-
-    private List<Map<String, Object>> orderHeaderLocationRows() {
-        List<Map<String, Object>> rows = new ArrayList<>();
-        for (Map<String, Object> reservation : allRows("OrderItemShipGrpInvRes")) {
-            Map<String, Object> order = first("OrderHeader", eq("orderId", reservation.get("orderId")));
-            Map<String, Object> shipGroup = first("OrderItemShipGroup", eq("orderId", reservation.get("orderId")),
-                    eq("shipGroupSeqId", reservation.get("shipGroupSeqId")));
-            Map<String, Object> inventory = first(
-                    "InventoryItem", eq("inventoryItemId", reservation.get("inventoryItemId")));
-            if (order == null || shipGroup == null || inventory == null) {
-                continue;
+        if (projectedDistinct) {
+            hql.append("SG.shipmentMethodTypeId, FL.areaId");
+        } else {
+            hql.append(String.join(", ", plan.selections()));
+        }
+        hql.append(" from ").append(plan.fromClause());
+        Map<String, Object> boundValues = new LinkedHashMap<>();
+        List<String> where = new ArrayList<>();
+        appendViewConditions(entityName, conditions, where, boundValues);
+        if (anyConditions != null && !anyConditions.isEmpty()) {
+            List<String> any = new ArrayList<>();
+            appendViewConditions(entityName, anyConditions, any, boundValues);
+            where.add("(" + String.join(" or ", any) + ")");
+        }
+        if (!where.isEmpty()) {
+            hql.append(" where ").append(String.join(" and ", where));
+        }
+        if (!ordering.isEmpty()) {
+            List<String> orderExpressions = new ArrayList<>();
+            for (String order : ordering) {
+                boolean ascending = !order.startsWith("-");
+                String field = order.startsWith("+") || order.startsWith("-") ? order.substring(1) : order;
+                orderExpressions.add(viewFieldPath(entityName, field) + (ascending ? " asc" : " desc"));
             }
-            Map<String, Object> location = first("FacilityLocation",
-                    eq("facilityId", inventory.get("facilityId")),
-                    eq("locationSeqId", inventory.get("locationSeqId")));
-            Map<String, Object> row = new LinkedHashMap<>();
-            row.put("orderId", order.get("orderId"));
-            row.put("orderItemSeqId", reservation.get("orderItemSeqId"));
-            row.put("inventoryItemId", reservation.get("inventoryItemId"));
-            row.put("shipGroupSeqId", shipGroup.get("shipGroupSeqId"));
-            row.put("shipmentMethodTypeId", shipGroup.get("shipmentMethodTypeId"));
-            row.put("carrierPartyId", shipGroup.get("carrierPartyId"));
-            row.put("productId", inventory.get("productId"));
-            row.put("facilityId", inventory.get("facilityId"));
-            row.put("locationSeqId", inventory.get("locationSeqId"));
-            row.put("locationTypeEnumId", location == null ? null : location.get("locationTypeEnumId"));
-            row.put("areaId", location == null ? null : location.get("areaId"));
-            rows.add(row);
+            hql.append(" order by ").append(String.join(", ", orderExpressions));
+        }
+        TypedQuery<Object[]> query = entityManager.createQuery(hql.toString(), Object[].class);
+        boundValues.forEach(query::setParameter);
+        if (offset > 0) {
+            query.setFirstResult(offset);
+        }
+        if (limit > 0) {
+            query.setMaxResults(limit);
+        }
+        List<Map<String, Object>> rows = new ArrayList<>();
+        for (Object[] members : query.getResultList()) {
+            rows.add(projectedDistinct
+                    ? values("shipmentMethodTypeId", members[0], "areaId", members[1])
+                    : mapViewRow(entityName, members));
         }
         return rows;
     }
 
-    private List<Map<String, Object>> orderItemAssocRows() {
-        List<Map<String, Object>> rows = new ArrayList<>();
-        List<Map<String, Object>> associations = allRows("OrderItemShipGroupAssoc");
-        for (Map<String, Object> item : allRows("OrderItem")) {
-            for (Map<String, Object> association : associations) {
-                if (!Objects.equals(item.get("orderId"), association.get("orderId"))
-                        || !Objects.equals(item.get("orderItemSeqId"), association.get("orderItemSeqId"))) {
-                    continue;
-                }
-                Map<String, Object> row = new LinkedHashMap<>(item);
-                row.remove("quantity");
-                row.remove("cancelQuantity");
-                row.putAll(association);
-                row.put("orderItemQuantity", item.get("quantity"));
-                row.put("orderItemCancelQuantity", item.get("cancelQuantity"));
-                rows.add(row);
-            }
+    private void appendViewConditions(
+            String entityName, List<Condition> conditions, List<String> expressions,
+            Map<String, Object> boundValues) {
+        if (conditions == null) {
+            return;
         }
-        return rows;
-    }
-
-    private List<Map<String, Object>> picklistBinItemRows() {
-        return joinRows(joinRows(allRows("Picklist"), allRows("PicklistBin"),
-                        "picklistId", "picklistId", false),
-                allRows("PicklistItem"), "picklistBinId", "picklistBinId", false);
-    }
-
-    private List<Map<String, Object>> picklistItemBinRows() {
-        return joinRows(allRows("PicklistBin"), allRows("PicklistItem"),
-                "picklistBinId", "picklistBinId", false);
-    }
-
-    private List<Map<String, Object>> inventoryLocationRows() {
-        List<Map<String, Object>> rows = new ArrayList<>();
-        List<Map<String, Object>> products = allRows("Product");
-        List<Map<String, Object>> locations = allRows("FacilityLocation");
-        for (Map<String, Object> inventory : allRows("InventoryItem")) {
-            List<Map<String, Object>> matchedProducts = products.stream()
-                    .filter(product -> Objects.equals(inventory.get("productId"), product.get("productId")))
-                    .toList();
-            List<Map<String, Object>> matchedLocations = locations.stream()
-                    .filter(location -> Objects.equals(inventory.get("facilityId"), location.get("facilityId"))
-                            && Objects.equals(inventory.get("locationSeqId"), location.get("locationSeqId")))
-                    .toList();
-            if (matchedProducts.isEmpty()) {
-                matchedProducts = List.of(Map.of());
-            }
-            if (matchedLocations.isEmpty()) {
-                matchedLocations = List.of(Map.of());
-            }
-            for (Map<String, Object> product : matchedProducts) {
-                for (Map<String, Object> location : matchedLocations) {
-                    Map<String, Object> row = new LinkedHashMap<>(inventory);
-                    row.remove("comments");
-                    product.forEach((field, value) -> {
-                        if (!"facilityId".equals(field) && !"inventoryItemTypeId".equals(field)) {
-                            row.put(field, value);
-                        }
-                    });
-                    row.putAll(location);
-                    rows.add(row);
-                }
-            }
-        }
-        return rows;
-    }
-
-    private List<Map<String, Object>> partyNameRows() {
-        List<Map<String, Object>> rows = new ArrayList<>();
-        List<Map<String, Object>> people = allRows("Person");
-        List<Map<String, Object>> groups = allRows("PartyGroup");
-        for (Map<String, Object> party : allRows("Party")) {
-            List<Map<String, Object>> partyPeople = people.stream()
-                    .filter(person -> Objects.equals(party.get("partyId"), person.get("partyId")))
-                    .toList();
-            List<Map<String, Object>> partyGroups = groups.stream()
-                    .filter(group -> Objects.equals(party.get("partyId"), group.get("partyId")))
-                    .toList();
-            if (partyPeople.isEmpty()) partyPeople = List.of(Map.of());
-            if (partyGroups.isEmpty()) partyGroups = List.of(Map.of());
-            for (Map<String, Object> person : partyPeople) {
-                for (Map<String, Object> group : partyGroups) {
-                    Map<String, Object> row = new LinkedHashMap<>();
-                    row.put("partyId", party.get("partyId"));
-                    row.put("partyTypeId", party.get("partyTypeId"));
-                    row.put("description", party.get("description"));
-                    row.put("statusId", party.get("statusId"));
-                    for (String field : List.of("firstName", "middleName", "lastName", "firstNameLocal",
-                            "lastNameLocal", "personalTitle", "suffix")) {
-                        row.put(field, person.get(field));
-                    }
-                    row.put("groupName", group.get("groupName"));
-                    row.put("groupNameLocal", group.get("groupNameLocal"));
-                    rows.add(row);
-                }
-            }
-        }
-        return rows;
-    }
-
-    private List<Map<String, Object>> statusValidChangeRows() {
-        List<Map<String, Object>> rows = new ArrayList<>();
-        List<Map<String, Object>> statuses = allRows("StatusItem");
-        for (Map<String, Object> change : allRows("StatusValidChange")) {
-            for (Map<String, Object> status : statuses) {
-                if (!Objects.equals(change.get("statusIdTo"), status.get("statusId"))) {
-                    continue;
-                }
-                Map<String, Object> row = new LinkedHashMap<>(change);
-                row.putAll(status);
-                row.put("statusId", change.get("statusId"));
-                rows.add(row);
-            }
-        }
-        return rows;
-    }
-
-    private List<Map<String, Object>> allRows(String entityName) {
-        return select(entityName, List.of(), null, List.of(), 0, 0, false);
-    }
-
-    private List<Map<String, Object>> joinRows(
-            List<Map<String, Object>> left, List<Map<String, Object>> right,
-            String leftKey, String rightKey, boolean optional) {
-        List<Map<String, Object>> result = new ArrayList<>();
-        for (Map<String, Object> leftRow : left) {
-            List<Map<String, Object>> matches = right.stream()
-                    .filter(rightRow -> Objects.equals(leftRow.get(leftKey), rightRow.get(rightKey)))
-                    .toList();
-            if (matches.isEmpty() && optional) {
-                result.add(new LinkedHashMap<>(leftRow));
+        for (Condition condition : conditions) {
+            String path = viewFieldPath(entityName, condition.field());
+            Object value = condition.value();
+            if (condition.operator().equals("is-null") || value == null && condition.operator().equals("=")) {
+                expressions.add(path + " is null");
+            } else if (condition.operator().equals("is-not-null")
+                    || value == null && condition.operator().equals("!=")) {
+                expressions.add(path + " is not null");
             } else {
-                for (Map<String, Object> rightRow : matches) {
-                    Map<String, Object> row = new LinkedHashMap<>(leftRow);
-                    row.putAll(rightRow);
-                    result.add(row);
-                }
+                String parameter = "viewParam" + boundValues.size();
+                String operator = switch (condition.operator()) {
+                    case "!=" -> "<>";
+                    case ">", "<", ">=" -> condition.operator();
+                    default -> "=";
+                };
+                expressions.add(path + " " + operator + " :" + parameter);
+                boundValues.put(parameter, value);
             }
         }
-        return result;
     }
 
-    private boolean matches(Map<String, Object> row, List<Condition> conditions) {
-        return conditions == null || conditions.stream().allMatch(condition -> matches(row, condition));
-    }
-
-    private boolean matches(Map<String, Object> row, Condition condition) {
-        Object actual = row.get(condition.field());
-        Object expected = condition.value();
-        return switch (condition.operator()) {
-            case "is-null" -> actual == null;
-            case "is-not-null" -> actual != null;
-            case "!=" -> actual != null && expected != null && compareValues(actual, expected) != 0;
-            case ">" -> actual != null && expected != null && compareValues(actual, expected) > 0;
-            case "<" -> actual != null && expected != null && compareValues(actual, expected) < 0;
-            case ">=" -> actual != null && expected != null && compareValues(actual, expected) >= 0;
-            default -> actual == null ? expected == null : expected != null && compareValues(actual, expected) == 0;
+    private String viewFieldPath(String entityName, String field) {
+        return switch (entityName) {
+            case "OrderHeaderAndItemFacilityLocation" -> switch (field) {
+                case "orderId" -> "OH.orderId";
+                case "orderItemSeqId", "inventoryItemId" -> "R." + field;
+                case "shipGroupSeqId", "shipmentMethodTypeId", "carrierPartyId" -> "SG." + field;
+                case "productId", "facilityId", "locationSeqId" -> "II." + field;
+                case "locationTypeEnumId", "areaId" -> "FL." + field;
+                default -> throw new IllegalArgumentException("Unknown view field: " + entityName + "." + field);
+            };
+            case "OrderItemAndShipGroupAssoc" -> switch (field) {
+                case "shipGroupSeqId", "quantity" -> "OISGA." + field;
+                case "orderItemQuantity" -> "OI.quantity";
+                case "orderItemCancelQuantity" -> "OI.cancelQuantity";
+                default -> "OI." + field;
+            };
+            case "PicklistAndBinAndItem" -> switch (field) {
+                case "picklistId", "statusId" -> "PL." + field;
+                case "picklistBinId" -> "PB." + field;
+                case "orderId", "shipGroupSeqId", "orderItemSeqId", "inventoryItemId",
+                        "itemStatusId", "quantity" -> "PLI." + field;
+                default -> throw new IllegalArgumentException("Unknown view field: " + entityName + "." + field);
+            };
+            case "PicklistItemAndBin" -> switch (field) {
+                case "picklistId" -> "PB." + field;
+                case "picklistBinId" -> "PB." + field;
+                default -> "PLI." + field;
+            };
+            case "InventoryItemAndLocation" -> switch (field) {
+                case "areaId", "aisleId", "sectionId", "levelId", "positionId",
+                        "locationTypeEnumId" -> "FL." + field;
+                default -> "II." + field;
+            };
+            case "PartyNameView" -> switch (field) {
+                case "firstName", "middleName", "lastName", "firstNameLocal", "lastNameLocal",
+                        "personalTitle", "suffix" -> "PER." + field;
+                case "groupName", "groupNameLocal" -> "PTYGRP." + field;
+                default -> "PTY." + field;
+            };
+            case "StatusValidChangeToDetail" -> switch (field) {
+                case "statusId", "statusIdTo" -> "SVC." + field;
+                default -> "SI." + field;
+            };
+            default -> throw new IllegalArgumentException("Unknown view entity: " + entityName);
         };
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private static int compareValues(Object left, Object right) {
-        if (left == null || right == null) {
-            return left == right ? 0 : left == null ? -1 : 1;
+    private Map<String, Object> mapViewRow(String entityName, Object[] members) {
+        List<Map<String, Object>> rows = new ArrayList<>();
+        for (Object member : members) {
+            rows.add(member == null ? new LinkedHashMap<>() : entities.toMap(member));
         }
-        if (left instanceof Number || right instanceof Number) {
-            return new BigDecimal(left.toString()).compareTo(new BigDecimal(right.toString()));
-        }
-        if (left.getClass().isInstance(right) && left instanceof Comparable comparable) {
-            return comparable.compareTo(right);
-        }
-        return left.toString().compareTo(right.toString());
+        return switch (entityName) {
+            case "OrderHeaderAndItemFacilityLocation" -> values(
+                    "orderId", rows.get(0).get("orderId"),
+                    "orderItemSeqId", rows.get(1).get("orderItemSeqId"),
+                    "inventoryItemId", rows.get(1).get("inventoryItemId"),
+                    "shipGroupSeqId", rows.get(2).get("shipGroupSeqId"),
+                    "shipmentMethodTypeId", rows.get(2).get("shipmentMethodTypeId"),
+                    "carrierPartyId", rows.get(2).get("carrierPartyId"),
+                    "productId", rows.get(3).get("productId"),
+                    "facilityId", rows.get(3).get("facilityId"),
+                    "locationSeqId", rows.get(3).get("locationSeqId"),
+                    "locationTypeEnumId", rows.get(4).get("locationTypeEnumId"),
+                    "areaId", rows.get(4).get("areaId"));
+            case "OrderItemAndShipGroupAssoc" -> {
+                Map<String, Object> row = new LinkedHashMap<>(rows.get(0));
+                row.remove("quantity");
+                row.remove("cancelQuantity");
+                row.putAll(rows.get(1));
+                row.put("orderItemQuantity", rows.get(0).get("quantity"));
+                row.put("orderItemCancelQuantity", rows.get(0).get("cancelQuantity"));
+                yield row;
+            }
+            case "PicklistAndBinAndItem" -> {
+                Map<String, Object> row = new LinkedHashMap<>(rows.get(0));
+                row.putAll(rows.get(1));
+                row.putAll(rows.get(2));
+                yield row;
+            }
+            case "PicklistItemAndBin" -> {
+                Map<String, Object> row = new LinkedHashMap<>(rows.get(0));
+                row.putAll(rows.get(1));
+                yield row;
+            }
+            case "InventoryItemAndLocation" -> {
+                Map<String, Object> row = new LinkedHashMap<>(rows.get(0));
+                row.remove("comments");
+                rows.get(1).forEach((field, value) -> {
+                    if (!"facilityId".equals(field) && !"inventoryItemTypeId".equals(field)) {
+                        row.put(field, value);
+                    }
+                });
+                row.putAll(rows.get(2));
+                yield row;
+            }
+            case "PartyNameView" -> values(
+                    "partyId", rows.get(0).get("partyId"),
+                    "partyTypeId", rows.get(0).get("partyTypeId"),
+                    "description", rows.get(0).get("description"),
+                    "statusId", rows.get(0).get("statusId"),
+                    "firstName", rows.get(1).get("firstName"),
+                    "middleName", rows.get(1).get("middleName"),
+                    "lastName", rows.get(1).get("lastName"),
+                    "firstNameLocal", rows.get(1).get("firstNameLocal"),
+                    "lastNameLocal", rows.get(1).get("lastNameLocal"),
+                    "personalTitle", rows.get(1).get("personalTitle"),
+                    "suffix", rows.get(1).get("suffix"),
+                    "groupName", rows.get(2).get("groupName"),
+                    "groupNameLocal", rows.get(2).get("groupNameLocal"));
+            case "StatusValidChangeToDetail" -> {
+                Map<String, Object> row = new LinkedHashMap<>(rows.get(0));
+                row.putAll(rows.get(1));
+                row.put("statusId", rows.get(0).get("statusId"));
+                yield row;
+            }
+            default -> throw new IllegalArgumentException("Unknown view entity: " + entityName);
+        };
     }
 
     /**
@@ -1661,6 +1670,10 @@ public class PicklistServices extends UnportedSimpleMethodFile {
         return new MigrationException(HttpStatus.BAD_REQUEST, message);
     }
 
+    private static MigrationException notFound(String message) {
+        return new MigrationException(HttpStatus.NOT_FOUND, message);
+    }
+
     /**
      * Returns an insertion-ordered map while permitting source-compatible null values.
      * @param keyValues alternating string keys and values
@@ -1845,5 +1858,8 @@ public class PicklistServices extends UnportedSimpleMethodFile {
     }
 
     private record Relation(String target, Map<String, String> keys) {
+    }
+
+    private record ViewPlan(String fromClause, List<String> selections) {
     }
 }
