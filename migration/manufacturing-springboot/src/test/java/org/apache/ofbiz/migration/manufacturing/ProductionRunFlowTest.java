@@ -19,6 +19,7 @@ package org.apache.ofbiz.migration.manufacturing;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -26,6 +27,7 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
 import org.junit.jupiter.api.Test;
@@ -44,6 +46,8 @@ class ProductionRunFlowTest {
     private MigrationServiceDispatcher dispatcher;
     @Autowired
     private ProductPort products;
+    @Autowired
+    private EntityRegistry entities;
     @Autowired
     private WorkEffortPort workEfforts;
 
@@ -81,6 +85,34 @@ class ProductionRunFlowTest {
                 "productAssocTypeId", "PRODUCT_VARIANT", "fromDate", Timestamp.from(Instant.now())));
         Map<String, Object> variantRoutingRun = createRun("MFG_RAW1", "MFG_ROUTING");
         assertEquals(2, taskIds(String.valueOf(variantRoutingRun.get("productionRunId"))).size());
+    }
+
+    @Test
+    void ac04_overlappingBomRowsFailBeforeCreatingProductionRun() {
+        call("createBOMAssoc", Map.of(
+                "productId", "MFG_FG", "productIdTo", "MFG_RAW1",
+                "productAssocTypeId", "MANUF_COMPONENT",
+                "fromDate", Timestamp.from(Instant.parse("2020-01-01T00:00:00Z"))));
+        call("createBOMAssoc", Map.of(
+                "productId", "MFG_FG", "productIdTo", "MFG_RAW1",
+                "productAssocTypeId", "MANUF_COMPONENT",
+                "fromDate", Timestamp.from(Instant.parse("2021-01-01T00:00:00Z"))));
+        int headersBefore = entities.findByEquality(entities.entityClass("WorkEffort"),
+                Map.of("workEffortTypeId", "PROD_ORDER_HEADER")).size();
+        int tasksBefore = entities.findByEquality(entities.entityClass("WorkEffort"),
+                Map.of("workEffortTypeId", "PROD_ORDER_TASK")).size();
+
+        MigrationException duplicate = assertThrows(MigrationException.class, () -> createRun("MFG_FG"));
+        assertEquals(400, duplicate.getStatus().value());
+        assertTrue(duplicate.getMessage().contains("MFG_RAW1"));
+        assertEquals(headersBefore, entities.findByEquality(entities.entityClass("WorkEffort"),
+                Map.of("workEffortTypeId", "PROD_ORDER_HEADER")).size());
+        assertEquals(tasksBefore, entities.findByEquality(entities.entityClass("WorkEffort"),
+                Map.of("workEffortTypeId", "PROD_ORDER_TASK")).size());
+        assertTrue(workEfforts.findWorkEffortGoodStandards(Map.of(
+                "productId", "MFG_FG", "workEffortGoodStdTypeId", "PRUN_PROD_DELIV")).isEmpty());
+        assertTrue(workEfforts.findWorkEffortGoodStandards(Map.of(
+                "productId", "MFG_RAW1", "workEffortGoodStdTypeId", "PRUNT_PROD_NEEDED")).isEmpty());
     }
 
     @Test

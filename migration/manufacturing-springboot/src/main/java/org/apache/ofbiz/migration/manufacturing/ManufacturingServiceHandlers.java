@@ -405,6 +405,22 @@ public class ManufacturingServiceHandlers {
         List<Map<String, Object>> components = (List<Map<String, Object>>) getManufacturingComponents(componentInput)
                 .get("components");
 
+        String firstRoutingTaskId = text(routingTasks.get(0).get("workEffortIdTo"));
+        Set<String> routingTaskIds = new java.util.HashSet<>();
+        for (Map<String, Object> routingTask : routingTasks) {
+            routingTaskIds.add(text(routingTask.get("workEffortIdTo")));
+        }
+        Set<String> componentAssignments = new java.util.HashSet<>();
+        for (Map<String, Object> component : components) {
+            String routingTaskId = text(component.get("routingWorkEffortId"));
+            String targetRoutingTaskId = routingTaskIds.contains(routingTaskId) ? routingTaskId : firstRoutingTaskId;
+            String componentId = text(component.get("productIdTo"));
+            if (!componentAssignments.add(targetRoutingTaskId + "\u001f" + componentId)) {
+                throw badRequest("Duplicate production component " + componentId
+                        + " for routing task " + targetRoutingTaskId);
+            }
+        }
+
         Map<String, Object> routingWorkEffort = (Map<String, Object>) routing.get("routing");
         String workEffortName = text(input.get("workEffortName"));
         if (workEffortName.isBlank()) {

@@ -6,11 +6,11 @@
 | --- | --- | --- |
 | Manufacturing acceptance | `ManufacturingAcceptanceTest` 5件 | 成功 |
 | Entity-auto lifecycle | `EntityAutoAcceptanceTest` 9件（7 parameterized cases + catalog / INOUT checks） | 成功 |
-| Simple services | `SimpleServicesAcceptanceTest` 9件 | 成功 |
-| Production flow | `ProductionRunFlowTest` 10件 | 成功 |
+| Simple services | `SimpleServicesAcceptanceTest` 11件 | 成功 |
+| Production flow | `ProductionRunFlowTest` 12件 | 成功 |
 | Security / HTTPS / multi rollback | `ManufacturingSecurityTest` 7件、`ManufacturingHttpsSecurityTest` 3件、`MultiRollbackTest` 2件 | 成功 |
 | PostgreSQL smoke | `PostgresSmokeTest` 1件（Testcontainers） | 成功 |
-| Manufacturing Gradle tests | `MANUFACTURING_DEMO_PASSWORD=<任意値> ./gradlew :migration:manufacturing-springboot:test`（全8クラス、46件） | `BUILD SUCCESSFUL` |
+| Manufacturing Gradle tests | `MANUFACTURING_DEMO_PASSWORD=<任意値> ./gradlew :migration:manufacturing-springboot:test`（全8クラス、49件） | `BUILD SUCCESSFUL` |
 | 共通基盤 regression | `./gradlew :migration:springboot-common:test` 18件（共通基盤は今回変更なし。前回検証結果） | 成功 |
 | Checkstyle / Codenarc | リポジトリ root の `./gradlew checkstyleMain checkstyleTest codenarcMain codenarcTest`（local-only で Node/npm asset tasks を除外） | 成功（17 tasks）。初回の除外なし実行は Node 24.16.0 の artifact 解決が Maven Central HTTP 429 で失敗したため、`nodeSetup`、`npmInstall`、Swagger/Redoc asset tasks を除外して再実行。Manufacturing サブプロジェクト自体には該当 task なし |
 | local E2E curl | `python3 /home/ubuntu/work/manufacturing-e2e.py`、`cases.json` 全リクエスト | 29/29 成功 |
@@ -25,6 +25,7 @@ OUT モードの主キーを持つ entity-auto create は、Manufacturing の生
 - 生産 run のカレンダー調整、PartyAssignment、CostCalc、DOC_PRINTED 時の自動在庫引当は未再現。
 - updateProductionRunTask の time entry / issueRequiredComponents、task status の issueAllComponents / indirect cost calculation は未再現。
 - task start は有効な先行タスクの COMPLETED を要求する。`issueAllComponents` は無視する。
+- 有効期間が重なる同一部品の BOM 行は、OFBiz と同じく production run の作成を失敗させる。WorkEffortGoodStandard の重複を永続化前に検出し、データ不整合として部品 ID を含む400を返す。
 - common multi exception を Manufacturing advice で409へ写像する。details は `notes.md`。
 
 ## 既知の制約
