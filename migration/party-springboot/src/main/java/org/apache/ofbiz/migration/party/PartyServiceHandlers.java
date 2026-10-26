@@ -338,11 +338,13 @@ public class PartyServiceHandlers {
             newLink.put("contactMechId", newId);
             newLink.put("fromDate", now());
             newLink.put("thruDate", null);
+            copy(input, newLink, "comments", "extension", "allowSolicitation");
             create("PartyContactMech", newLink);
             transferCurrentPurposes(partyId, oldId, newId);
             return result("contactMechId", newId);
         }
-        copyWritable(input, relationship, "contactMechTypeId", "comments", "extension", "allowSolicitation");
+        copyWritable(input, relationship, "partyId", "contactMechId", "newContactMechId",
+                "contactMechTypeId", "fromDate", "thruDate");
         return result("contactMechId", oldId);
     }
 

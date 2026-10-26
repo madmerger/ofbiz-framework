@@ -172,8 +172,21 @@ class SimpleServicesTest {
                 "partyId", "AC21_CONTACT_PARTY",
                 "contactMechId", directContactId,
                 "contactMechTypeId", "EMAIL_ADDRESS",
-                "infoString", "updated@example.test"));
+                "infoString", "updated@example.test",
+                "comments", "updated link",
+                "extension", "test extension",
+                "allowSolicitation", "N"));
         String updatedContactId = String.valueOf(updatedLink.get("contactMechId"));
+        Object newContactLink = entities.findByEquality(entities.entityClass("PartyContactMech"),
+                Map.of("partyId", "AC21_CONTACT_PARTY", "contactMechId", updatedContactId)).get(0);
+        assertEquals("updated link", entities.get(newContactLink, "comments"));
+        assertEquals("test extension", entities.get(newContactLink, "extension"));
+        assertEquals("N", entities.get(newContactLink, "allowSolicitation"));
+        call("updatePartyContactMech", Map.of(
+                "partyId", "AC21_CONTACT_PARTY",
+                "contactMechId", updatedContactId,
+                "comments", "updated in place"));
+        assertEquals("updated in place", entities.get(newContactLink, "comments"));
         call("deletePartyContactMech", Map.of(
                 "partyId", "AC21_CONTACT_PARTY", "contactMechId", updatedContactId));
 
