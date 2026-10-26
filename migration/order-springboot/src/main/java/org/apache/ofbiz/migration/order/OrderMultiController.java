@@ -24,6 +24,7 @@ import java.util.Map;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
 import org.apache.ofbiz.migration.common.ServiceHandlerRegistry;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,14 +40,17 @@ import org.springframework.web.bind.annotation.RestController;
 public final class OrderMultiController {
     private final MigrationServiceDispatcher dispatcher;
     private final ServiceHandlerRegistry registry;
+    private final OrderEntitySupport data;
     private final TransactionTemplate transactionTemplate;
 
     public OrderMultiController(
             MigrationServiceDispatcher dispatcher,
             ServiceHandlerRegistry registry,
+            OrderEntitySupport data,
             PlatformTransactionManager transactionManager) {
         this.dispatcher = dispatcher;
         this.registry = registry;
+        this.data = data;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
@@ -90,7 +94,9 @@ public final class OrderMultiController {
         List<Map<String, Object>> errors = new ArrayList<>();
         for (int index = 0; index < inputs.size(); index++) {
             try {
-                results.add(dispatcher.execute("order", serviceName, inputs.get(index)));
+                Map<String, Object> result = dispatcher.execute("order", serviceName, inputs.get(index));
+                data.flush();
+                results.add(result);
             } catch (MigrationException exception) {
                 HttpStatus status = exception.getStatus();
                 Map<String, Object> error = new LinkedHashMap<>();
@@ -98,6 +104,14 @@ public final class OrderMultiController {
                 error.put("status", status.value());
                 error.put("errorMessage", exception.getMessage() == null ? "Service failed" : exception.getMessage());
                 errors.add(error);
+            } catch (DataIntegrityViolationException | ConstraintViolationException exception) {
+                Map<String, Object> error = new LinkedHashMap<>();
+                error.put("index", index);
+                error.put("status", HttpStatus.CONFLICT.value());
+                error.put("errorMessage", "Data integrity violation");
+                errors.add(error);
+                transactionStatus.setRollbackOnly();
+                break;
             }
         }
         if (!errors.isEmpty()) {
