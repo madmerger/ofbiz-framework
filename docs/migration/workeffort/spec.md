@@ -16,5 +16,24 @@ OFBiz `applications/workeffort` のサービスAPIを独立した Spring Boot 3.
 | AC-08 | local profile のみSwagger/seedを有効にし、起動時 `MIGRATION_DEMO_PASSWORD` を必須にする。PostgresはHTTPS/validateと環境変数資格情報を使う。 | `applications/workeffort/data/WorkEffortTypeData.xml:1` | `ac10LocalProfileRequiresEnvironmentPassword`, `ac11PostgresContainerStarts` |
 | AC-09 | 95 entity-auto servicesを各サービス名のparameterized caseとして実呼出しし、INOUT/OUT key semantics、undeclared-attribute rejectionを確認する。 | `applications/workeffort/servicedef/services.xml`, `services_timesheet.xml`, `services_workeffort.xml` | `EntityAutoExecutionAcceptanceTest.invokesEveryEntityAutoService`, `ac09bEntityAutoUpdateRejectsUndeclaredAttributes`, `ac09cEntityAutoCreateHonorsProvidedInoutPrimaryKey`, `ac09dEntityAutoCreateGeneratesEmptyInoutPrimaryKey`, `ac09eEntityAutoCreateIgnoresSuppliedOutPrimaryKey` |
 | AC-10 | キーワード再index、association/timesheet重複、status拒否、period buckets、HTTPS/X-Forwarded-Proto、Swagger profile gatesを確認する。 | `applications/workeffort/minilang/workeffort/WorkEffortSimpleServices.xml`, `applications/workeffort/src/main/java/org/apache/ofbiz/workeffort/workeffort/WorkEffortServices.java` | `WorkEffortSimpleServicesTest.invokesEverySimpleService`, `simpleIndexWorkEffortKeywordsRebuildsKeywordsFromWorkEffortFields`, `simpleCreateWorkEffortAndAssocRejectsDuplicateAssociation`, `simpleCreateTimesheetForThisWeekRejectsDuplicate`, `checkTimesheetStatusRejectsNonInProcessStatus`, `simpleGetWorkEffortEventsByPeriodBucketsInRangeHolidayAndEvent`, `HttpsSecurityTest.untrustedForwardedHttpsIsIgnored`, `SpringdocProfileTest.docsAndSwaggerUiAreNotServedWithoutLocalProfile`, `LocalSpringdocProfileTest.docsAndSwaggerUiAreServedWithLocalProfile` |
+| AC-11 | handler登録対象にcatalog main-actionも明示actionも無い場合、登録（起動）を `IllegalStateException` で拒否する。 | `applications/workeffort/servicedef/services.xml:280` | `WorkEffortServiceRegistrationTest.handlerRegistrationFailsWhenPermissionActionIsMissing` |
+
+### 最終テスト件数
+
+| Test class | Cases |
+|---|---:|
+| `EntityAutoExecutionAcceptanceTest` | 95 |
+| `WorkEffortAcceptanceTest` | 31 |
+| `WorkEffortSimpleServicesTest` | 33 |
+| `HttpsSecurityTest` | 1 |
+| `LocalSpringdocProfileTest` | 1 |
+| `SpringdocProfileTest` | 1 |
+| `PostgresSmokeTest` | 1 |
+| `WorkEffortServiceRegistrationTest` | 1 |
+| **合計** | **164** |
+
+最終実行は164 passed / 0 failed / 0 skipped。実行コマンドとCheckstyle結果は `review.md` を参照。
+
+`./gradlew --console=plain :migration:workeffort-springboot:test :migration:workeffort-springboot:checkstyleMain :migration:workeffort-springboot:checkstyleTest` — BUILD SUCCESSFUL; tests 164/164 passed, Checkstyle main/test passed.
 
 `/api/workeffort/services/{name}`、`/api/workeffort/services/{name}/multi`、`/api/workeffort/entities/{Entity}` を公開する。

@@ -57,3 +57,19 @@
 | view-entity未移植 | 33 |
 | FTL未移植 | 11 |
 | Widget XML未移植 | 35 |
+
+## 最新のテスト実測
+
+`./gradlew --console=plain :migration:workeffort-springboot:test :migration:workeffort-springboot:checkstyleMain :migration:workeffort-springboot:checkstyleTest` は BUILD SUCCESSFUL。164 passed / 0 failed / 0 skipped。内訳:
+
+| Test class | Cases |
+|---|---:|
+| `EntityAutoExecutionAcceptanceTest` | 95 |
+| `WorkEffortAcceptanceTest` | 31 |
+| `WorkEffortSimpleServicesTest` | 33 |
+| `HttpsSecurityTest` | 1 |
+| `LocalSpringdocProfileTest` | 1 |
+| `SpringdocProfileTest` | 1 |
+| `PostgresSmokeTest` | 1 |
+| `WorkEffortServiceRegistrationTest` | 1 |
+| **合計** | **164** |

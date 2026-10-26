@@ -1,5 +1,7 @@
 # Dependency inventory
 
+`inventory/`直下は `applications/workeffort/entitydef/entitymodel_view.xml` 由来、`entitymodel/` は `applications/datamodel/entitydef/workeffort-entitymodel.xml` 由来です。
+
 ## Called services and simple methods
 
 | Kind | Name | Defined by | Definition | Source | Line |

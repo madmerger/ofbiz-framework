@@ -170,7 +170,7 @@ public final class WorkEffortServiceRegistration {
                 .forEach(definition -> registerHandler(definition.name(), businessServices));
     }
 
-    private void registerHandler(String name, WorkEffortBusinessServices handler) {
+    void registerHandler(String name, WorkEffortBusinessServices handler) {
         String sensitiveEntity = "getTimeEntryRate".equals(name) ? "RateAmount" : null;
         registry.registerHandler("workeffort", name, actionFor(name), sensitiveEntity,
                 input -> handler.execute(name, input));

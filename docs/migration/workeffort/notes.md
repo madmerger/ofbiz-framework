@@ -142,3 +142,10 @@ Rate候補の優先順は WorkEffort・Party・Position・Rate type・Currency �
 - common multiは400と確認したのでworkeffort固有409 controllerを維持する。
 - 3ff99279ebで空のINOUT主キー（単一PK・sub-sequence PK）の自動採番もEntityAutoServiceで扱う。workeffort catalogの `createWorkEffortType`（`workEffortTypeId` INOUT optional）で、空文字入力時の採番と永続化を検証する。component側に採番回避策は置かない。
 - 23f8c75e65ではEntityAutoServiceのcreate時にOUT主キーの入力値を無視して採番する。`createTimesheet` の `timesheetId`（OUT）へcaller値を送っても採番IDが返ることをテストする。移植済みhandlerでは `createTimesheets` が行mapをcreateTimesheetへ渡すが、OFBiz原典の `TimesheetServices.xml` は `set-service-fields` でサービス入力項目だけを作るため、OUT主キーを使う差異はない。`createTimesheetForThisWeek` もOFBizの呼出し先が同じentity-auto serviceであり、callerのOUT値を採用しない。
+
+## 最終登録・E2E検証
+
+- `WorkEffortServiceRegistration.registerHandler` は catalog `main-action` / 明示 `DEFAULT_ACTIONS` のどちらにも無いhandler名で `IllegalStateException` を投げる。`WorkEffortServiceRegistrationTest.handlerRegistrationFailsWhenPermissionActionIsMissing` で確認。
+- local profileのfresh curlでは auditor RateAmount が1行（`DemoEmployee`, `125.0`）、readonlyは403。E2E-01〜08はすべて期待statusで、multi重複409後のWorkEffortStatus照会は空配列。サーバー停止も確認済み。詳細は `~/work/workeffort/curl-check.txt` と `~/work/workeffort/e2e-requests.md`。
+- 最終コマンド `./gradlew --console=plain :migration:workeffort-springboot:test :migration:workeffort-springboot:checkstyleMain :migration:workeffort-springboot:checkstyleTest` は BUILD SUCCESSFUL、164 passed / 0 failed / 0 skipped、Checkstyle main/test passed。
+- テストクラス別件数: EntityAutoExecutionAcceptanceTest 95、WorkEffortAcceptanceTest 31、WorkEffortSimpleServicesTest 33、HttpsSecurityTest 1、LocalSpringdocProfileTest 1、SpringdocProfileTest 1、PostgresSmokeTest 1、WorkEffortServiceRegistrationTest 1（合計164）。実行詳細は `review.md`。
