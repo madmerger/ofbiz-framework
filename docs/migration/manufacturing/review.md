@@ -9,7 +9,7 @@
 | PostgreSQL smoke | `PostgresSmokeTest` 1件 | 成功 |
 | 共通基盤 regression | `./gradlew :migration:springboot-common:test` 18件 | 成功 |
 | 統合 Gradle 実行 | `MANUFACTURING_DEMO_PASSWORD=<任意値> MANUFACTURING_ADMIN_PASSWORD_HASH=<テスト用値> ./gradlew :migration:manufacturing-springboot:test :migration:springboot-common:test` | `BUILD SUCCESSFUL` |
-| Checkstyle / Codenarc | モジュール build に適用設定なし | 該当タスクなし |
+| Checkstyle / Codenarc | リポジトリ pre-push hook: `./gradlew checkstyleMain checkstyleTest codenarcMain codenarcTest` | 成功（17 tasks。Maven Central の 429 に対し、一時的なローカル Gradle init script で Node/npm 資産タスクを除外して実行） |
 | local E2E curl | `cases.json` 27リクエスト | 27/27 成功 |
 | Swagger UI | `/swagger-ui/index.html` | HTTP 200 |
 
