@@ -92,6 +92,8 @@ entity-auto で必ず再現する挙動: 採番（OUT / 空の INOUT / N IN + 1 
 - webapp の base-permission → `/api/<c>/**` の全体ゲート（各 base permission に `_VIEW` または `_ADMIN` が必要）。
 - サービスの permission-service の main-action → サービス単位のゲート。
 - 拒否したときは業務処理（Repository）に到達しないことをテストで verify する。
+- センシティブ Entity は URI 文字列ではなく EntityRegistry が解決した正規名で認可し、EntityAuto と行を返す simple service の双方で検査する。
+- HTTPS 強制で `X-Forwarded-Proto` を使う場合は Tomcat native `RemoteIpValve` と信頼プロキシ regex を設定する。公開 IP の偽装ヘッダーは拒否し、信頼済みプロキシ経由だけを HTTPS として扱うテストを置く。
 - 認証はパイロットでは HTTP Basic + インメモリ。全体移行では OIDC 等にし、`SecurityGroupPermission` から authority をロードする。
 
 ## 4. 依存のアダプタ化と段階的な切り替え
@@ -153,6 +155,8 @@ DeepWiki の使い方: 「<component> の主要ユースケース、エンティ
 | deny-list（`deniedWebShellTokens`）の誤検知 | OFBiz と同じ挙動にとどめ、改善は全体で一括して判断する |
 | StatusValidChange のシードが別コンポーネントにある | 必要な遷移をシードに明示する |
 | センシティブな Entity を汎用 API から公開する | `migration.security.sensitive-entities` に列挙し、`<BASE>_SENSITIVE_VIEW` と HTTPS を設定してテストする |
+| URI だけでセンシティブ Entity を認可する | 正規 Entity 名へ解決した時点で検査し、EntityAuto と simple service の戻り値にも同じゲートを適用する |
+| `X-Forwarded-Proto` を任意クライアントから信頼する | `server.forward-headers-strategy=native` とし、`MIGRATION_SECURITY_TRUSTED_PROXIES` の許可範囲を運用環境に合わせて限定する |
 | DeepWiki の誤り | コードで裏取りし、spec の「DeepWiki との差分」に記録 |
 | 相互依存（party ⇔ humanres の画面） | 画面を移植しないので API 層では切れる。UI 再構築時に対応する |
 

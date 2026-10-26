@@ -34,6 +34,7 @@ public class EntityQueryService {
     @Transactional(readOnly = true)
     public Map<String, Object> list(
             String entityName, Map<String, String> requestParams, int page, int size) {
+        entityRegistry.requireSensitiveView(entityRegistry.entityClass(entityName));
         Map<String, String> filters = new LinkedHashMap<>(requestParams);
         filters.remove("page");
         filters.remove("size");
@@ -48,6 +49,7 @@ public class EntityQueryService {
 
     @Transactional(readOnly = true)
     public Object one(String entityName, Map<String, String> primaryKeys) {
+        entityRegistry.requireSensitiveView(entityRegistry.entityClass(entityName));
         Object entity = entityRegistry.findByPrimaryKey(entityName, primaryKeys);
         if (entity == null) {
             throw HumanResException.notFound("ServiceValueNotFound");

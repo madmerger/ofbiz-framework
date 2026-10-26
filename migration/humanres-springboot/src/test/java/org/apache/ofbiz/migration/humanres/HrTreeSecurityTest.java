@@ -18,9 +18,12 @@
  *******************************************************************************/
 package org.apache.ofbiz.migration.humanres;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
@@ -30,6 +33,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.net.URI;
+import org.apache.ofbiz.migration.humanres.generated.PayHistoryRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -52,6 +57,9 @@ class HrTreeSecurityTest {
 
     @MockitoSpyBean
     private EntityAutoService entityAutoService;
+
+    @Autowired
+    private PayHistoryRepository payHistoryRepository;
 
     @Test
     void ac46_swaggerDocsArePublicAndHumanResApiRemainsProtected() throws Exception {
@@ -138,5 +146,33 @@ class HrTreeSecurityTest {
         mockMvc.perform(get("/api/humanres/entities/PayHistory")
                         .with(httpBasic("admin", "admin")))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void sensitiveEntityAuthorizationUsesResolvedEntityName() throws Exception {
+        mockMvc.perform(get(URI.create("/api/humanres/entities/Pay%48istory"))
+                        .with(httpBasic("view", "view")))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/humanres/entities/PayHistory;variant=1")
+                        .with(httpBasic("view", "view")))
+                .andExpect(status().is4xxClientError());
+        mockMvc.perform(get("/api/humanres/entities/payhistory")
+                        .with(httpBasic("view", "view")))
+                .andExpect(status().is4xxClientError());
+        mockMvc.perform(get("/api/humanres/entities/PayHistory")
+                        .with(httpBasic("sensitive", "sensitive")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void sensitiveEntityAutoResponsesRequireSensitiveViewAuthority() throws Exception {
+        long countBefore = payHistoryRepository.count();
+        mockMvc.perform(post("/api/humanres/services/createPayHistory")
+                        .contentType("application/json")
+                        .content("{}")
+                        .with(httpBasic("writer", "writer")))
+                .andExpect(status().isForbidden());
+        assertEquals(countBefore, payHistoryRepository.count());
+        verify(entityAutoService, never()).execute(eq("createPayHistory"), anyMap());
     }
 }

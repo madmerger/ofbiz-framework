@@ -69,6 +69,14 @@ public class HumanResBusinessServices {
         return SERVICES.contains(serviceName);
     }
 
+    public String sensitiveResultEntity(String serviceName) {
+        return switch (serviceName) {
+            case "updatePayHistory" -> "PayHistory";
+            case "getCurrentPartyEmploymentData" -> "PartyBenefit";
+            default -> null;
+        };
+    }
+
     @Transactional
     public Map<String, Object> execute(String serviceName, Map<String, ?> input) {
         return switch (serviceName) {

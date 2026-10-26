@@ -40,6 +40,10 @@ public class HumanResException extends RuntimeException {
         return new HumanResException(HttpStatus.NOT_FOUND, message);
     }
 
+    public static HumanResException forbidden(String message) {
+        return new HumanResException(HttpStatus.FORBIDDEN, message);
+    }
+
     public static HumanResException conflict(String message) {
         return new HumanResException(HttpStatus.CONFLICT, message);
     }

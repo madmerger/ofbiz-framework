@@ -52,6 +52,19 @@ public class TestUsersConfiguration {
                 User.withUsername("no-create")
                         .password(encoder.encode("no-create"))
                         .authorities("OFBTOOLS_VIEW", "HUMANRES_VIEW")
+                        .build(),
+                User.withUsername("sensitive")
+                        .password(encoder.encode("sensitive"))
+                        .authorities("OFBTOOLS_VIEW", "HUMANRES_VIEW", "HUMANRES_SENSITIVE_VIEW")
+                        .build(),
+                User.withUsername("writer")
+                        .password(encoder.encode("writer"))
+                        .authorities(
+                                "OFBTOOLS_VIEW",
+                                "HUMANRES_VIEW",
+                                "HUMANRES_CREATE",
+                                "HUMANRES_UPDATE",
+                                "HUMANRES_DELETE")
                         .build());
     }
 }

@@ -42,15 +42,20 @@ import org.apache.ofbiz.migration.humanres.generated.ServiceCatalog;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
 public class EntityRegistry {
     private static final String GENERATED_PACKAGE = "org.apache.ofbiz.migration.humanres.generated";
     private final EntityManager entityManager;
+    private final MigrationSecurityProperties migrationSecurityProperties;
 
-    public EntityRegistry(EntityManager entityManager) {
+    public EntityRegistry(EntityManager entityManager, MigrationSecurityProperties migrationSecurityProperties) {
         this.entityManager = entityManager;
+        this.migrationSecurityProperties = migrationSecurityProperties;
     }
 
     public EntityManager entityManager() {
@@ -64,6 +69,19 @@ public class EntityRegistry {
                 .filter(type -> type.getSimpleName().equals(name))
                 .findFirst()
                 .orElseThrow(() -> HumanResException.notFound("Unknown entity: " + name));
+    }
+
+    public void requireSensitiveView(Class<?> entityClass) {
+        if (!migrationSecurityProperties.isSensitiveEntity(entityClass.getSimpleName())) {
+            return;
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Set<String> authorities = authentication == null
+                ? Set.of()
+                : AuthorityUtils.authorityListToSet(authentication.getAuthorities());
+        if (!authorities.contains("HUMANRES_SENSITIVE_VIEW") && !authorities.contains("HUMANRES_ADMIN")) {
+            throw HumanResException.forbidden("Sensitive entity access denied: " + entityClass.getSimpleName());
+        }
     }
 
     public List<String> primaryKeyNames(Class<?> entityClass) {

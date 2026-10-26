@@ -31,16 +31,28 @@ import org.springframework.transaction.annotation.Transactional;
 public class HumanResServiceDispatcher {
     private final EntityAutoService entityAutoService;
     private final HumanResBusinessServices businessServices;
+    private final EntityRegistry entityRegistry;
 
     public HumanResServiceDispatcher(
-            EntityAutoService entityAutoService, HumanResBusinessServices businessServices) {
+            EntityAutoService entityAutoService,
+            HumanResBusinessServices businessServices,
+            EntityRegistry entityRegistry) {
         this.entityAutoService = entityAutoService;
         this.businessServices = businessServices;
+        this.entityRegistry = entityRegistry;
     }
 
     @Transactional
     public Map<String, Object> execute(String serviceName, Map<String, ?> input) {
-        if (ServiceCatalog.find(serviceName).isPresent()) {
+        var entityAutoDefinition = ServiceCatalog.find(serviceName);
+        String sensitiveResultEntity = entityAutoDefinition
+                .map(ServiceCatalog.ServiceDefinition::entity)
+                .filter(name -> !name.isBlank())
+                .orElseGet(() -> businessServices.sensitiveResultEntity(serviceName));
+        if (sensitiveResultEntity != null) {
+            entityRegistry.requireSensitiveView(entityRegistry.entityClass(sensitiveResultEntity));
+        }
+        if (entityAutoDefinition.isPresent()) {
             return entityAutoService.execute(serviceName, input);
         }
         if (businessServices.supports(serviceName)) {
