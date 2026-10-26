@@ -28,13 +28,14 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.ofbiz.base.util.ObjectType;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
@@ -141,16 +142,17 @@ public class IssuanceServices extends UnportedSimpleMethodFile {
         entityManager.persist(itemIssuance);
         Object inventoryItem = findPrimaryKey("InventoryItem", Map.of(
                 "inventoryItemId", Objects.toString(issuance.get("inventoryItemId"), "")));
-        Object product = inventoryItem == null
-                ? null
-                : findPrimaryKey("Product", Map.of("productId", Objects.toString(get(inventoryItem, "productId"), "")));
         boolean affectAccounting = true;
-        if ("SERIALIZED_INV_ITEM".equals(get(inventoryItem, "inventoryItemTypeId"))
-                && "SERVICE_PRODUCT".equals(get(product, "productTypeId"))) {
-            affectAccounting = false;
+        if (inventoryItem != null && "SERIALIZED_INV_ITEM".equals(get(inventoryItem, "inventoryItemTypeId"))) {
             executeSibling("updateInventoryItem", inventoryServices, Map.of(
-                    "inventoryItemId", issuance.get("inventoryItemId"),
+                    "inventoryItemId", get(inventoryItem, "inventoryItemId"),
                     "statusId", "INV_DELIVERED"));
+            Object product = findPrimaryKey("Product", Map.of(
+                    "productId", Objects.toString(get(inventoryItem, "productId"), "")));
+            if (Set.of("SERVICE_PRODUCT", "ASSET_USAGE_OUT_IN", "AGGREGATEDSERV_CONF")
+                    .contains(get(product, "productTypeId"))) {
+                affectAccounting = false;
+            }
         }
         env.result.put("itemIssuanceId", issuance.get("itemIssuanceId"));
         env.result.put("affectAccounting", affectAccounting);
@@ -218,16 +220,16 @@ public class IssuanceServices extends UnportedSimpleMethodFile {
         List<?> orderShipments = find("OrderShipment", primaryKeyValues("OrderShipment", env.parameters), null);
         env.set("orderShipment", first(orderShipments));
         calcQtyForShipmentItemInline(env);
-        LOGGER.info("qtyForShipmentItem: {}", get(env, "qtyForShipmentItem"));
-        if (ordered(env, get(env, "qtyForShipmentItem"), ZERO, "greater-equals")) {
+        LOGGER.info("qtyForShipmentItem: {}", env.get("qtyForShipmentItem"));
+        if (ordered(env, env.get("qtyForShipmentItem"), ZERO, "greater-equals")) {
             if (!isEmpty(get(env.get("orderShipment"), "shipmentItemSeqId"))) {
                 env.result.put("shipmentItemSeqId", get(env.get("orderShipment"), "shipmentItemSeqId"));
                 env.set("shipmentItem", findPrimaryKey(
                         "ShipmentItem", primaryKeyValues("ShipmentItem", env.resultWithParameters())));
             }
-            if (!isZero(get(env, "qtyForShipmentItem"))) {
+            if (!isZero(env.get("qtyForShipmentItem"))) {
                 Object requestedQuantity = get(env.parameters, "quantity");
-                set(env, "parameters.quantity", get(env, "qtyForShipmentItem"));
+                set(env, "parameters.quantity", env.get("qtyForShipmentItem"));
                 findCreateIssueShipmentItem(env);
                 set(env, "parameters.quantity", requestedQuantity);
             }
@@ -268,13 +270,13 @@ public class IssuanceServices extends UnportedSimpleMethodFile {
         }
 
         Map<String, Object> detail = new LinkedHashMap<>();
-        detail.put("inventoryItemId", get(env.get("orderItemShipGrpInvRes"), "inventoryItemId"));
-        detail.put("orderId", get(env.get("orderItemShipGrpInvRes"), "orderId"));
-        detail.put("orderItemSeqId", get(env.get("orderItemShipGrpInvRes"), "orderItemSeqId"));
+        detail.put("inventoryItemId", get(env.get("inventoryItem"), "inventoryItemId"));
+        detail.put("orderId", get(env.get("orderItem"), "orderId"));
+        detail.put("orderItemSeqId", get(env.get("orderItem"), "orderItemSeqId"));
         detail.put("shipGroupSeqId", get(env.get("orderItemShipGrpInvRes"), "shipGroupSeqId"));
-        detail.put("shipmentId", get(env.parameters, "shipmentId"));
+        detail.put("shipmentId", get(env.get("shipmentItem"), "shipmentId"));
         detail.put("shipmentItemSeqId", get(env.get("shipmentItem"), "shipmentItemSeqId"));
-        detail.put("itemIssuanceId", get(env, "itemIssuanceId"));
+        detail.put("itemIssuanceId", env.get("itemIssuanceId"));
         detail.put("quantityOnHandDiff", calc(null, "negative", 6, get(env.parameters, "quantity")));
         executeSibling("createInventoryItemDetail", inventoryServices, detail);
         List<?> remainingReservations = find("OrderItemShipGrpInvRes", Map.of(
@@ -309,10 +311,10 @@ public class IssuanceServices extends UnportedSimpleMethodFile {
         }
         env.set("otherInventoryItemQuantity", otherInventoryItemQuantity);
         Object orderShipmentAmount = calculate(calc(
-                get(env.get("orderShipment"), "quantity"), "subtract", 2, get(env, "otherInventoryItemQuantity")));
+                get(env.get("orderShipment"), "quantity"), "subtract", 2, env.get("otherInventoryItemQuantity")));
         env.set("orderShipmentAmount", orderShipmentAmount);
         env.set("qtyForShipmentItem", calculate(calc(
-                get(env.parameters, "quantity"), "subtract", 2, get(env, "orderShipmentAmount"))));
+                get(env.parameters, "quantity"), "subtract", 2, env.get("orderShipmentAmount"))));
     }
 
     /** Port of applications/product/minilang/shipment/issuance/IssuanceServices.xml:363-400. */
@@ -344,6 +346,7 @@ public class IssuanceServices extends UnportedSimpleMethodFile {
             store(env.get("shipmentItem"));
         }
         env.set("shipmentItemSeqId", get(env.get("shipmentItem"), "shipmentItemSeqId"));
+        env.result.put("shipmentItemSeqId", env.get("shipmentItemSeqId"));
         createOrUpdateOrderShipmentInline(env);
     }
 
@@ -395,7 +398,7 @@ public class IssuanceServices extends UnportedSimpleMethodFile {
                         .add(decimal(get(env.parameters, "quantity"))));
                 store(itemIssuance);
                 env.set("itemIssuanceId", get(itemIssuance, "itemIssuanceId"));
-                env.result.put("itemIssuanceId", get(env, "itemIssuanceId"));
+                env.result.put("itemIssuanceId", env.get("itemIssuanceId"));
                 return;
             }
         }
@@ -405,7 +408,7 @@ public class IssuanceServices extends UnportedSimpleMethodFile {
         itemIssuanceInput.put("shipmentItemSeqId", get(env.get("shipmentItem"), "shipmentItemSeqId"));
         itemIssuanceInput.put("orderId", get(env.get("orderItem"), "orderId"));
         itemIssuanceInput.put("orderItemSeqId", get(env.get("orderItem"), "orderItemSeqId"));
-        itemIssuanceInput.put("issuedDateTime", get(env, "eventDate"));
+        itemIssuanceInput.put("issuedDateTime", env.get("eventDate"));
         if (env.get("orderItemShipGrpInvRes") != null) {
             itemIssuanceInput.put("inventoryItemId", get(env.get("orderItemShipGrpInvRes"), "inventoryItemId"));
             itemIssuanceInput.put("shipGroupSeqId", get(env.get("orderItemShipGrpInvRes"), "shipGroupSeqId"));
@@ -435,12 +438,12 @@ public class IssuanceServices extends UnportedSimpleMethodFile {
             entityManager.persist(partyRole);
         }
         Map<String, Object> roleKey = Map.of(
-                "itemIssuanceId", get(env, "itemIssuanceId"),
+                "itemIssuanceId", env.get("itemIssuanceId"),
                 "partyId", partyId,
                 "roleTypeId", "PACKER");
         if (findPrimaryKey("ItemIssuanceRole", roleKey) == null) {
             Map<String, Object> roleInput = new LinkedHashMap<>(roleKey);
-            roleInput.put("shipmentId", get(env, "shipmentId"));
+            roleInput.put("shipmentId", env.get("shipmentId"));
             dispatch("createItemIssuanceRole", roleInput);
         }
     }
@@ -912,7 +915,19 @@ public class IssuanceServices extends UnportedSimpleMethodFile {
     }
 
     private static boolean isEmpty(Object value) {
-        return ObjectType.isEmpty(value);
+        if (value == null) {
+            return true;
+        }
+        if (value instanceof CharSequence sequence) {
+            return sequence.length() == 0;
+        }
+        if (value instanceof Collection<?> collection) {
+            return collection.isEmpty();
+        }
+        if (value instanceof Map<?, ?> map) {
+            return map.isEmpty();
+        }
+        return false;
     }
 
     private static boolean isZero(Object value) {

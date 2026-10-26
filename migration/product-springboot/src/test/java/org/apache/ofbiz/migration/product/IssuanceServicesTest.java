@@ -26,10 +26,10 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -55,6 +55,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,7 +65,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureMockMvc
 class IssuanceServicesTest {
     private static final AtomicLong IDS = new AtomicLong();
-    private static final String LOGIN_ID = "issuance-test-user";
+    private static final String LOGIN_ID = "issuance-test";
     private static final String GROUP = "00001";
     private static final String ITEM_SEQ = "00001";
 
@@ -125,8 +126,34 @@ class IssuanceServicesTest {
                 .andExpect(status().isOk())
                 .andReturn());
         assertEquals(false, serializedResponse.get("affectAccounting"));
-        verify(inventoryServices).execute(
-                eq("updateInventoryItem"), anyString(), argThat(input -> "INV_DELIVERED".equals(input.get("statusId"))));
+
+        ProductInventory serializedFinishedGood = seedInventory("SERIALIZED_INV_ITEM", "FINISHED_GOOD", "20");
+        Map<String, Object> finishedGoodResponse = response(post("createItemIssuance", map(
+                "inventoryItemId", serializedFinishedGood.inventoryItemId(),
+                "shipmentId", shipmentId,
+                "quantity", BigDecimal.ONE))
+                .andExpect(status().isOk())
+                .andReturn());
+        assertEquals(true, finishedGoodResponse.get("affectAccounting"));
+
+        ProductInventory serializedAssetUsage = seedInventory(
+                "SERIALIZED_INV_ITEM", "ASSET_USAGE_OUT_IN", "20");
+        Map<String, Object> assetUsageResponse = response(post("createItemIssuance", map(
+                "inventoryItemId", serializedAssetUsage.inventoryItemId(),
+                "shipmentId", shipmentId,
+                "quantity", BigDecimal.ONE))
+                .andExpect(status().isOk())
+                .andReturn());
+        assertEquals(false, assetUsageResponse.get("affectAccounting"));
+
+        ArgumentCaptor<Map<String, Object>> updateInput = mapCaptor();
+        verify(inventoryServices, times(3)).execute(
+                eq("updateInventoryItem"), anyString(), updateInput.capture());
+        assertEquals(serialized.inventoryItemId(), updateInput.getAllValues().get(0).get("inventoryItemId"));
+        assertEquals(serializedFinishedGood.inventoryItemId(),
+                updateInput.getAllValues().get(1).get("inventoryItemId"));
+        assertEquals(serializedAssetUsage.inventoryItemId(), updateInput.getAllValues().get(2).get("inventoryItemId"));
+        updateInput.getAllValues().forEach(input -> assertEquals("INV_DELIVERED", input.get("statusId")));
 
         String packedShipment = seedShipment("SHIPMENT_PACKED");
         post("createItemIssuance", map(
@@ -207,6 +234,13 @@ class IssuanceServicesTest {
 
         ArgumentCaptor<Map<String, Object>> detailInput = mapCaptor();
         verify(inventoryServices).execute(eq("createInventoryItemDetail"), anyString(), detailInput.capture());
+        assertEquals(inventory.inventoryItemId(), detailInput.getValue().get("inventoryItemId"));
+        assertEquals(order.orderId(), detailInput.getValue().get("orderId"));
+        assertEquals(ITEM_SEQ, detailInput.getValue().get("orderItemSeqId"));
+        assertEquals(GROUP, detailInput.getValue().get("shipGroupSeqId"));
+        assertEquals(shipmentId, detailInput.getValue().get("shipmentId"));
+        assertEquals(response.get("shipmentItemSeqId"), detailInput.getValue().get("shipmentItemSeqId"));
+        assertEquals(response.get("itemIssuanceId"), detailInput.getValue().get("itemIssuanceId"));
         assertDecimal("-2.000000", detailInput.getValue().get("quantityOnHandDiff"));
         assertEquals(6, ((BigDecimal) detailInput.getValue().get("quantityOnHandDiff")).scale());
         verify(inventoryReserveServices).execute(
@@ -252,7 +286,7 @@ class IssuanceServicesTest {
         String otherShipment = seedShipment("SHIPMENT_INPUT");
         OrderFixture differentDestination = seedOrder("SALES_ORDER", inventory.productId());
         seedDestination(differentDestination, "POSTAL_A", "10000");
-        seedDestinationForShipment(otherShipment, "SHIPMENT_ORDER", "POSTAL_B", "20000");
+        seedDestinationForShipment("SHIPMENT_ORDER", "POSTAL_B", "20000");
         set("Shipment", Map.of("shipmentId", otherShipment), "primaryOrderId", "SHIPMENT_ORDER");
         set("Shipment", Map.of("shipmentId", otherShipment), "primaryShipGroupSeqId", GROUP);
         seedReservation(differentDestination, inventory.inventoryItemId(), new BigDecimal("5"));
@@ -514,7 +548,7 @@ class IssuanceServicesTest {
     }
 
     private ResultActions post(String service, Map<String, Object> arguments) throws Exception {
-        return mockMvc.perform(post("/api/product/services/" + service)
+        return mockMvc.perform(MockMvcRequestBuilders.post("/api/product/services/" + service)
                         .with(user(LOGIN_ID).authorities(
                                 new SimpleGrantedAuthority("OFBTOOLS_VIEW"),
                                 new SimpleGrantedAuthority("FACILITY_VIEW"),
@@ -526,7 +560,7 @@ class IssuanceServicesTest {
 
     private org.springframework.test.web.servlet.ResultActions postReadonly(
             String service, Map<String, Object> arguments) throws Exception {
-        return mockMvc.perform(post("/api/product/services/" + service)
+        return mockMvc.perform(MockMvcRequestBuilders.post("/api/product/services/" + service)
                 .with(user(LOGIN_ID).authorities(
                         new SimpleGrantedAuthority("OFBTOOLS_VIEW"),
                         new SimpleGrantedAuthority("FACILITY_VIEW")))
@@ -552,7 +586,7 @@ class IssuanceServicesTest {
                 "productId", productId,
                 "inventoryItemTypeId", inventoryType,
                 "availableToPromiseTotal", new BigDecimal(atp),
-                "facilityId", "FACILITY_" + inventoryItemId));
+                "facilityId", id("FACILITY")));
         return new ProductInventory(productId, inventoryItemId);
     }
 
