@@ -11,7 +11,7 @@
 | N-05 | noteId / deletedCount をレスポンスに追加 | REST client から作成結果を参照し、削除件数を確認できるようにする。OFBiz の空 success map との差分 |
 | N-06 | service 権限で VIEW / UPDATE を明示 | OFBiz の Webapp base permission `OFBTOOLS,SETUP` に加えて、読み取り・更新操作を個別に分離 |
 | N-07 | HTTP forwarded header を Spring `forward-headers-strategy` で処理しない | 共通 runtime の trusted proxy 制御のみを利用し、Spring Boot 既定の別 RemoteIpValve による過剰な信頼を避ける |
-| N-08 | PostgreSQL は `COMMONEXT_DB_*`、Swagger は local のみ | 認証情報を設定ファイルへ埋め込まず、運用 profile で docs を公開しない |
+| N-08 | PostgreSQL は `COMMONEXT_DB_*` と admin 用 BCrypt hash を環境変数から取得し、Swagger は local のみ | 認証情報を設定ファイルへ埋め込まず、運用 profile で docs を公開しない |
 | N-09 | 画面 Widget / controller events は移植しない | Setup events は Party、Product、Accounting の広範なサービスに依存し、本タスクは CommonExt の6 service と読み取り API に限定 |
 | N-10 | service-multi は HTTP 400 と全件 rollback を確認 | 共通 runtime のエラー契約に従う。該当 service は entity-auto でなく、409 の前提となるクライアント PK 衝突を使わない |
 | N-11 | 共通 runtime の `migration.security.component` を `commonext` に固定 | 別 component 名でこの API を呼ぶと 404。共有 runtime が追加した scope 制御に従う |
@@ -32,7 +32,7 @@
 - generator は `migration/tools/ofbiz2spring.py` を build-time に実行し、NoteData を含む base entity と全 component の `entitymodel*.xml` を渡して extension を解決する。CommonExt の service definition だけを catalog 入力にし、generated `ServiceCatalog` directory だけを sourceSet に加える。エンティティは datamodel と重複させず、生成物はコミットしない。
 - Maven Central の HTTP 429 が発生した場合は、環境固有の mirror を `~/.gradle/init.d/mirror.gradle` に置く。リポジトリへ認証や VM 固有 URL を含めない。
 - `run-local.sh` は `MIGRATION_DEMO_PASSWORD` を要求し、`local` profile で 8080 を起動する。Swagger UI / OpenAPI はこの profile のみ有効。
-- `postgres` profile は `COMMONEXT_DB_URL`、`COMMONEXT_DB_USERNAME`、`COMMONEXT_DB_PASSWORD`、HTTPS 必須、Swagger 無効。`MIGRATION_SECURITY_TRUSTED_PROXIES` の未指定値 `a^` はプロキシを信頼しない。
+- `postgres` profile は `COMMONEXT_DB_URL`、`COMMONEXT_DB_USERNAME`、`COMMONEXT_DB_PASSWORD` と `COMMONEXT_ADMIN_PASSWORD_HASH` を環境変数で指定する。admin hash は `{bcrypt}...` 形式とし、値を設定ファイルやリポジトリに保存しない。admin 権限は local profile と同じ。HTTPS 必須、Swagger 無効。`MIGRATION_SECURITY_TRUSTED_PROXIES` の未指定値 `a^` はプロキシを信頼しない。
 - base config の HTTPS 既定値は true のまま保持し、`local` と H2 test profile は false を明示する。PostgreSQL deployment profile は HTTPS を true にする。HTTPS テストは profile default を上書きして検証する。
 
 ## 4. 調査上の不一致

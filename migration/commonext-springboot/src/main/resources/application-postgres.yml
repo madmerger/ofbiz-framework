@@ -21,3 +21,10 @@ migration:
   security:
     require-https: true
     trusted-proxies: ${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}
+    users:
+      - username: admin
+        password-hash: ${COMMONEXT_ADMIN_PASSWORD_HASH}
+        authorities:
+          - OFBTOOLS_VIEW
+          - SETUP_ADMIN
+          - COMMONEXT_PUBLMSG

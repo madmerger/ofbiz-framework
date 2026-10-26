@@ -37,7 +37,15 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import jakarta.persistence.EntityManager;
 
 @Testcontainers(disabledWithoutDocker = true)
-@SpringBootTest(properties = "migration.security.require-https=false")
+@SpringBootTest(properties = {
+        "migration.security.require-https=false",
+        "migration.security.users[0].username=postgres-admin",
+        "migration.security.users[0].password=test-password",
+        "migration.security.users[0].password-hash=",
+        "migration.security.users[0].authorities[0]=OFBTOOLS_VIEW",
+        "migration.security.users[0].authorities[1]=SETUP_ADMIN",
+        "migration.security.users[0].authorities[2]=COMMONEXT_PUBLMSG"
+})
 @ActiveProfiles("postgres")
 @Transactional
 class PostgresSmokeTest {
