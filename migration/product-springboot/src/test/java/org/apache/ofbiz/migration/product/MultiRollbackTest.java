@@ -19,20 +19,26 @@
 package org.apache.ofbiz.migration.product;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.apache.ofbiz.migration.common.EntityRegistry;
+import org.apache.ofbiz.migration.common.SequenceService;
 import org.apache.ofbiz.migration.product.generated.ServiceCatalog;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -52,6 +58,9 @@ class MultiRollbackTest {
 
     @Autowired
     private EntityRegistry entities;
+
+    @SpyBean
+    private SequenceService sequences;
 
     @Test
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -75,6 +84,39 @@ class MultiRollbackTest {
                 ProductTestSupport.keys(create, entities, first)));
         assertNull(entities.findByPrimaryKey(entities.entityClass("ProductType"),
                 ProductTestSupport.keys(create, entities, second)));
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void ac02_compositeOutKeyCreateInMultiIsRolledBackWhenNextCallFails() throws Exception {
+        ServiceCatalog.ServiceDefinition parentCreate =
+                ProductTestSupport.matching("ProductConfigItem", "create", "catalog");
+        Map<String, Object> parentInput = ProductTestSupport.input(
+                parentCreate, entities, "multi-config-parent", false);
+        String parentBody = mockMvc.perform(post("/api/product/services/" + parentCreate.name())
+                        .with(user("admin").authorities(authorities()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JSON.writeValueAsBytes(parentInput)))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        Map<String, Object> parentOutput = JSON.readValue(parentBody, new TypeReference<>() { });
+
+        ServiceCatalog.ServiceDefinition optionCreate =
+                ServiceCatalog.all().get("createProductConfigOption");
+        Map<String, Object> optionInput = ProductTestSupport.input(
+                optionCreate, entities, "multi-config-option", false);
+        String configItemId = parentOutput.get("configItemId").toString();
+        optionInput.put("configItemId", configItemId);
+        doReturn("00001").when(sequences)
+                .nextSubSequence(eq("ProductConfigOption"), anyMap(), eq("configOptionId"));
+
+        mockMvc.perform(post("/api/product/services/" + optionCreate.name() + "/multi")
+                        .with(user("admin").authorities(authorities()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JSON.writeValueAsBytes(List.of(optionInput, optionInput))))
+                .andExpect(status().isConflict());
+
+        assertNull(entities.findByPrimaryKey(entities.entityClass("ProductConfigOption"), Map.of(
+                "configItemId", configItemId, "configOptionId", "00001")));
     }
 
     private static GrantedAuthority[] authorities() {
