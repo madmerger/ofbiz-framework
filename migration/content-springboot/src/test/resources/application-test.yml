@@ -1,0 +1,20 @@
+# テスト専用ユーザー（ローカル/本番のデモパスワードとは無関係）
+migration:
+  security:
+    require-https: false
+    users:
+      - username: admin
+        password: ${CONTENT_TEST_PASSWORD:test-only}
+        authorities: [OFBTOOLS_VIEW, CONTENTMGR_VIEW, CONTENTMGR_ADMIN, CONTENTMGR_SUPER_ADMIN, CONTENTMGR_SENSITIVE_VIEW]
+      - username: editor
+        password: ${CONTENT_TEST_PASSWORD:test-only}
+        authorities: [OFBTOOLS_VIEW, CONTENTMGR_VIEW, CONTENTMGR_CREATE, CONTENTMGR_UPDATE, CONTENTMGR_DELETE]
+      - username: readonly
+        password: ${CONTENT_TEST_PASSWORD:test-only}
+        authorities: [OFBTOOLS_VIEW, CONTENTMGR_VIEW]
+      - username: auditor
+        password: ${CONTENT_TEST_PASSWORD:test-only}
+        authorities: [OFBTOOLS_VIEW, CONTENTMGR_VIEW, CONTENTMGR_SENSITIVE_VIEW]
+      - username: nocontent
+        password: ${CONTENT_TEST_PASSWORD:test-only}
+        authorities: [OFBTOOLS_VIEW]
