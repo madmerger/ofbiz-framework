@@ -1,0 +1,448 @@
+[
+  {
+    "description": "リクエスト内の ${MANUFACTURING-E2E-xx-yy.field} は、先行する step id の JSON 応答から field を取得して置換する。taskCount を検証する WorkEffort 検索では tasks 配列も保存し、[0] / [1] で参照する。",
+    "id": "MANUFACTURING-E2E-01",
+    "name": "未認証 API",
+    "request": {
+      "method": "GET",
+      "path": "/api/manufacturing/entities/Product",
+      "user": null,
+      "body": null
+    },
+    "expected": {
+      "status": 401
+    }
+  },
+  {
+    "id": "MANUFACTURING-E2E-02",
+    "name": "権限不足",
+    "request": {
+      "method": "GET",
+      "path": "/api/manufacturing/entities/Product",
+      "user": "ofbtoolsonly",
+      "body": null
+    },
+    "expected": {
+      "status": 403
+    }
+  },
+  {
+    "id": "MANUFACTURING-E2E-03",
+    "name": "機密 CostComponent",
+    "steps": [
+      {
+        "id": "MANUFACTURING-E2E-03-01",
+        "request": {
+          "method": "GET",
+          "path": "/api/manufacturing/entities/CostComponent?costComponentId=MFG_COST_DEMO",
+          "user": "mfgviewer",
+          "body": null
+        },
+        "expected": {
+          "status": 403
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-03-02",
+        "request": {
+          "method": "GET",
+          "path": "/api/manufacturing/entities/CostComponent?costComponentId=MFG_COST_DEMO",
+          "user": "mfgwriter",
+          "body": null
+        },
+        "expected": {
+          "status": 200
+        }
+      }
+    ]
+  },
+  {
+    "id": "MANUFACTURING-E2E-04",
+    "name": "カレンダー CRUD",
+    "steps": [
+      {
+        "id": "MANUFACTURING-E2E-04-01",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/createCalendar",
+          "user": "mfgwriter",
+          "body": {
+            "calendarId": "E2E_CAL",
+            "description": "E2E"
+          }
+        },
+        "expected": {
+          "status": 200,
+          "calendarId": "E2E_CAL"
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-04-02",
+        "request": {
+          "method": "GET",
+          "path": "/api/manufacturing/entities/TechDataCalendar/one?calendarId=E2E_CAL",
+          "user": "mfgwriter",
+          "body": null
+        },
+        "expected": {
+          "status": 200,
+          "description": "E2E"
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-04-03",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/updateCalendar",
+          "user": "mfgwriter",
+          "body": {
+            "calendarId": "E2E_CAL",
+            "description": "updated"
+          }
+        },
+        "expected": {
+          "status": 200
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-04-04",
+        "request": {
+          "method": "GET",
+          "path": "/api/manufacturing/entities/TechDataCalendar/one?calendarId=E2E_CAL",
+          "user": "mfgwriter",
+          "body": null
+        },
+        "expected": {
+          "status": 200,
+          "description": "updated"
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-04-05",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/createCalendarExceptionDay",
+          "user": "mfgwriter",
+          "body": {
+            "calendarId": "E2E_CAL",
+            "exceptionDateStartTime": "2025-01-01T00:00:00Z",
+            "description": "holiday"
+          }
+        },
+        "expected": {
+          "status": 200
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-04-06",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/removeCalendarExceptionDay",
+          "user": "mfgwriter",
+          "body": {
+            "calendarId": "E2E_CAL",
+            "exceptionDateStartTime": "2025-01-01T00:00:00Z"
+          }
+        },
+        "expected": {
+          "status": 200
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-04-07",
+        "request": {
+          "method": "GET",
+          "path": "/api/manufacturing/entities/TechDataCalendarExcDay?calendarId=E2E_CAL",
+          "user": "mfgwriter",
+          "body": null
+        },
+        "expected": {
+          "status": 200,
+          "recordCount": 0
+        }
+      }
+    ]
+  },
+  {
+    "id": "MANUFACTURING-E2E-05",
+    "name": "BOM 自己参照と線形式",
+    "steps": [
+      {
+        "id": "MANUFACTURING-E2E-05-01",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/createBOMAssoc",
+          "user": "mfgwriter",
+          "body": {
+            "productId": "MFG_FG",
+            "productIdTo": "MFG_FG",
+            "productAssocTypeId": "MANUF_COMPONENT"
+          }
+        },
+        "expected": {
+          "status": 400
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-05-02",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/linearComponentFormula",
+          "user": "mfgwriter",
+          "body": {
+            "arguments": {
+              "neededQuantity": 2,
+              "amount": 5,
+              "width": 3
+            }
+          }
+        },
+        "expected": {
+          "status": 200,
+          "quantity": 4
+        }
+      }
+    ]
+  },
+  {
+    "id": "MANUFACTURING-E2E-06",
+    "name": "BOM から2タスクの生産完了",
+    "steps": [
+      {
+        "id": "MANUFACTURING-E2E-06-01",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/createBOMAssoc",
+          "user": "mfgwriter",
+          "body": {
+            "productId": "MFG_FG",
+            "productIdTo": "MFG_RAW1",
+            "productAssocTypeId": "MANUF_COMPONENT",
+            "quantity": 2,
+            "scrapFactor": 1
+          }
+        },
+        "expected": {
+          "status": 200
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-06-02",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/createBOMAssoc",
+          "user": "mfgwriter",
+          "body": {
+            "productId": "MFG_FG",
+            "productIdTo": "MFG_RAW2",
+            "productAssocTypeId": "MANUF_COMPONENT",
+            "quantity": 1,
+            "scrapFactor": 1
+          }
+        },
+        "expected": {
+          "status": 200
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-06-03",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/createProductionRun",
+          "user": "mfgwriter",
+          "body": {
+            "productId": "MFG_FG",
+            "quantityToProduce": 2,
+            "facilityId": "MFG_PLANT"
+          }
+        },
+        "expected": {
+          "status": 200,
+          "productionRunId": "non-empty"
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-06-04",
+        "request": {
+          "method": "GET",
+          "path": "/api/manufacturing/entities/WorkEffort?workEffortParentId=${MANUFACTURING-E2E-06-03.productionRunId}&workEffortTypeId=PROD_ORDER_TASK",
+          "user": "mfgwriter",
+          "body": null
+        },
+        "expected": {
+          "status": 200,
+          "taskCount": 2
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-06-05",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/changeProductionRunStatus",
+          "user": "mfgwriter",
+          "body": {
+            "productionRunId": "${MANUFACTURING-E2E-06-03.productionRunId}",
+            "statusId": "PRUN_DOC_PRINTED"
+          }
+        },
+        "expected": {
+          "status": 200,
+          "newStatusId": "PRUN_DOC_PRINTED"
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-06-06",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/changeProductionRunTaskStatus",
+          "user": "mfgwriter",
+          "body": {
+            "productionRunId": "${MANUFACTURING-E2E-06-03.productionRunId}",
+            "workEffortId": "${MANUFACTURING-E2E-06-04.tasks[0].workEffortId}",
+            "statusId": "PRUN_RUNNING"
+          }
+        },
+        "expected": {
+          "status": 200,
+          "newStatusId": "PRUN_RUNNING"
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-06-07",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/updateProductionRunTask",
+          "user": "mfgwriter",
+          "body": {
+            "workEffortId": "${MANUFACTURING-E2E-06-04.tasks[0].workEffortId}",
+            "addQuantityProduced": 2
+          }
+        },
+        "expected": {
+          "status": 200,
+          "quantityProduced": 2
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-06-08",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/changeProductionRunTaskStatus",
+          "user": "mfgwriter",
+          "body": {
+            "productionRunId": "${MANUFACTURING-E2E-06-03.productionRunId}",
+            "workEffortId": "${MANUFACTURING-E2E-06-04.tasks[0].workEffortId}",
+            "statusId": "PRUN_COMPLETED"
+          }
+        },
+        "expected": {
+          "status": 200,
+          "newStatusId": "PRUN_COMPLETED"
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-06-09",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/changeProductionRunTaskStatus",
+          "user": "mfgwriter",
+          "body": {
+            "productionRunId": "${MANUFACTURING-E2E-06-03.productionRunId}",
+            "workEffortId": "${MANUFACTURING-E2E-06-04.tasks[1].workEffortId}",
+            "statusId": "PRUN_RUNNING"
+          }
+        },
+        "expected": {
+          "status": 200,
+          "newStatusId": "PRUN_RUNNING"
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-06-10",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/updateProductionRunTask",
+          "user": "mfgwriter",
+          "body": {
+            "workEffortId": "${MANUFACTURING-E2E-06-04.tasks[1].workEffortId}",
+            "addQuantityProduced": 2
+          }
+        },
+        "expected": {
+          "status": 200,
+          "quantityProduced": 2
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-06-11",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/changeProductionRunTaskStatus",
+          "user": "mfgwriter",
+          "body": {
+            "productionRunId": "${MANUFACTURING-E2E-06-03.productionRunId}",
+            "workEffortId": "${MANUFACTURING-E2E-06-04.tasks[1].workEffortId}",
+            "statusId": "PRUN_COMPLETED"
+          }
+        },
+        "expected": {
+          "status": 200,
+          "newStatusId": "PRUN_COMPLETED"
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-06-12",
+        "request": {
+          "method": "GET",
+          "path": "/api/manufacturing/entities/WorkEffort/one?workEffortId=${MANUFACTURING-E2E-06-03.productionRunId}",
+          "user": "mfgwriter",
+          "body": null
+        },
+        "expected": {
+          "status": 200,
+          "currentStatusId": "PRUN_COMPLETED"
+        }
+      }
+    ]
+  },
+  {
+    "id": "MANUFACTURING-E2E-07",
+    "name": "multi 重複時の全件 rollback",
+    "steps": [
+      {
+        "id": "MANUFACTURING-E2E-07-01",
+        "request": {
+          "method": "POST",
+          "path": "/api/manufacturing/services/createCalendar/multi",
+          "user": "mfgwriter",
+          "body": [
+            {
+              "calendarId": "E2E_MULTI",
+              "description": "first"
+            },
+            {
+              "calendarId": "E2E_MULTI",
+              "description": "duplicate"
+            }
+          ]
+        },
+        "expected": {
+          "status": 409
+        }
+      },
+      {
+        "id": "MANUFACTURING-E2E-07-02",
+        "request": {
+          "method": "GET",
+          "path": "/api/manufacturing/entities/TechDataCalendar?calendarId=E2E_MULTI",
+          "user": "mfgwriter",
+          "body": null
+        },
+        "expected": {
+          "status": 200,
+          "recordCount": 0
+        }
+      }
+    ]
+  }
+]

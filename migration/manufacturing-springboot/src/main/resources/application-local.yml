@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:manufacturing-local;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+server:
+  tomcat:
+    remoteip:
+      internal-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:127\.\d{1,3}\.\d{1,3}\.\d{1,3}|::1}'
+migration:
+  security:
+    require-https: false
+    users:
+      - username: mfgadmin
+        password: ${MANUFACTURING_DEMO_PASSWORD}
+        authorities: [OFBTOOLS_VIEW, MANUFACTURING_ADMIN]
+      - username: mfgwriter
+        password: ${MANUFACTURING_DEMO_PASSWORD}
+        authorities: [OFBTOOLS_VIEW, MANUFACTURING_VIEW, MANUFACTURING_CREATE, MANUFACTURING_UPDATE, MANUFACTURING_DELETE, MANUFACTURING_SENSITIVE_VIEW]
+      - username: mfgviewer
+        password: ${MANUFACTURING_DEMO_PASSWORD}
+        authorities: [OFBTOOLS_VIEW, MANUFACTURING_VIEW]
+      - username: ofbtoolsonly
+        password: ${MANUFACTURING_DEMO_PASSWORD}
+        authorities: [OFBTOOLS_VIEW]
