@@ -1,0 +1,91 @@
+spring:
+  application:
+    name: workeffort-springboot
+  datasource:
+    url: jdbc:h2:mem:workeffort;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+server:
+  forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      internal-proxies: '${MIGRATION_SECURITY_TRUSTED_PROXIES:a^}'
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+migration:
+  security:
+    component: workeffort
+    base-permissions:
+      - OFBTOOLS
+      - WORKEFFORTMGR
+    service-permission-prefix: WORKEFFORTMGR
+    extra-entities:
+      - RateAmount
+      - PartyRate
+      - StatusItem
+      - StatusValidChange
+      - WorkEffortStatus
+      - WorkEffortPartyAssignment
+      - WorkEffortType
+      - RoleType
+      - Party
+      - PartyRole
+      - Timesheet
+      - TimesheetRole
+      - TimeEntry
+      - Invoice
+      - InvoiceItem
+      - CommunicationEvent
+      - CommunicationEventWorkEff
+      - NoteData
+      - WorkEffortNote
+      - WorkEffortAssoc
+      - WorkEffortInventoryAssign
+      - WorkEffortFixedAssetAssign
+      - WorkEffortReview
+      - WorkEffortKeyword
+      - CustRequestItemWorkEffort
+    sensitive-entities:
+      - UserLogin
+      - UserLoginHistory
+      - UserLoginPasswordHistory
+      - UserLoginSession
+      - CreditCard
+      - PaymentMethod
+      - EftAccount
+      - GiftCard
+      - CheckAccount
+      - PayPalPaymentMethod
+      - BillingAccount
+      - Payment
+      - PaymentGatewayResponse
+      - PaymentGatewayConfig
+      - FinAccount
+      - FinAccountTrans
+      - PayHistory
+      - PayrollPreference
+      - PartyRate
+      - RateAmount
+      - EmplPositionTypeRate
+      - SalaryStep
+      - PayGrade

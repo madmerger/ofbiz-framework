@@ -1,0 +1,335 @@
+{
+  "component": "workeffort",
+  "baseUrl": "http://127.0.0.1:8080",
+  "profile": "local",
+  "auth": "HTTP Basic。全ユーザーのパスワードは環境変数 MIGRATION_DEMO_PASSWORD（ファイル・画面に出さない）",
+  "cases": [
+    {
+      "id": "WORKEFFORT-E2E-01",
+      "name": "未認証 401",
+      "request": {
+        "method": "GET",
+        "path": "/api/workeffort/entities/WorkEffort",
+        "user": "anonymous"
+      },
+      "expected": {
+        "status": 401
+      }
+    },
+    {
+      "id": "WORKEFFORT-E2E-02",
+      "name": "権限不足 403（readonly が createWorkEffort）",
+      "request": {
+        "method": "POST",
+        "path": "/api/workeffort/services/createWorkEffort",
+        "user": "readonly",
+        "body": {
+          "workEffortTypeId": "TASK",
+          "workEffortName": "E2E denied"
+        }
+      },
+      "expected": {
+        "status": 403,
+        "errorMessage": "Service permission denied"
+      }
+    },
+    {
+      "id": "WORKEFFORT-E2E-03",
+      "name": "機密エンティティ RateAmount: 閲覧専用ユーザーは 403",
+      "request": {
+        "method": "GET",
+        "path": "/api/workeffort/entities/RateAmount?partyId=DemoEmployee",
+        "user": "readonly"
+      },
+      "expected": {
+        "status": 403,
+        "errorMessage": "Sensitive entity access denied",
+        "rateAmountReturned": false
+      }
+    },
+    {
+      "id": "WORKEFFORT-E2E-04",
+      "name": "機密エンティティ RateAmount: 専用権限（auditor）は 200",
+      "request": {
+        "method": "GET",
+        "path": "/api/workeffort/entities/RateAmount?partyId=DemoEmployee",
+        "user": "auditor"
+      },
+      "expected": {
+        "status": 200,
+        "rows": 1,
+        "partyId": "DemoEmployee",
+        "rateAmount": 125.0
+      }
+    },
+    {
+      "id": "WORKEFFORT-E2E-05",
+      "name": "entity-auto 作成→取得→更新→削除（WorkEffortType）",
+      "steps": [
+        {
+          "request": {
+            "method": "POST",
+            "path": "/api/workeffort/services/createWorkEffortType",
+            "user": "admin",
+            "body": {
+              "workEffortTypeId": "E2E-TYPE-01",
+              "description": "E2E CRUD"
+            }
+          },
+          "expected": {
+            "status": 200,
+            "workEffortTypeId": "E2E-TYPE-01"
+          }
+        },
+        {
+          "request": {
+            "method": "GET",
+            "path": "/api/workeffort/entities/WorkEffortType?workEffortTypeId=E2E-TYPE-01",
+            "user": "admin"
+          },
+          "expected": {
+            "status": 200,
+            "rows": 1,
+            "description": "E2E CRUD"
+          }
+        },
+        {
+          "request": {
+            "method": "POST",
+            "path": "/api/workeffort/services/updateWorkEffortType",
+            "user": "admin",
+            "body": {
+              "workEffortTypeId": "E2E-TYPE-01",
+              "description": "E2E CRUD updated"
+            }
+          },
+          "expected": {
+            "status": 200,
+            "description": "E2E CRUD updated"
+          }
+        },
+        {
+          "request": {
+            "method": "POST",
+            "path": "/api/workeffort/services/deleteWorkEffortType",
+            "user": "admin",
+            "body": {
+              "workEffortTypeId": "E2E-TYPE-01"
+            }
+          },
+          "expected": {
+            "status": 200
+          }
+        },
+        {
+          "request": {
+            "method": "GET",
+            "path": "/api/workeffort/entities/WorkEffortType?workEffortTypeId=E2E-TYPE-01",
+            "user": "admin"
+          },
+          "expected": {
+            "status": 200,
+            "rows": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "WORKEFFORT-E2E-06",
+      "name": "simple サービス代表2本（createWorkEffortNote / createTimesheetForThisWeek）",
+      "steps": [
+        {
+          "request": {
+            "method": "POST",
+            "path": "/api/workeffort/services/createWorkEffortNote",
+            "user": "admin",
+            "body": {
+              "workEffortId": "WE-HOLIDAY",
+              "noteParty": "DemoEmployee",
+              "noteName": "E2E note",
+              "noteInfo": "E2E simple service",
+              "internalNote": "N"
+            }
+          },
+          "expected": {
+            "status": 200,
+            "noteId": "<サーバー採番>"
+          }
+        },
+        {
+          "request": {
+            "method": "POST",
+            "path": "/api/workeffort/services/createTimesheetForThisWeek",
+            "user": "admin",
+            "body": {
+              "partyId": "DemoEmployee",
+              "statusId": "TIMESHEET_IN_PROCESS",
+              "requiredDate": "<実行時の UTC 現在時刻>"
+            }
+          },
+          "expected": {
+            "status": 200,
+            "timesheetId": "<サーバー採番>",
+            "statusId": "TIMESHEET_IN_PROCESS"
+          }
+        }
+      ]
+    },
+    {
+      "id": "WORKEFFORT-E2E-07",
+      "name": "主要フロー: タスク作成→担当割当→作業時間記録→完了",
+      "notes": "{{step1.workEffortId}} / {{step3.timesheetId}} は前ステップ応答のサーバー採番値",
+      "steps": [
+        {
+          "request": {
+            "method": "POST",
+            "path": "/api/workeffort/services/createWorkEffort",
+            "user": "admin",
+            "body": {
+              "workEffortTypeId": "TASK",
+              "workEffortName": "E2E flow task"
+            }
+          },
+          "expected": {
+            "status": 200,
+            "workEffortId": "<サーバー採番>",
+            "currentStatusId": "CAL_CREATED"
+          }
+        },
+        {
+          "request": {
+            "method": "POST",
+            "path": "/api/workeffort/services/assignPartyToWorkEffort",
+            "user": "admin",
+            "body": {
+              "workEffortId": "{{step1.workEffortId}}",
+              "partyId": "DemoEmployee",
+              "roleTypeId": "CAL_OWNER"
+            }
+          },
+          "expected": {
+            "status": 200
+          }
+        },
+        {
+          "request": {
+            "method": "POST",
+            "path": "/api/workeffort/services/createTimesheet",
+            "user": "admin",
+            "body": {
+              "partyId": "DemoEmployee",
+              "statusId": "TIMESHEET_IN_PROCESS",
+              "fromDate": "<実行時の UTC 現在時刻>"
+            }
+          },
+          "expected": {
+            "status": 200,
+            "timesheetId": "<サーバー採番>"
+          }
+        },
+        {
+          "request": {
+            "method": "POST",
+            "path": "/api/workeffort/services/createTimeEntry",
+            "user": "admin",
+            "body": {
+              "partyId": "DemoEmployee",
+              "timesheetId": "{{step3.timesheetId}}",
+              "workEffortId": "{{step1.workEffortId}}",
+              "hours": 2.5,
+              "fromDate": "<実行時の UTC 現在時刻>"
+            }
+          },
+          "expected": {
+            "status": 200,
+            "timeEntryId": "<サーバー採番>"
+          }
+        },
+        {
+          "request": {
+            "method": "POST",
+            "path": "/api/workeffort/services/updateWorkEffort",
+            "user": "admin",
+            "body": {
+              "workEffortId": "{{step1.workEffortId}}",
+              "currentStatusId": "CAL_IN_PROGRESS"
+            }
+          },
+          "expected": {
+            "status": 200,
+            "currentStatusId": "CAL_IN_PROGRESS"
+          }
+        },
+        {
+          "request": {
+            "method": "POST",
+            "path": "/api/workeffort/services/updateWorkEffort",
+            "user": "admin",
+            "body": {
+              "workEffortId": "{{step1.workEffortId}}",
+              "currentStatusId": "CAL_COMPLETED"
+            }
+          },
+          "expected": {
+            "status": 200,
+            "currentStatusId": "CAL_COMPLETED"
+          }
+        },
+        {
+          "request": {
+            "method": "POST",
+            "path": "/api/workeffort/services/getWorkEffort",
+            "user": "admin",
+            "body": {
+              "workEffortId": "{{step1.workEffortId}}"
+            }
+          },
+          "expected": {
+            "status": 200,
+            "currentStatusId": "CAL_COMPLETED"
+          }
+        }
+      ]
+    },
+    {
+      "id": "WORKEFFORT-E2E-08",
+      "name": "multi の 409 と全件ロールバック",
+      "steps": [
+        {
+          "request": {
+            "method": "POST",
+            "path": "/api/workeffort/services/createWorkEffortStatus/multi",
+            "user": "admin",
+            "body": [
+              {
+                "workEffortId": "WE-MULTI-E2E",
+                "statusId": "CAL_CREATED",
+                "statusDatetime": "2025-01-01T00:00:00Z"
+              },
+              {
+                "workEffortId": "WE-MULTI-E2E",
+                "statusId": "CAL_CREATED",
+                "statusDatetime": "2025-01-01T00:00:00Z"
+              }
+            ]
+          },
+          "expected": {
+            "status": 409,
+            "responseMessage": "error"
+          }
+        },
+        {
+          "request": {
+            "method": "GET",
+            "path": "/api/workeffort/entities/WorkEffortStatus?workEffortId=WE-MULTI-E2E",
+            "user": "admin"
+          },
+          "expected": {
+            "status": 200,
+            "rows": 0
+          }
+        }
+      ]
+    }
+  ]
+}
