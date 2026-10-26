@@ -27,8 +27,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,6 +54,70 @@ class PaymentMethodServicesTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @ParameterizedTest(name = "PaymentMethod simple service {0}")
+    @MethodSource("simpleServices")
+    void eachPaymentMethodServiceHasANamedNormalPath(String serviceName) throws Exception {
+        switch (serviceName) {
+            case "setPaymentMethodAddress" -> {
+                Object contactMech = entities.newEntity(entities.entityClass("ContactMech"));
+                entities.set(contactMech, "contactMechId", "MIG_PM_CONTACT");
+                entities.set(contactMech, "contactMechTypeId", "POSTAL_ADDRESS");
+                entityManager.persist(contactMech);
+                entityManager.flush();
+                postService(serviceName, "{\"paymentMethodId\":\"MIG_DEMO_PM\","
+                        + "\"contactMechId\":\"MIG_PM_CONTACT\"}").andExpect(status().isOk());
+            }
+            case "updatePaymentMethodAddress" ->
+                    postService(serviceName, "{\"oldContactMechId\":\"NO_MATCHING_CONTACT\","
+                            + "\"contactMechId\":\"MIG_PM_CONTACT\"}").andExpect(status().isOk());
+            case "createPayPalPaymentMethod" ->
+                    postService(serviceName, "{\"paymentMethodId\":\"MIG_PM_PAYPAL\","
+                            + "\"partyId\":\"MIG_DEMO_CUSTOMER\",\"description\":\"PayPal test\"}")
+                            .andExpect(status().isOk()).andExpect(jsonPath("$.paymentMethodId").exists());
+            case "createPaymentGroupMember" -> {
+                createPaymentGroupFixture();
+                postService(serviceName, "{\"paymentGroupId\":\"MIG_PM_GROUP\","
+                        + "\"paymentId\":\"MIG_PM_PAYMENT\"}").andExpect(status().isOk());
+            }
+            case "expirePaymentGroupMember" -> {
+                createPaymentGroupFixture();
+                postService("createPaymentGroupMember", "{\"paymentGroupId\":\"MIG_PM_GROUP\","
+                        + "\"paymentId\":\"MIG_PM_PAYMENT\"}").andExpect(status().isOk());
+                Object member = entities.findByEquality(entities.entityClass("PaymentGroupMember"),
+                        Map.of("paymentGroupId", "MIG_PM_GROUP", "paymentId", "MIG_PM_PAYMENT")).get(0);
+                postService(serviceName, "{\"paymentGroupId\":\"MIG_PM_GROUP\","
+                        + "\"paymentId\":\"MIG_PM_PAYMENT\",\"fromDate\":\""
+                        + entities.get(member, "fromDate") + "\"}").andExpect(status().isOk());
+            }
+            default -> throw new IllegalArgumentException(serviceName);
+        }
+    }
+
+    private static Stream<String> simpleServices() {
+        return Stream.of("setPaymentMethodAddress", "updatePaymentMethodAddress", "createPayPalPaymentMethod",
+                "createPaymentGroupMember", "expirePaymentGroupMember");
+    }
+
+    private void createPaymentGroupFixture() {
+        Object group = entities.newEntity(entities.entityClass("PaymentGroup"));
+        entities.set(group, "paymentGroupId", "MIG_PM_GROUP");
+        entities.set(group, "paymentGroupTypeId", "BATCH_PAYMENT");
+        entityManager.persist(group);
+
+        Object payment = entities.newEntity(entities.entityClass("Payment"));
+        entities.set(payment, "paymentId", "MIG_PM_PAYMENT");
+        entities.set(payment, "paymentTypeId", "CUSTOMER_PAYMENT");
+        entities.set(payment, "paymentMethodTypeId", "CREDIT_CARD");
+        entities.set(payment, "paymentMethodId", "MIG_DEMO_PM");
+        entities.set(payment, "partyIdFrom", "MIG_DEMO_CUSTOMER");
+        entities.set(payment, "partyIdTo", "MIG_DEMO_VENDOR");
+        entities.set(payment, "statusId", "PMNT_RECEIVED");
+        entities.set(payment, "currencyUomId", "USD");
+        entities.set(payment, "amount", "1.00");
+        entityManager.persist(payment);
+        entityManager.flush();
+    }
 
     @Test
     void handlesAddressPaypalAndPaymentGroupMemberServices() throws Exception {

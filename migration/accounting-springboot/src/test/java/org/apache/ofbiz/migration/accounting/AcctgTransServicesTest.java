@@ -26,8 +26,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import jakarta.persistence.EntityManager;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -50,6 +53,48 @@ class AcctgTransServicesTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @ParameterizedTest(name = "AcctgTrans simple service {0}")
+    @MethodSource("simpleServices")
+    void eachAcctgTransServiceHasANamedNormalPath(String serviceName) throws Exception {
+        createTransaction("MIG_ATX_TEST");
+        switch (serviceName) {
+            case "checkAcctgTransPosted" ->
+                    postService(serviceName, "{\"acctgTransId\":\"MIG_ATX_TEST\"}").andExpect(status().isOk());
+            case "createAcctgTransEntry" ->
+                    postService(serviceName, entryBody("D")).andExpect(status().isOk());
+            case "updateAcctgTransEntry", "deleteAcctgTransEntry" -> {
+                MvcResult result = postService("createAcctgTransEntry", entryBody("D"))
+                        .andExpect(status().isOk()).andReturn();
+                String sequence = com.jayway.jsonpath.JsonPath.parse(result.getResponse().getContentAsString())
+                        .read("$.acctgTransEntrySeqId");
+                String body = "{\"acctgTransId\":\"MIG_ATX_TEST\",\"acctgTransEntrySeqId\":\""
+                        + sequence + "\",\"description\":\"normal path\"}";
+                postService(serviceName, body).andExpect(status().isOk());
+            }
+            case "getAcctgTransEntriesAndTransTotal" ->
+                    postService(serviceName, "{\"organizationPartyId\":\"MIG_DEMO_VENDOR\","
+                            + "\"glAccountId\":\"MIG_GL_ACCOUNT\","
+                            + "\"customTimePeriodStartDate\":\"2020-01-01 00:00:00\","
+                            + "\"customTimePeriodEndDate\":\"2030-01-01 00:00:00\"}")
+                            .andExpect(status().isOk());
+            case "calculateAcctgTransTrialBalance" ->
+                    postService(serviceName, "{\"acctgTransId\":\"MIG_ATX_TEST\"}").andExpect(status().isOk());
+            case "postAcctgTrans" ->
+                    postService(serviceName, "{\"acctgTransId\":\"MIG_ATX_TEST\"}").andExpect(status().isOk());
+            case "calculateGlAccountTrialBalance" ->
+                    postService(serviceName, "{\"glAccountId\":\"MIG_GL_ACCOUNT\","
+                            + "\"fromDate\":\"2020-01-01 00:00:00\",\"thruDate\":\"2030-01-01 00:00:00\"}")
+                            .andExpect(status().isOk());
+            default -> throw new IllegalArgumentException(serviceName);
+        }
+    }
+
+    private static Stream<String> simpleServices() {
+        return Stream.of("checkAcctgTransPosted", "createAcctgTransEntry", "updateAcctgTransEntry",
+                "deleteAcctgTransEntry", "getAcctgTransEntriesAndTransTotal", "calculateAcctgTransTrialBalance",
+                "postAcctgTrans", "calculateGlAccountTrialBalance");
+    }
 
     @Test
     void calculatesMaintainsAndDeletesEntriesAndPostsAnEmptyTransaction() throws Exception {

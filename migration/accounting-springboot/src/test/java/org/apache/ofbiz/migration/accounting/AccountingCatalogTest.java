@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.InputStream;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,11 +35,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.ServiceHandlerRegistry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -46,6 +52,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 @SpringBootTest(classes = AccountingMigrationApplication.class)
 @AutoConfigureMockMvc
@@ -81,6 +90,27 @@ class AccountingCatalogTest {
     @MethodSource("generalLedgerServices")
     void eachGeneralLedgerSimpleServiceIsRegistered(String name) {
         assertTrue(registry.handler("accounting", name).isPresent(), name);
+    }
+
+    @ParameterizedTest(name = "Accounting simple service {0}")
+    @MethodSource("simpleServicesFromDefinitions")
+    void simpleServicesMatchTheServicedefRegistrationScope(String name, boolean excluded) throws Exception {
+        if (excluded) {
+            assertTrue(registry.handler("accounting", name).isEmpty(), name);
+            mockMvc.perform(post("/api/accounting/services/" + name)
+                            .with(httpBasic("acct-admin", "test"))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{}"))
+                    .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status()
+                            .isNotFound());
+        } else {
+            assertTrue(registry.handler("accounting", name).isPresent(), name);
+            assertTrue(mockMvc.perform(post("/api/accounting/services/" + name)
+                            .with(httpBasic("acct-admin", "test"))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{}"))
+                    .andReturn().getResponse().getStatus() != 404, name);
+        }
     }
 
     @Test
@@ -193,6 +223,37 @@ class AccountingCatalogTest {
                 "getGlAcctgAndAmountPercentage",
                 "getInventoryValuationList",
                 "setGlReconciliationStatus");
+    }
+
+    private static Stream<Arguments> simpleServicesFromDefinitions() throws Exception {
+        Resource[] resources = new PathMatchingResourcePatternResolver()
+                .getResources("classpath*:ofbiz-servicedef/accounting/services_*.xml");
+        List<Arguments> result = new ArrayList<>();
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        for (Resource resource : resources) {
+            try (InputStream input = resource.getInputStream()) {
+                NodeList services = factory.newDocumentBuilder().parse(input).getElementsByTagName("service");
+                for (int index = 0; index < services.getLength(); index++) {
+                    Node node = services.item(index);
+                    if (node instanceof Element service && "simple".equals(service.getAttribute("engine"))) {
+                        String name = service.getAttribute("name");
+                        boolean excluded = name.startsWith("createAcctgTransFor")
+                                || name.startsWith("createAcctgTransAndEntriesFor")
+                                || name.startsWith("revertAcctgTransOn")
+                                || "postFinAccountTransToGl".equals(name);
+                        result.add(Arguments.of(name, excluded));
+                    }
+                }
+            }
+        }
+        assertEquals(93, result.size());
+        assertEquals(20, result.stream().filter(argument -> (boolean) argument.get()[1]).count());
+        return result.stream();
     }
 
     private Map<String, ServiceHandlerRegistry.ServiceDefinition> byEntityAndAction(

@@ -60,12 +60,12 @@ public class AcctgTransServiceHandlers {
     @PostConstruct
     void registerHandlers() {
         registry.registerHandler(COMPONENT, "checkAcctgTransPosted", "VIEW", this::checkAcctgTransPosted);
-        registry.registerHandler(COMPONENT, "createAcctgTransEntry", "CREATE", this::createAcctgTransEntry);
-        registry.registerHandler(COMPONENT, "updateAcctgTransEntry", "UPDATE", this::updateAcctgTransEntry);
-        registry.registerHandler(COMPONENT, "deleteAcctgTransEntry", "DELETE", this::deleteAcctgTransEntry);
-        registry.registerHandler(COMPONENT, "calculateAcctgTransTrialBalance", "CREATE",
+        registry.registerHandler(COMPONENT, "createAcctgTransEntry", "ACCTG_ATX_CREATE", this::createAcctgTransEntry);
+        registry.registerHandler(COMPONENT, "updateAcctgTransEntry", "ACCTG_ATX_UPDATE", this::updateAcctgTransEntry);
+        registry.registerHandler(COMPONENT, "deleteAcctgTransEntry", "ACCTG_ATX_DELETE", this::deleteAcctgTransEntry);
+        registry.registerHandler(COMPONENT, "calculateAcctgTransTrialBalance", "ACCTG_ATX_CREATE",
                 this::calculateAcctgTransTrialBalance);
-        registry.registerHandler(COMPONENT, "postAcctgTrans", "CREATE", this::postAcctgTrans);
+        registry.registerHandler(COMPONENT, "postAcctgTrans", "ACCTG_ATX_CREATE", this::postAcctgTrans);
         registry.registerHandler(COMPONENT, "getAcctgTransEntriesAndTransTotal", "VIEW",
                 this::getAcctgTransEntriesAndTransTotal);
         registry.registerHandler(COMPONENT, "calculateGlAccountTrialBalance", "VIEW",
