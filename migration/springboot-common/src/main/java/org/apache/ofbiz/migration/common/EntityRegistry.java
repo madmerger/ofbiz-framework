@@ -21,6 +21,7 @@ package org.apache.ofbiz.migration.common;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.metamodel.EntityType;
@@ -33,12 +34,14 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -51,10 +54,18 @@ public class EntityRegistry {
             "currentpassword", "passwordhint", "cardnumber", "accountnumber", "pinnumber");
     private final EntityManager entityManager;
     private final MigrationSecurityProperties properties;
+    private final ServiceHandlerRegistry serviceRegistry;
 
-    public EntityRegistry(EntityManager entityManager, MigrationSecurityProperties properties) {
+    @Autowired
+    public EntityRegistry(
+            EntityManager entityManager, MigrationSecurityProperties properties, ServiceHandlerRegistry serviceRegistry) {
         this.entityManager = entityManager;
         this.properties = properties;
+        this.serviceRegistry = serviceRegistry;
+    }
+
+    public EntityRegistry(EntityManager entityManager, MigrationSecurityProperties properties) {
+        this(entityManager, properties, new ServiceHandlerRegistry());
     }
 
     public Class<?> entityClass(String name) {
@@ -108,6 +119,34 @@ public class EntityRegistry {
         }
         query.select(root).where(predicates.toArray(Predicate[]::new));
         return new ArrayList<>(entityManager.createQuery(query).setMaxResults(100).getResultList());
+    }
+
+    public Long maxNumericFieldByEquality(Class<?> type, String field, Map<String, ?> filters) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<?> root = query.from(type);
+        if (entityManager.getMetamodel().entity(type).getAttribute(field) == null) {
+            throw new MigrationException(HttpStatus.BAD_REQUEST, "Unknown field: " + field);
+        }
+        List<Predicate> predicates = new ArrayList<>();
+        for (var filter : filters.entrySet()) {
+            if (entityManager.getMetamodel().entity(type).getAttribute(filter.getKey()) == null) {
+                throw new MigrationException(HttpStatus.BAD_REQUEST, "Unknown field: " + filter.getKey());
+            }
+            predicates.add(builder.equal(
+                    root.get(filter.getKey()), convert(filter.getValue(), propertyType(type, filter.getKey()))));
+        }
+        Expression<Long> numericField = root.get(field).as(Long.class);
+        query.select(builder.max(numericField)).where(predicates.toArray(Predicate[]::new));
+        return entityManager.createQuery(query).getSingleResult();
+    }
+
+    public void requireComponentEntity(String component, Class<?> type) {
+        Set<String> allowed = new HashSet<>(properties.getExtraEntities());
+        allowed.addAll(serviceRegistry.entityNames(component));
+        if (!allowed.contains(type.getSimpleName())) {
+            throw new MigrationException(HttpStatus.NOT_FOUND, "Unknown entity: " + type.getSimpleName());
+        }
     }
 
     public void requireSensitiveView(Class<?> type) {

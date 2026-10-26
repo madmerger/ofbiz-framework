@@ -35,6 +35,7 @@ import org.springframework.test.web.servlet.MockMvc;
             "spring.datasource.username=sa",
             "spring.datasource.password=",
             "spring.jpa.hibernate.ddl-auto=create-drop",
+            "migration.security.component=test",
             "migration.security.require-https=true"
         })
 @AutoConfigureMockMvc

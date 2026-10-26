@@ -18,9 +18,12 @@
  *******************************************************************************/
 package org.apache.ofbiz.migration.common;
 
+import java.lang.reflect.RecordComponent;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
 
@@ -29,8 +32,17 @@ public class ServiceHandlerRegistry {
     private final Map<String, Map<String, ServiceDefinition>> catalogs = new ConcurrentHashMap<>();
     private final Map<String, Map<String, HandlerRegistration>> handlers = new ConcurrentHashMap<>();
 
-    public void registerCatalog(String component, Map<String, ServiceDefinition> services) {
-        catalogs.put(component, Map.copyOf(services));
+    public void registerCatalog(String component, Map<String, ?> services) {
+        Map<String, ServiceDefinition> normalized = new ConcurrentHashMap<>();
+        services.forEach((name, definition) -> normalized.put(name, adapt(definition)));
+        catalogs.put(component, Map.copyOf(normalized));
+    }
+
+    public Set<String> entityNames(String component) {
+        return catalogs.getOrDefault(component, Map.of()).values().stream()
+                .map(ServiceDefinition::entity)
+                .filter(entity -> entity != null && !entity.isBlank())
+                .collect(java.util.stream.Collectors.toUnmodifiableSet());
     }
 
     public void registerHandler(String component, String service, SimpleServiceHandler handler) {
@@ -65,6 +77,45 @@ public class ServiceHandlerRegistry {
             String name, String entity, String invoke, String permissionMainAction, List<ParamDefinition> params) { }
     public record HandlerRegistration(
             String requiredPermission, String sensitiveResultEntity, SimpleServiceHandler handler) { }
+
+    private static ServiceDefinition adapt(Object definition) {
+        if (definition instanceof ServiceDefinition serviceDefinition) {
+            return serviceDefinition;
+        }
+        List<ParamDefinition> params = new ArrayList<>();
+        Object rawParams = recordValue(definition, "params");
+        if (rawParams instanceof List<?> generatedParams) {
+            for (Object param : generatedParams) {
+                params.add(new ParamDefinition(
+                        (String) recordValue(param, "name"),
+                        (String) recordValue(param, "mode"),
+                        Boolean.TRUE.equals(recordValue(param, "optional")),
+                        (String) recordValue(param, "type")));
+            }
+        }
+        return new ServiceDefinition(
+                (String) recordValue(definition, "name"),
+                (String) recordValue(definition, "entity"),
+                (String) recordValue(definition, "invoke"),
+                (String) recordValue(definition, "permissionMainAction"),
+                List.copyOf(params));
+    }
+
+    private static Object recordValue(Object value, String name) {
+        if (value == null || !value.getClass().isRecord()) {
+            throw new IllegalArgumentException("Unsupported generated service definition");
+        }
+        for (RecordComponent component : value.getClass().getRecordComponents()) {
+            if (component.getName().equals(name)) {
+                try {
+                    return component.getAccessor().invoke(value);
+                } catch (ReflectiveOperationException exception) {
+                    throw new IllegalArgumentException("Cannot read generated service definition", exception);
+                }
+            }
+        }
+        throw new IllegalArgumentException("Generated service definition is missing: " + name);
+    }
 
     @FunctionalInterface
     public interface SimpleServiceHandler {

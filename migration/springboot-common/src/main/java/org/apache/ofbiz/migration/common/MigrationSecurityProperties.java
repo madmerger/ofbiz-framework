@@ -26,15 +26,19 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class MigrationSecurityProperties {
     private List<String> basePermissions = new ArrayList<>(List.of("OFBTOOLS"));
     private List<String> sensitiveEntities = new ArrayList<>();
+    private List<String> extraEntities = new ArrayList<>();
     private List<User> users = new ArrayList<>();
     private String servicePermissionPrefix = "MIGRATION";
     private String trustedProxies = "a^";
-    private boolean requireHttps;
+    private String component = "";
+    private boolean requireHttps = true;
 
     public List<String> getBasePermissions() { return basePermissions; }
     public void setBasePermissions(List<String> basePermissions) { this.basePermissions = basePermissions; }
     public List<String> getSensitiveEntities() { return sensitiveEntities; }
     public void setSensitiveEntities(List<String> sensitiveEntities) { this.sensitiveEntities = sensitiveEntities; }
+    public List<String> getExtraEntities() { return extraEntities; }
+    public void setExtraEntities(List<String> extraEntities) { this.extraEntities = extraEntities; }
     public List<User> getUsers() { return users; }
     public void setUsers(List<User> users) { this.users = users; }
     public String getServicePermissionPrefix() { return servicePermissionPrefix; }
@@ -43,6 +47,8 @@ public class MigrationSecurityProperties {
     }
     public String getTrustedProxies() { return trustedProxies; }
     public void setTrustedProxies(String trustedProxies) { this.trustedProxies = trustedProxies; }
+    public String getComponent() { return component; }
+    public void setComponent(String component) { this.component = component; }
     public boolean isRequireHttps() { return requireHttps; }
     public void setRequireHttps(boolean requireHttps) { this.requireHttps = requireHttps; }
 
