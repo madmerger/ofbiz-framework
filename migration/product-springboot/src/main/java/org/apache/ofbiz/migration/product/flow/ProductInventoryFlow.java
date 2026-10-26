@@ -20,13 +20,18 @@ package org.apache.ofbiz.migration.product.flow;
 import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.SequenceService;
+import org.apache.ofbiz.migration.product.ProductPermissions;
 import org.apache.ofbiz.migration.product.adapter.AccountingPort;
+import org.apache.ofbiz.migration.product.simple.InventoryServices;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,13 +45,22 @@ public class ProductInventoryFlow {
     private final EntityManager entityManager;
     private final SequenceService sequences;
     private final AccountingPort accounting;
+    private final ProductPermissions permissions;
+    private final InventoryServices inventoryServices;
 
     public ProductInventoryFlow(
-            EntityRegistry entities, EntityManager entityManager, SequenceService sequences, AccountingPort accounting) {
+            EntityRegistry entities,
+            EntityManager entityManager,
+            SequenceService sequences,
+            AccountingPort accounting,
+            ProductPermissions permissions,
+            InventoryServices inventoryServices) {
         this.entities = entities;
         this.entityManager = entityManager;
         this.sequences = sequences;
         this.accounting = accounting;
+        this.permissions = permissions;
+        this.inventoryServices = inventoryServices;
     }
 
     /**
@@ -55,6 +69,10 @@ public class ProductInventoryFlow {
      */
     @Transactional
     public Map<String, Object> createProduct(Map<String, Object> input) {
+        if (!permissions.hasPermission("CATALOG", "CREATE")
+                && !permissions.hasPermission("CATALOG_ROLE", "CREATE")) {
+            throw new MigrationException(HttpStatus.FORBIDDEN, "ProductCatalogCreatePermissionError");
+        }
         String productTypeId = required(input, "productTypeId");
         String internalName = required(input, "internalName");
         String productId = text(input.get("productId"));
@@ -151,7 +169,7 @@ public class ProductInventoryFlow {
         }
         Object inventoryItem = entities.newEntity(entities.entityClass("InventoryItem"));
         copyKnownFields(inventoryItem, input,
-                Set.of("inventoryItemId", "quantityOnHandTotal", "availableToPromiseTotal"));
+                Set.of("inventoryItemId", "quantityOnHandTotal", "availableToPromiseTotal", "datetimeReceived"));
         String inventoryItemId = sequences.nextId("InventoryItem");
         entities.set(inventoryItem, "inventoryItemId", inventoryItemId);
         entities.set(inventoryItem, "productId", productId);
@@ -160,9 +178,7 @@ public class ProductInventoryFlow {
         entities.set(inventoryItem, "ownerPartyId", ownerPartyId);
         entities.set(inventoryItem, "currencyUomId", currencyUomId);
         entities.set(inventoryItem, "unitCost", unitCost);
-        entities.set(inventoryItem, "datetimeReceived",
-                input.get("datetimeReceived") == null ? new Timestamp(System.currentTimeMillis())
-                        : input.get("datetimeReceived"));
+        entities.set(inventoryItem, "datetimeReceived", timestamp(input.get("datetimeReceived")));
         entityManager.persist(inventoryItem);
         return Map.of("inventoryItemId", inventoryItemId);
     }
@@ -189,9 +205,10 @@ public class ProductInventoryFlow {
         if (find("Product", Map.of("productId", productId)) == null) {
             throw new MigrationException(HttpStatus.NOT_FOUND, "Product not found: " + productId);
         }
-        BigDecimal loopCount = "SERIALIZED_INV_ITEM".equals(inventoryType) && accepted.signum() > 0
+        boolean serialized = "SERIALIZED_INV_ITEM".equals(inventoryType);
+        BigDecimal loopCount = serialized && accepted.signum() > 0
                 ? accepted : BigDecimal.ONE;
-        if ("SERIALIZED_INV_ITEM".equals(inventoryType)
+        if (serialized
                 && (text(input.get("serialNumber")) != null || text(input.get("currentInventoryItemId")) != null)
                 && accepted.compareTo(BigDecimal.ONE) > 0) {
             throw new MigrationException(HttpStatus.BAD_REQUEST, "FacilityReceiveInventoryProduct");
@@ -208,7 +225,8 @@ public class ProductInventoryFlow {
         String inventoryItemId = null;
         String lastReceiptId = null;
         int count = loopCount.intValueExact();
-        BigDecimal receivedEach = "SERIALIZED_INV_ITEM".equals(inventoryType) ? BigDecimal.ONE : accepted;
+        BigDecimal receivedEach = serialized && accepted.signum() > 0 ? BigDecimal.ONE : accepted;
+        Object oldOwnerPartyId = null;
         for (int i = 0; i < count; i++) {
             Map<String, Object> itemInput = new LinkedHashMap<>(input);
             itemInput.put("statusId", statusId);
@@ -218,47 +236,51 @@ public class ProductInventoryFlow {
                     Map<String, Object> created = createInventoryItem(itemInput);
                     inventoryItemId = text(created.get("inventoryItemId"));
                 } else {
-                    Object currentItem = find("InventoryItem", Map.of("inventoryItemId", currentInventoryItemId));
-                    if (currentItem == null) {
-                        throw new MigrationException(
-                                HttpStatus.NOT_FOUND, "Inventory item not found: " + currentInventoryItemId);
-                    }
-                    copyKnownFields(currentItem, itemInput,
-                            Set.of("inventoryItemId", "quantityOnHandTotal", "availableToPromiseTotal"));
-                    entityManager.merge(currentItem);
+                    requireInventoryItemUpdatePermission();
+                    itemInput.put("inventoryItemId", currentInventoryItemId);
+                    oldOwnerPartyId = callInventoryService("updateInventoryItem", itemInput).get("oldOwnerPartyId");
                     inventoryItemId = currentInventoryItemId;
                 }
-                if ("SERIALIZED_INV_ITEM".equals(inventoryType)
+                if (serialized
                         && text(input.get("returnId")) == null) {
                     Object inventoryItem = find("InventoryItem", Map.of("inventoryItemId", inventoryItemId));
                     String currentStatus = text(entities.get(inventoryItem, "statusId"));
                     if (!"INV_PROMISED".equals(currentStatus) && !"INV_ON_HOLD".equals(currentStatus)) {
-                        entities.set(inventoryItem, "statusId", "INV_AVAILABLE");
-                        entityManager.merge(inventoryItem);
+                        requireInventoryItemUpdatePermission();
+                        callInventoryService("updateInventoryItem", Map.of(
+                                "inventoryItemId", inventoryItemId, "statusId", "INV_AVAILABLE"));
                     }
                 }
             }
             String receiptId = sequences.nextId("ShipmentReceipt");
-            if (receivedEach.signum() > 0 && !"SERIALIZED_INV_ITEM".equals(inventoryType)) {
+            if (receivedEach.signum() > 0 && !serialized) {
                 createReceiptDetail(itemInput, inventoryItemId, receivedEach, rejected, receiptId);
             }
             createReceipt(itemInput, inventoryItemId, receivedEach, rejected, receiptId);
-            if ("SERIALIZED_INV_ITEM".equals(inventoryType) && inventoryItemId != null) {
-                Object item = find("InventoryItem", Map.of("inventoryItemId", inventoryItemId));
-                if (!"INV_PROMISED".equals(text(entities.get(item, "statusId")))
-                        && !"INV_ON_HOLD".equals(text(entities.get(item, "statusId")))) {
-                    entities.set(item, "statusId", "INV_AVAILABLE");
-                }
+            if (serialized && inventoryItemId != null) {
+                // Mirrors applications/product/entitydef/eecas.xml:52-55.
+                callInventoryService("updateSerializedInventoryTotals",
+                        Map.of("inventoryItemId", inventoryItemId));
+            }
+            if (accepted.signum() > 0) {
+                Map<String, Object> balanceInput = new LinkedHashMap<>(input);
+                balanceInput.put("inventoryItemId", inventoryItemId);
+                callInventoryService("balanceInventoryItems", balanceInput);
             }
             lastReceiptId = receiptId;
             rejected = ZERO;
         }
-        return Map.of("inventoryItemId", inventoryItemId == null ? "" : inventoryItemId,
-                "receiptId", lastReceiptId == null ? "" : lastReceiptId,
-                "successMessageList", inventoryItemId == null ? java.util.List.of()
-                        : java.util.List.of("Received " + receivedEach + " of " + productId
-                                + " in inventory item " + inventoryItemId + "."),
-                "sideEffectNotes", "Receipt accounting and receipt SECA/ECA callbacks are no-ops.");
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("inventoryItemId", inventoryItemId == null ? "" : inventoryItemId);
+        result.put("receiptId", lastReceiptId == null ? "" : lastReceiptId);
+        result.put("successMessageList", inventoryItemId == null ? java.util.List.of()
+                : java.util.List.of("Received " + receivedEach + " of " + productId
+                        + " in inventory item " + inventoryItemId + "."));
+        result.put("sideEffectNotes", "Receipt accounting and receipt SECA/ECA callbacks are no-ops.");
+        if (oldOwnerPartyId != null) {
+            result.put("oldOwnerPartyId", oldOwnerPartyId);
+        }
+        return result;
     }
 
     private void createReceiptDetail(
@@ -291,7 +313,8 @@ public class ProductInventoryFlow {
     private void createReceipt(
             Map<String, Object> input, String inventoryItemId, BigDecimal accepted, BigDecimal rejected, String receiptId) {
         Object receipt = entities.newEntity(entities.entityClass("ShipmentReceipt"));
-        copyKnownFields(receipt, input, Set.of("receiptId", "inventoryItemId", "quantityAccepted", "quantityRejected"));
+        copyKnownFields(receipt, input,
+                Set.of("receiptId", "inventoryItemId", "quantityAccepted", "quantityRejected", "datetimeReceived"));
         entities.set(receipt, "receiptId", receiptId);
         if (inventoryItemId != null) {
             entities.set(receipt, "inventoryItemId", inventoryItemId);
@@ -299,9 +322,42 @@ public class ProductInventoryFlow {
         entities.set(receipt, "productId", input.get("productId"));
         entities.set(receipt, "quantityAccepted", accepted);
         entities.set(receipt, "quantityRejected", rejected);
-        entities.set(receipt, "datetimeReceived", new Timestamp(System.currentTimeMillis()));
+        entities.set(receipt, "datetimeReceived", timestamp(input.get("datetimeReceived")));
         entities.set(receipt, "receivedByUserLoginId", currentUserLoginId());
         entityManager.persist(receipt);
+    }
+
+    private void requireInventoryItemUpdatePermission() {
+        if (!permissions.hasPermission("CATALOG", "UPDATE")
+                && !permissions.hasPermission("FACILITY", "UPDATE")) {
+            throw new MigrationException(HttpStatus.FORBIDDEN, "ProductCatalogCreatePermissionError");
+        }
+    }
+
+    private Map<String, Object> callInventoryService(String serviceName, Map<String, Object> input) {
+        return inventoryServices.execute(serviceName, serviceName, input);
+    }
+
+    private static Timestamp timestamp(Object value) {
+        if (value == null) {
+            return new Timestamp(System.currentTimeMillis());
+        }
+        if (value instanceof Timestamp timestamp) {
+            return timestamp;
+        }
+        if (value instanceof Date date) {
+            return new Timestamp(date.getTime());
+        }
+        String text = value.toString();
+        try {
+            return Timestamp.from(Instant.parse(text));
+        } catch (DateTimeParseException exception) {
+            try {
+                return Timestamp.valueOf(text);
+            } catch (IllegalArgumentException invalidTimestamp) {
+                throw new MigrationException(HttpStatus.BAD_REQUEST, "Invalid datetimeReceived");
+            }
+        }
     }
 
     private Object find(String entityName, Map<String, ?> keys) {

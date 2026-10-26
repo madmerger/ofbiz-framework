@@ -61,9 +61,8 @@ public class ProductFlowServiceRegistration {
         register("quickShipEntireOrder", new ProductServiceMetadata.ServiceMetadata(
                 "services_shipment.xml", "facility", ""),
                 "UPDATE", null, quickShipEntireOrder::execute);
-        register("createProduct", new ProductServiceMetadata.ServiceMetadata(
-                "services.xml", "catalog", ""),
-                "CREATE", null, productInventory::createProduct);
+        registry.registerHandler("product", "createProduct", "OFBTOOLS_VIEW", null,
+                productInventory::createProduct);
         register("createInventoryItem", new ProductServiceMetadata.ServiceMetadata(
                 "services_facility.xml", "facility", "facilityGenericPermission"),
                 "CREATE", null, productInventory::createInventoryItem);
