@@ -17,6 +17,7 @@ entity-auto CRUD acceptance は77件実行、54件スキップ（CRUD三つ組�
 
 ## 2. OFBiz との差分と既知の制約
 
+- `ACCOUNTING_ROLE_*` による組織／ロール単位の権限は未移植。`ACCOUNTING_*` 権限の保持者は全組織の伝票を操作できる。これは OFBiz の `acctgInvoicePermissionCheck` と同等の挙動。
 - `createInvoice`: PartyAcctgPreference の `invoiceIdPrefix` と per-party invoice sequence enforcement は未移植。
 - `setInvoiceStatus`: 承認時の自動PaymentApplication照合・gateway captureは未移植。
 - `createInvoiceForOrder`: adjustments、billing account、contact-mech、shipment grouping、payment-preference auto-application、fees は未移植。
@@ -29,6 +30,8 @@ entity-auto CRUD acceptance は77件実行、54件スキップ（CRUD三つ組�
 ## 3. セキュリティ選定
 
 機密14 Entityは、カード・金融口座・金融取引・ゲートウェイ応答／設定情報を含むことを基準に選定した。`Payment` と `Invoice` は認証情報そのものを持たないため通常のAccounting権限とする。PaymentMethod/CreditCardの参照、カード番号redaction、機密entity-auto作成制限は `AccountingSecurityTest` で確認する。
+
+`ACCOUNTING_ROLE_*` による組織／ロール単位の制限は未移植であり、`ACCOUNTING_*` 権限の保持者は全組織の伝票を操作できる。OFBiz の `acctgInvoicePermissionCheck` も組織所有者による追加制限を行わない。
 
 Tomcat trusted proxy の既定値をlocalを含むAccounting profileで `a^` とし、明示設定がない限り転送ヘッダーを信頼しない。
 

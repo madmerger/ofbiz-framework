@@ -21,6 +21,10 @@
 | FreeMarker template | 37 | 画面未移植 |
 | Groovy files | 74 | 画面／業務スクリプト未移植 |
 
+## 権限スコープの制約
+
+`ACCOUNTING_ROLE_*` による組織／ロール単位の権限は未移植。`ACCOUNTING_*` 権限の保持者は全組織の伝票を操作できる。OFBiz の `acctgInvoicePermissionCheck` と同等の範囲であり、組織所有者による追加制限はない。
+
 ## Java / Groovy サービス
 
 | service name | engine | location | 理由 |
