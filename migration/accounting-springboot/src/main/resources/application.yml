@@ -62,6 +62,9 @@ migration:
       - CreditCard
       - PartyRelationship
       - PartyGroup
+      - ProductGlAccount
+      - ProductCategoryGlAccount
+      - ProductCategoryMember
     sensitive-entities:
       - PaymentMethod
       - CreditCard

@@ -158,6 +158,56 @@ class GeneralLedgerServicesTest {
     }
 
     @Test
+    void getGlAccountFromAccountTypeUsesFixedAssetDepreciationMapping() throws Exception {
+        persist("GlAccount", Map.of("glAccountId", "MIG_GL_DEP"));
+        persist("FixedAssetTypeGlAccount", Map.of("fixedAssetTypeId", "_NA_", "fixedAssetId", "MIG_GL_FA",
+                "organizationPartyId", "MIG_DEMO_VENDOR", "depGlAccountId", "MIG_GL_DEP"));
+        post("getGlAccountFromAccountType", "{\"organizationPartyId\":\"MIG_DEMO_VENDOR\","
+                + "\"acctgTransTypeId\":\"DEPRECIATION\",\"fixedAssetId\":\"MIG_GL_FA\","
+                + "\"debitCreditFlag\":\"D\"}").andExpect(status().isOk())
+                .andExpect(jsonPath("$.glAccountId").value("MIG_GL_DEP"));
+    }
+
+    @Test
+    void getGlAccountFromAccountTypeUsesProductSpecificMapping() throws Exception {
+        persist("GlAccount", Map.of("glAccountId", "MIG_GL_PRODUCT"));
+        persist("ProductGlAccount", Map.of("productId", "MIG_DEMO_PRODUCT_1",
+                "organizationPartyId", "MIG_DEMO_VENDOR", "glAccountTypeId", "MIG_PRODUCT_ACCOUNT",
+                "glAccountId", "MIG_GL_PRODUCT"));
+        post("getGlAccountFromAccountType", "{\"organizationPartyId\":\"MIG_DEMO_VENDOR\","
+                + "\"productId\":\"MIG_DEMO_PRODUCT_1\",\"glAccountTypeId\":\"MIG_PRODUCT_ACCOUNT\"}")
+                .andExpect(status().isOk()).andExpect(jsonPath("$.glAccountId").value("MIG_GL_PRODUCT"));
+    }
+
+    @Test
+    void getGlAccountFromAccountTypeUsesInvoiceItemTypeMapping() throws Exception {
+        persist("GlAccount", Map.of("glAccountId", "MIG_GL_INVOICE"));
+        persist("InvoiceItemType", Map.of("invoiceItemTypeId", "MIG_GL_ITEM_TYPE"));
+        persist("InvoiceItemTypeGlAccount", Map.of("invoiceItemTypeId", "MIG_GL_ITEM_TYPE",
+                "organizationPartyId", "MIG_DEMO_VENDOR", "glAccountId", "MIG_GL_INVOICE"));
+        post("getGlAccountFromAccountType", "{\"organizationPartyId\":\"MIG_DEMO_VENDOR\","
+                + "\"acctgTransTypeId\":\"SALES_INVOICE\",\"debitCreditFlag\":\"C\","
+                + "\"invoiceId\":\"MIG_GL_INVOICE_ID\",\"glAccountTypeId\":\"MIG_GL_ITEM_TYPE\"}")
+                .andExpect(status().isOk()).andExpect(jsonPath("$.glAccountId").value("MIG_GL_INVOICE"));
+    }
+
+    @Test
+    void getGlAccountFromAccountTypeUsesCreditCardTypeMapping() throws Exception {
+        persist("GlAccount", Map.of("glAccountId", "MIG_GL_CARD"));
+        persist("PaymentMethod", Map.of("paymentMethodId", "MIG_GL_CARD_PM",
+                "paymentMethodTypeId", "CREDIT_CARD"));
+        persist("CreditCard", Map.of("paymentMethodId", "MIG_GL_CARD_PM", "cardType", "MIG_CARD_TYPE"));
+        persist("Payment", Map.of("paymentId", "MIG_GL_CARD_PAYMENT", "paymentMethodTypeId", "CREDIT_CARD",
+                "paymentMethodId", "MIG_GL_CARD_PM"));
+        persist("CreditCardTypeGlAccount", Map.of("cardType", "MIG_CARD_TYPE",
+                "organizationPartyId", "MIG_DEMO_VENDOR", "glAccountId", "MIG_GL_CARD"));
+        post("getGlAccountFromAccountType", "{\"organizationPartyId\":\"MIG_DEMO_VENDOR\","
+                + "\"acctgTransTypeId\":\"OUTGOING_PAYMENT\",\"debitCreditFlag\":\"C\","
+                + "\"paymentId\":\"MIG_GL_CARD_PAYMENT\"}").andExpect(status().isOk())
+                .andExpect(jsonPath("$.glAccountId").value("MIG_GL_CARD"));
+    }
+
+    @Test
     void getInventoryItemOwnerReturnsOwnerFromInventoryPort() throws Exception {
         persist("InventoryItem", Map.of("inventoryItemId", "MIG_GL_ITEM",
                 "productId", "MIG_DEMO_PRODUCT_1", "ownerPartyId", "MIG_DEMO_VENDOR"));

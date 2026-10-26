@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.apache.ofbiz.migration.accounting.adapter.local;
 
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.apache.ofbiz.migration.accounting.ProductPort;
@@ -52,5 +54,37 @@ public class LocalProductAdapter implements ProductPort {
             }
         }
         return "INV_FPROD_ITEM";
+    }
+
+    @Override
+    public Map<String, Object> productGlAccount(
+            String productId, String organizationPartyId, String glAccountTypeId) {
+        Object mapping = entities.findByPrimaryKey(entities.entityClass("ProductGlAccount"), Map.of(
+                "productId", productId, "organizationPartyId", organizationPartyId,
+                "glAccountTypeId", glAccountTypeId));
+        return mapping == null ? null : entities.toMap(mapping);
+    }
+
+    @Override
+    public List<Map<String, Object>> productCategoryMemberships(String productId) {
+        Date now = new Date();
+        return entities.findByEquality(entities.entityClass("ProductCategoryMember"), Map.of("productId", productId))
+                .stream().filter(member -> {
+                    Date from = (Date) entities.get(member, "fromDate");
+                    Date thru = (Date) entities.get(member, "thruDate");
+                    return (from == null || !now.before(from)) && (thru == null || !now.after(thru));
+                }).sorted(Comparator.comparing(
+                        (Object member) -> (Date) entities.get(member, "fromDate"),
+                        Comparator.nullsFirst(Comparator.reverseOrder())))
+                .map(entities::toMap).toList();
+    }
+
+    @Override
+    public Map<String, Object> productCategoryGlAccount(
+            String productCategoryId, String organizationPartyId, String glAccountTypeId) {
+        Object mapping = entities.findByPrimaryKey(entities.entityClass("ProductCategoryGlAccount"), Map.of(
+                "productCategoryId", productCategoryId, "organizationPartyId", organizationPartyId,
+                "glAccountTypeId", glAccountTypeId));
+        return mapping == null ? null : entities.toMap(mapping);
     }
 }

@@ -18,10 +18,18 @@
  *******************************************************************************/
 package org.apache.ofbiz.migration.accounting;
 
+import java.util.List;
 import java.util.Map;
 
 public interface ProductPort {
     Map<String, Object> findProduct(String productId);
 
     String invoiceItemType(String invoiceTypeId, String orderItemTypeId);
+
+    Map<String, Object> productGlAccount(String productId, String organizationPartyId, String glAccountTypeId);
+
+    List<Map<String, Object>> productCategoryMemberships(String productId);
+
+    Map<String, Object> productCategoryGlAccount(
+            String productCategoryId, String organizationPartyId, String glAccountTypeId);
 }

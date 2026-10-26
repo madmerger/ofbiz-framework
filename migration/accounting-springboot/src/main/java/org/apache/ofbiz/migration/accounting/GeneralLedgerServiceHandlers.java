@@ -46,6 +46,7 @@ public class GeneralLedgerServiceHandlers {
     private final EntityRegistry entities;
     private final InventoryAccountingPort inventory;
     private final PartyAccountingPort parties;
+    private final ProductPort products;
     private final MigrationServiceDispatcher dispatcher;
     private final ServiceHandlerRegistry registry;
 
@@ -54,12 +55,14 @@ public class GeneralLedgerServiceHandlers {
             EntityRegistry entities,
             InventoryAccountingPort inventory,
             PartyAccountingPort parties,
+            ProductPort products,
             MigrationServiceDispatcher dispatcher,
             ServiceHandlerRegistry registry) {
         this.entityManager = entityManager;
         this.entities = entities;
         this.inventory = inventory;
         this.parties = parties;
+        this.products = products;
         this.dispatcher = dispatcher;
         this.registry = registry;
     }
@@ -526,13 +529,41 @@ public class GeneralLedgerServiceHandlers {
                     "organizationPartyId", organization, "varianceReasonId", type));
             accountId = mapping == null ? null : entities.get(mapping, "glAccountId");
         }
+        if (accountId == null && "DEPRECIATION".equals(input.get("acctgTransTypeId"))
+                && text(input.get("fixedAssetId")) != null) {
+            List<?> mappings = entities.findByEquality(entities.entityClass("FixedAssetTypeGlAccount"),
+                    Map.of("fixedAssetId", input.get("fixedAssetId"), "organizationPartyId", organization));
+            Object mapping = mappings.isEmpty() ? null : mappings.get(0);
+            if (mapping == null) {
+                Object fixedAsset = findOne("FixedAsset", Map.of("fixedAssetId", input.get("fixedAssetId")));
+                String fixedAssetTypeId = fixedAsset == null ? null
+                        : text(entities.get(fixedAsset, "fixedAssetTypeId"));
+                if (fixedAssetTypeId != null) {
+                    mappings = entities.findByEquality(entities.entityClass("FixedAssetTypeGlAccount"),
+                                    Map.of("fixedAssetId", "_NA_", "organizationPartyId", organization)).stream()
+                            .filter(candidate -> fixedAssetTypeId.equals(entities.get(candidate, "fixedAssetTypeId"))
+                                    || "_NA_".equals(entities.get(candidate, "fixedAssetTypeId")))
+                            .toList();
+                    mapping = mappings.isEmpty() ? null : mappings.get(0);
+                }
+            }
+            String mappedAccount = mapping == null ? null : text(entities.get(mapping,
+                    "C".equals(input.get("debitCreditFlag")) ? "accDepGlAccountId" : "depGlAccountId"));
+            if (mappedAccount != null) {
+                return Map.of("glAccountId", mappedAccount);
+            }
+        }
         if (accountId == null && type != null && input.get("partyId") != null && input.get("roleTypeId") != null) {
             Object mapping = findOne("PartyGlAccount", Map.of("organizationPartyId", organization,
                     "partyId", input.get("partyId"), "roleTypeId", input.get("roleTypeId"),
                     "glAccountTypeId", type));
             accountId = mapping == null ? null : entities.get(mapping, "glAccountId");
         }
-        if (accountId == null && input.get("paymentId") != null) {
+        if (accountId == null && input.get("paymentId") != null
+                && (("OUTGOING_PAYMENT".equals(input.get("acctgTransTypeId"))
+                        && "C".equals(input.get("debitCreditFlag")))
+                    || ("INCOMING_PAYMENT".equals(input.get("acctgTransTypeId"))
+                        && "D".equals(input.get("debitCreditFlag"))))) {
             Object payment = findOne("Payment", Map.of("paymentId", input.get("paymentId")));
             if (payment != null) {
                 Object paymentMethod = findOne("PaymentMethod",
@@ -541,11 +572,65 @@ public class GeneralLedgerServiceHandlers {
                     accountId = entities.get(paymentMethod, "glAccountId");
                 }
                 if (accountId == null) {
+                    if ("CREDIT_CARD".equals(entities.get(payment, "paymentMethodTypeId")) && paymentMethod != null) {
+                        Object creditCard = findOne("CreditCard",
+                                Map.of("paymentMethodId", entities.get(paymentMethod, "paymentMethodId")));
+                        if (creditCard != null && entities.get(creditCard, "cardType") != null) {
+                            Object cardMapping = findOne("CreditCardTypeGlAccount", Map.of(
+                                    "organizationPartyId", organization, "cardType", entities.get(creditCard, "cardType")));
+                            accountId = cardMapping == null ? null : entities.get(cardMapping, "glAccountId");
+                        }
+                    }
+                }
+                if (accountId == null) {
                     Object mapping = findOne("PaymentMethodTypeGlAccount", Map.of("organizationPartyId", organization,
                             "paymentMethodTypeId", entities.get(payment, "paymentMethodTypeId")));
                     accountId = mapping == null ? null : entities.get(mapping, "glAccountId");
                 }
             }
+            return accountId == null ? Map.of() : Map.of("glAccountId", accountId);
+        }
+        if (accountId == null && text(input.get("productId")) != null && type != null) {
+            Map<String, Object> mapping = products.productGlAccount(text(input.get("productId")),
+                    organization, type);
+            accountId = mapping == null ? null : mapping.get("glAccountId");
+            if (accountId == null) {
+                for (Map<String, Object> membership : products.productCategoryMemberships(
+                        text(input.get("productId")))) {
+                    mapping = products.productCategoryGlAccount(text(membership.get("productCategoryId")),
+                            organization, type);
+                    if (mapping != null && mapping.get("glAccountId") != null) {
+                        accountId = mapping.get("glAccountId");
+                        break;
+                    }
+                }
+            }
+        }
+        String transactionType = text(input.get("acctgTransTypeId"));
+        String debitCredit = text(input.get("debitCreditFlag"));
+        boolean invoiceMappingBranch = text(input.get("invoiceId")) != null && type != null
+                && ("PURCHASE_INVOICE".equals(transactionType) && "D".equals(debitCredit)
+                    || "CUST_RTN_INVOICE".equals(transactionType) && "D".equals(debitCredit)
+                    || "SALES_INVOICE".equals(transactionType) && "C".equals(debitCredit));
+        if (invoiceMappingBranch) {
+            Object mapping = findOne("InvoiceItemTypeGlAccount", Map.of(
+                    "invoiceItemTypeId", type, "organizationPartyId", organization));
+            accountId = mapping == null ? null : entities.get(mapping, "glAccountId");
+            if (accountId == null) {
+                Object itemType = findOne("InvoiceItemType", Map.of("invoiceItemTypeId", type));
+                accountId = itemType == null ? null : entities.get(itemType, "defaultGlAccountId");
+            }
+            if (accountId == null && text(input.get("productId")) != null) {
+                String defaultType = switch (transactionType) {
+                    case "PURCHASE_INVOICE" -> "UNINVOICED_SHIP_RCPT";
+                    case "CUST_RTN_INVOICE" -> "SALES_RETURNS";
+                    default -> "SALES_ACCOUNT";
+                };
+                Object defaultMapping = findOne("GlAccountTypeDefault", Map.of(
+                        "organizationPartyId", organization, "glAccountTypeId", defaultType));
+                accountId = defaultMapping == null ? null : entities.get(defaultMapping, "glAccountId");
+            }
+            return accountId == null ? Map.of() : Map.of("glAccountId", accountId);
         }
         if (accountId == null && type != null) {
             Object mapping = findOne("GlAccountTypeDefault", Map.of(
