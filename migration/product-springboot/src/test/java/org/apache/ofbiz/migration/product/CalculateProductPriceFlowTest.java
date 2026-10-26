@@ -70,7 +70,9 @@ class CalculateProductPriceFlowTest {
                 .andExpect(jsonPath("$.price").value(12.5))
                 .andExpect(jsonPath("$.defaultPrice").value(12.5))
                 .andExpect(jsonPath("$.validPriceFound").value(true))
-                .andExpect(jsonPath("$.currencyUsed").value("USD"));
+                .andExpect(jsonPath("$.currencyUsed").value("USD"))
+                .andExpect(jsonPath("$.orderItemPriceInfos").isArray())
+                .andExpect(jsonPath("$.orderItemPriceInfos.length()").value(0));
     }
 
     @Test
@@ -102,6 +104,64 @@ class CalculateProductPriceFlowTest {
                 .andExpect(jsonPath("$.validPriceFound").value(false));
     }
 
+    @Test
+    @Transactional
+    void emptyStoreDefaultsFallBackToActiveStoreGroupAndCurrency() throws Exception {
+        persistProduct("PRICE_FLOW_STORE");
+        persistStore("PRICE_STORE_FLOW_01");
+        persistStoreGroup("PRICE_GROUP_FLOW_01");
+        Timestamp fromDate = Timestamp.from(Instant.now().minusSeconds(3600));
+        persistStoreGroupMember("PRICE_STORE_FLOW_01", "PRICE_GROUP_FLOW_01", fromDate);
+        persistPrice("PRICE_FLOW_STORE", "DEFAULT_PRICE", new BigDecimal("15.00"), fromDate,
+                "USD", "PRICE_GROUP_FLOW_01");
+
+        mockMvc.perform(post("/api/product/services/calculateProductPrice")
+                        .with(user("viewer").authorities(authorities()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JSON.writeValueAsBytes(Map.of(
+                                "productId", "PRICE_FLOW_STORE", "productStoreId", "PRICE_STORE_FLOW_01"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.price").value(15.0))
+                .andExpect(jsonPath("$.currencyUsed").value("USD"))
+                .andExpect(jsonPath("$.orderItemPriceInfos").isArray())
+                .andExpect(jsonPath("$.orderItemPriceInfos.length()").value(0));
+    }
+
+    @Test
+    @Transactional
+    void minimumPriceClampsDefaultEvenWhenListPriceExists() throws Exception {
+        persistProduct("PRICE_FLOW_MINIMUM");
+        Timestamp fromDate = Timestamp.from(Instant.now().minusSeconds(3600));
+        persistPrice("PRICE_FLOW_MINIMUM", "LIST_PRICE", new BigDecimal("20.00"), fromDate);
+        persistPrice("PRICE_FLOW_MINIMUM", "MINIMUM_PRICE", new BigDecimal("5.00"), fromDate);
+
+        mockMvc.perform(post("/api/product/services/calculateProductPrice")
+                        .with(user("viewer").authorities(authorities()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JSON.writeValueAsBytes(Map.of("productId", "PRICE_FLOW_MINIMUM"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.price").value(5.0))
+                .andExpect(jsonPath("$.defaultPrice").value(5.0))
+                .andExpect(jsonPath("$.listPrice").value(20.0));
+    }
+
+    @Test
+    @Transactional
+    void listPriceWithoutDefaultOrMinimumLeavesPriceAtZero() throws Exception {
+        persistProduct("PRICE_FLOW_LIST_ONLY");
+        persistPrice("PRICE_FLOW_LIST_ONLY", "LIST_PRICE", new BigDecimal("20.00"),
+                Timestamp.from(Instant.now().minusSeconds(3600)));
+
+        mockMvc.perform(post("/api/product/services/calculateProductPrice")
+                        .with(user("viewer").authorities(authorities()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JSON.writeValueAsBytes(Map.of("productId", "PRICE_FLOW_LIST_ONLY"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.price").value(0))
+                .andExpect(jsonPath("$.listPrice").value(20.0))
+                .andExpect(jsonPath("$.validPriceFound").value(false));
+    }
+
     private void persistProduct(String productId) {
         Object product = entities.newEntity(entities.entityClass("Product"));
         entities.set(product, "productId", productId);
@@ -112,15 +172,46 @@ class CalculateProductPriceFlowTest {
     }
 
     private void persistPrice(String productId, String type, BigDecimal amount, Timestamp fromDate) {
+        persistPrice(productId, type, amount, fromDate, "USD", "_NA_");
+    }
+
+    private void persistPrice(
+            String productId, String type, BigDecimal amount, Timestamp fromDate, String currency, String storeGroup) {
         Object price = entities.newEntity(entities.entityClass("ProductPrice"));
         entities.set(price, "productId", productId);
         entities.set(price, "productPriceTypeId", type);
         entities.set(price, "productPricePurposeId", "PURCHASE");
-        entities.set(price, "currencyUomId", "USD");
-        entities.set(price, "productStoreGroupId", "_NA_");
+        entities.set(price, "currencyUomId", currency);
+        entities.set(price, "productStoreGroupId", storeGroup);
         entities.set(price, "fromDate", fromDate);
         entities.set(price, "price", amount);
         entityManager.persist(price);
+        entityManager.flush();
+    }
+
+    private void persistStore(String productStoreId) {
+        Object store = entities.newEntity(entities.entityClass("ProductStore"));
+        entities.set(store, "productStoreId", productStoreId);
+        entities.set(store, "primaryStoreGroupId", "");
+        entities.set(store, "defaultCurrencyUomId", "");
+        entityManager.persist(store);
+        entityManager.flush();
+    }
+
+    private void persistStoreGroup(String productStoreGroupId) {
+        Object group = entities.newEntity(entities.entityClass("ProductStoreGroup"));
+        entities.set(group, "productStoreGroupId", productStoreGroupId);
+        entityManager.persist(group);
+        entityManager.flush();
+    }
+
+    private void persistStoreGroupMember(String productStoreId, String productStoreGroupId, Timestamp fromDate) {
+        Object member = entities.newEntity(entities.entityClass("ProductStoreGroupMember"));
+        entities.set(member, "productStoreId", productStoreId);
+        entities.set(member, "productStoreGroupId", productStoreGroupId);
+        entities.set(member, "fromDate", fromDate);
+        entities.set(member, "sequenceNum", BigDecimal.ONE);
+        entityManager.persist(member);
         entityManager.flush();
     }
 

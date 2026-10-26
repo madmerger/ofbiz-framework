@@ -62,7 +62,7 @@ public class CalculateProductPriceFlow {
                     entities.entityClass("ProductStore"), Map.of("productStoreId", productStoreId));
         }
         if (storeGroup == null && store != null) {
-            storeGroup = value(entities.get(store, "primaryStoreGroupId"));
+            storeGroup = nonEmpty(value(entities.get(store, "primaryStoreGroupId")));
             if (storeGroup == null) {
                 storeGroup = activeStoreGroup(productStoreId, at);
             }
@@ -72,7 +72,7 @@ public class CalculateProductPriceFlow {
         }
         String currency = nonEmpty(value(input.get("currencyUomId")));
         if (currency == null && store != null) {
-            currency = value(entities.get(store, "defaultCurrencyUomId"));
+            currency = nonEmpty(value(entities.get(store, "defaultCurrencyUomId")));
         }
         if (currency == null) {
             currency = "USD";
@@ -113,16 +113,14 @@ public class CalculateProductPriceFlow {
         BigDecimal defaultPrice = amount(selected.get("DEFAULT_PRICE"));
         BigDecimal listPrice = amountOrNull(selected.get("LIST_PRICE"));
         boolean validPriceFound = selected.containsKey("DEFAULT_PRICE");
-        if (listPrice == null) {
-            BigDecimal maximum = amountOrNull(selected.get("MAXIMUM_PRICE"));
-            BigDecimal minimum = amountOrNull(selected.get("MINIMUM_PRICE"));
-            if (maximum != null && defaultPrice.compareTo(maximum) > 0) {
-                defaultPrice = maximum;
-            }
-            if (minimum != null && defaultPrice.compareTo(minimum) < 0) {
-                defaultPrice = minimum;
-                validPriceFound = true;
-            }
+        BigDecimal maximum = amountOrNull(selected.get("MAXIMUM_PRICE"));
+        BigDecimal minimum = amountOrNull(selected.get("MINIMUM_PRICE"));
+        if (maximum != null && defaultPrice.compareTo(maximum) > 0) {
+            defaultPrice = maximum;
+        }
+        if (minimum != null && defaultPrice.compareTo(minimum) < 0) {
+            defaultPrice = minimum;
+            validPriceFound = true;
         }
 
         Map<String, Object> result = new LinkedHashMap<>();
@@ -137,6 +135,7 @@ public class CalculateProductPriceFlow {
         result.put("isSale", false);
         result.put("validPriceFound", validPriceFound);
         result.put("currencyUsed", currency);
+        result.put("orderItemPriceInfos", List.of());
         return result;
     }
 
