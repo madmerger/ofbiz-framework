@@ -1,0 +1,99 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+ext['testcontainers.version'] = '1.21.4'
+
+group = 'org.apache.ofbiz.migration'
+version = '0.1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':migration:springboot-common')
+    implementation project(':migration:springboot-datamodel')
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+def partyComponent = rootProject.file('applications/party')
+def partyEntityModel = rootProject.file('applications/datamodel/entitydef/party-entitymodel.xml')
+def inventoryTool = rootProject.file('migration/tools/ofbiz_inventory.py')
+def generatorTool = rootProject.file('migration/tools/ofbiz2spring.py')
+def generatedInventory = layout.buildDirectory.dir('generated/party-inventory')
+def inventoryJson = generatedInventory.map { it.file('inventory.json') }
+def generatedRoot = layout.buildDirectory.dir('generated/sources/ofbiz2spring/main/java')
+def generatedCatalog = generatedRoot.map {
+    it.dir('org/apache/ofbiz/migration/party/generated')
+}
+def reportFile = layout.buildDirectory.file('generated/ofbiz2spring-report.json')
+
+tasks.register('generatePartyInventory', Exec) {
+    workingDir rootProject.projectDir
+    inputs.dir(partyComponent)
+    inputs.file(partyEntityModel)
+    inputs.file(inventoryTool)
+    outputs.dir(generatedInventory)
+
+    doFirst {
+        commandLine 'python3',
+                inventoryTool.absolutePath,
+                '--component', 'applications/party',
+                '--entitymodel', partyEntityModel.absolutePath,
+                '--out', generatedInventory.get().asFile.absolutePath
+    }
+}
+
+tasks.register('generatePartyCatalog', Exec) {
+    workingDir rootProject.projectDir
+    dependsOn tasks.named('generatePartyInventory')
+    inputs.file(inventoryJson)
+    inputs.file(generatorTool)
+    outputs.dir(generatedRoot)
+    outputs.file(reportFile)
+
+    doFirst {
+        commandLine(
+                'python3',
+                generatorTool.absolutePath,
+                '--inventory', inventoryJson.get().asFile.absolutePath,
+                '--out', generatedRoot.get().asFile.absolutePath,
+                '--entity-package', 'org.apache.ofbiz.migration.party.unused.entity',
+                '--repository-package', 'org.apache.ofbiz.migration.party.unused.repository',
+                '--service-package', 'org.apache.ofbiz.migration.party.generated',
+                '--report', reportFile.get().asFile.absolutePath)
+    }
+}
+
+sourceSets.main.java.srcDir(generatedCatalog)
+tasks.named('compileJava') {
+    dependsOn tasks.named('generatePartyCatalog')
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    maxHeapSize = '2g'
+    systemProperty 'ofbiz.root', rootProject.projectDir.absolutePath
+}
