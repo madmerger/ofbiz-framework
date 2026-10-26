@@ -1,0 +1,185 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+ext['testcontainers.version'] = '1.21.4'
+
+group = 'org.apache.ofbiz.migration'
+version = '0.1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':migration:springboot-common')
+    implementation project(':migration:springboot-datamodel')
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+def modelFiles = rootProject.fileTree(rootProject.projectDir) {
+    include 'framework/common/entitydef/entitymodel*.xml'
+    include 'framework/*/entitydef/entitymodel*.xml'
+    include 'applications/datamodel/entitydef/*entitymodel*.xml'
+    include 'applications/*/entitydef/entitymodel*.xml'
+    exclude '**/*_test.xml'
+}
+def serviceFiles = rootProject.fileTree(rootProject.projectDir) {
+    include 'applications/product/servicedef/services*.xml'
+}
+def scopedEntityModelFiles = [
+        rootProject.file('applications/datamodel/entitydef/product-entitymodel.xml'),
+        rootProject.file('applications/datamodel/entitydef/shipment-entitymodel.xml')
+]
+def generatedRoot = layout.buildDirectory.dir('generated/sources/ofbiz2spring/main/java')
+def reportFile = layout.buildDirectory.file('generated/product-ofbiz2spring-report.json')
+
+tasks.register('generateProductCatalog', Exec) {
+    inputs.files(modelFiles, serviceFiles)
+    inputs.files(scopedEntityModelFiles)
+    inputs.file(rootProject.file('migration/tools/ofbiz2spring.py'))
+    inputs.file(rootProject.file('migration/tools/ofbiz_inventory.py'))
+    outputs.dir(generatedRoot)
+    outputs.file(reportFile)
+
+    doFirst {
+        def arguments = [
+                'python3',
+                rootProject.file('migration/tools/ofbiz2spring.py').absolutePath,
+                '--out', generatedRoot.get().asFile.absolutePath,
+                '--entity-package', 'org.apache.ofbiz.migration.product.generated.unusedentity',
+                '--repository-package', 'org.apache.ofbiz.migration.product.generated.unusedrepo',
+                '--service-package', 'org.apache.ofbiz.migration.product.generated',
+                '--report', reportFile.get().asFile.absolutePath
+        ]
+        modelFiles.files.sort().each { File model ->
+            arguments.addAll(['--entity-model', model.absolutePath])
+        }
+        serviceFiles.files.sort().each { File service ->
+            arguments.addAll(['--service-def', service.absolutePath])
+        }
+        commandLine arguments
+    }
+
+    doLast {
+        def serviceMetadata = [:]
+        def componentByFile = [:]
+        def modelEntityNames = new TreeSet<String>()
+        def facilityFiles = [
+                'services_facility.xml', 'services_inventory.xml', 'services_picklist.xml',
+                'services_shipment.xml', 'services_shipmentgateway.xml', 'services_perm.xml',
+                'services_maint.xml'
+        ] as Set
+        serviceFiles.files.sort().each { File serviceFile ->
+            String fileName = serviceFile.name
+            String component = facilityFiles.contains(fileName) ? 'facility' : 'catalog'
+            componentByFile[fileName] = component
+            new groovy.xml.XmlSlurper(false, false).parse(serviceFile).service.each { service ->
+                if (service.'@engine'.text() != 'entity-auto') {
+                    return
+                }
+                String serviceName = service.'@name'.text()
+                String permissionService = service.'permission-service'.'@service-name'.text()
+                serviceMetadata[serviceName] = [
+                        serviceFile: fileName,
+                        component: component,
+                        permissionService: permissionService
+                ]
+            }
+        }
+        scopedEntityModelFiles.each { File modelFile ->
+            new groovy.xml.XmlSlurper(false, false).parse(modelFile).entity.each { entity ->
+                modelEntityNames.add(entity.'@entity-name'.text())
+            }
+        }
+        def javaString = { String value ->
+            '"' + value.replace('\\', '\\\\').replace('"', '\\"') + '"'
+        }
+        def metadataEntries = serviceMetadata.sort().collect { name, metadata ->
+            "        Map.entry(${javaString(name)}, new ServiceMetadata(" +
+                    "${javaString(metadata.serviceFile)}, ${javaString(metadata.component)}, " +
+                    "${javaString(metadata.permissionService)}))"
+        }.join(',\n')
+        def componentEntries = componentByFile.sort().collect { name, component ->
+            "        Map.entry(${javaString(name)}, ${javaString(component)})"
+        }.join(',\n')
+        def modelEntityEntries = modelEntityNames.collect { name -> "        ${javaString(name)}" }.join(',\n')
+        File metadataFile = new File(
+                generatedRoot.get().asFile,
+                'org/apache/ofbiz/migration/product/generated/ProductServiceMetadata.java')
+        metadataFile.parentFile.mkdirs()
+        metadataFile.text = """\
+/*******************************************************************************
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *******************************************************************************/
+package org.apache.ofbiz.migration.product.generated;
+
+import java.util.Map;
+import java.util.Set;
+
+public final class ProductServiceMetadata {
+    public record ServiceMetadata(String serviceFile, String component, String permissionService) { }
+
+    private static final Map<String, ServiceMetadata> SERVICES = Map.ofEntries(
+${metadataEntries});
+    private static final Map<String, String> COMPONENTS_BY_FILE = Map.ofEntries(
+${componentEntries});
+    private static final Set<String> ENTITY_MODEL_NAMES = Set.of(
+${modelEntityEntries});
+
+    private ProductServiceMetadata() { }
+
+    public static Map<String, ServiceMetadata> all() { return SERVICES; }
+    public static Map<String, String> componentsByFile() { return COMPONENTS_BY_FILE; }
+    public static Set<String> entityModelNames() { return ENTITY_MODEL_NAMES; }
+}
+""".stripIndent()
+    }
+}
+
+sourceSets.main.java.srcDir(generatedRoot.map { it.dir('org/apache/ofbiz/migration/product/generated') })
+tasks.named('compileJava') {
+    dependsOn tasks.named('generateProductCatalog')
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    maxHeapSize = '2g'
+    systemProperty 'ofbiz.root', rootProject.projectDir.absolutePath
+}
