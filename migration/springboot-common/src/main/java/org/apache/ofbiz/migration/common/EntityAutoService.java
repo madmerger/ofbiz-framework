@@ -197,9 +197,11 @@ public class EntityAutoService {
             Set<String> keys,
             ServiceHandlerRegistry.ParamDefinition param,
             Map<String, ?> input) {
+        boolean outputParameter = "OUT".equalsIgnoreCase(param.mode());
+        boolean inputOutputParameter = "INOUT".equalsIgnoreCase(param.mode());
         if (!keys.contains(param.name())
-                || !("OUT".equalsIgnoreCase(param.mode()) || "INOUT".equalsIgnoreCase(param.mode()))
-                || present(input.get(param.name()))) {
+                || (!outputParameter && !inputOutputParameter)
+                || (inputOutputParameter && present(input.get(param.name())))) {
             return false;
         }
         return keys.size() == 1 || isSubSequenceParameter(definition, keys, param, input);
