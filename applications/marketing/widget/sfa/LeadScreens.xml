@@ -118,7 +118,7 @@ under the License.
                                 </screenlet>
                             </widgets>
                             <fail-widgets>
-                                <label text="Please first add related company." style="h2"/>
+                                <label text="${uiLabelMap.MarketingAddRelatedCompanyFirst}" style="h2"/>
                                 <screenlet title="${uiLabelMap.PageTitleAddRelatedCompany}" >
                                     <include-form name="AddRelatedCompany" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
                                 </screenlet>

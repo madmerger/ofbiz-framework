@@ -40,8 +40,8 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.HashMap;
 import java.util.Locale;
+import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -530,11 +530,14 @@ public final class MacroFormRendererTest {
     @Test
     public void fileFieldMacroRendered() throws IOException {
         final ModelFormField.FileField fileField = mock(ModelFormField.FileField.class);
-        when(renderableFtlFormElementsBuilder.fileField(notNull(), eq(fileField))).thenReturn(genericMacroCall);
+        when(renderableFtlFormElementsBuilder.fileField(notNull(), eq(fileField), eq("CommonSelectFile_MESSAGE"),
+                eq("CommonNoFileChosen_MESSAGE"))).thenReturn(genericMacroCall);
         genericTooltipRenderedExpectation(fileField);
 
-        macroFormRenderer.renderFileField(appendable, ImmutableMap.of(), fileField);
+        macroFormRenderer.renderFileField(appendable, ImmutableMap.of("locale", Locale.JAPANESE), fileField);
 
+        verify(renderableFtlFormElementsBuilder).fileField(notNull(), eq(fileField), eq("CommonSelectFile_MESSAGE"),
+                eq("CommonNoFileChosen_MESSAGE"));
         genericSingleMacroRenderedVerification();
         genericTooltipRenderedVerification();
     }

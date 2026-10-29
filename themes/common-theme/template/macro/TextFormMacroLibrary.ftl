@@ -107,7 +107,7 @@ placeholder="" delegatorName="default"><@renderField value /></#macro>
 
 <#macro renderLookupField name formName fieldFormName conditionGroup className="" alert="false" value="" size="" maxlength="" id="" event="" action="" readonly=false autocomplete="" descriptionFieldName="" targetParameterIter="" imgSrc="" ajaxUrl="" ajaxEnabled=javaScriptEnabled presentation="layer" width="" height="" position="" fadeBackground="true" clearText="" showDescription="" initiallyCollapsed="" lastViewName="main" tabindex="" delegatorName="default">><@renderField value /></#macro>
 <#macro renderNextPrev paginateStyle paginateFirstStyle viewIndex highIndex listSize viewSize ajaxEnabled javaScriptEnabled ajaxFirstUrl firstUrl paginateFirstLabel paginatePreviousStyle ajaxPreviousUrl previousUrl paginatePreviousLabel pageLabel ajaxSelectUrl selectUrl ajaxSelectSizeUrl selectSizeUrl commonDisplaying paginateNextStyle ajaxNextUrl nextUrl paginateNextLabel paginateLastStyle ajaxLastUrl lastUrl paginateLastLabel paginateViewSizeLabel></#macro>
-<#macro renderFileField className alert name value size maxlength autocomplete tabindex><@renderField value /></#macro>
+<#macro renderFileField className alert name value size maxlength autocomplete tabindex selectFileText="" noFileChosenText=""><@renderField value /></#macro>
 <#macro renderPasswordField className alert name value size maxlength id autocomplete tabindex></#macro>
 <#macro renderImageField value description alternate style event action></#macro>
 <#macro renderBanner style leftStyle rightStyle leftText text rightText></#macro>

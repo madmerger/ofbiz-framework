@@ -1331,7 +1331,7 @@
         <value xml:lang="es">Familia Apache OFBiz de Software de Código Abierto</value>
         <value xml:lang="fr">Partie de l'ouverture pour la famille d'affaires du logiciel libre</value>
         <value xml:lang="it">Un modulo della famiglia di software open source Apache OFBiz</value>
-        <value xml:lang="ja">Part of the Apache OFBiz Family of Open Source Software</value>
+        <value xml:lang="ja">Apache OFBiz オープンソースソフトウェアファミリーの一員</value>
         <value xml:lang="pt-BR">Parte da Família Apache OFBiz de Software livre</value>
         <value xml:lang="th">เป็นส่วนหนึ่งของธุรกิจแบบครอบครัวที่เป็นซอฟต์แวร์โอเพนซอส</value>
         <value xml:lang="vi">Thành viên của gia đình mã nguồn mở Ofbiz</value>
@@ -3240,6 +3240,7 @@
     <property key="HumanResSkill">
         <value xml:lang="de">Fähigkeit</value>
         <value xml:lang="en">Skill</value>
+        <value xml:lang="ja">スキル</value>
         <value xml:lang="nl">Vaardigheid</value>
     </property>
     <property key="HumanResSkills">

@@ -30,12 +30,15 @@
     </property>
     <property key="check.error.suffix">
         <value xml:lang="en"> </value>
+        <value xml:lang="ja"> </value>
     </property>
     <property key="check.message.prefix">
         <value xml:lang="en"> </value>
+        <value xml:lang="ja"> </value>
     </property>
     <property key="check.message.suffix">
         <value xml:lang="en"> </value>
+        <value xml:lang="ja"> </value>
     </property>
     <property key="service.default.message">
         <value xml:lang="de">Aktion erfolgreich ausgeführt.</value>
@@ -63,17 +66,22 @@
     </property>
     <property key="service.error.suffix">
         <value xml:lang="en"> </value>
+        <value xml:lang="ja"> </value>
     </property>
     <property key="service.message.prefix">
         <value xml:lang="en"> </value>
+        <value xml:lang="ja"> </value>
     </property>
     <property key="service.message.suffix">
         <value xml:lang="en"> </value>
+        <value xml:lang="ja"> </value>
     </property>
     <property key="service.success.prefix">
         <value xml:lang="en"> </value>
+        <value xml:lang="ja"> </value>
     </property>
     <property key="service.success.suffix">
         <value xml:lang="en"> </value>
+        <value xml:lang="ja"> </value>
     </property>
 </resource>

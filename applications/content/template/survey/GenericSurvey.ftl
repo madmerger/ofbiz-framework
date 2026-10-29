@@ -71,7 +71,7 @@ under the License.
       <#assign content = answer.getRelatedOne("Content", false)>
       <a href="<@ofbizUrl controlPath="/content/control">img?imgId=${content.dataResourceId}</@ofbizUrl>" class="buttontext">${answer.contentId}</a>&nbsp;-&nbsp;${content.contentName!}&nbsp;&nbsp;&nbsp;
     </#if>
-    <input type="file" size="15" name="${questionFieldName}" class="inputBox"/>
+    <@htmlTemplate.fileInput name=questionFieldName size="15" className="inputBox"/>
   <#elseif "OPTION" == surveyQuestionAndAppl.surveyQuestionTypeId>
     <#assign options = surveyQuestionAndAppl.getRelated("SurveyQuestionOption", null, sequenceSort, false)!/>
     <#assign selectedOption = (answer.surveyOptionSeqId)?default("_NA_")/>

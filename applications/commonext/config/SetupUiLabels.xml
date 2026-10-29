@@ -66,7 +66,7 @@
         <value xml:lang="es">Parte de la familia de software Apache OFBiz de código abierto</value>
         <value xml:lang="fr">Un module de la famille Apache OFBiz, logiciel libre de gestion d'entreprise.</value>
         <value xml:lang="it">Un modulo della famiglia di software open source Apache OFBiz</value>
-        <value xml:lang="ja">Part of the Apache OFBiz Family of Open Source Software</value>
+        <value xml:lang="ja">Apache OFBiz オープンソースソフトウェアファミリーの一員</value>
         <value xml:lang="nl">Deel van de Apache OFBiz-suite van Open Source Software</value>
         <value xml:lang="pt-BR">Parte da família OfBiz de software de fonte aberta</value>
         <value xml:lang="pt-PT">Parte da família OfBiz de software de fonte aberta</value>
@@ -143,6 +143,7 @@
         <value xml:lang="en">Facility Name is missing</value>
         <value xml:lang="fr">Le nom du lieu de stockage est absent</value>
         <value xml:lang="it">Stabilimento mancante</value>
+        <value xml:lang="ja">拠点名が未入力です。</value>
         <value xml:lang="pt-BR">Nome da Instalação está faltando</value>
         <value xml:lang="vi">Bạn chưa nhập tên cơ sở (Facility Name)</value>
         <value xml:lang="zh">缺少场所名称</value>
@@ -221,6 +222,7 @@
         <value xml:lang="en">Organization name is missing</value>
         <value xml:lang="fr">Nom de l'organisation est absente</value>
         <value xml:lang="it">Nome organizzazione è mancante</value>
+        <value xml:lang="ja">組織名が未入力です。</value>
         <value xml:lang="pt-BR">Nome da organização está faltando</value>
         <value xml:lang="vi">Bạn chưa nhập tên doanh nghiệp</value>
         <value xml:lang="zh">缺少组织名称</value>
@@ -274,6 +276,7 @@
     <property key="SetupProductStoreNameIsMissing">
         <value xml:lang="en">Store Name is missing</value>
         <value xml:lang="it">Nome negozio è mancante</value>
+        <value xml:lang="ja">店舗名が未入力です。</value>
         <value xml:lang="pt-BR">Nome da loja está faltando</value>
         <value xml:lang="vi">Bạn chưa nhập tên cửa hàng</value>
         <value xml:lang="zh">缺少店铺名称</value>

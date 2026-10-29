@@ -37,10 +37,12 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.ws.rs.HttpMethod;
 
 import org.hamcrest.Matchers;
@@ -54,6 +56,23 @@ public final class UtilHttpTest {
     @BeforeEach
     public void setup() {
         req = Mockito.mock(HttpServletRequest.class);
+    }
+
+    @Test
+    public void getLocaleUsesApplicationDefaultWhenNoUserLocaleIsSet() {
+        HttpSession session = Mockito.mock(HttpSession.class);
+        when(req.getLocale()).thenReturn(Locale.US);
+
+        assertThat(UtilHttp.getLocale(req, session, "ja"), equalTo(Locale.JAPANESE));
+    }
+
+    @Test
+    public void getLocaleSessionLocaleOverridesApplicationDefault() {
+        HttpSession session = Mockito.mock(HttpSession.class);
+        when(session.getAttribute("locale")).thenReturn(Locale.CANADA_FRENCH);
+        when(req.getLocale()).thenReturn(Locale.US);
+
+        assertThat(UtilHttp.getLocale(req, session, "ja"), equalTo(Locale.CANADA_FRENCH));
     }
 
     @Test

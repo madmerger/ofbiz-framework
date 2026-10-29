@@ -507,6 +507,7 @@
     </property>
     <property key="LastVisitOn">
         <value xml:lang="en">Your last visit was on ${jsLastVisit}</value>
+        <value xml:lang="ja">前回の訪問日時: ${jsLastVisit}</value>
         <value xml:lang="zh">您上次访问的时间是 ${jsLastVisit}</value>
         <value xml:lang="zh-TW">您上次訪問的時間是 ${jsLastVisit}</value>
     </property>
@@ -699,22 +700,27 @@
     <property key="PolicyNoneMixedOrDouble">
         <value xml:lang="en">In field [${valueName}] found character escaping (mixed or double) that is not allowed or other format consistency error: </value>
         <value xml:lang="fr">Le champ "${valueName}" contient un caractère d'échappement (mixte ou double) qui n'est pas autorisé ou une autre erreur de cohérence de format : </value>
+        <value xml:lang="ja">フィールド[${valueName}]に許可されていないエスケープ（混在または二重）または形式の不整合があります: </value>
     </property>
     <property key="PolicyNoneLess-thanGreater-than">
         <value xml:lang="en">In field [${valueName}] less-than (&lt;) and greater-than (&gt;) symbols are not allowed.</value>
         <value xml:lang="fr">Dans le champ "${valueName}" les symboles inférieurs (&lt;) et supérieurs (&gt;) ne sont pas autorisés.</value>
+        <value xml:lang="ja">フィールド[${valueName}]では不等号（&lt;、&gt;）を使用できません。</value>
     </property>
     <property key="PolicyNoneJsEvents">
         <value xml:lang="en">In field [${valueName}] Javascript events are not allowed.</value>
         <value xml:lang="fr">Dans le champ "${valueName}" les événements Javascript ne sont pas autorisés.</value>
+        <value xml:lang="ja">フィールド[${valueName}]ではJavaScriptイベントを使用できません。</value>
     </property>
     <property key="PolicySafe">
         <value xml:lang="en">In field [${valueName}] by our input policy, your input has not been accepted for security reason. Please check and modify accordingly, thanks.</value>
         <value xml:lang="fr">Dans le champ "${valueName}", conformément à notre politique de saisie, votre saisie n'a pas été acceptée pour des raisons de sécurité. Veuillez vérifier et modifier en conséquence, merci.</value>
+        <value xml:lang="ja">入力ポリシーにより、フィールド[${valueName}]の入力はセキュリティ上の理由で受け付けられません。内容を確認して修正してください。</value>
     </property>
     <property key="ResetPassword">
         <value xml:lang="en">Click Here To Reset Password</value>
         <value xml:lang="fr">Cliquez ici pour créer un nouveau mot de passe</value>
+        <value xml:lang="ja">パスワードの再設定はこちら</value>
     </property>
     <property key="SecurityGroups">
         <value xml:lang="de">Sicherheitsgruppen</value>
@@ -770,22 +776,27 @@
     <property key="SupportedFileFormatsIncludingSvg">
         <value xml:lang="en">For security reason only valid files of supported image formats (GIF, JPEG, PNG, TIFF), SVG, PDF, and ZIP or text files with safe names (only Alpha-Numeric characters, hyphen, underscore and spaces, only 1 dot, name and extension not empty) and safe contents are accepted. For Ms Office files try to transform a Word file to PDF and an Excel file to CSV. For other file types try PDF.</value>
         <value xml:lang="fr">Pour des raisons de sécurité, seuls les fichiers valides de formats d'image pris en charge (GIF, JPEG, PNG, TIFF), les fichiers SVG, PDF, et les fichiers ZIP ou texte avec des noms sûrs (uniquement des caractères alphanumériques, 1 seul point, nom et extension non vides) et aux contenus sûrs sont acceptés. Pour les fichiers Ms Office, essayez de transformer un fichier Word en PDF et un fichier Excel en CSV. Pour d'autres types de fichiers, essayez le PDF.</value>
+        <value xml:lang="ja">セキュリティ上、対応画像形式（GIF、JPEG、PNG、TIFF）、SVG、PDF、ZIP、またはテキストファイルのみ受け付けます。ファイル名には英数字、ハイフン、アンダースコア、空白のみを使用し、ピリオドは1つにし、名前と拡張子を空にしないでください。ファイル内容も安全である必要があります。Microsoft Officeファイルは、WordをPDFに、ExcelをCSVに変換してください。その他のファイル形式はPDFへの変換をお試しください。</value>
     </property>
      <property key="SupportedFileFormats">
         <value xml:lang="en">For security reason only valid files of supported image formats (GIF, JPEG, PNG, TIFF), PDF or text files with safe names (only Alpha-Numeric characters, hyphen, underscore and spaces, only 1 dot, name and extension not empty) and contents are accepted.</value>
         <value xml:lang="fr">Pour des raisons de sécurité, seuls les fichiers valides de formats d'image pris en charge (GIF, JPEG, PNG, TIFF), les fichiers PDF ou les fichiers texte avec des noms sûrs (uniquement des caractères alphanumériques, 1 seul point, nom et extension non vides) et aux contenus sûrs sont acceptés.</value>
+        <value xml:lang="ja">セキュリティ上、対応画像形式（GIF、JPEG、PNG、TIFF）、PDF、またはテキストファイルのみ受け付けます。ファイル名には英数字、ハイフン、アンダースコア、空白のみを使用し、ピリオドは1つにし、名前と拡張子を空にしないでください。ファイル内容も安全である必要があります。</value>
     </property>
     <property key="SupportedImageFormatsIncludingSvg">
         <value xml:lang="en">For security reason only valid files of supported image formats (GIF, JPEG, PNG, TIFF), or SVG format with safe names (only Alpha-Numeric characters, hyphen, underscore and spaces, only 1 dot, name and extension not empty) are accepted.</value>
         <value xml:lang="fr">Pour des raisons de sécurité, seuls les fichiers valides des formats d'image pris en charge (GIF, JPEG, PNG, TIFF) ou au format SVG avec des noms sûrs (uniquement des caractères alphanumériques, 1 seul point, nom et extension non vides) sont acceptés.</value>
+        <value xml:lang="ja">セキュリティ上、対応画像形式（GIF、JPEG、PNG、TIFF）またはSVG形式のファイルのみ受け付けます。ファイル名には英数字、ハイフン、アンダースコア、空白のみを使用し、ピリオドは1つにし、名前と拡張子を空にしないでください。</value>
     </property>
     <property key="SupportedImageFormats">
         <value xml:lang="en">For security reason only valid files of supported image formats (GIF, JPEG, PNG, TIFF) with safe names (only Alpha-Numeric characters, hyphen, underscore and spaces, only 1 dot, name and extension not empty) are accepted.</value>
         <value xml:lang="fr">Pour des raisons de sécurité, seuls les fichiers valides des formats d'image pris en charge (GIF, JPEG, PNG, TIFF) avec des noms sûrs (uniquement des caractères alphanumériques, 1 seul point, nom et extension non vides) sont acceptés.</value>
+        <value xml:lang="ja">セキュリティ上、対応画像形式（GIF、JPEG、PNG、TIFF）のファイルのみ受け付けます。ファイル名には英数字、ハイフン、アンダースコア、空白のみを使用し、ピリオドは1つにし、名前と拡張子を空にしないでください。</value>
     </property>
     <property key="SupportedTextFileFormats">
         <value xml:lang="en">For security reason only text files with safe names (only Alpha-Numeric characters, hyphen, underscore and spaces, only 1 dot, name and extension not empty) and contents are accepted.</value>
         <value xml:lang="fr">Pour des raisons de sécurité, seuls les fichiers texte dont les contenus et les noms sont sûrs (uniquement des caractères alphanumériques, 1 seul point, nom et extension non vides) sont acceptés</value>
+        <value xml:lang="ja">セキュリティ上、安全な名前と内容を持つテキストファイルのみ受け付けます。ファイル名には英数字、ハイフン、アンダースコア、空白のみを使用し、ピリオドは1つにし、名前と拡張子を空にしないでください。</value>
     </property>
     <property key="UserLogin">
         <value xml:lang="de">Benutzeranmeldung</value>

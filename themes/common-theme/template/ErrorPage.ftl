@@ -20,7 +20,7 @@ under the License.
 <html>
 <head>
     <meta http-equiv="Content-Security-Policy" frame-ancestors="self">
-    <title>500 Internal error</title>
+    <title>500 ${Static["org.apache.ofbiz.base.util.UtilProperties"].getMessage("CommonUiLabels", "CommonInternalServerError", locale)}</title>
     <style>
         body{
             display: flex;
@@ -112,7 +112,7 @@ under the License.
 <body>
 <div class="container">
     <div class="content">
-        <p class="error-500"><span>ERROR MESSAGE</span></p>
+        <p class="error-500"><span>${Static["org.apache.ofbiz.base.util.UtilProperties"].getMessage("CommonUiLabels", "CommonErrorMessage", locale)}</span></p>
         <p>${(request.getAttribute("_ERROR_MESSAGE_")!)?replace("\n", "<br/>")}</p>
         <div class="img">
             <svg

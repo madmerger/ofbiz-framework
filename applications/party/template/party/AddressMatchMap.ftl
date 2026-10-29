@@ -52,7 +52,7 @@ under the License.
           <td></td>
           <td>
             <form name="importaddrmap" method="post" enctype="multipart/form-data" action="<@ofbizUrl>importAddressMatchMapCsv</@ofbizUrl>">
-            <input type="file" name="uploadedFile" size="14" accept=".csv"/>
+            <@htmlTemplate.fileInput name="uploadedFile" size="14" accept=".csv"/>
             <input type="submit" value="${uiLabelMap.CommonUpload} CSV"/>
             <p>${uiLabelMap.PartyAddressMatchMessage1}</p>
             </form>

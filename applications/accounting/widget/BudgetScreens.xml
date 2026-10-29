@@ -110,7 +110,7 @@ under the License.
                                     </condition>
                                     <widgets>
                                         <include-menu name="BudgetSubTabBar" location="${parameters.mainMenuLocation}"/>
-                                        <label style="h1" text="Budget : [${budgetId}]"/>
+                                        <label style="h1" text="${uiLabelMap.AccountingBudget} : [${budgetId}]"/>
                                     </widgets>
                                 </section>
                                 <decorator-section-include name="body"/>

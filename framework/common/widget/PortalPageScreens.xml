@@ -26,6 +26,7 @@ under the License.
             <widgets>
                 <section>
                     <actions>
+                        <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
                         <entity-one entity-name="PortalPortlet" value-field="portlet" />
                     </actions>
                     <widgets>

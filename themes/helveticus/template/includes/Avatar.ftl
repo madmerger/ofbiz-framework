@@ -31,15 +31,7 @@ under the License.
         </p>
 
         <a id="user-lang" href="<@ofbizUrl>ListLocales</@ofbizUrl>">
-            <#assign userLang = locale.toString()>
-            <#assign flagLang = locale.toString()?keep_after_last("_")>
-            <#if "en" == userLang || "fr" == userLang || "zh" == userLang || "th" == userLang>
-                <#if "en" == userLang><#assign flagLang = "GB"></#if>
-                <#if "fr" == userLang><#assign flagLang = "FR"></#if>
-                <#if "zh" == userLang><#assign flagLang = "SG"></#if>
-                <#if "th" == userLang><#assign flagLang = "TH"></#if>
-            <#elseif 2 == userLang?length><#assign flagLang = "UN"></#if>
-                <span class="flag-icon flag-icon-<#if userLang?size <= 2>${userLang}<#else>${flagLang?lower_case}</#if>"><#if userLang?size <= 2>${userLang}<#else>${flagLang}</#if></span>
+            <span>${locale.getDisplayName(locale)}</span>
         </a>
         <a class="dark-color" title="${uiLabelMap.CommonHelp}" href="${userDocUri!Static["org.apache.ofbiz.entity.util.EntityUtilProperties"].getPropertyValue("general", "userDocUri", delegator)}<#if helpAnchor??>#${helpAnchor}</#if>" target="help">${uiLabelMap.CommonHelp}</a>
         <a id="visual-theme" class="user-pref-btn" href="<@ofbizUrl>ListVisualThemes</@ofbizUrl>">${uiLabelMap.CommonVisualThemes}</a>

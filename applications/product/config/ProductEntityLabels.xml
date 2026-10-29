@@ -493,6 +493,7 @@
         <value xml:lang="es">Código de barra UPCA</value>
         <value xml:lang="fr">Code barre UPCA</value>
         <value xml:lang="it">Codice a barre UPCA</value>
+        <value xml:lang="ja">UPCA</value>
         <value xml:lang="nl">Barcode - UPCA</value>
         <value xml:lang="ro">Cod Bare UPCA</value>
         <value xml:lang="zh">UPCA条码</value>
@@ -504,6 +505,7 @@
         <value xml:lang="es">Código de barra UPCE</value>
         <value xml:lang="fr">Code barre UPCE</value>
         <value xml:lang="it">Codice a barre UPCE</value>
+        <value xml:lang="ja">UPCE</value>
         <value xml:lang="nl">Barcode - UPCE</value>
         <value xml:lang="ro">Cod Bare UPCE</value>
         <value xml:lang="zh">UPCE条码</value>
@@ -1333,11 +1335,13 @@
         <value xml:lang="en">Defaut Image</value>
         <value xml:lang="es">Imágen por defecto</value>
         <value xml:lang="fr">Image par défaut</value>
+        <value xml:lang="ja">既定の画像</value>
     </property>
     <property key="ProductContentType.description.ALTERNATIVE_URL">
         <value xml:lang="en">Alternative URL</value>
         <value xml:lang="es">URL alternativa</value>
         <value xml:lang="fr">URL de remplacement</value>
+        <value xml:lang="ja">代替URL</value>
     </property>
     <property key="ProductContentType.description.ADDITIONAL_IMAGE_1">
         <value xml:lang="de">Zusatzbild 1</value>
@@ -1595,21 +1599,25 @@
         <value xml:lang="en">Image - Additional View Detail</value>
         <value xml:lang="es">Imagen - Detalle Vista Adicional</value>
         <value xml:lang="fr">Image - Vue supplémentaire(Détaillée)</value>
+        <value xml:lang="ja">画像 - 追加ビュー（詳細）</value>
     </property>
     <property key="ProductContentType.description.XTRA_IMG_L_LARGE">
         <value xml:lang="en">Image - Additional View Large</value>
         <value xml:lang="es">Imagen - Vista adicional grande</value>
         <value xml:lang="fr">Image - Vue supplémentaire(grande)</value>
+        <value xml:lang="ja">画像 - 追加ビュー（大）</value>
     </property>
     <property key="ProductContentType.description.XTRA_IMG_L_MEDIUM">
         <value xml:lang="en">Image - Additional View Medium</value>
         <value xml:lang="es">Imagen - Vista adicional mediana</value>
         <value xml:lang="fr">Image - Vue supplémentaire(moyenne)</value>
+        <value xml:lang="ja">画像 - 追加ビュー（中）</value>
     </property>
     <property key="ProductContentType.description.XTRA_IMG_L_SMALL">
         <value xml:lang="en">Image - Additional View Small</value>
         <value xml:lang="es">Imagen - Vista adicional pequeña</value>
         <value xml:lang="fr">Image - Vue supplémentaire(petite)</value>
+        <value xml:lang="ja">画像 - 追加ビュー（小）</value>
     </property>
     <property key="ProductContentType.description.ADDTOCART_LABEL">
         <value xml:lang="de">Zum Warenkorb hinzufügen Label</value>
@@ -1987,20 +1995,24 @@
         <value xml:lang="en">Meta Description</value>
         <value xml:lang="es">Metadescripción</value>
         <value xml:lang="fr">Description méta</value>
+        <value xml:lang="ja">メタディスクリプション</value>
     </property>
     <property key="ProductContentType.description.META_KEYWORD">
         <value xml:lang="en">Meta Keywords</value>
         <value xml:lang="fr">Mots-clés méta</value>
+        <value xml:lang="ja">メタキーワード</value>
     </property>
     <property key="ProductContentType.description.PAGE_TITLE">
         <value xml:lang="en">Page Title</value>
         <value xml:lang="es">Título de la página</value>
         <value xml:lang="fr">Page de titre</value>
+        <value xml:lang="ja">ページタイトル</value>
     </property>
     <property key="ProductContentType.description.SPECIFICATION">
         <value xml:lang="en">Specification</value>
         <value xml:lang="es">Especifícaciones</value>
         <value xml:lang="fr">Spécification</value>
+        <value xml:lang="ja">仕様</value>
     </property>
     <property key="ProductContentType.description.WARRANTY">
         <value xml:lang="de">Gewährleistung</value>
@@ -3442,6 +3454,7 @@
         <value xml:lang="en">Asset Rental</value>
         <value xml:lang="es">Alquiler de activos</value>
         <value xml:lang="fr">Actif location</value>
+        <value xml:lang="ja">資産レンタル</value>
         <value xml:lang="nl">Verhuur productiemiddel</value>
         <value xml:lang="zh">资产出租</value>
     </property>
@@ -3842,6 +3855,7 @@
         <value xml:lang="de">Andere Sendung</value>
         <value xml:lang="en">Other shipment</value>
         <value xml:lang="fr">Expédition(autre)</value>
+        <value xml:lang="ja">その他の出荷</value>
         <value xml:lang="nl">Andere zending</value>
         <value xml:lang="zh">其它运输</value>
     </property>
@@ -4261,6 +4275,7 @@
         <value xml:lang="de">Zu welcher Gruppe gehört dieser Laden. Läden können gruppiert werden mit einem Preis je Ladengruppe. Kann leer bleiben, wenn keine Ladengruppen eingerichtet sind.</value>
         <value xml:lang="en">What group this store belongs to. Stores can be grouped together with a price for each store group. It can be left blank if there are no store groups set up.</value>
         <value xml:lang="fr">Le groupe d'appartenance du magasin. Les magasins peuvent être regroupés, avec un prix pour chaque groupe. Il peut être laissé vide si il n'y a aucun groupes de magasins mis en place.</value>
+        <value xml:lang="ja">この店舗が所属するグループです。店舗グループごとに価格を設定して複数の店舗をまとめられます。店舗グループを設定しない場合は空欄にします。</value>
         <value xml:lang="zh">这个店铺属于哪个组。多个店铺能够编成组，每个店铺组使用同一个价格。如果没有设置店铺组，则不填。</value>
         <value xml:lang="zh-TW">這個店鋪屬於哪個群組.多個店鋪能夠編成群組,每個店鋪群組使用同一個價格.如果沒有設置店鋪群組,則不填.</value>
     </property>
@@ -4314,6 +4329,7 @@
         <value xml:lang="de">Steuert die Stornierung von Bestellungen bei Nichtzahlung nach Ablauf der hier angegebenen Tage.</value>
         <value xml:lang="en">Triggers cancellation of orders for non-payment after the number of days entered here.</value>
         <value xml:lang="fr">Déclenche l'annulation des commandes pour non-paiement après la période spécifiée(jours).</value>
+        <value xml:lang="ja">ここで指定した日数が経過すると、未払いの注文がキャンセルされます。</value>
         <value xml:lang="zh">取消达到这里输入的天数后仍未付款的订单的触发器。</value>
         <value xml:lang="zh-TW">取消達到這裡輸入的天數後仍未付款的訂單的觸發器.</value>
     </property>
@@ -4379,6 +4395,7 @@
         <value xml:lang="de">Wenn eingeschaltet, werden Bestellungen nicht vearbeitet, Kreditkartenzahlungen nicht ausgeführt etc.</value>
         <value xml:lang="en">If Yes, any orders created will not be sent, credit card charges will not be made, etc.</value>
         <value xml:lang="fr">Si oui, toutes les commandes de produits sont pour démonstration. Aucun frais de carte de crédit seront prélevés, rien ne sera expédié.</value>
+        <value xml:lang="ja">はいの場合、作成された注文は送信されず、クレジットカード決済も行われません。</value>
         <value xml:lang="zh">如果是，则不会发送任何新建的订单，也不会对信用卡收费等。</value>
         <value xml:lang="zh-TW">如果是,則不會發送任何新建的訂單,也不會對信用卡收費等.</value>
     </property>
@@ -4396,6 +4413,7 @@
         <value xml:lang="de">Hier werden die Lagerbestände verwaltet.</value>
         <value xml:lang="en">This is where the stock levels are drawn from.</value>
         <value xml:lang="fr">Les stocks sont prélevés à partir d'ici.</value>
+        <value xml:lang="ja">在庫数の取得元となる拠点です。</value>
         <value xml:lang="zh">这是库存水平数据的来源。</value>
         <value xml:lang="zh-TW">這是庫存水準資料的來源.</value>
     </property>
@@ -4413,6 +4431,7 @@
         <value xml:lang="de">Legt fest, ob das System beim Ausführen einer Bestellung den Lagerbestand prüfen soll.</value>
         <value xml:lang="en">This determines whether the system checks inventory levels when processing an order.</value>
         <value xml:lang="fr">Si Oui, le système vérifie les niveaux de stocks lors du traitement d'une commande.</value>
+        <value xml:lang="ja">注文の処理時に在庫レベルを確認するかどうかを指定します。</value>
         <value xml:lang="zh">这会决定在处理订单时，系统是否检查库存水平。</value>
         <value xml:lang="zh-TW">這會決定在處理訂單時,系統是否檢查庫存水準.</value>
     </property>
@@ -4491,6 +4510,7 @@
     <property key="FieldDescription.ProductStore.defaultTimeZoneString">
         <value xml:lang="en">Which time zone will be used. If none is specified the machine time zone will be used.</value>
         <value xml:lang="fr">Utilise ce fuseau horaire. Si aucun n'est spécifié le fuseau horaire de la machine sera utilisé.</value>
+        <value xml:lang="ja">使用するタイムゾーンです。指定しない場合は、システムのタイムゾーンが使用されます。</value>
     </property>
     <property key="FieldDescription.ProductStore.defaultSalesChannelEnumId">
         <value xml:lang="de">Sofern der Verkaufskanal in der Transaktion nicht spezifiziert ist, wird angenommen, dass der Verkauf über den hier ausgewählten Kanal kommt.</value>
@@ -4655,6 +4675,7 @@
         <value xml:lang="de">Spezifiziert den Typ (Rechnungs- oder Finanzkonto) des Laden Kreditkontos für Rückzahlungen.</value>
         <value xml:lang="en">Specify the type (Billing Account or Financial Account) of Store Credit Account used for refund return.</value>
         <value xml:lang="fr">Défini le type de Compte de crédit du magasin, utilisé pour le remboursement de retour (Compte de facturation ou compte financier).</value>
+        <value xml:lang="ja">返品の返金に使用する店舗クレジットアカウントの種別（請求先アカウントまたは金融アカウント）を指定します。</value>
         <value xml:lang="zh">为店铺的信用账户退款指定类型（账单账户或财务账户）。</value>
         <value xml:lang="zh-TW">為店鋪的信用帳戶退款指定類型(帳單帳戶或財務帳戶).</value>
     </property>
@@ -4663,6 +4684,7 @@
         <value xml:lang="de">Wenn eingeschaltet, wird kein Eingabefeld für den Benutzernamen angezeigt, sondern die primäre Emailadresse für den Benutzernamen verwendet.</value>
         <value xml:lang="en">If set to Y then in the create customer form no entry box will be presented for a username - the primary email address will be used for username.</value>
         <value xml:lang="fr">Si Oui, utiliser l'adresse e-mail principale comme nom d'utilisateur lors de la création d'un nouveau compte client.</value>
+        <value xml:lang="ja">Yに設定すると、顧客作成フォームにユーザー名の入力欄は表示されず、主メールアドレスがユーザー名として使用されます。</value>
         <value xml:lang="zh">如果设为是（Y），那么在创建用户的表单中将没有用户名 —— 会使用首选电子邮件地址作为用户名。</value>
         <value xml:lang="zh-TW">如果設為是(Y),那麼在新建使用者的表單中將沒有使用者名 —— 會使用首選電子郵件地址作為使用者名.</value>
     </property>
@@ -4671,6 +4693,7 @@
         <value xml:lang="de">Wenn eingeschaltet, muss der Kunde mit dem Laden über die Kundenrolle verbunden sein, um sich einzuloggen (z.B. B2B)</value>
         <value xml:lang="en">If set to Y then the customer must be associated with the store in the Customer role in order to be able to login (e.g. B2B)</value>
         <value xml:lang="fr">Si Oui, le client doit être associé à la boutique dans le 'rôle du client' afin d'être capable de se connecter (ex: B2B)</value>
+        <value xml:lang="ja">Y に設定すると、顧客がログインするには、顧客ロールで店舗に関連付けられている必要があります（例: B2B）。</value>
         <value xml:lang="zh">如果设为是（Y），那么客户必须在订单的客户角色中与店铺关联，才能登录（如B2B）</value>
         <value xml:lang="zh-TW">如果設為是(Y),那麼客戶必須在訂單的客戶角色中與店鋪結合,才能登入(如B2B)</value>
     </property>
@@ -4679,6 +4702,7 @@
         <value xml:lang="de">Wenn eingeschaltet, werden digitale Produkte direkt in Rechnung gestellt, wenn die Bestellung platziert wird.</value>
         <value xml:lang="en">If Y, digital items will be immediately invoiced when the order is placed.</value>
         <value xml:lang="fr">Si Oui, les articles numériques seront immédiatement facturés lorsque la commande est passée.</value>
+        <value xml:lang="ja">Y の場合、注文時にデジタル商品に対する請求書が直ちに作成されます。</value>
         <value xml:lang="zh">如果是（Y），下单时会立刻为数字产品明细生成发票。</value>
         <value xml:lang="zh-TW">如果是(Y),下單時會立刻為數字產品細項產生發票.</value>
     </property>
@@ -4696,6 +4720,7 @@
         <value xml:lang="de">Wenn ausgeschaltet werden die Geschenkoptionen ('ist ein Geschenk' und 'Geschenknachricht') im Bestellprozes nicht angezeigt.</value>
         <value xml:lang="en">If set to N the options related to gifts (the 'is gift' and 'gift message' options) will not be shown during checkout.</value>
         <value xml:lang="fr">Si Non, les options appliquées aux dons («C'est un cadeau» and «Message cadeau») ne seront pas affichées lors de votre commande.</value>
+        <value xml:lang="ja">Nに設定すると、チェックアウト時にギフト関連のオプション（「ギフトとして購入」「ギフトメッセージ」）は表示されません。</value>
         <value xml:lang="zh">如果设为否（N），在结账时不显示与礼品（'是礼品'和'礼品信息'选项）相关的选项。</value>
         <value xml:lang="zh-TW">如果設為否(N),在結帳時不顯示與禮物('是禮物'和'禮物資訊'選項)相關的選項.</value>
     </property>

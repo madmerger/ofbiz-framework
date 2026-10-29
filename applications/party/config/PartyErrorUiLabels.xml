@@ -31,96 +31,127 @@
     </property>
     <property key="PartyRequiredFieldMissingAddress1">
         <value xml:lang="en">Required Field Missing : Address1.</value>
+        <value xml:lang="ja">必須項目が未入力です: 住所1</value>
     </property>
     <property key="PartyRequiredFieldMissingCity">
         <value xml:lang="en">Required Field Missing : City.</value>
+        <value xml:lang="ja">必須項目が未入力です: 市区町村</value>
     </property>
     <property key="PartyRequiredFieldMissingCurrentStatusId">
         <value xml:lang="en">Required Field Missing : Current Status Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 現在のステータスID</value>
     </property>
     <property key="PartyRequiredFieldMissingPostalCode">
         <value xml:lang="en">Required Field Missing : Postal Code.</value>
+        <value xml:lang="ja">必須項目が未入力です: 郵便番号</value>
     </property>
     <property key="PartyRequiredFieldMissingWorkEffortName">
         <value xml:lang="en">Required Field Missing : WorkEffort Name.</value>
+        <value xml:lang="ja">必須項目が未入力です: 作業成果名</value>
     </property>
     <property key="PartyRequiredFieldMissingWorkEffortTypeId">
         <value xml:lang="en">Required Field Missing : WorkEffort Type Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 作業成果種別ID</value>
     </property>
     <property key="PartyRequiredFieldMissingAddress">
             <value xml:lang="en">Required Field Missing : Address</value>
+            <value xml:lang="ja">必須項目が未入力です: 住所</value>
         </property>
     <property key="PartyRequiredFieldMissingChildRoleTypeIdList">
         <value xml:lang="en">Required Field Missing : ChildRole Type Id List</value>
+        <value xml:lang="ja">必須項目が未入力です: 子ロール種別ID一覧</value>
     </property>
     <property key="PartyRequiredFieldMissingContactMechId">
         <value xml:lang="en">Required Field Missing : Contact Mech Id</value>
+        <value xml:lang="ja">必須項目が未入力です: 連絡先ID</value>
     </property>
     <property key="PartyRequiredFieldMissingContactMechPurposeTypeId">
         <value xml:lang="en">Required Field Missing : Contact Mech Purpose Type Id</value>
+        <value xml:lang="ja">必須項目が未入力です: 連絡先用途種別ID</value>
     </property>
     <property key="PartyRequiredFieldMissingContactMechTypeId">
         <value xml:lang="en">Required Field Missing : Contact Mech Type Id</value>
+        <value xml:lang="ja">必須項目が未入力です: 連絡先種別ID</value>
     </property>
     <property key="PartyRequiredFieldMissingEmailAddress">
         <value xml:lang="en">Required Field Missing : Email Address</value>
+        <value xml:lang="ja">必須項目が未入力です: メールアドレス</value>
     </property>
     <property key="PartyRequiredFieldMissingFirstName">
         <value xml:lang="en">Required Field Missing : First Name</value>
+        <value xml:lang="ja">必須項目が未入力です: 名</value>
     </property>
     <property key="PartyRequiredFieldMissingLastName">
         <value xml:lang="en">Required Field Missing : Last Name</value>
+        <value xml:lang="ja">必須項目が未入力です: 姓</value>
     </property>
     <property key="PartyRequiredFieldMissingLookupResult">
         <value xml:lang="en">Required Field Missing : Lookup Result</value>
+        <value xml:lang="ja">必須項目が未入力です: 検索結果</value>
     </property>
     <property key="PartyRequiredFieldMissingNewUserLogin">
         <value xml:lang="en">Required Field Missing : New User Login</value>
+        <value xml:lang="ja">必須項目が未入力です: 新規ユーザーログイン</value>
     </property>
     <property key="PartyRequiredFieldMissingOldContactMechId">
         <value xml:lang="en">Required Field Missing : Old Contact Mech Id</value>
+        <value xml:lang="ja">必須項目が未入力です: 旧連絡先ID</value>
     </property>
     <property key="PartyRequiredFieldMissingOrganizationPartyId">
         <value xml:lang="en">Required Field Missing : Organization Party Id</value>
+        <value xml:lang="ja">必須項目が未入力です: 組織の取引先ID</value>
     </property>
     <property key="PartyRequiredFieldMissingParentOrganizationPartyIdList">
         <value xml:lang="en">Required Field Missing : Organization Party Id List</value>
+        <value xml:lang="ja">必須項目が未入力です: 組織の取引先ID一覧</value>
     </property>
     <property key="PartyRequiredFieldMissingPartyId">
         <value xml:lang="en">Required Field Missing : Party Id</value>
+        <value xml:lang="ja">必須項目が未入力です: 取引先ID</value>
     </property>
     <property key="PartyRequiredFieldMissingPartyIdFrom">
         <value xml:lang="en">Required Field Missing : Party Id From</value>
+        <value xml:lang="ja">必須項目が未入力です: 開始取引先ID</value>
     </property>
     <property key="PartyRequiredFieldMissingPartyIdTo">
         <value xml:lang="en">Required Field Missing : Party Id To</value>
+        <value xml:lang="ja">必須項目が未入力です: 終了取引先ID</value>
     </property>
     <property key="PartyRequiredFieldMissingPartyInvitationId">
         <value xml:lang="en">Required Field Missing : Party Invitation Id</value>
+        <value xml:lang="ja">必須項目が未入力です: 取引先招待ID</value>
     </property>
     <property key="PartyRequiredFieldMissingProductStoreId">
         <value xml:lang="en">Required Field Missing : Product Store Id</value>
+        <value xml:lang="ja">必須項目が未入力です: 製品店舗ID</value>
     </property>
     <property key="PartyRequiredFieldMissingRelatedPartyIdList">
         <value xml:lang="en">Required Field Missing : Related Party Id List</value>
+        <value xml:lang="ja">必須項目が未入力です: 関連取引先ID一覧</value>
     </property>
     <property key="PartyRequiredFieldMissingRoleTypeId">
         <value xml:lang="en">Required Field Missing : Role Type Id</value>
+        <value xml:lang="ja">必須項目が未入力です: 役割種別ID</value>
     </property>
     <property key="PartyRequiredFieldMissingStatusId">
         <value xml:lang="en">Required Field Missing : Status Id</value>
+        <value xml:lang="ja">必須項目が未入力です: ステータスID</value>
     </property>
     <property key="PartyRequiredFieldMissingTelno">
         <value xml:lang="en">Required Field Missing : Tel no.</value>
+        <value xml:lang="ja">必須項目が未入力です: 電話番号</value>
     </property>
     <property key="PartyRequiredFieldMissingUserLoginId">
         <value xml:lang="en">Required Field Missing : User Login Id</value>
+        <value xml:lang="ja">必須項目が未入力です: ユーザーログインID</value>
     </property>
     <property key="PartyRequiredFieldMissingVerifyHash">
         <value xml:lang="en">Required Field Missing : Verify Hash</value>
+        <value xml:lang="ja">必須項目が未入力です: 検証ハッシュ</value>
     </property>
     <property key="PartyUploadedFileDataNotFound">
         <value xml:lang="en">Uploaded file data not found</value>
+        <value xml:lang="ja">アップロードされたファイルデータが見つかりません。</value>
     </property>
     <property key="commeventservices.communication_event_from_contact_mech_must_be_email">
         <value xml:lang="cs">Chyba: Komunikační událost musí mít jako odesílatele uvedenu emailovou adresu.</value>
@@ -144,6 +175,7 @@
         <value xml:lang="en">ERROR: Communication event must have a from contact mech that is an ftp server for communication event Id</value>
         <value xml:lang="es">Error: Los eventos de comunicación deben tener un servidor ftp asociado</value>
         <value xml:lang="fr">ERREUR: la réf. d'évènement de communication doit avoir une coordonnée qui soit un serveur ftp pour évènement de communication</value>
+        <value xml:lang="ja">エラー: 通信イベントの送信元連絡先には、FTPサーバーを指定する必要があります（通信イベントID）。</value>
     </property>
     <property key="commeventservices.communication_event_must_be_email_for_email">
         <value xml:lang="de">FEHLER: Kommunikationsereignis ist keine E-Mail Kommunikation und kann nicht als E-Mail versendet werden für Kommunikationsereignis ID</value>
@@ -166,6 +198,7 @@
         <value xml:lang="en">ERROR: Communication event is not an Ftp communication and cannot be transfered for communication event Id </value>
         <value xml:lang="es">ERROR: La comunicación no es un transferencia ftp y no puede se enviado</value>
         <value xml:lang="fr">ERREUR: l'évènement de communication n'est pas un transfert ftp et ne peut être envoyé comme réf. d'évènement de communication </value>
+        <value xml:lang="ja">エラー: 通信イベントはFTP通信ではないため、通信イベントIDに転送できません: </value>
     </property>
     <property key="commeventservices.communication_event_not_found_failure">
         <value xml:lang="de">FEHLER: Kommunikationsereignis nicht gefunden mit der Kommunikationsereignis ID</value>
@@ -830,6 +863,7 @@
     </property>
     <property key="PartyRoleAssociationRequired">
         <value xml:lang="en">Party id: ${partyId} should be in role: ${roleDescription}</value>
+        <value xml:lang="ja">取引先ID ${partyId} はロール「${roleDescription}」に設定されている必要があります。</value>
     </property>
     <property key="partyroleservices.could_not_create_party_role_read">
         <value xml:lang="de">Akteur Rolle kann nicht erstellt werden (Lesefehler).</value>
@@ -911,7 +945,7 @@
         <value xml:lang="fr">Les prénom et nom ne peuvent être vides.</value>
         <value xml:lang="hi-IN">दोनों 'अंतिमनाम' और 'प्रथमनाम' खाली नहीं हो सकते|</value>
         <value xml:lang="it">Entrambi 'cognome' e 'nome' non possono essere vuoti.</value>
-        <value xml:lang="ja">姓(LN)と名(FN)の両方とも空にできません。</value>
+        <value xml:lang="ja">姓と名の両方を空欄にはできません。</value>
         <value xml:lang="nl">Voornaam en achternaam mogen niet leeg zijn.</value>
         <value xml:lang="pt-BR">Nome e sobrenome não podem ser ambos vazios.</value>
         <value xml:lang="ro">Entrambi 'Nume' si 'Prenume' nu pot sa fie goi.</value>

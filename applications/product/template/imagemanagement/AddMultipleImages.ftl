@@ -37,43 +37,43 @@ under the License.
       </tr>
       <tr>
         <td class="label"/>
-        <td><input type="file" size="20" name="additionalImageOne"accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
+        <td><@htmlTemplate.fileInput size="20" name="additionalImageOne" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
       </tr>
       <tr>
         <td class="label"/>
-        <td><input type="file" size="20" name="additionalImageTwo"accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
+        <td><@htmlTemplate.fileInput size="20" name="additionalImageTwo" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
       </tr>
       <tr>
         <td class="label"/>
-        <td><input type="file" size="20" name="additionalImageThree"accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
+        <td><@htmlTemplate.fileInput size="20" name="additionalImageThree" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
       </tr>
       <tr>
         <td class="label"/>
-        <td><input type="file" size="20" name="additionalImageFour"accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
+        <td><@htmlTemplate.fileInput size="20" name="additionalImageFour" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
       </tr>
       <tr>
         <td class="label"/>
-        <td><input type="file" size="20" name="additionalImageFive"accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
+        <td><@htmlTemplate.fileInput size="20" name="additionalImageFive" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
       </tr>
       <tr>
         <td class="label"/>
-        <td><input type="file" size="20" name="additionalImageSix"accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
+        <td><@htmlTemplate.fileInput size="20" name="additionalImageSix" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
       </tr>
       <tr>
         <td class="label"/>
-        <td><input type="file" size="20" name="additionalImageSeven"accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
+        <td><@htmlTemplate.fileInput size="20" name="additionalImageSeven" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
       </tr>
       <tr>
         <td class="label"/>
-        <td><input type="file" size="20" name="additionalImageEight"accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
+        <td><@htmlTemplate.fileInput size="20" name="additionalImageEight" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
       </tr>
       <tr>
         <td class="label"/>
-        <td><input type="file" size="20" name="additionalImageNine"accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
+        <td><@htmlTemplate.fileInput size="20" name="additionalImageNine" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
       </tr>
       <tr>
         <td class="label"/>
-        <td><input type="file" size="20" name="additionalImageTen"accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
+        <td><@htmlTemplate.fileInput size="20" name="additionalImageTen" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
       </tr>
       <tr>
         <td class="label"/>

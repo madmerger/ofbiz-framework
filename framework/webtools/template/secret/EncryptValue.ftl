@@ -225,7 +225,7 @@ under the License.
                     <label>${uiLabelMap.WebtoolsSecretCsvFile}</label>
                 </td>
                 <td>
-                    <input type="file" name="uploadedFile" accept=".csv,text/csv"/>
+                    <@htmlTemplate.fileInput name="uploadedFile" accept=".csv,text/csv"/>
                 </td>
             </tr>
             <tr>

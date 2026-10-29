@@ -39,7 +39,7 @@ under the License.
             </#if>
 
             <#if "PURCHASE_ORDER" == orderHeader.orderTypeId && ("ORDER_REJECTED" != currentStatus.statusId || "ORDER_CANCELLED" != currentStatus.statusId)>
-              <li><a href="javascript:document.SendPOEmail.submit()">Send Email</a>
+              <li><a href="javascript:document.SendPOEmail.submit()">${uiLabelMap.OrderSendEmail}</a>
                 <form name="SendPOEmail" method="post" action="<@ofbizUrl>sendPOEmail</@ofbizUrl>">
                   <input type="hidden" name="orderId" value="${orderHeader.orderId!}"/>
                   <input type="hidden" name="emailTemplateSettingId" value="SEND_PO_EMAIL"/>
@@ -252,7 +252,7 @@ under the License.
                     ${uiLabelMap.CommonNo} ${uiLabelMap.CommonAttachments}
                   </div>
                 </#if>
-                <a href="<@ofbizUrl>AddOrderAttachments?orderId=${orderId!}</@ofbizUrl>" class="buttontext">Add Attachment</a>
+                <a href="<@ofbizUrl>AddOrderAttachments?orderId=${orderId!}</@ofbizUrl>" class="buttontext">${uiLabelMap.OrderAddAttachment}</a>
               </td>
             </tr>
             </#if>

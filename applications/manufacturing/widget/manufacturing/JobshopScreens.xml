@@ -896,7 +896,7 @@ under the License.
                                             <not><if-empty field="inventoryIssuePlan"/></not>
                                         </condition>
                                         <widgets>
-                                            <label style="h3" text="${uiLabelMap.ManufacturingIssuancePreview} (Items: ${groovy: inventoryIssuePlan.size()})"/>
+                                            <label style="h3" text="${uiLabelMap.ManufacturingIssuancePreview} (${uiLabelMap.CommonItems}: ${groovy: inventoryIssuePlan.size()})"/>
                                             <include-grid name="InventoryIssuePlanList" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
                                         </widgets>
                                     </section>

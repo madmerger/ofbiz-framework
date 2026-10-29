@@ -867,7 +867,7 @@ public final class UtilHttp {
         if (request == null) {
             return Locale.getDefault();
         }
-        return getLocale(request, request.getSession(), null);
+        return getLocale(request, request.getSession(), UtilProperties.getPropertyValue("general", "locale.ui.default"));
     }
 
     /**
@@ -880,7 +880,7 @@ public final class UtilHttp {
         if (session == null) {
             return Locale.getDefault();
         }
-        return getLocale(null, session, null);
+        return getLocale(null, session, UtilProperties.getPropertyValue("general", "locale.ui.default"));
     }
 
     public static void setLocale(HttpServletRequest request, String localeString) {

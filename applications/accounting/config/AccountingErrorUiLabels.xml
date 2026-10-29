@@ -21,6 +21,7 @@
 <resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://ofbiz.apache.org/dtds/ofbiz-properties.xsd">
     <property key="AccountingCheckAccountCannotBeUpdated">
         <value xml:lang="en">ERROR: Could not update Check Account.</value>
+        <value xml:lang="ja">エラー: 小切手口座を更新できませんでした。</value>
     </property>
     <property key="AccountingDeleteRateAmount">
         <value xml:lang="ar">لا يمكن إيجاد سجل مبلغ النسبة لإلغائها</value>
@@ -95,6 +96,7 @@
     </property>
     <property key="AccountingFailedToProcessCaptureResult">
         <value xml:lang="en">Failed to process capture result: Could not find invoice ${invoiceId} due to entity error: ${errorString}</value>
+        <value xml:lang="ja">売上確定結果の処理に失敗しました。エンティティエラーにより請求書 ${invoiceId} が見つかりません: ${errorString}</value>
     </property>
     <property key="AccountingFinAccountAuthorizationExpired">
         <value xml:lang="ar">انتهت صلاحية عملية التصريح ${paymentGatewayResponseId} منذ ${authExpiration}</value>
@@ -241,6 +243,7 @@
     </property>
     <property key="AccountingFinAccountCodeDecryptPermissionError">
         <value xml:lang="en">You do not have permission to run the FinAccount finAccountCode decryption migration</value>
+        <value xml:lang="ja">FinAccount の finAccountCode 復号移行を実行する権限がありません。</value>
     </property>
     <property key="AccountingFinAccountExpired">
         <value xml:lang="ar">انتهت صلاحية الحساب منذ ${thruDate}</value>
@@ -397,6 +400,7 @@
     <property key="AccountingFixedAssetNotFound">
         <value xml:lang="en">Fixed asset not found</value>
         <value xml:lang="fr">Immobilisation non trouvée</value>
+        <value xml:lang="ja">固定資産が見つかりません。</value>
     </property>
     <property key="AccountingGiftCardCannotBeCreated">
         <value xml:lang="ar">خطأ: لا يمكن خلق بطاقة الهدية (فشل توليد الدليل)</value>
@@ -470,6 +474,7 @@
     </property>
     <property key="AccountingGiftCertificateNumberCannotFulfillFromSurvey">
         <value xml:lang="en">Unable to get survey response; cannot fulfill gift card reload</value>
+        <value xml:lang="ja">アンケート回答を取得できないため、ギフトカードへのチャージを完了できません。</value>
     </property>
     <property key="AccountingGiftCertificateNumberCannotFulfillFromSurveyAnswers">
         <value xml:lang="de">Kann keine Umfrageantworten von Umfrageantwort ermitteln; kann Geschenkkarte nicht verarbeiten</value>
@@ -685,6 +690,7 @@
     </property>
     <property key="AccountingReturnTypeCannotBeNull">
         <value xml:lang="en">Return type cannot be null</value>
+        <value xml:lang="ja">戻り値の型は null にできません。</value>
     </property>
     <property key="AccountingTaxIdInvalidFormat">
         <value xml:lang="ar">دليل الضريبة ${parameters.partyTaxId} لم يدخل بطريقة صحيحة للمصلحة الضريبية المختارة ${taxAuthority.taxIdFormatPattern}</value>
@@ -701,21 +707,26 @@
         <value xml:lang="de">Datenfehler beim Ermitteln der Steuer Einstellungen: ${errorString}</value>
         <value xml:lang="en">Data error getting tax settings: ${errorString}</value>
         <value xml:lang="it">Errore di lettura impostazioni tasse: ${errorString}</value>
+        <value xml:lang="ja">税設定の取得中にデータエラーが発生しました: ${errorString}</value>
         <value xml:lang="zh">获取税务设置时数据错误：${errorString}</value>
         <value xml:lang="zh-TW">獲取稅務設定時資料錯誤:${errorString}</value>
     </property>
     <property key="AccountingUpdateRateAmountAlreadyExist">
         <value xml:lang="en">The Rate amount already exist</value>
         <value xml:lang="fr">Le taux est déjà existant</value>
+        <value xml:lang="ja">レート金額は既に存在します。</value>
     </property>
     <property key="AccountingUploadedFileDataNotFound">
         <value xml:lang="en">Uploaded file data not found</value>
+        <value xml:lang="ja">アップロードされたファイルデータが見つかりません。</value>
     </property>
     <property key="AccountingValidationFailedInvalidValues">
         <value xml:lang="en">Validation Failed - invalid values</value>
+        <value xml:lang="ja">検証に失敗しました - 値が無効です。</value>
     </property>
     <property key="AccountingProcessingAuthResultEmpty">
         <value xml:lang="en">No authentification result available. Payment preference can't be checked.</value>
         <value xml:lang="de">Es ist kein Authentifizierungsergebnis vorhanden. Die Zahlungsmethode kann nicht überprüft werden.</value>
+        <value xml:lang="ja">認証結果がありません。支払設定を確認できません。</value>
     </property>
 </resource>

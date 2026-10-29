@@ -22,17 +22,22 @@ under the License.
           xsi:noNamespaceSchemaLocation="https://ofbiz.apache.org/dtds/ofbiz-properties.xsd">
     <property key="GenericServiceValidationErrorMessage">
         <value xml:lang="en">${service} validation failed. The request contained invalid information and could not be processed.</value>
+        <value xml:lang="ja">${service}の検証に失敗しました。リクエストに無効な情報が含まれているため、処理できませんでした。</value>
     </property>
     <property key="GenericServiceExecutionGenericEntityOperationErrorMessage">
         <value xml:lang="en">${service} execution failed. The request contained invalid information and could not be processed.</value>
+        <value xml:lang="ja">${service}の実行に失敗しました。リクエストに無効な情報が含まれているため、処理できませんでした。</value>
     </property>
     <property key="GenericServiceExecutionGenericExceptionErrorMessage">
         <value xml:lang="en">${service} execution failed. The service encountered an error; please try again later.</value>
+        <value xml:lang="ja">${service}の実行に失敗しました。サービスでエラーが発生しました。後でもう一度お試しください。</value>
     </property>
     <property key="NoSuchEntityDefaultMessage">
         <value xml:lang="en">${service} execution failed. The requested entity does not exist.</value>
+        <value xml:lang="ja">${service}の実行に失敗しました。要求されたエンティティは存在しません。</value>
     </property>
      <property key="GenericServiceErrorMessage">
         <value xml:lang="en">${service} returned error. The request contained invalid information and could not be processed.</value>
+        <value xml:lang="ja">${service}からエラーが返されました。リクエストに無効な情報が含まれているため、処理できませんでした。</value>
     </property>
 </resource>
