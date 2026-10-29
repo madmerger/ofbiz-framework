@@ -900,14 +900,8 @@ Parameter: delegatorName, String, optional - name of the delegator in context.
 </#macro>
 
 <#macro fileInput name id="" className="" alert="" value="" size="" maxlength="" autocomplete="" tabindex=""
-        accept="" multiple=false required=false disabled=false attributes="">
+        accept="" multiple=false required=false disabled=false attributes="" selectFileText="" noFileChosenText="">
   <#outputformat "HTML">
-  <#if id?has_content>
-    <#local fileInputId = id>
-  <#else>
-    <#global ofbizFileInputCounter = (ofbizFileInputCounter!0) + 1>
-    <#local fileInputId = "ofbiz_file_" + ofbizFileInputCounter?c>
-  </#if>
   <#local fileInputClass = className>
   <#if alert?has_content && alert == "true">
     <#if fileInputClass?has_content>
@@ -920,16 +914,25 @@ Parameter: delegatorName, String, optional - name of the delegator in context.
     <#local fileInputClass = fileInputClass + " ">
   </#if>
   <#local fileInputClass = fileInputClass + "ofbiz-file-input-visually-hidden">
-  <#local selectFileText = "Select File">
-  <#local noFileChosenText = "No file chosen">
-  <#if locale??>
-    <#local selectFileText = Static["org.apache.ofbiz.base.util.UtilProperties"].getMessage("CommonUiLabels", "CommonSelectFile", locale)!selectFileText>
-    <#local noFileChosenText = Static["org.apache.ofbiz.base.util.UtilProperties"].getMessage("CommonUiLabels", "CommonNoFileChosen", locale)!noFileChosenText>
-  <#elseif uiLabelMap??>
-    <#local selectFileText = uiLabelMap.CommonSelectFile!selectFileText>
-    <#local noFileChosenText = uiLabelMap.CommonNoFileChosen!noFileChosenText>
+  <#local fileInputSelectText = selectFileText>
+  <#local fileInputNoFileChosenText = noFileChosenText>
+  <#if !fileInputSelectText?has_content>
+    <#local fileInputSelectText = "Select File">
+    <#if locale??>
+      <#local fileInputSelectText = Static["org.apache.ofbiz.base.util.UtilProperties"].getMessage("CommonUiLabels", "CommonSelectFile", locale)!fileInputSelectText>
+    <#elseif uiLabelMap??>
+      <#local fileInputSelectText = uiLabelMap.CommonSelectFile!fileInputSelectText>
+    </#if>
   </#if>
-  <input type="file" id="${fileInputId}" name="${name}" class="${fileInputClass}"
+  <#if !fileInputNoFileChosenText?has_content>
+    <#local fileInputNoFileChosenText = "No file chosen">
+    <#if locale??>
+      <#local fileInputNoFileChosenText = Static["org.apache.ofbiz.base.util.UtilProperties"].getMessage("CommonUiLabels", "CommonNoFileChosen", locale)!fileInputNoFileChosenText>
+    <#elseif uiLabelMap??>
+      <#local fileInputNoFileChosenText = uiLabelMap.CommonNoFileChosen!fileInputNoFileChosenText>
+    </#if>
+  </#if>
+  <label class="buttontext ofbiz-file-input-button"><input type="file"<#if id?has_content> id="${id}"</#if> name="${name}" class="${fileInputClass}"
       data-ofbiz-file-input-enhanced="true"
       style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);clip-path:inset(50%);white-space:nowrap;border:0"
       <#if value?has_content>value="${value}"</#if>
@@ -941,16 +944,17 @@ Parameter: delegatorName, String, optional - name of the delegator in context.
       <#if multiple>multiple</#if>
       <#if required>required</#if>
       <#if disabled>disabled</#if>
-      <#if attributes?has_content>${attributes?no_esc}</#if> />
-  <label for="${fileInputId}" class="buttontext ofbiz-file-input-button">${selectFileText}</label>
-  <span class="ofbiz-file-input-name" data-ofbiz-file-input-name-for="${fileInputId}"
-      data-ofbiz-empty-text="${noFileChosenText}" aria-live="polite">${noFileChosenText}</span>
+      <#if attributes?has_content>${attributes?no_esc}</#if> /><span>${fileInputSelectText}</span></label>
+  <span class="ofbiz-file-input-name" data-ofbiz-file-input-name data-ofbiz-empty-text="${fileInputNoFileChosenText}"
+      aria-live="polite">${fileInputNoFileChosenText}</span>
   </#outputformat>
 </#macro>
 
-<#macro renderFileField className alert name="" value="" size="" maxlength="" autocomplete="" tabindex="" disabled=false>
+<#macro renderFileField className alert name="" value="" size="" maxlength="" autocomplete="" tabindex="" disabled=false
+        selectFileText="" noFileChosenText="">
   <@fileInput name=name className=className alert=alert value=value size=size maxlength=maxlength
-      autocomplete=autocomplete tabindex=tabindex disabled=disabled />
+      autocomplete=autocomplete tabindex=tabindex disabled=disabled selectFileText=selectFileText
+      noFileChosenText=noFileChosenText />
 </#macro>
 
 <#macro renderPasswordField className alert name="" value="" size="" maxlength="" id="" autocomplete="" tabindex="" disabled=false>

@@ -2236,9 +2236,12 @@ public final class RenderableFtlFormElementsBuilder {
      * Creates the macro call that renders a file field.
      * @param context the context
      * @param fileField the file field
+     * @param selectFileText localized file select text
+     * @param noFileChosenText localized empty file text
      * @return the RenderableFtl
      */
-    public RenderableFtl fileField(final Map<String, Object> context, final ModelFormField.FileField fileField) {
+    public RenderableFtl fileField(final Map<String, Object> context, final ModelFormField.FileField fileField,
+            final String selectFileText, final String noFileChosenText) {
         final ModelFormField modelFormField = fileField.getModelFormField();
         final var builder = RenderableFtlMacroCall.builder().name("renderFileField");
         applyWidgetStyleAndAlert(modelFormField, context, builder);
@@ -2249,6 +2252,8 @@ public final class RenderableFtlFormElementsBuilder {
                 .stringParameter("maxlength", fileField.getMaxlength() == null ? "" : fileField.getMaxlength().toString())
                 .stringParameter("autocomplete", fileField.getClientAutocompleteField() ? "" : "off")
                 .stringParameter("tabindex", nonNull(modelFormField.getTabindex()))
+                .stringParameter("selectFileText", nonNull(selectFileText))
+                .stringParameter("noFileChosenText", nonNull(noFileChosenText))
                 .booleanParameter("disabled", modelFormField.getDisabled(context))
                 .build();
     }

@@ -74,6 +74,13 @@ $(document).ready(function () {
 
     function updateFileName(input) {
         var display = input._ofbizFileNameDisplay;
+        if (!display && input.closest) {
+            var button = input.closest(".ofbiz-file-input-button");
+            var serverRenderedDisplay = button && button.nextElementSibling;
+            if (serverRenderedDisplay && serverRenderedDisplay.hasAttribute("data-ofbiz-file-input-name")) {
+                display = serverRenderedDisplay;
+            }
+        }
         if (!display && input.id) {
             var escapedId = window.CSS && typeof window.CSS.escape === "function"
                 ? window.CSS.escape(input.id)
@@ -101,7 +108,7 @@ $(document).ready(function () {
         }
         var style = document.createElement("style");
         style.id = "ofbiz-file-input-enhancement-style";
-        style.textContent = ".ofbiz-file-input-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important}.ofbiz-file-input-button{display:inline-block;cursor:pointer;border:1px solid currentColor;border-radius:3px;background-color:#f5f5f5;color:inherit;padding:.3em .6em;margin:0 .5em 0 0;line-height:normal;font:inherit;text-decoration:none}.ofbiz-file-input-visually-hidden:focus+.ofbiz-file-input-button{outline:2px solid Highlight;outline-offset:2px}.ofbiz-file-input-name{display:inline-block}";
+        style.textContent = ".ofbiz-file-input-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important}.ofbiz-file-input-button{display:inline-block;cursor:pointer;border:1px solid currentColor;border-radius:3px;background-color:#f5f5f5;color:inherit;padding:.3em .6em;margin:0 .5em 0 0;line-height:normal;font:inherit;text-decoration:none}.ofbiz-file-input-visually-hidden:focus+.ofbiz-file-input-button,.ofbiz-file-input-button:focus-within{outline:2px solid Highlight;outline-offset:2px}.ofbiz-file-input-name{display:inline-block}";
         (document.head || document.documentElement).appendChild(style);
     }
 
@@ -201,7 +208,7 @@ $(document).ready(function () {
         }, 0);
     }, true);
 
-    if (document.querySelector("[data-ofbiz-file-input-name-for]")) {
+    if (document.querySelector("[data-ofbiz-file-input-name-for], [data-ofbiz-file-input-name]")) {
         addFileInputStyles();
     }
 

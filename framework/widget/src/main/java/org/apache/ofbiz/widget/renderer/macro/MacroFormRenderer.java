@@ -33,6 +33,7 @@ import org.apache.ofbiz.base.util.Debug;
 import org.apache.ofbiz.base.util.UtilCodec;
 import org.apache.ofbiz.base.util.UtilGenerics;
 import org.apache.ofbiz.base.util.UtilHttp;
+import org.apache.ofbiz.base.util.UtilMisc;
 import org.apache.ofbiz.base.util.UtilProperties;
 import org.apache.ofbiz.base.util.UtilValidate;
 import org.apache.ofbiz.base.util.string.FlexibleStringExpander;
@@ -619,7 +620,10 @@ public final class MacroFormRenderer implements FormStringRenderer {
 
     @Override
     public void renderFileField(Appendable writer, Map<String, Object> context, FileField textField) throws IOException {
-        writeFtlElement(writer, renderableFtlFormElementsBuilder.fileField(context, textField));
+        Locale locale = UtilMisc.ensureLocale(context.get("locale"));
+        String selectFileText = UtilProperties.getMessage("CommonUiLabels", "CommonSelectFile", locale);
+        String noFileChosenText = UtilProperties.getMessage("CommonUiLabels", "CommonNoFileChosen", locale);
+        writeFtlElement(writer, renderableFtlFormElementsBuilder.fileField(context, textField, selectFileText, noFileChosenText));
         this.makeHyperlinkString(writer, textField.getSubHyperlink(), context);
         this.appendTooltip(writer, context, textField.getModelFormField());
     }

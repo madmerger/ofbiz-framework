@@ -1281,13 +1281,15 @@ public final class RenderableFtlFormElementsBuilderTest {
         when(modelFormField.getEntry(notNull(), nullable(String.class))).thenReturn("it's \"VALUE\" ${1+1}");
         when(modelFormField.getWidgetStyle()).thenReturn("WIDGETSTYLE");
 
-        assertThat(renderableFtlFormElementsBuilder.fileField(new HashMap<>(), fileField),
+        assertThat(renderableFtlFormElementsBuilder.fileField(new HashMap<>(), fileField, "SELECT_FILE", "NO_FILE"),
                 MacroCallMatcher.hasNameAndParameters("renderFileField",
                         MacroCallParameterMatcher.hasNameAndStringValue("name", "FIELDNAME"),
                         MacroCallParameterMatcher.hasNameAndStringValue("value", "it's \"VALUE\" ${1+1}"),
                         MacroCallParameterMatcher.hasNameAndStringValue("className", "WIDGETSTYLE"),
                         MacroCallParameterMatcher.hasNameAndStringValue("size", "30"),
-                        MacroCallParameterMatcher.hasNameAndStringValue("maxlength", "")));
+                        MacroCallParameterMatcher.hasNameAndStringValue("maxlength", ""),
+                        MacroCallParameterMatcher.hasNameAndStringValue("selectFileText", "SELECT_FILE"),
+                        MacroCallParameterMatcher.hasNameAndStringValue("noFileChosenText", "NO_FILE")));
     }
 
     @Test
