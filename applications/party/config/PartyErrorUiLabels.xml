@@ -945,7 +945,7 @@
         <value xml:lang="fr">Les prénom et nom ne peuvent être vides.</value>
         <value xml:lang="hi-IN">दोनों 'अंतिमनाम' और 'प्रथमनाम' खाली नहीं हो सकते|</value>
         <value xml:lang="it">Entrambi 'cognome' e 'nome' non possono essere vuoti.</value>
-        <value xml:lang="ja">姓(LN)と名(FN)の両方とも空にできません。</value>
+        <value xml:lang="ja">姓と名の両方を空欄にはできません。</value>
         <value xml:lang="nl">Voornaam en achternaam mogen niet leeg zijn.</value>
         <value xml:lang="pt-BR">Nome e sobrenome não podem ser ambos vazios.</value>
         <value xml:lang="ro">Entrambi 'Nume' si 'Prenume' nu pot sa fie goi.</value>

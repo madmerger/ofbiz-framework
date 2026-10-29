@@ -63,6 +63,10 @@
         <value xml:lang="zh">生日</value>
         <value xml:lang="zh-TW">生日</value>
     </property>
+    <property key="FormFieldTitle_cardId">
+        <value xml:lang="en">Card ID</value>
+        <value xml:lang="ja">カードID</value>
+    </property>
     <property key="FormFieldTitle_certProvisionId">
         <value xml:lang="de">Zertifikatsaussteller ID</value>
         <value xml:lang="en">Cert Provision ID</value>
@@ -506,7 +510,7 @@
         <value xml:lang="fr">Prénom</value>
         <value xml:lang="hi-IN">प्रथम नाम</value>
         <value xml:lang="it">Nome</value>
-        <value xml:lang="ja">姓(FN)</value>
+        <value xml:lang="ja">名</value>
         <value xml:lang="nl">Voornaam</value>
         <value xml:lang="pt-BR">Nome</value>
         <value xml:lang="ro">PreNume</value>
@@ -524,7 +528,7 @@
         <value xml:lang="fr">Prénom local</value>
         <value xml:lang="hi-IN">स्थानीय प्रथम नाम</value>
         <value xml:lang="it">Nome Locale</value>
-        <value xml:lang="ja">姓(現地)</value>
+        <value xml:lang="ja">名（現地）</value>
         <value xml:lang="nl">Voornaam lokaal</value>
         <value xml:lang="pt-BR">Nome local</value>
         <value xml:lang="ro">PreNume Local</value>
@@ -712,7 +716,7 @@
         <value xml:lang="fr">Nom</value>
         <value xml:lang="hi-IN">अंतिम नाम</value>
         <value xml:lang="it">Cognome</value>
-        <value xml:lang="ja">名(LN)</value>
+        <value xml:lang="ja">姓</value>
         <value xml:lang="nl">Achternaam</value>
         <value xml:lang="pt-BR">Sobrenome</value>
         <value xml:lang="ro">Nume</value>
@@ -730,7 +734,7 @@
         <value xml:lang="fr">Nom Local</value>
         <value xml:lang="hi-IN">स्थानीय अंतिम नाम</value>
         <value xml:lang="it">Cognome Locale</value>
-        <value xml:lang="ja">名(現地)</value>
+        <value xml:lang="ja">姓（現地）</value>
         <value xml:lang="nl">Achternaam Local</value>
         <value xml:lang="pt-BR">Sobrenome Local</value>
         <value xml:lang="ro">Nume Local</value>
@@ -850,7 +854,7 @@
         <value xml:lang="fr">Nom intermédiaire</value>
         <value xml:lang="hi-IN">मध्य नाम</value>
         <value xml:lang="it">Nome Centrale</value>
-        <value xml:lang="ja">ミドル名</value>
+        <value xml:lang="ja">ミドルネーム</value>
         <value xml:lang="nl">Tussenvoegsel</value>
         <value xml:lang="pt-BR">Nome do meio</value>
         <value xml:lang="ro">PreNume Central</value>
@@ -868,7 +872,7 @@
         <value xml:lang="fr">Nom intermédiaire local</value>
         <value xml:lang="hi-IN">स्थानीय मध्य नाम</value>
         <value xml:lang="it">Secondo nome</value>
-        <value xml:lang="ja">ミドル名(現地)</value>
+        <value xml:lang="ja">ミドルネーム（現地）</value>
         <value xml:lang="pt-BR">Nome do meio local</value>
         <value xml:lang="vi">Đệm (địa phương)</value>
         <value xml:lang="zh">中间名的本地语言</value>
@@ -6987,7 +6991,7 @@
         <value xml:lang="fr">Prénom</value>
         <value xml:lang="hi-IN">पहला नाम</value>
         <value xml:lang="it">Nome</value>
-        <value xml:lang="ja">姓(FN)</value>
+        <value xml:lang="ja">名</value>
         <value xml:lang="nl">Voornaam</value>
         <value xml:lang="pt-BR">Nome</value>
         <value xml:lang="pt-PT">Primeiro Nome</value>
@@ -7008,7 +7012,7 @@
         <value xml:lang="fr">Prénom absent</value>
         <value xml:lang="hi-IN">पहला नाम नही है</value>
         <value xml:lang="it">Nome mancante</value>
-        <value xml:lang="ja">姓(FN)が正しくありません</value>
+        <value xml:lang="ja">名が未入力です</value>
         <value xml:lang="nl">Voornaam mist</value>
         <value xml:lang="pt-BR">Nome está em branco</value>
         <value xml:lang="pt-PT">Primeiro Nome em Falta</value>
@@ -7026,7 +7030,7 @@
         <value xml:lang="fr">Le prénom manque sur la carte</value>
         <value xml:lang="hi-IN">कार्ड पर पहला नाम गायब है</value>
         <value xml:lang="it">Nome sulla carta di credito è mancante</value>
-        <value xml:lang="ja">カードの姓(FN)が正しくありません</value>
+        <value xml:lang="ja">カードの名が未入力です</value>
         <value xml:lang="pt-BR">Nome no cartão está faltando</value>
         <value xml:lang="vi">Tên trên thẻ chưa được nhập</value>
         <value xml:lang="zh">找不到卡上的名字</value>
@@ -7037,7 +7041,7 @@
         <value xml:lang="de">Bitte Vornamen eingeben</value>
         <value xml:lang="en">Please enter a firstName</value>
         <value xml:lang="it">Per favore inserire il nome</value>
-        <value xml:lang="ja">姓(FN)を入力してください</value>
+        <value xml:lang="ja">名を入力してください</value>
         <value xml:lang="vi">Bạn hãy nhập thông tin Tên</value>
         <value xml:lang="zh">请输入一个名字（firstName）</value>
         <value xml:lang="zh-TW">請輸入一個名字(firstName)</value>
@@ -7911,7 +7915,7 @@
         <value xml:lang="fr">Nom</value>
         <value xml:lang="hi-IN">अन्त नाम</value>
         <value xml:lang="it">Cognome</value>
-        <value xml:lang="ja">名(LN)</value>
+        <value xml:lang="ja">姓</value>
         <value xml:lang="nl">Familienaam</value>
         <value xml:lang="pt-BR">Segundo nome</value>
         <value xml:lang="pt-PT">Apelido</value>
@@ -7932,7 +7936,7 @@
         <value xml:lang="fr">Nom absent</value>
         <value xml:lang="hi-IN">अन्त नाम नही है</value>
         <value xml:lang="it">Cognome mancante</value>
-        <value xml:lang="ja">名(LN)が正しくありません</value>
+        <value xml:lang="ja">姓が未入力です</value>
         <value xml:lang="nl">Familienaam mist</value>
         <value xml:lang="pt-BR">Segundo nome está em branco</value>
         <value xml:lang="pt-PT">Apelido em Falta</value>
@@ -7950,7 +7954,7 @@
         <value xml:lang="fr">Le nom manque sur la carte</value>
         <value xml:lang="hi-IN">कार्ड पर अंतिम नाम गायब है</value>
         <value xml:lang="it">Cognome sulla carta di credito è mancante</value>
-        <value xml:lang="ja">カードの名(LN)が正しくありません</value>
+        <value xml:lang="ja">カードの姓が未入力です</value>
         <value xml:lang="pt-BR">Sobrenome no cartão está faltando</value>
         <value xml:lang="vi">'Họ' trên thẻ chưa có thông tin</value>
         <value xml:lang="zh">找不到卡上的姓氏</value>
@@ -7961,7 +7965,7 @@
         <value xml:lang="de">Bitte Nachnamen angeben</value>
         <value xml:lang="en">Please enter a lastName</value>
         <value xml:lang="it">Per favore inserire il cognome</value>
-        <value xml:lang="ja">名(LN)を入力してください</value>
+        <value xml:lang="ja">姓を入力してください</value>
         <value xml:lang="vi">Bạn hãy nhập họ</value>
         <value xml:lang="zh">请输入姓氏（lastName）</value>
         <value xml:lang="zh-TW">請輸入姓氏(lastName)</value>
@@ -8882,7 +8886,7 @@
         <value xml:lang="fr">Nom intermédiaire</value>
         <value xml:lang="hi-IN">मध्य नाम</value>
         <value xml:lang="it">Nome Centrale</value>
-        <value xml:lang="ja">ミドル名</value>
+        <value xml:lang="ja">ミドルネーム</value>
         <value xml:lang="nl">Tussenvoegsel</value>
         <value xml:lang="pt-BR">Nome do meio</value>
         <value xml:lang="ro">Nume Central</value>
