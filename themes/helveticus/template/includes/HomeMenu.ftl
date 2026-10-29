@@ -82,8 +82,8 @@ under the License.
 <#if userLogin?has_content>
     <div id="main-navigation-bar" class="fixed-nav-bar">
         <div id="main-nav-bar-left">
-            <img id="homeGlyph" src="/rainbowstone/images/home.svg" alt="Home">
-            <span id="homePageTitle">Home Page</span>
+            <img id="homeGlyph" src="/rainbowstone/images/home.svg" alt="${uiLabelMap.CommonHome}">
+            <span id="homePageTitle">${uiLabelMap.CommonHome}</span>
             <label class="main-bar-label">${uiLabelMap.EmbiHomeMenuDisplayAllMenu}</label>
             <input id="showHideBtn" type="checkbox" class="nrd-chkbox" <#if "true" == displayFavorites>checked</#if> onchange="showHideFavorites()">
             <label for="showHideBtn"></label>

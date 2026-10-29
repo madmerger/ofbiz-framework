@@ -580,6 +580,7 @@
     </property>
     <property key="PageTitleFetchLogs">
         <value xml:lang="en">Fetch Logs</value>
+        <value xml:lang="ja">フェッチログ</value>
     </property>
     <property key="PageTitleFindJob">
         <value xml:lang="de">Job suchen</value>
@@ -596,10 +597,12 @@
     <property key="PageTitleFindJobTracker">
         <value xml:lang="en">Job tracker</value>
         <value xml:lang="fr">Traceur de job</value>
+        <value xml:lang="ja">ジョブトラッカー</value>
     </property>
     <property key="PageTitleFindJobTrackerResults">
         <value xml:lang="en">Job tracker results</value>
         <value xml:lang="fr">Résultat du traceur de job</value>
+        <value xml:lang="ja">ジョブトラッカー結果</value>
     </property>
     <property key="PageTitleFindUtilCache">
         <value xml:lang="de">Cache Wartungsseite</value>
@@ -643,6 +646,7 @@
     <property key="PageTitleJobDetails">
         <value xml:lang="en">Job Details</value>
         <value xml:lang="fr">Détails du job</value>
+        <value xml:lang="ja">ジョブの詳細</value>
         <value xml:lang="zh">任务详情</value>
         <value xml:lang="zh-TW">任務詳情</value>
     </property>
@@ -675,6 +679,7 @@
     <property key="PageTitleProgramExport">
         <value xml:lang="en">Programmable Export</value>
         <value xml:lang="fr">Export programmable</value>
+        <value xml:lang="ja">プログラマブルエクスポート</value>
         <value xml:lang="zh">可编程导出</value>
     </property>
     <property key="PageTitleRunService">
@@ -692,10 +697,12 @@
     <property key="PageTitleJobManagerLockList">
         <value xml:lang="en">Job manager locks list</value>
         <value xml:lang="fr">Blocage du gestionnaire de service</value>
+        <value xml:lang="ja">ジョブマネージャーのロック一覧</value>
     </property>
     <property key="PageTitleJobTrackerDetails">
         <value xml:lang="en">Job tracker details</value>
         <value xml:lang="fr">Détails du traceur de job</value>
+        <value xml:lang="ja">ジョブトラッカーの詳細</value>
     </property>
     <property key="PageTitleScheduleJob">
         <value xml:lang="de">Job anlegen</value>
@@ -876,6 +883,7 @@
     <property key="WebtoolsArtifactInfoTimeToLoad">
         <value xml:lang="en">(may take some time to load)</value>
         <value xml:lang="fr">(cela peut prendre un certain temps à charger)</value>
+        <value xml:lang="ja">(読み込みに時間がかかる)</value>
         <value xml:lang="vi">(đợi chút thời gian)</value>
         <value xml:lang="zh">(可能会花些时间载入)</value>
     </property>
@@ -895,6 +903,7 @@
     <property key="WebtoolsAvailableUelMethods">
         <value xml:lang="en">Available UEL Methods</value>
         <value xml:lang="fr">Fonctions UEL disponibles</value>
+        <value xml:lang="ja">利用可能なUELメソッド</value>
     </property>
     <property key="WebtoolsBackToCacheMaintenance">
         <value xml:lang="de">Zurück zur Cache-Wartung</value>
@@ -990,6 +999,7 @@
     <property key="WebtoolsCacheMemory">
         <value xml:lang="en">Cache Memory</value>
         <value xml:lang="fr">Mémoire cache</value>
+        <value xml:lang="ja">キャッシュメモリ</value>
         <value xml:lang="zh">缓存内存</value>
         <value xml:lang="zh-TW">快取記憶體</value>
     </property>
@@ -1168,6 +1178,7 @@
     </property>
     <property key="WebtoolsClearSelectedCaches">
         <value xml:lang="en">Clear Selected Caches</value>
+        <value xml:lang="ja">明確な選択されたキャッシュ</value>
     </property>
     <property key="WebtoolsCompanyName">
         <value xml:lang="de">OFBiz: Web Tools</value>
@@ -1193,7 +1204,7 @@
         <value xml:lang="fr">Un module de la famille Apache OFBiz, logiciel libre de gestion d'entreprise.</value>
         <value xml:lang="it">Un modulo della famiglia di software open source Apache OFBiz</value>
     <!--value xml:lang="nl">Onderdeel van de Apache OFBiz'-suite</value-->
-        <value xml:lang="ja">Part of the Apache OFBiz Family of Open Source Software</value>
+        <value xml:lang="ja">Apache OFBiz オープンソースソフトウェアファミリーの一員</value>
         <value xml:lang="nl">Deel van de Apache OFBiz-suite van Open Source Software</value>
         <value xml:lang="pt-BR">Parte da família OfBiz de software de fonte aberta</value>
     <!--value xml:lang="pt-PT">Parte do Software de Fonte Aberta para Grupos Abertos Para o Negócio</value-->
@@ -1324,9 +1335,11 @@
     <property key="WebtoolsConfirmDelete">
         <value xml:lang="en">Are you sure you want to delete?</value>
         <value xml:lang="fr">Êtes-vous sûr de vouloir supprimer l'élément ?</value>
+        <value xml:lang="ja">削除したいですか?</value>
     </property>
     <property key="WebtoolsConfirmIrreversibleDelete">
         <value xml:lang="en">This action is irreversible. Are you sure you want to delete</value>
+        <value xml:lang="ja">このアクションは不可逆です。 削除したいことを確認してください</value>
     </property>
     <property key="WebtoolsCount">
         <value xml:lang="de">Anzahl</value>
@@ -1430,6 +1443,7 @@
     <property key="WebtoolsCurrentJobManagerLock">
         <value xml:lang="en">Current job manager locks</value>
         <value xml:lang="fr">Blocages actuels du gestionnaire de service</value>
+        <value xml:lang="ja">現在の仕事のマネージャーはロックを締めます</value>
     </property>
     <property key="WebtoolsDaemon">
         <value xml:lang="de">Daemon</value>
@@ -1615,10 +1629,12 @@
     </property>
     <property key="WebtoolsDefaultsToOfbizRootDirectory">
         <value xml:lang="en">Defaults to OFBiz root directory</value>
+        <value xml:lang="ja">OFBizのルートディレクトリにデフォルト</value>
     </property>
     <property key="WebtoolsDefinitionLocation">
         <value xml:lang="en">Definition Location</value>
         <value xml:lang="fr">Emplacement de la définition</value>
+        <value xml:lang="ja">定義の場所</value>
         <value xml:lang="zh">定义位置</value>
         <value xml:lang="zh-TW">定義位置</value>
     </property>
@@ -1663,16 +1679,20 @@
     <property key="WebtoolsDeprecated">
         <value xml:lang="en">Deprecated</value>
         <value xml:lang="fr">Périmé</value>
+        <value xml:lang="ja">廃止予定</value>
     </property>
     <property key="WebtoolsDeprecatedUseInstead">
         <value xml:lang="en">Use instead</value>
         <value xml:lang="fr">Utilisez en remplacement</value>
+        <value xml:lang="ja">代わりに使用</value>
     </property>
     <property key="WebtoolsDisableEeca">
         <value xml:lang="en">Disable ECAs</value>
+        <value xml:lang="ja">無効なECAs</value>
     </property>
     <property key="WebtoolsDisableEecaWarning">
         <value xml:lang="en">Disabling ECAs prevents entity-change-triggered services (e.g. order status updates) from firing while this data is loaded. Use this for full-instance snapshot restores; leave it unchecked for partial or incremental imports that rely on those side effects.</value>
+        <value xml:lang="ja">ECAを無効にすると、データ読み込み中にエンティティ変更をトリガーとするサービス（例: 注文ステータスの更新）が実行されなくなります。インスタンス全体のスナップショットを復元する場合に使用してください。副作用に依存する部分的または増分インポートでは、チェックを外したままにしてください。</value>
     </property>
     <property key="WebtoolsDispatcherName">
         <value xml:lang="de">Dispatcher-Name</value>
@@ -2027,9 +2047,11 @@
     </property>
     <property key="WebtoolsEncryptValue">
         <value xml:lang="en">Encrypt Value</value>
+        <value xml:lang="ja">価値を暗号化する</value>
     </property>
     <property key="WebtoolsSecretManagerTools">
         <value xml:lang="en">Secret Manager Tools</value>
+        <value xml:lang="ja">シークレットマネージャーツール</value>
     </property>
     <property key="WebtoolsEncryptValueInfo">
         <value xml:lang="en">Encrypt a secret value with AES-256-GCM (using the server's OFBIZ_MASTER_KEY) and store
@@ -2037,10 +2059,12 @@
             The encrypted value is not displayed. If the target SystemProperty record or
             passwords.properties entry already exists, it is updated with the new encrypted value;
             otherwise it is created.</value>
+            <value xml:lang="ja">AES-256-GCM(サーバーの OFBIZ MASTER KEY を使用して)で秘密値を暗号化し、その結果を SystemProperty レコードに保存するか、フレームワーク/ベース/コンフィグ/パスwords.properties で保存します。暗号化された値は表示されません。対象となる SystemProperty レコードまたは passwords.properties エントリが既に存在している場合は、新しい暗号化された値で更新されます。 そうでなければ作成されます。</value>
     </property>
     <property key="WebtoolsSecretSystemPropertyRequiredInfo">
         <value xml:lang="en">For SystemProperty: Resource ID and Property ID are required. Lookup Key
             is optional.</value>
+            <value xml:lang="ja">SystemProperty: リソースIDとプロパティIDが必要です。Lookup Keyはオプションです。</value>
     </property>
     <property key="WebtoolsSecretPasswordsFileRequiredInfo">
         <value xml:lang="en">For passwords.properties: Lookup Key is always required.
@@ -2049,30 +2073,39 @@
             Provide all four fields to also update the matching property file on disk
             (sets &lt;propertyId&gt;=LOOKUP(&lt;lookupKey&gt;)) and refresh the in-memory
             property cache — no server restart needed.</value>
+            <value xml:lang="ja">passwords.properties:Lookup Keyは常に必要です。 リソースIDとプロパティIDを空のままにして、passwords.properties(entityengine.xml jdbc-password-lookup use-case)にのみ書きます。 一致するプロパティファイルをディスク(sets)に更新するために、すべての4つのフィールドを提供 &lt;プロパティID&gt;=ロクP()&lt;リファレンス&gt;) およびメモリ内プロパティキャッシュをリフレッシュし、サーバーの再起動は不要です。</value>
     </property>
     <property key="WebtoolsSecretTarget">
         <value xml:lang="en">Store In</value>
+        <value xml:lang="ja">店舗情報</value>
     </property>
     <property key="WebtoolsSecretTargetSystemProperty">
         <value xml:lang="en">SystemProperty entity</value>
+        <value xml:lang="ja">システムプロパティ</value>
     </property>
     <property key="WebtoolsSecretTargetPasswordsFile">
         <value xml:lang="en">passwords.properties</value>
+        <value xml:lang="ja">パスワード.プロパティ</value>
     </property>
     <property key="WebtoolsSecretSystemResourceId">
         <value xml:lang="en">System Resource ID (SystemProperty)</value>
+        <value xml:lang="ja">システムリソースID(SystemProperty)</value>
     </property>
     <property key="WebtoolsSecretSystemPropertyId">
         <value xml:lang="en">System Property ID (SystemProperty)</value>
+        <value xml:lang="ja">システムプロパティID(SystemProperty)</value>
     </property>
     <property key="WebtoolsSecretFileResourceId">
         <value xml:lang="en">Resource ID (Property File)</value>
+        <value xml:lang="ja">リソースID(プロパティファイル)</value>
     </property>
     <property key="WebtoolsSecretFilePropertyId">
         <value xml:lang="en">Property ID (Property File)</value>
+        <value xml:lang="ja">プロパティID(プロパティファイル)</value>
     </property>
     <property key="WebtoolsSecretLookupKey">
         <value xml:lang="en">Lookup Key</value>
+        <value xml:lang="ja">ルックアップキー</value>
     </property>
     <property key="WebtoolsSecretLookupKeyInfo">
         <value xml:lang="en">Required for passwords.properties. When Resource ID and Property ID are empty,
@@ -2080,246 +2113,325 @@
             provided, stored as &lt;lookupKey&gt; directly (property file use-case).
             Optional for SystemProperty: if set, the plain key is stored in systemPropertyLookup
             so a configured remote secret provider is tried first.</value>
+            <value xml:lang="ja">パスワードは必須です。リソースIDとプロパティIDが空の場合、jdbc-passwordとして保存されます。&lt;リファレンス&gt; (entityengine.xml のユースケース)。すべての 4 つのフィールドが提供されると、次のように保存されます。 &lt;リファレンス&gt; 直接(property file use-case)。 SystemProperty のオプション: set の場合、プレーンキーは systemPropertyLookup に保存され、設定されたリモートシークレットプロバイダが最初に試されます。</value>
     </property>
     <property key="WebtoolsSecretValue">
         <value xml:lang="en">Secret Value</value>
+        <value xml:lang="ja">秘密の価値</value>
     </property>
     <property key="WebtoolsSecretEncryptAndSave">
         <value xml:lang="en">Encrypt and Save</value>
+        <value xml:lang="ja">暗号化と保存</value>
     </property>
     <property key="WebtoolsSecretCsvUploadInfo">
         <value xml:lang="en">Or upload a CSV file to create multiple secrets at once:</value>
+        <value xml:lang="ja">またはCSVファイルをアップロードして、複数の秘密を一度に作成します。</value>
     </property>
     <property key="WebtoolsSecretCsvColumns">
         <value xml:lang="en">Columns (header row required): target, systemResourceId, systemPropertyId, lookupKey, secretValue</value>
+        <value xml:lang="ja">列(ヘッダー行が必要): ターゲット、システムResourceId、システムPropertyId、lookupKey、secretValue</value>
     </property>
     <property key="WebtoolsSecretCsvTargetInfo">
         <value xml:lang="en">target is SYSTEM_PROPERTY or PASSWORDS_FILE; leave unused columns empty</value>
+        <value xml:lang="ja">対象は、System PROPERTY または PASSWORDS FILE です。未使用の列を空にします。</value>
     </property>
     <property key="WebtoolsSecretCsvFile">
         <value xml:lang="en">CSV File</value>
+        <value xml:lang="ja">CSVファイル</value>
     </property>
     <property key="WebtoolsSecretUploadAndEncrypt">
         <value xml:lang="en">Upload and Encrypt</value>
+        <value xml:lang="ja">アップロードと暗号化</value>
     </property>
     <property key="WebtoolsSecretConfirmValue">
         <value xml:lang="en">Confirm Secret Value</value>
+        <value xml:lang="ja">秘密値の確認</value>
     </property>
     <property key="WebtoolsSecretConfirmValueMismatch">
         <value xml:lang="en">Secret Value and Confirm Secret Value must match.</value>
+        <value xml:lang="ja">秘密値と秘密値が一致しなければならないことを確認します。</value>
     </property>
     <property key="WebtoolsSecretFlushCacheInfo">
         <value xml:lang="en">Force an immediate re-fetch from the secret provider by flushing all cached values.
             Use this after rotating a secret so the new value is picked up without restarting OFBiz.</value>
+            <value xml:lang="ja">キャッシュされたすべての値をフラッシュすることで、秘密のプロバイダから即時にリフェッチを強制します。この後、シークレットを回転させ、OFBizを再起動せずに新しい値がピックアップされます。</value>
     </property>
     <property key="WebtoolsSecretFlushCache">
         <value xml:lang="en">Flush Secret Cache</value>
+        <value xml:lang="ja">フラッシュシークレットキャッシュ</value>
     </property>
     <property key="WebtoolsSecretReloadProviderInfo">
         <value xml:lang="en">Re-discover the active secret provider via ServiceLoader. Use this after deploying
             a new vault plugin jar or editing that plugin's own connection settings, without restarting OFBiz.</value>
+            <value xml:lang="ja">ServiceLoader 経由でアクティブなシークレットプロバイダを再ディスカバリーします。OBiz を再起動することなく、新しい vault プラグイン jar またはそのプラグインの独自の接続設定を編集した後にこれを使用します。</value>
     </property>
     <property key="WebtoolsSecretReloadProvider">
         <value xml:lang="en">Reload Secret Provider</value>
+        <value xml:lang="ja">シークレットプロバイダのリロード</value>
     </property>
     <property key="WebtoolsSecretSyncInfo">
         <value xml:lang="en">Fetch the current value of a key from the active secret provider and re-encrypt it into
             the local fallback snapshot. Use this after rotating a secret in the remote vault to keep the local
             ENC(...) fallback (used when the vault is unreachable) up to date.</value>
+            <value xml:lang="ja">アクティブ・シークレット・プロバイダーからキーの現在の値を取得し、ローカル・フォールバック・スナップショットに再暗号化します。 リモート・ボルトで秘密を回転させ、ローカルENC(...)のフォールバック(ボルトが到達不可能なときに使用される)を最新の状態に保ちます。</value>
     </property>
     <property key="WebtoolsSecretSync">
         <value xml:lang="en">Sync From Provider</value>
+        <value xml:lang="ja">プロバイダーからの同期</value>
     </property>
     <property key="WebtoolsSecretTestConnectionInfo">
         <value xml:lang="en">Verify that the active secret provider is reachable by resolving a known key.
             If the key exists the secret value is confirmed but never displayed.
             A "key not found" response still confirms vault connectivity.</value>
+            <value xml:lang="ja">既知のキーを解決することで、アクティブ・シークレット・プロバイダが到達可能であることを確認します。キーがシークレット・バリューが存在する場合、決して表示されません。 "key not found" 応答は、ボルト接続が確認されます。</value>
     </property>
     <property key="WebtoolsSecretTestKey">
         <value xml:lang="en">Test Key</value>
+        <value xml:lang="ja">テストキー</value>
     </property>
     <property key="WebtoolsSecretTestConnection">
         <value xml:lang="en">Test Connection</value>
+        <value xml:lang="ja">テスト接続</value>
     </property>
     <property key="WebtoolsSecretActiveProvider">
         <value xml:lang="en">Active Secret Provider</value>
+        <value xml:lang="ja">アクティブシークレットプロバイダ</value>
     </property>
     <property key="WebtoolsSecretUsageStatsInfo">
         <value xml:lang="en">Secret lookup statistics since the last JVM start. Hit = served from cache; Miss = fetched from provider.</value>
+        <value xml:lang="ja">最後の JVM の開始以来のシークレットルックアップ統計。ヒット = キャッシュから提供され、Miss = プロバイダーから取得。</value>
     </property>
     <property key="WebtoolsSecretUsageStatsRefresh">
         <value xml:lang="en">Show Usage Stats</value>
+        <value xml:lang="ja">用途のステータスを表示</value>
     </property>
     <property key="WebtoolsSecretUsageStatsReset">
         <value xml:lang="en">Reset Stats</value>
+        <value xml:lang="ja">ステータスのリセット</value>
     </property>
     <property key="WebtoolsSecretUsageTotalHits">
         <value xml:lang="en">Cache Hits</value>
+        <value xml:lang="ja">キャッシュヒット</value>
     </property>
     <property key="WebtoolsSecretUsageTotalMisses">
         <value xml:lang="en">Provider Fetches</value>
+        <value xml:lang="ja">プロバイダーフェッチ</value>
     </property>
     <property key="WebtoolsSecretUsageTotalLookups">
         <value xml:lang="en">Total Lookups</value>
+        <value xml:lang="ja">総合検索</value>
     </property>
     <property key="WebtoolsSecretUsageCachedKeys">
         <value xml:lang="en">Keys In Cache</value>
+        <value xml:lang="ja">キャッシュのキー</value>
     </property>
     <property key="WebtoolsSecretUsageKey">
         <value xml:lang="en">Secret Key</value>
+        <value xml:lang="ja">秘密鍵</value>
     </property>
     <property key="WebtoolsSecretUsageHits">
         <value xml:lang="en">Cache Hits</value>
+        <value xml:lang="ja">キャッシュヒット</value>
     </property>
     <property key="WebtoolsSecretUsageMisses">
         <value xml:lang="en">Provider Fetches</value>
+        <value xml:lang="ja">プロバイダーフェッチ</value>
     </property>
     <property key="WebtoolsSecretUsageTotal">
         <value xml:lang="en">Total</value>
+        <value xml:lang="ja">合計</value>
     </property>
     <property key="WebtoolsSecretUsageLastAccessed">
         <value xml:lang="en">Last Accessed</value>
+        <value xml:lang="ja">最終アクセス</value>
     </property>
     <property key="WebtoolsSecretUsageStatsTitle">
         <value xml:lang="en">Secret Usage Statistics</value>
+        <value xml:lang="ja">秘密利用統計</value>
     </property>
     <property key="WebtoolsSecretUsageStatsFullView">
         <value xml:lang="en">View full stats</value>
+        <value xml:lang="ja">全ステータスを表示</value>
     </property>
     <property key="WebtoolsSecretUsageStatsResetInfo">
         <value xml:lang="en">Reset all counters to zero. Useful to observe clean post-rotation metrics without a JVM restart.</value>
+        <value xml:lang="ja">すべてのカウンタをゼロにリセットします。JVM 再起動なしでクリーンな後回転メトリックを観察するのに便利です。</value>
     </property>
     <property key="WebtoolsSecretUsageNoStats">
         <value xml:lang="en">No secret lookups recorded since the last JVM start or stats reset.</value>
+        <value xml:lang="ja">最後の JVM 起動または stats のリセット以来、記録されたシークレットルックアップはありません。</value>
     </property>
     <property key="WebtoolsSecretProviderReachable">
         <value xml:lang="en">Reachable</value>
+        <value xml:lang="ja">到達可能</value>
     </property>
     <property key="WebtoolsSecretProviderUnreachable">
         <value xml:lang="en">Unreachable (check server logs)</value>
+        <value xml:lang="ja">到達不能(サーバログのチェック)</value>
     </property>
     <property key="WebtoolsSecretAuditLog">
         <value xml:lang="en">Secret Audit Log</value>
+        <value xml:lang="ja">秘密の監査ログ</value>
     </property>
     <property key="WebtoolsSecretAuditPermissionError">
         <value xml:lang="en">You do not have permission to view the Secret Audit Log. The SECRET_AUDIT_VIEW or ENTITY_MAINT permission is required.</value>
+        <value xml:lang="ja">秘密の監査ログを表示することはできません。 SECRET AUDIT VIEW または ENTITY MAINT の許可が必要です。</value>
     </property>
     <property key="WebtoolsSecretAuditFilterUser">
         <value xml:lang="en">User Login ID</value>
+        <value xml:lang="ja">ユーザログインID</value>
     </property>
     <property key="WebtoolsSecretAuditFilterAction">
         <value xml:lang="en">Action</value>
+        <value xml:lang="ja">アクション</value>
     </property>
     <property key="WebtoolsSecretAuditFilterOutcome">
         <value xml:lang="en">Outcome</value>
+        <value xml:lang="ja">アウトカム</value>
     </property>
     <property key="WebtoolsSecretAuditFilterKey">
         <value xml:lang="en">Secret Key Ref</value>
+        <value xml:lang="ja">秘密鍵の参考</value>
     </property>
     <property key="WebtoolsSecretAuditFilterFrom">
         <value xml:lang="en">Date From</value>
+        <value xml:lang="ja">開始日</value>
     </property>
     <property key="WebtoolsSecretAuditFilterTo">
         <value xml:lang="en">Date To</value>
+        <value xml:lang="ja">日程表</value>
     </property>
     <property key="WebtoolsSecretAuditShowing">
         <value xml:lang="en">Showing</value>
+        <value xml:lang="ja">ニュース</value>
     </property>
     <property key="WebtoolsSecretAuditOf">
         <value xml:lang="en">of</value>
+        <value xml:lang="ja">インフォメーション</value>
     </property>
     <property key="WebtoolsSecretAuditTimestamp">
         <value xml:lang="en">Timestamp</value>
+        <value xml:lang="ja">タイムスタンプ</value>
     </property>
     <property key="WebtoolsSecretAuditUser">
         <value xml:lang="en">User</value>
+        <value xml:lang="ja">ユーザ</value>
     </property>
     <property key="WebtoolsSecretAuditAction">
         <value xml:lang="en">Action</value>
+        <value xml:lang="ja">アクション</value>
     </property>
     <property key="WebtoolsSecretAuditOutcome">
         <value xml:lang="en">Outcome</value>
+        <value xml:lang="ja">アウトカム</value>
     </property>
     <property key="WebtoolsSecretAuditErrorCategory">
         <value xml:lang="en">Error Category</value>
+        <value xml:lang="ja">エラーカテゴリ</value>
     </property>
     <property key="WebtoolsSecretAuditKey">
         <value xml:lang="en">Secret Key Ref</value>
+        <value xml:lang="ja">秘密鍵の参考</value>
     </property>
     <property key="WebtoolsSecretAuditTarget">
         <value xml:lang="en">Target</value>
+        <value xml:lang="ja">対象</value>
     </property>
     <property key="WebtoolsSecretAuditAccessMode">
         <value xml:lang="en">Access Mode</value>
+        <value xml:lang="ja">アクセスモード</value>
     </property>
     <property key="WebtoolsSecretAuditProvider">
         <value xml:lang="en">Provider</value>
+        <value xml:lang="ja">プロバイダー</value>
     </property>
     <property key="WebtoolsSecretAuditDeployMode">
         <value xml:lang="en">Deploy Mode</value>
+        <value xml:lang="ja">デプロイモード</value>
     </property>
     <property key="WebtoolsSecretAuditResourceId">
         <value xml:lang="en">Resource ID</value>
+        <value xml:lang="ja">リソースID</value>
     </property>
     <property key="WebtoolsSecretAuditPropertyId">
         <value xml:lang="en">Property ID</value>
+        <value xml:lang="ja">プロパティID</value>
     </property>
     <property key="WebtoolsSecretAuditNoRows">
         <value xml:lang="en">No audit records found matching the filter criteria.</value>
+        <value xml:lang="ja">フィルター条件に一致する監査記録はありません。</value>
     </property>
     <property key="WebtoolsSecretAuditClientIp">
         <value xml:lang="en">Client IP</value>
+        <value xml:lang="ja">クライアントIP</value>
     </property>
     <property key="WebtoolsSecretAuditK8sNoticeTitle">
         <value xml:lang="en">K8s Injected Mode</value>
+        <value xml:lang="ja">K8sはモードを注入しました</value>
     </property>
     <property key="WebtoolsSecretAuditK8sNoticeBody">
         <value xml:lang="en">OFBiz is running in K8S_INJECTED deployment mode. Vault-level FETCH events are emitted by the external secret operator (CSI driver, ESO, or Vault Agent) and are not recorded here. Only admin actions (STORE, SYNC, FLUSH_CACHE, etc.) appear in this log.</value>
+        <value xml:lang="ja">OFBiz は、K8S INJECTED デプロイメント モードで実行されます。 Vault レベルの FETCH イベントは、外部シークレット オペレータ (CSI ドライバー、ESO、または Vault Agent) によって生成され、ここで録画されません。 管理者アクションのみ (STORE、SYNC、FLUSH CACHE など) はこのログに表示されます。</value>
     </property>
     <property key="WebtoolsSecretAuditExportTitle">
         <value xml:lang="en">Export to CSV</value>
+        <value xml:lang="ja">CSVへのエクスポート</value>
     </property>
     <property key="WebtoolsSecretAuditExportButton">
         <value xml:lang="en">Download CSV</value>
+        <value xml:lang="ja">CSVのダウンロード</value>
     </property>
     <property key="WebtoolsSecretAuditExportHint">
         <value xml:lang="en">Date range required. Maximum export window: 90 days. Maximum rows per file: 50,000 (a header comment is added if the cap is hit — narrow the range and re-export).</value>
+        <value xml:lang="ja">日付範囲を指定してください。エクスポート期間の上限: 90日。ファイルあたりの最大行数: 50,000行（上限に達した場合はヘッダーコメントが追加されます。範囲を狭めて再エクスポートしてください）。</value>
     </property>
     <property key="WebtoolsSecretAuditRetentionTitle">
         <value xml:lang="en">Retention &amp; Phase 2 Settings</value>
+        <value xml:lang="ja">リテンション &amp; フェーズ2設定</value>
     </property>
     <property key="WebtoolsSecretAuditRetentionDays">
         <value xml:lang="en">Retention period</value>
+        <value xml:lang="ja">保持期間</value>
     </property>
     <property key="WebtoolsSecretAuditRetentionDaysSuffix">
         <value xml:lang="en">days (PCI-DSS 4.0 §10.7 minimum: 365)</value>
+        <value xml:lang="ja">日 (PCI-DSS 4.0 §10.7 最小: 365)</value>
     </property>
     <property key="WebtoolsSecretAuditRetentionBatch">
         <value xml:lang="en">Purge batch size</value>
+        <value xml:lang="ja">パージのバッチ サイズ</value>
     </property>
     <property key="WebtoolsSecretAuditRetentionNextRun">
         <value xml:lang="en">Next scheduled purge</value>
+        <value xml:lang="ja">次 スケジュールされたパージ</value>
     </property>
     <property key="WebtoolsSecretAuditRetentionFetchEvents">
         <value xml:lang="en">FETCH / ROTATION_POLL logging</value>
+        <value xml:lang="ja">FETCH / ROTATION POLLロギング</value>
     </property>
     <property key="WebtoolsSecretAuditRetentionCacheHits">
         <value xml:lang="en">CACHE_HIT logging</value>
+        <value xml:lang="ja">CACHE HITロギング</value>
     </property>
     <property key="WebtoolsSecretAuditRetentionHint">
         <value xml:lang="en">To change the retention period or batch size, update the secret.audit.retention.days / secret.audit.purge.batch.size SystemProperty rows and restart the purge job. To enable Phase 2 logging, set secret.audit.log.fetch.events=true or secret.audit.log.cache.hits=true in security.properties and restart OFBiz.</value>
+        <value xml:lang="ja">保持期間またはバッチサイズを変更するには、SystemProperty の secret.audit.retention.days / secret.audit.purge.batch.size 行を更新し、パージジョブを再起動してください。Phase 2 のログ記録を有効にするには、security.properties で secret.audit.log.fetch.events=true または secret.audit.log.cache.hits=true を設定して OFBiz を再起動してください。</value>
     </property>
     <property key="WebtoolsSecretAuditRetentionSave">
         <value xml:lang="en">Save Retention Settings</value>
+        <value xml:lang="ja">保持設定を保存</value>
     </property>
     <property key="WebtoolsSecretAuditFilterProvider">
         <value xml:lang="en">Provider</value>
+        <value xml:lang="ja">プロバイダー</value>
     </property>
     <property key="WebtoolsSecretAuditFilterDeployMode">
         <value xml:lang="en">Deploy Mode</value>
+        <value xml:lang="ja">デプロイモード</value>
     </property>
     <property key="WebtoolsSecretAuditLogLink">
         <value xml:lang="en">View Secret Audit Log</value>
+        <value xml:lang="ja">秘密の監査ログを表示</value>
     </property>
     <property key="WebtoolsEntityXMLTools">
         <value xml:lang="de">Entität XML Tools</value>
@@ -2452,6 +2564,7 @@
     <property key="WebtoolsErrorDatafileLoadUrlNotEnabled">
         <value xml:lang="en">ERROR: For security reason HTTP URLs are not accepted, see OFBIZ-12304. Rather load your data from a file or set SystemProperty security.datafile.loadurls.enable = true</value>
         <value xml:lang="de">FEHLER: Aus Sicherheitsgründen wird das Laden von HTTP Urls nicht erlaubt. Laden Sie die Daten über eine Datei oder setzen Sie die SystemProperty security.datafile.loadurls.enable = true.</value>
+        <value xml:lang="ja">ERROR: セキュリティの理由で HTTP URL が受け入れられないため、OFBIZ-12304 を参照してください。 Rather はファイルからデータをロードするか、SystemProperty Security.datafile.loadurls.enable = true を設定します。</value>
     </property>
     <property key="WebtoolsErrorReadingTemplateFile">
         <value xml:lang="en">ERROR: reading template file ${filename}: ${errorString}</value>
@@ -2579,6 +2692,7 @@
     </property>
     <property key="WebtoolsFetchLogs">
         <value xml:lang="en">Fetch Logs</value>
+        <value xml:lang="ja">フェッチログ</value>
     </property>
     <property key="WebtoolsFieldName">
         <value xml:lang="de">Feldname</value>
@@ -2724,7 +2838,7 @@
         <value xml:lang="en">For something interesting make sure you are logged in, try username: admin, password: ofbiz</value>
         <value xml:lang="fr">Pour quelque chose d'intéressant assurez-vous que vous avez ouvert une session. Essayez avec l'identifiant de connexion : admin, et le mot de passe : ofbiz</value>
         <value xml:lang="it">Per accedere all'applicazione devi essere autenticato, prova con Nome utente:admin, Password:ofbiz</value>
-        <value xml:lang="ja">興味を感じたことを確実なものにするため、Username;Admin;Password Ofbiz でログインしてください</value>
+        <value xml:lang="ja">詳細を確認するにはログインしてください（ユーザー名: admin、パスワード: ofbiz）。</value>
         <value xml:lang="pt">Para algo interessante conecte-se, use usuÃ¡rio: admin, senha: ofbiz</value>
         <value xml:lang="ro">Daca  esti interesat, trebuie sa ai autentificare, incearca cu cu Nume utilizator :admin, Pasword :ofbiz</value>
         <value xml:lang="th">เพื่อความแน่ใจคุณควรเข้าสู่ระบบโดยใช้ ชื่อผูใช้: admin, รหัสผ่าน: ofbiz</value>
@@ -2809,6 +2923,7 @@
     <property key="WebtoolsGeoAssocList">
         <value xml:lang="en">List GeoAssoc</value>
         <value xml:lang="fr">Lister les relations de zone géographique</value>
+        <value xml:lang="ja">リスト GeoAssoc</value>
     </property>
     <property key="WebtoolsGeoCreateNew">
         <value xml:lang="en">Create/Edit Geo</value>
@@ -2861,6 +2976,7 @@
     <property key="WebtoolsGeoPoints">
         <value xml:lang="en">GEO Points</value>
         <value xml:lang="fr">Points GEO</value>
+        <value xml:lang="ja">GEOポイント</value>
         <value xml:lang="zh">地理点</value>
     </property>
     <property key="WebtoolsGeosSelect">
@@ -3233,14 +3349,17 @@
     <property key="WebtoolsJobManagerLockEnable">
         <value xml:lang="en">Job manager locks enabled</value>
         <value xml:lang="fr">Blocages actifs sur le gestionnaire de service</value>
+        <value xml:lang="ja">ジョブマネージャーロックが有効</value>
     </property>
     <property key="WebtoolsJobTrackerJobsEvolution">
         <value xml:lang="en">Tracked jobs evolution</value>
         <value xml:lang="fr">État des jobs suivis</value>
+        <value xml:lang="ja">ジョブの進化を追跡</value>
     </property>
     <property key="WebtoolsJobTrackerList">
         <value xml:lang="en">Job Tracker List</value>
         <value xml:lang="fr">Liste des traceurs de job</value>
+        <value xml:lang="ja">ジョブトラッカー一覧</value>
     </property>
     <property key="WebtoolsLHSMapName">
         <value xml:lang="de">Name der LHS-Map</value>
@@ -3633,6 +3752,7 @@
     <property key="WebtoolsLayoutDemoSimpleGridHeaderInfo">
         <value xml:lang="en">Demonstration of a complex header for a collapsed screenlet</value>
         <value xml:lang="fr">Démonstration d'entête complexe pour screenlet repliée</value>
+        <value xml:lang="ja">壊れたスクリーンレットのための複雑なヘッダーの実証</value>
     </property>
     <property key="WebtoolsLayoutDemoText">
         <value xml:lang="en">Demonstrate layout best practices and provide a visual theme test page (it's recommended to use HTML source code).</value>
@@ -4015,6 +4135,7 @@
         <value xml:lang="de">Kein Ersatzes</value>
         <value xml:lang="en">No replacements</value>
         <value xml:lang="fr">Pas de remplacements</value>
+        <value xml:lang="ja">交換なし</value>
     </property>
     <property key="WebtoolsMyCertificates">
         <value xml:lang="de">Meine Zertifikate</value>
@@ -4044,6 +4165,7 @@
     <property key="WebtoolsNextJobManagerLock">
         <value xml:lang="en">Next job manager locks</value>
         <value xml:lang="fr">Prochains blocages du gestionnaire de service</value>
+        <value xml:lang="ja">次のジョブマネージャロック</value>
     </property>
     <property key="WebtoolsNoEntitiesRead">
         <value xml:lang="de">Keine Entität eingelesen</value>
@@ -4477,6 +4599,7 @@
     </property>
     <property key="WebtoolsSecretPermissionError">
         <value xml:lang="en">You do not have permission to manage secrets. The SECRET_MAINT or ENTITY_MAINT permission is required.</value>
+        <value xml:lang="ja">秘密を管理する権限はありません。 SECRET MAINT または ENTITY MAINT の許可が必要です。</value>
     </property>
     <property key="WebtoolsPermissionError">
         <value xml:lang="de">WebTools Autorisierungsfehler</value>
@@ -4892,6 +5015,7 @@
     </property>
     <property key="WebtoolsRunAsSystem">
         <value xml:lang="en">Run As System</value>
+        <value xml:lang="ja">システムとして動く</value>
     </property>
     <property key="WebtoolsRunGC">
         <value xml:lang="de">GC starten</value>
@@ -4948,6 +5072,7 @@
     <property key="WebtoolsRunTimeDataInfo">
         <value xml:lang="en">Run Time Data Info</value>
         <value xml:lang="fr">Information sur le moment de l'exécution </value>
+        <value xml:lang="ja">タイムデータ情報を実行</value>
         <value xml:lang="zh">运行时间数据信息</value>
         <value xml:lang="zh-TW">執行時間資料資訊</value>
     </property>
@@ -4979,6 +5104,7 @@
     </property>
     <property key="WebtoolsSearchString">
         <value xml:lang="en">Search String</value>
+        <value xml:lang="ja">検索文字列</value>
     </property>
     <property key="WebtoolsSecasIgnoreError">
         <value xml:lang="de">Fehler ignorieren</value>
@@ -5080,6 +5206,7 @@
     <property key="WebtoolsJobManagerLockList">
         <value xml:lang="en">Job manager locks List</value>
         <value xml:lang="fr">Liste des blocages du gest. service</value>
+        <value xml:lang="ja">ジョブマネージャーのロック一覧</value>
     </property>
     <property key="WebtoolsServerHitStatisticsTools">
         <value xml:lang="de">Statistik-Tools für Server-Besuche</value>
@@ -5110,6 +5237,7 @@
     <property key="WebtoolsServiceLimitedTime">
         <value xml:lang="en">Note: the duration of the service is limited to the transaction default timeout (60 seconds)</value>
         <value xml:lang="fr">A noter : la durée du service est limitée à la valeur par défaut des transactions (60 secondes)</value>
+        <value xml:lang="ja">Note: サービスの期間は、トランザクションのデフォルトタイムアウト(60秒)に制限されます。</value>
     </property>
     <property key="WebtoolsServiceClearPreviousParams">
         <value xml:lang="de">Vorige Parameter löschen</value>
@@ -5847,6 +5975,7 @@
     <property key="WebtoolsTTL">
         <value xml:lang="en">TTL</value>
         <value xml:lang="fr">Péremption</value>
+        <value xml:lang="ja">TTL</value>
         <value xml:lang="zh">存在时间</value>
         <value xml:lang="zh-TW">存在時間</value>
     </property>
@@ -5915,6 +6044,7 @@
         <value xml:lang="de">ThreadID</value>
         <value xml:lang="en">ID</value>
         <value xml:lang="fr">Réf</value>
+        <value xml:lang="ja">ID</value>
         <value xml:lang="th">รหัส</value>
         <value xml:lang="vi">Id</value>
         <value xml:lang="zh">标识</value>
@@ -6027,18 +6157,22 @@
     <property key="WebtoolsUelKeyString">
         <value xml:lang="en">Uel string key</value>
         <value xml:lang="fr">Clef de l'Uel</value>
+        <value xml:lang="ja">Uel 文字列キー</value>
     </property>
     <property key="WebtoolsUelMethodClass">
         <value xml:lang="en">Uel Method class</value>
         <value xml:lang="fr">Methode appelée par l'Uel</value>
+        <value xml:lang="ja">Uelメソッドクラス</value>
     </property>
     <property key="WebtoolsUelMethodParams">
         <value xml:lang="en">Uel method params</value>
         <value xml:lang="fr">Paramètres de la methode Uel</value>
+        <value xml:lang="ja">Uelメソッドのパラメータ</value>
     </property>
     <property key="WebtoolsUelDescription">
         <value xml:lang="en">Uel description</value>
         <value xml:lang="fr">Description de l'Uel</value>
+        <value xml:lang="ja">Uel 説明</value>
     </property>
     <property key="WebtoolsUnCheckAll">
         <value xml:lang="de">Keine auswählen</value>
@@ -6144,11 +6278,13 @@
     <property key="WebtoolsViewAsPdfTheHtmlLayoutDemo">
         <value xml:lang="en">View as Pdf the html layout : testing macro template ftl and global render (but not forcing the screen coherence)</value>
         <value xml:lang="fr">Voir en Pdf la disposition html : permet de tester les modèles de macro ftl et le rendu global (mais pas forcement la cohérence d'écran)</value>
+        <value xml:lang="ja">html レイアウトの Pdf として表示 : マクロ テンプレートの ftl とグローバル レンダーのテスト (ただし、画面の一貫性を強制しない)</value>
         <value xml:lang="zh">按PDF浏览网页版式：测试宏模版FTL和全局渲染程序(但是不强制页面一致)</value>
     </property>
     <property key="WebtoolsViewAsTextTheHtmlLayoutDemo">
         <value xml:lang="en">View as text (xml, csv and text) the html layout : testing macro template ftl and global render (but not forcing the screen coherence)</value>
         <value xml:lang="fr">Voir en text (xml, csv, text) la disposition html : permet de tester les modèles de macro ftl et le rendu global (mais pas forcement la cohérence d'écran)</value>
+        <value xml:lang="ja">html レイアウトのテキスト(xml, csv, text)として表示: マクロ テンプレートの ftl とグローバル レンダーのテスト (ただし、画面の一貫性を強制しない)</value>
         <value xml:lang="zh">按文本(XML，逗号分隔格式和文本)浏览网页版式：测试宏模版FTL和全局渲染程序(但是不强制页面一致)</value>
     </property>
     <property key="WebtoolsViewComponents">
@@ -6191,6 +6327,7 @@
     <property key="WebtoolsViewMetrics">
         <value xml:lang="en">View Metrics</value>
         <value xml:lang="fr">Voir les mesures</value>
+        <value xml:lang="ja">メトリックを見る</value>
         <value xml:lang="zh">浏览度量</value>
         <value xml:lang="zh-TW">檢視度量</value>
     </property>
@@ -6339,10 +6476,12 @@
     <property key="WebtoolsXMLImportInfoBewareTenant1">
         <value xml:lang="en">Beware, you are using tenant, import acts as the "loadAll" Gradle task that says: "Load default data; meant for OFBiz development, testing, and demo purposes".</value>
         <value xml:lang="fr">Attention, vous utilisez la fonctionnalité "tenant", l'import agit comme la tâche Gradle "loadAll" : "Charger les données par défaut ; destiné au développement, aux tests et à la démonstration OFBiz".</value>
+        <value xml:lang="ja">注意して、テナントを使用して、インポートは "loadAll" Gradle タスクとして機能します。 "Load default data; OFBiz 開発、テスト、およびデモの目的を意味します。</value>
     </property>
     <property key="WebtoolsXMLImportInfoBewareTenant2">
         <value xml:lang="en">You should use the "loadTenant" Gradle task to load tenant specific data.</value>
         <value xml:lang="fr">Vous devez utiliser la tâche Gradle "loadTenant" pour charger des données spécifiques à un tenant.</value>
+        <value xml:lang="ja">"loadTenant" Gradle タスクを使用してテナント固有のデータをロードします。</value>
     </property>
     <property key="WebtoolsYouMayCreateAnEntity">
         <value xml:lang="de">You may create an Entity ${entityName} by entering the values you want, and clicking Create.</value>
@@ -6359,61 +6498,76 @@
     <property key="WebtoolsReaderImportNotice">
         <value xml:lang="de">Eingabe Readers (Komma getrennt,keine Leerzeichen; aus entityengine.xml und ofbiz-component.xml Dateien; common ones include seed,ext,demo)</value>
         <value xml:lang="en">Enter Readers (comma separated, no spaces; from entityengine.xml and ofbiz-component.xml files; common ones include seed,ext,demo)</value>
+        <value xml:lang="ja">リーダー(コンマ区切り、スペースなし、 entityengine.xml および ofbiz-component.xml ファイルから)を入力します。 一般的なファイルにはシード、ext、demo が含まれます。</value>
     </property>
     <property key="WebtoolsSearchLocName">
         <value xml:lang="de">Ort/Namen Suchen</value>
         <value xml:lang="en">Search Names/Locations</value>
+        <value xml:lang="ja">名称・所在地検索</value>
     </property>
     <property key="WebtoolsType">
         <value xml:lang="de">Typ</value>
         <value xml:lang="en">Type</value>
+        <value xml:lang="ja">種類</value>
     </property>
     <property key="WebtoolsModelInduceFromDb">
         <value xml:lang="de">Modell-XML aus der Datenbank indizieren</value>
         <value xml:lang="en">Induce Model XML from Database</value>
+        <value xml:lang="ja">データベースからモデルXMLを導出</value>
     </property>
     <property key="ModelInduceDatasourceName">
         <value xml:lang="de">Datenquelle</value>
         <value xml:lang="en">Datasource</value>
+        <value xml:lang="ja">データソース</value>
     </property>
     <property key="ModelInduceEntityModel">
         <value xml:lang="de">Entitäten Model</value>
         <value xml:lang="en">Entity Model</value>
+        <value xml:lang="ja">Entityモデル</value>
     </property>
     <property key="ModelInduceEntityGroup">
         <value xml:lang="de">Entitäten Gruppe</value>
         <value xml:lang="en">Entity Group</value>
+        <value xml:lang="ja">エンティティグループ</value>
     </property>
     <property key="ModelInduceInducedText">
         <value xml:lang="de">Induzierter Text</value>
         <value xml:lang="en">Induced Text</value>
+        <value xml:lang="ja">誘導テキスト</value>
     </property>
     <property key="ModelInducePackageName">
         <value xml:lang="de">Packet Name</value>
         <value xml:lang="en">Package Name</value>
+        <value xml:lang="ja">パッケージ名</value>
     </property>
     <property key="ModelInduceInduceTypeError">
         <value xml:lang="de">Bitte Induzierungs Typen auswählen.</value>
         <value xml:lang="en">Please select an Induce Type.</value>
+        <value xml:lang="ja">インサートタイプを選択してください。</value>
     </property>
     <property key="ModelInduceDatasourceNameError">
         <value xml:lang="de">Name der Datenquelle benötigt.</value>
         <value xml:lang="en">Datasource name required.</value>
+        <value xml:lang="ja">必要なデータソース名。</value>
     </property>
     <property key="ModelInduceEntityGroupError">
         <value xml:lang="de">Für den Induzierungstyp "EntitätenGruppe" wird der Packet Name benötigt.</value>
         <value xml:lang="en">Package name required for induce type entitygroup.</value>
+        <value xml:lang="ja">型実体グループを誘発するために必要なパッケージ名。</value>
     </property>
     <property key="ModelInduceDataStructureError">
         <value xml:lang="de">Ermittlung der Datenstruktur fehlgeschlagen. Bitte gültige Datenquelle angeben.</value>
         <value xml:lang="en">Could not determine Structure for this datasource. Please choose a valid datasource.</value>
+        <value xml:lang="ja">本データソースの構成は決定できません。有効なデータソースを選択してください。</value>
     </property>
      <property key="typeAndTitleDisclaimer">
         <value xml:lang="de">Bitte beachten Sie, dass die Attribute Type und Title der Referenzen nicht aus der Datenbank heraus rekonstruiert werden können.</value>
         <value xml:lang="en">Please note that the attributes Type and Title for references cannot be derived from the database.</value>
+        <value xml:lang="ja">参照用の属性タイプとタイトルはデータベースから派生できませんのでご注意ください。</value>
     </property>
     <property key="pleaseAddManually">
         <value xml:lang="de">Diese müssen händisch nachgepflegt werden.</value>
         <value xml:lang="en">These must be added manually.</value>
+        <value xml:lang="ja">手動で追加する必要があります。</value>
     </property>
 </resource>

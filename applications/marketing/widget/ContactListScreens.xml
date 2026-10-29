@@ -447,7 +447,7 @@ under the License.
                     <decorator-section name="body">
                         <screenlet title="Opt-Out Results">
                             <container>
-                                <label text="You have been successfully removed from the ${contactList.contactListName} mailing list!"/>                                            
+                                <label text="${uiLabelMap.MarketingRemovedFromMailingList} ${contactList.contactListName}!"/>
                             </container>                                        
                         </screenlet>
                     </decorator-section>

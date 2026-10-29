@@ -22,12 +22,14 @@
     <property key="BirtOrderReportsWarning">
         <value xml:lang="en">Four Birt reports (Last 3 Months Sales, Sales, Sales Order Discount Code, Product Demand) require to feed the BI data base (note that the bi.properties file will need to be updated after September 2026). Then only new approved orders will be taken into account.</value>
         <value xml:lang="fr">Quatre tableau créés par Birt (Ventes des 3 derniers mois, Ventes, Ventes par codes promotionels, Demandes par produit) nécessitent d'alimenter la base de données d'Inform. décis. (notez aussi la nécessaire màj du fichier bi.properties après septembre 2026). Ensuite seules les commandes nouvellement approuvées seront prises en compte.</value>
+        <value xml:lang="ja">4つのBIRTレポート（直近3か月の売上、売上、受注割引コード、製品需要）を使用するには、BIデータベースへのデータ投入が必要です（2026年9月以降は bi.properties ファイルの更新が必要です）。その後に承認された注文のみが対象になります。</value>
         <value xml:lang="zh">4个Birt报告（最近3个月销售、销售、销售订单折扣优惠码、产品需求）要求提供BI数据库（注意：bi.properites文件需要在2026年9月后进行更新）。只会统计新批准的那些订单。</value>
     </property>
     <property key="DeleteOrderItemShipGroup">
         <value xml:lang="de">Versandgruppe löschen</value>
         <value xml:lang="en">Delete this ship group</value>
         <value xml:lang="fr">Supprimer le groupe d'expédition</value>
+        <value xml:lang="ja">この船グループを削除します。</value>
         <value xml:lang="nl">Verwijder verzendgroep</value>
         <value xml:lang="zh">删除这个运输组</value>
     </property>
@@ -1215,6 +1217,7 @@
         <value xml:lang="de">Retourenposition Seq ID</value>
         <value xml:lang="en">Return Item Seq ID</value>
         <value xml:lang="fr">Ref. ligne de retour</value>
+        <value xml:lang="ja">返品アイテム連番ID</value>
         <value xml:lang="nl">Retour Itemnr ID</value>
         <value xml:lang="zh">退货明细序号</value>
     </property>
@@ -1923,6 +1926,7 @@
         <value xml:lang="de">Zur Versandgruppe hinzufügen</value>
         <value xml:lang="en">Add to ship group</value>
         <value xml:lang="fr">Ajouter au groupe d'expédition</value>
+        <value xml:lang="ja">船舶グループに追加</value>
         <value xml:lang="nl">Voeg toe aan verzendgroep</value>
         <value xml:lang="zh">添加到运输组</value>
     </property>
@@ -2078,31 +2082,38 @@
     </property>
     <property key="OrderAllocated">
         <value xml:lang="en">Allocated</value>
+        <value xml:lang="ja">アクセス</value>
         <value xml:lang="nl">Toegewezen</value>
     </property>
     <property key="OrderAllocatedUnits">
         <value xml:lang="en">Allocated Units</value>
+        <value xml:lang="ja">割り当てられた単位</value>
         <value xml:lang="nl">Toegewezen eenheden</value>
     </property>
     <property key="OrderAllocatedValue">
         <value xml:lang="en">Allocated Value</value>
+        <value xml:lang="ja">割り当てられた価値</value>
         <value xml:lang="nl">Toegewezen waarde</value>
     </property>
     <property key="OrderAllocation">
         <value xml:lang="en">Allocation</value>
+        <value xml:lang="ja">アクセス</value>
         <value xml:lang="nl">Allocatie</value>
     </property>
     <property key="OrderAllocationPlan">
         <value xml:lang="en">Allocation Plan</value>
         <value xml:lang="fr">Plan d'allocation</value>
+        <value xml:lang="ja">配置計画</value>
         <value xml:lang="nl">Allocatieplan</value>
     </property>
     <property key="OrderAllocationPlanNotFound">
         <value xml:lang="en">Allocation Plan Not Found.</value>
+        <value xml:lang="ja">割り当てプランが見つかりません。</value>
         <value xml:lang="nl">Allocatieplan niet gevonden.</value>
     </property>
     <property key="OrderAllocationPlanViewPermissionError">
         <value xml:lang="en">You do not have the permission to view the allocation plan.</value>
+        <value xml:lang="ja">割り当てプランを表示することはできません。</value>
         <value xml:lang="nl">U heeft geen permissies om het allocatieplan te zien.</value>
     </property>
     <property key="OrderAllowSolicitation">
@@ -2274,10 +2285,12 @@
     </property>
     <property key="OrderApproveItem">
         <value xml:lang="en">Approve Item</value>
+        <value xml:lang="ja">アイテム承認</value>
         <value xml:lang="nl">Bevestig item</value>
     </property>
     <property key="OrderApprovePlan">
         <value xml:lang="en">Approve Plan</value>
+        <value xml:lang="ja">承認プラン</value>
         <value xml:lang="nl">Plan goedkeuren</value>
     </property>
     <property key="OrderApproveOrder">
@@ -2429,6 +2442,7 @@
     </property>
     <property key="OrderAutoReserve">
         <value xml:lang="en">Auto Reserve</value>
+        <value xml:lang="ja">オートリザーブ</value>
         <value xml:lang="nl">Automatische reserving</value>
     </property>
     <property key="OrderAverageRating">
@@ -2455,6 +2469,7 @@
         <value xml:lang="de">AVS</value>
         <value xml:lang="en">AVS</value>
         <value xml:lang="fr">AVS</value>
+        <value xml:lang="ja">AVS</value>
         <value xml:lang="nl">AVS (betaling)</value>
         <value xml:lang="zh">地址验证服务</value>
         <value xml:lang="zh-TW">位址驗證服務</value>
@@ -2684,6 +2699,7 @@
     </property>
     <property key="OrderCancelEdit">
         <value xml:lang="en">Cancel Edit</value>
+        <value xml:lang="ja">キャンセル 編集</value>
         <value xml:lang="nl">Annuleer wijziging</value>
     </property>
     <property key="OrderCancelledItemToOrder">
@@ -2699,6 +2715,7 @@
     </property>
     <property key="OrderCancelPlan">
         <value xml:lang="en">Cancel Plan</value>
+        <value xml:lang="ja">キャンセルプラン</value>
         <value xml:lang="nl">Annuleer plan</value>
     </property>
     <property key="OrderCancelOrder">
@@ -3157,7 +3174,7 @@
         <value xml:lang="es">Parte de la familia de software Apache OFBiz de código abierto</value>
         <value xml:lang="fr">Un module de la famille Apache OFBiz, logiciel libre de gestion d'entreprise.</value>
         <value xml:lang="it">Un modulo della famiglia di software open source Apache OFBiz</value>
-        <value xml:lang="ja">Part of the Apache OFBiz Family of Open Source Software</value>
+        <value xml:lang="ja">Apache OFBiz オープンソースソフトウェアファミリーの一員</value>
         <value xml:lang="nl">Deel van de Apache OFBiz-suite van Open Source Software</value>
         <value xml:lang="pt-BR">Parte da família OfBiz de software de fonte aberta</value>
         <value xml:lang="pt-PT">Parte da família OfBiz de software de fonte aberta</value>
@@ -3340,6 +3357,7 @@
     </property>
     <property key="OrderCreatePlan">
       <value xml:lang="en">Create Plan</value>
+      <value xml:lang="ja">プランの作成</value>
       <value xml:lang="nl">Allocatieplan aanmaken</value>
     </property>
     <property key="OrderCreateTestSalesOrderSingleError">
@@ -3588,6 +3606,7 @@
         <value xml:lang="de">Neue Bedingung für Angebot erstellen</value>
         <value xml:lang="en">Create New Quote Term</value>
         <value xml:lang="fr">Créer une condition de réglement de devis</value>
+        <value xml:lang="ja">新しい引用用語を作成する</value>
         <value xml:lang="nl">Nieuwe conditie aanmaken</value>
         <value xml:lang="zh">新建询价条款</value>
         <value xml:lang="zh-TW">新建詢價條款</value>
@@ -3987,6 +4006,7 @@
     </property>
     <property key="OrderDefaultOrderItemTypeValue">
         <value xml:lang="en">default value will be PRODUCT_ORDER_ITEM</value>
+        <value xml:lang="ja">デフォルト値は PRODUCT_ORDER_ITEM です。</value>
         <value xml:lang="nl">Standaardwaarde = PRODUCT_ORDER_ITEM</value>
     </property>
     <property key="OrderDeliveryScheduleInfo">
@@ -4548,6 +4568,7 @@
     </property>
     <property key="OrderExtValue">
         <value xml:lang="en">Ext. Value</value>
+        <value xml:lang="ja">Ext. 値</value>
         <value xml:lang="nl">Ext. waarde</value>
     </property>
     <property key="OrderExternalId">
@@ -5534,6 +5555,7 @@
         <value xml:lang="de">Bestellpos. ID</value>
         <value xml:lang="en">Ref</value>
         <value xml:lang="fr">N° ligne</value>
+        <value xml:lang="ja">参考文献</value>
         <value xml:lang="nl">regel-ID</value>
         <value xml:lang="zh">参考</value>
     </property>
@@ -6128,6 +6150,7 @@
        <value xml:lang="de">Keine Artikel im Angebot</value>
        <value xml:lang="en">No Items in quote</value>
        <value xml:lang="fr">Aucune ligne dans le devis</value>
+       <value xml:lang="ja">引用符の項目無し</value>
        <value xml:lang="nl">Geen items in offerte</value>
        <value xml:lang="zh">询价中没有明细</value>
     </property>
@@ -6208,6 +6231,7 @@
     </property>
     <property key="OrderNewAllocationPlan">
         <value xml:lang="en">New Allocation Plan</value>
+        <value xml:lang="ja">新規移転計画</value>
         <value xml:lang="nl">Nieuw allocatieplan</value>
     </property>
     <property key="OrderNewDropShipmentForShipGroup">
@@ -7327,6 +7351,7 @@
     </property>
     <property key="OrderOrderingChannel">
         <value xml:lang="en">Ordering Channel</value>
+        <value xml:lang="ja">注文チャネル</value>
         <value xml:lang="nl">Verkoopkanaal</value>
     </property>
     <property key="OrderOrderBillFromParty">
@@ -8286,6 +8311,7 @@
     </property>
     <property key="OrderOrderQuoteCreatedSuccessfully">
         <value xml:lang="en">Quote Created Successfully</value>
+        <value xml:lang="ja">成功に成功した引用</value>
         <value xml:lang="nl">Quote aangemaakt</value>
     </property>
     <property key="OrderOrderQuoteDefaultUnitPrice">
@@ -8453,6 +8479,7 @@
         <value xml:lang="de">Angebotsbedingung bearbeiten</value>
         <value xml:lang="en">Edit Quote Term</value>
         <value xml:lang="fr">Editer les conditions de réglement du devis</value>
+        <value xml:lang="ja">引用語句の編集</value>
         <value xml:lang="nl">Offerte-conditie aanpassen</value>
         <value xml:lang="vi">Cập nhật Điều khoản trên Báo giá</value>
         <value xml:lang="zh">编辑询价条款</value>
@@ -8624,6 +8651,7 @@
     </property>
     <property key="OrderOrderQuoteLeadTimeDays">
         <value xml:lang="en">Lead Time Days</value>
+        <value xml:lang="ja">調達期間の日</value>
         <value xml:lang="nl">Doorlooptijd (dagen)</value>
     </property>
     <property key="OrderOrderQuoteListAdjustments">
@@ -8719,6 +8747,7 @@
         <value xml:lang="de">Liste der Angebotsbedingungen</value>
         <value xml:lang="en">List Quote Terms</value>
         <value xml:lang="fr">Liste des conditions de règlement du devis</value>
+        <value xml:lang="ja">リスト引用条件</value>
         <value xml:lang="nl">Voorwaarden</value>
         <value xml:lang="zh">询价条款列表</value>
         <value xml:lang="zh-TW">詢價條款清單</value>
@@ -8875,6 +8904,7 @@
     </property>
     <property key="OrderOrderQuoteRoleAddedSuccessfully">
         <value xml:lang="en">Quote Role Added Successfully.</value>
+        <value xml:lang="ja">引用ロールは成功しました。</value>
         <value xml:lang="nl">Party en rol toegevoegd.</value>
     </property>
     <property key="OrderOrderQuoteRoles">
@@ -9015,6 +9045,7 @@
     <property key="OrderOrderQuoteUpdatedSuccessfully">
         <value xml:lang="en">Quote updated successfully.</value>
         <value xml:lang="fr">Le devis a été mis à jour avec succès.</value>
+        <value xml:lang="ja">正常に更新された引用.</value>
         <value xml:lang="nl">Update uitgevoerd</value>
     </property>
     <property key="OrderOrderQuoteViewProfit">
@@ -9159,6 +9190,7 @@
     </property>
     <property key="OrderReturnHeaderType">
         <value xml:lang="en">Return Header Type</value>
+        <value xml:lang="ja">リターンヘッダーのタイプ</value>
         <value xml:lang="nl">Soort retour</value>
     </property>
     <property key="OrderOrderShortcuts">
@@ -9275,6 +9307,7 @@
         <value xml:lang="fr">Valeur du texte</value>
         <value xml:lang="hi-IN">पाठ्य मान</value>
         <value xml:lang="it">Testo Valore</value>
+        <value xml:lang="ja">テキスト値</value>
         <value xml:lang="nl">Tekst</value>
         <value xml:lang="pt">Valor do Texto</value>
         <value xml:lang="ru">Текстовое значение</value>
@@ -9356,10 +9389,12 @@
     </property>
     <property key="OrderOrderedUnits">
         <value xml:lang="en">Ordered Units</value>
+        <value xml:lang="ja">注文済みユニット</value>
         <value xml:lang="nl">Bestelde eenheden</value>
     </property>
     <property key="OrderOrderedValue">
         <value xml:lang="en">Ordered Value</value>
+        <value xml:lang="ja">注文された価値</value>
         <value xml:lang="nl">Bestelwaarde</value>
     </property>
     <property key="OrderOrders">
@@ -9976,14 +10011,17 @@
     </property>
     <property key="OrderPlanHeader">
         <value xml:lang="en">Plan Header</value>
+        <value xml:lang="ja">プランヘッダ</value>
         <value xml:lang="nl">Kop</value>
     </property>
     <property key="OrderPlanItems">
         <value xml:lang="en">Plan Items</value>
+        <value xml:lang="ja">プランアイテム</value>
         <value xml:lang="nl">Artikelen</value>
     </property>
     <property key="OrderPlanName">
         <value xml:lang="en">Plan Name</value>
+        <value xml:lang="ja">プラン名</value>
         <value xml:lang="nl">Naam</value>
     </property>
     <property key="OrderPlannedInReceive">
@@ -10331,6 +10369,7 @@
     </property>
     <property key="OrderPromoAppliedSuccessfully">
         <value xml:lang="en">Promotion Code[${productPromoCodeId}] has been applied successfully</value>
+        <value xml:lang="ja">プロモーションコード [${productPromoCodeId}] を適用しました。</value>
         <value xml:lang="nl">Promo ${productPromoCodeId] succesvol toegepast</value>
     </property>
     <property key="OrderPromotion">
@@ -10932,6 +10971,7 @@
         <value xml:lang="en">Empty for total quote</value>
         <value xml:lang="fr">Le total du devis est vide</value>
         <value xml:lang="it">Totale preventivo è vuoto</value>
+        <value xml:lang="ja">合計引用符の空の</value>
         <value xml:lang="nl">Quote legen</value>
         <value xml:lang="zh">清空全部询价</value>
         <value xml:lang="zh-TW">清空全部詢價</value>
@@ -11299,6 +11339,7 @@
         <value xml:lang="de">Promotion entfernen</value>
         <value xml:lang="en">Remove Promotion</value>
         <value xml:lang="fr">Supprimer la promotion</value>
+        <value xml:lang="ja">プロモーションの削除</value>
         <value xml:lang="nl">Verwijder PROMO</value>
         <value xml:lang="zh">删除促销</value>
     </property>
@@ -12048,11 +12089,13 @@
     <property key="OrderReserveAfterDate">
          <value xml:lang="en">Reserve After Date</value>
          <value xml:lang="fr">Réserver après cette date</value>
+         <value xml:lang="ja">予約後日</value>
          <value xml:lang="nl">Reserveer na de datum</value>
     </property>
     <property key="OrderReserveAfterDateDefault">
          <value xml:lang="en">Default Reserve After Date</value>
          <value xml:lang="fr">Date de réservation par défaut</value>
+         <value xml:lang="ja">デフォルトは日付後に予約します</value>
          <value xml:lang="nl">Reserveer na standaarddatum</value>
     </property>
     <property key="OrderReturnAccept">
@@ -13659,6 +13702,7 @@
         <value xml:lang="de">Ansicht nach Versandgruppe</value>
         <value xml:lang="en">View by ship group</value>
         <value xml:lang="fr">Voir par groupe d'expédition</value>
+        <value xml:lang="ja">船舶グループで見る</value>
         <value xml:lang="nl">Info per zendgroup</value>
         <value xml:lang="zh">按运输组浏览</value>
     </property>
@@ -13666,6 +13710,7 @@
         <value xml:lang="de">Ansicht Versandgruppe nach Bestellposition</value>
         <value xml:lang="en">View ship group by order item</value>
         <value xml:lang="fr">Voir les groupes d'expédition par ligne de commandes</value>
+        <value xml:lang="ja">注文項目で船グループを見る</value>
         <value xml:lang="nl">Zendgroep per order item</value>
         <value xml:lang="zh">按订单明细浏览运输组</value>
     </property>
@@ -13959,11 +14004,13 @@
     <property key="OrderShoppingListCreatedSuccessfully">
         <value xml:lang="de">Die Einkaufsliste wurde erfolgreich erstellt.</value>
         <value xml:lang="en">Shopping list has been created successfully.</value>
+        <value xml:lang="ja">ショッピングリストが正常に作成されました。</value>
         <value xml:lang="nl">Boodschappenlijst aangemaakt.</value>
     </property>
     <property key="OrderShoppingListUpdatedSuccessfully">
         <value xml:lang="de">Die Einkaufsliste wurde erfolgreich aktualisiert.</value>
         <value xml:lang="en">Shopping list has been updated successfully.</value>
+        <value xml:lang="ja">ショッピングリストが正常に更新されました。</value>
         <value xml:lang="nl">Boodschappenlijst bijgewerkt.</value>
     </property>
     <property key="OrderShortfalled">
@@ -15189,6 +15236,7 @@
     </property>
     <property key="OrderViewOrdersPdf">
         <value xml:lang="en">View PDF</value>
+        <value xml:lang="ja">PDFファイルを見る</value>
     </property>
     <property key="OrderViewPermissionError">
         <value xml:lang="ar">ليس لديك صلاحية مشاهدة هذه الصفحة (تحتاج إلى "ORDERMGR_VIEW" أو "ORDERMGR_PURCHASE_VIEW" أو "ORDERMGR_ADMIN").</value>
@@ -15537,6 +15585,7 @@
     </property>
     <property key="PageTitleCreateAllocationPlan">
         <value xml:lang="en">Create Allocation Plan</value>
+        <value xml:lang="ja">割り当てプランを作成する</value>
         <value xml:lang="nl">Nieuw allocatieplan</value>
     </property>
     <property key="PageTitleCreateQuoteForCustRequest">
@@ -15572,6 +15621,7 @@
     </property>
     <property key="PageTitleEditAllocationPlan">
         <value xml:lang="en">Edit Allocation Plan</value>
+        <value xml:lang="ja">割り当てプランの編集</value>
         <value xml:lang="nl">Allocatieplan wijzigen</value>
     </property>
     <property key="PageTitleEditQuoteItemForCustRequest">
@@ -15686,6 +15736,7 @@
     </property>
     <property key="PageTitleFindAllocationPlan">
         <value xml:lang="en">Find Allocation Plan</value>
+        <value xml:lang="ja">割り当てプランを探す</value>
         <value xml:lang="nl">Allocatieplan zoeken/vinden</value>
     </property>
     <property key="PageTitleFindApprovedProductRequirements">
@@ -16284,10 +16335,12 @@
     </property>
     <property key="PageTitleLookupReturnHeader">
         <value xml:lang="en">Lookup Return Header</value>
+        <value xml:lang="ja">ルックアップリターンヘッダ</value>
         <value xml:lang="nl">Retouren zoeken/vinden</value>
     </property>
     <property key="ItemAddedSuccessfully">
        <value xml:lang="en">Item ${productId} added successfully</value>
        <value xml:lang="it">Articolo ${productId} aggiunto con successo</value>
+       <value xml:lang="ja">アイテム ${productId} 正常に追加</value>
     </property>
 </resource>

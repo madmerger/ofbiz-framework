@@ -106,6 +106,7 @@
     </property>
     <property key="ServiceExceptionThrownWhileGettingServiceConfiguration">
         <value xml:lang="en">Exception thrown while getting service configuration: ${errorString}</value>
+        <value xml:lang="ja">サービス構成を取得中にスローされた例外: ${errorString}</value>
     </property>
     <property key="ServiceParameterValueNotValid">
         <value xml:lang="en">The ID value in the parameter ${parameterName} was not valid: ${errorDetails}</value>
@@ -117,22 +118,27 @@
     <property key="ServicePermissionError">
         <value xml:lang="en">You haven't the permission for the service ${serviceName}, reason : ${failMessage}</value>
         <value xml:lang="fr">Vous n'avez pas la permission sur le service ${serviceName}, raison : ${failMessage}</value>
+        <value xml:lang="ja">サービスの許可がない場合 ${serviceName}, 理由 : ${failMessage}</value>
     </property>
     <property key="ServicePermissionErrorDefinitionProblem">
         <value xml:lang="en">Problem on permission service definition, please see with your integrator</value>
         <value xml:lang="fr">Problème dans la définition d'un service de validation de permission, merci d'en informer votre intégrateur</value>
+        <value xml:lang="ja">許可サービスの定義の問題は、あなたのインテグレータを参照してください</value>
     </property>
     <property key="ServicePermissionErrorInvalidPermissionType">
         <value xml:lang="en">The permission type call by the service isn't valid. Please see with your integrator</value>
         <value xml:lang="fr">Le type de permission défini sur le service appelé n'est pas conforme, veuiller prendre contact avec votre intégrateur !</value>
+        <value xml:lang="ja">サービスによるアクセス許可タイプは有効ではありません。</value>
     </property>
     <property key="ServicePermissionErrorRefused">
         <value xml:lang="en">Access refused</value>
         <value xml:lang="fr">Accés refusé</value>
+        <value xml:lang="ja">アクセス拒否</value>
     </property>
     <property key="ServicePermissionErrorUserLoginMissing">
         <value xml:lang="en">User login is missing</value>
         <value xml:lang="fr">Absence d'utilisateur identifié</value>
+        <value xml:lang="ja">ユーザログインが見つかりません</value>
     </property>
     <property key="ServiceTestDeadLockError">
         <value xml:lang="en">Error running deadlock test services: ${errorString}</value>
@@ -278,6 +284,7 @@
         <value xml:lang="en">Value found (with ids ${pkFields}), cannot create a new one</value>
         <value xml:lang="fr">La valeur a été trouvée (avec les réfs. ${pkFields}), une nouvelle ne peut donc pas être créée</value>
         <value xml:lang="it">Valore troavato, non è possibile creare</value>
+        <value xml:lang="ja">見つかる価値(IDと) ${pkFields})、新しいものを作成できません。</value>
         <value xml:lang="zh">发现了数值(标识为${pkFields})，不能新建</value>
     </property>
     <property key="ServiceValueNotFound">
@@ -292,6 +299,7 @@
         <value xml:lang="en">Value not found, cannot remove</value>
         <value xml:lang="fr">La valeur n'a pas été trouvée, suppression impossible</value>
         <value xml:lang="it">Valore non troavato, non è possibile sopprimere</value>
+        <value xml:lang="ja">見つからない価値は、取除くことができません</value>
         <value xml:lang="zh">没有找到数值，不能删除</value>
     </property>
 </resource>

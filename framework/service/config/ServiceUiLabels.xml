@@ -21,14 +21,18 @@
 <resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://ofbiz.apache.org/dtds/ofbiz-properties.xsd">
     <property key="EntityCreatedSuccessfully">
         <value xml:lang="en">${label} created successfully</value>
+        <value xml:lang="ja">${label} 正常に作成</value>
     </property>
     <property key="EntityUpdatedSuccessfully">
         <value xml:lang="en">${label} updated successfully</value>
+        <value xml:lang="ja">${label} 正常に更新</value>
     </property>
     <property key="EntityDeletedSuccessfully">
         <value xml:lang="en">${label} deleted successfully</value>
+        <value xml:lang="ja">${label} 正常に削除</value>
     </property>
     <property key="EntityExpiredSuccessfully">
         <value xml:lang="en">${label} expired successfully</value>
+        <value xml:lang="ja">${label} 正常に終了</value>
     </property>
 </resource>

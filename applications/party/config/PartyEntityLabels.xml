@@ -609,6 +609,7 @@
         <value xml:lang="de">iCalendar URL</value>
         <value xml:lang="en">iCalendar URL</value>
         <value xml:lang="fr">Adresse du calendrier (URL)</value>
+        <value xml:lang="ja">iカレンダー URL</value>
         <value xml:lang="zh">iCalendar网址</value>
         <value xml:lang="zh-TW">iCalendar網址</value>
     </property>
@@ -1082,6 +1083,7 @@
         <value xml:lang="de">Fileserver</value>
         <value xml:lang="en">File server</value>
         <value xml:lang="fr">Serveur de fichier</value>
+        <value xml:lang="ja">ファイルサーバ</value>
     </property>
     <property key="ContactMechType.description.INTERNAL_PARTYID">
         <value xml:lang="ar">ملاحظة طرف داخلية</value>
@@ -3154,6 +3156,7 @@
         <value xml:lang="fr">FAI</value>
         <value xml:lang="hi-IN">आईएसपी(ISP)</value>
         <value xml:lang="it">FAI</value>
+        <value xml:lang="ja">ISP</value>
         <value xml:lang="ru">Провайдер Интернет</value>
         <value xml:lang="zh">互联网服务提供商</value>
         <value xml:lang="zh-TW">網際網服務供應商</value>
@@ -4731,9 +4734,11 @@
     </property>
     <property key="TermType.description.INCO_TERM_2020_DPU">
         <value xml:lang="en">Incoterm 2020 Delivered at Place Unloaded</value>
+        <value xml:lang="ja">Incoterm 2020 は、プレイスアンロードで配信</value>
     </property>
     <property key="TermType.description.INCO_TERM_2020_DAP">
         <value xml:lang="en">Incoterm 2020 Delivered at Place</value>
+        <value xml:lang="ja">Incoterm 2020年 開催場所</value>
     </property>
     <property key="TermType.description.INCO_TERM_2020_DDP">
         <value xml:lang="de">Incoterm 2020 Geliefert Zoll bezahlt</value>

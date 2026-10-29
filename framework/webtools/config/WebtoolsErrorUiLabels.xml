@@ -103,6 +103,7 @@
     <property key="genericWebEvent.delete_succeeded">
         <value xml:lang="en">Delete succeeded</value>
         <value xml:lang="fr">La suppression a été effectuée: </value>
+        <value xml:lang="ja">成功した削除</value>
     </property>
     <property key="genericWebEvent.entity_name_not_specified">
         <value xml:lang="en">The entityName was not specified, but is required</value>
@@ -246,15 +247,19 @@
     </property>
     <property key="WebtoolsRequiredFieldMissingEoModeldFullPath">
         <value xml:lang="en">Required Field Missing : Eo Modeld Full Path</value>
+        <value xml:lang="ja">必須フィールドの欠損:Eo Modeldフルパス</value>
     </property>
     <property key="WebtoolsRequiredFieldMissingServiceName">
         <value xml:lang="en">Required Field Missing : Service Name</value>
+        <value xml:lang="ja">必須フィールド ミス : サービス名</value>
     </property>
     <property key="WebtoolsRequiredFieldMissingUpdateLabel">
         <value xml:lang="en">Required Field Missing : Update Label</value>
+        <value xml:lang="ja">必須項目 : 更新ラベル</value>
     </property>
     <property key="WebtoolsRequiredFieldMissingFileName">
         <value xml:lang="en">Required Field Missing : File Name</value>
+        <value xml:lang="ja">必須フィールド名 : ファイル名</value>
     </property>
     <property key="saveLabelsToXmlFile.exceptionDuringSaveLabelsToXmlFile">
         <value xml:lang="en">Exception during saving labels to xml file</value>

@@ -1247,6 +1247,7 @@
         <value xml:lang="es">URL OFBiz</value>
         <value xml:lang="fr">URL (lien internet) au sein d'OFBiz</value>
         <value xml:lang="it">URL OFBiz</value>
+        <value xml:lang="ja">OFBizのURL</value>
         <value xml:lang="pt">URL OFBiz</value>
         <value xml:lang="ro">URL OFBiz</value>
         <value xml:lang="zh">OFBiz网址</value>
@@ -3776,11 +3777,13 @@
     </property>
     <property key="Enumeration.description.WF_PREDECESSOR">
         <value xml:lang="en">Preceding</value>
+        <value xml:lang="ja">先行予約</value>
         <value xml:lang="nl">Voorafgaand</value>
         <value xml:lang="zh">预处理</value>
     </property>
     <property key="Enumeration.description.WF_SUCCESSOR">
         <value xml:lang="en">Succeeding</value>
+        <value xml:lang="ja">スキューシーディング</value>
         <value xml:lang="nl">Opvolgend</value>
         <value xml:lang="zh">后处理</value>
     </property>
@@ -7999,6 +8002,7 @@
     <property key="Geo.geoName.SRB">
         <value xml:lang="de">Serbien</value>
         <value xml:lang="en">Serbia</value>
+        <value xml:lang="ja">セルビア</value>
     </property>
     <property key="Geo.geoName.STP">
         <value xml:lang="ar">سان تومي وبرينسيبي</value>
@@ -8748,22 +8752,27 @@
     <property key="GeoAssocType.description.COUNTY_CITY">
         <value xml:lang="en">City in a county</value>
         <value xml:lang="fr">Ville du département</value>
+        <value xml:lang="ja">郡の市</value>
     </property>
     <property key="GeoAssocType.description.COUNTY_SEAT">
         <value xml:lang="en">Administrative Main City of a County</value>
         <value xml:lang="fr">Chef-lieu du département</value>
+        <value xml:lang="ja">県の主要都市</value>
     </property>
     <property key="GeoAssocType.description.GROUP_MEMBER">
         <value xml:lang="en">Geo Group Member</value>
         <value xml:lang="fr">Membre de la zone Géographique</value>
+        <value xml:lang="ja">ジオグループメンバー</value>
     </property>
     <property key="GeoAssocType.description.POSTAL_CODE">
         <value xml:lang="en">Postal code associated to a GeoType</value>
         <value xml:lang="fr">Code Postal associé au type Géographique</value>
+        <value xml:lang="ja">GeoType に関連する郵便番号</value>
     </property>
     <property key="GeoAssocType.description.REGIONS">
         <value xml:lang="en">For a region of a larger Geo, i.e. states, counties, provinces...</value>
         <value xml:lang="fr">Région d'une zone géographique plus large</value>
+        <value xml:lang="ja">より大きい地、すなわち州、郡、州の地域のために...</value>
     </property>
     <property key="GeoType.description.CITY">
         <value xml:lang="ar">مدينة</value>
@@ -12004,6 +12013,7 @@
     </property>
     <property key="StatusItem.description.PMNT_VOID">
         <value xml:lang="en">Voided</value>
+        <value xml:lang="ja">ヴォイド</value>
         <value xml:lang="zh">已作废</value>
         <value xml:lang="zh-TW">已作廢</value>
     </property>
@@ -12759,6 +12769,7 @@
     <property key="StatusItem.description.ROU_INACTIVE">
         <value xml:lang="en">Inactive</value>
         <value xml:lang="fr">Inutilisable</value>
+        <value xml:lang="ja">インアクティブ</value>
     </property>
     <property key="StatusItem.description.ROU_PROD_TEMPLATE">
         <value xml:lang="en">Production Template</value>
@@ -13163,6 +13174,7 @@
     <property key="StatusItem.description.TRAINING_APPLIED">
         <value xml:lang="en">Applied</value>
         <value xml:lang="fr">Postulée</value>
+        <value xml:lang="ja">消込済</value>
         <value xml:lang="ru">Приложенный</value>
         <value xml:lang="zh">已申请</value>
         <value xml:lang="zh-TW">已申請</value>
@@ -17369,9 +17381,11 @@
     </property>
     <property key="Uom.abbreviation.WT_g">
         <value xml:lang="en">g</value>
+        <value xml:lang="ja">ツイート</value>
     </property>
     <property key="Uom.abbreviation.WT_kg">
         <value xml:lang="en">kg</value>
+        <value xml:lang="ja">カートン</value>
         <value xml:lang="ru">кг</value>
         <value xml:lang="th">กิโลกรัม</value>
         <value xml:lang="vi">cân</value>
@@ -22027,34 +22041,42 @@
     <property key="VisualTheme.description.HELVETICUS_AMBER">
         <value xml:lang="en">: a Rainbowstone evolution in orange</value>
         <value xml:lang="fr"> : une évolution de Rainbowstone en orange</value>
+        <value xml:lang="ja">: オレンジのレインボーストーンの進化</value>
     </property>
     <property key="VisualTheme.description.HELVETICUS_RUBY">
         <value xml:lang="en">: a Rainbowstone evolution in red</value>
         <value xml:lang="fr"> : une évolution de Rainbowstone en rouge</value>
+        <value xml:lang="ja">: 赤のレインボーストーンの進化</value>
     </property>
     <property key="VisualTheme.description.HELVETICUS_EMERALD">
         <value xml:lang="en">: a Rainbowstone evolution in green</value>
         <value xml:lang="fr"> : une évolution de Rainbowstone en vert</value>
+        <value xml:lang="ja">: 緑のレインボーストーンの進化</value>
     </property>
     <property key="VisualTheme.description.HELVETICUS_SAPHIR">
         <value xml:lang="en">: a Rainbowstone evolution in blue</value>
         <value xml:lang="fr"> : une évolution de Rainbowstone en bleu</value>
+        <value xml:lang="ja">: 青いレインボーストーンの進化</value>
     </property>
     <property key="VisualTheme.description.RAINBOWSTONE_AMBER">
         <value xml:lang="en">: Rainbowstone theme in orange</value>
         <value xml:lang="fr"> : le thème Rainbowstone en orange</value>
+        <value xml:lang="ja">: オレンジのレインボーストーンテーマ</value>
     </property>
     <property key="VisualTheme.description.RAINBOWSTONE_RUBY">
         <value xml:lang="en">: Rainbowstone theme in red</value>
         <value xml:lang="fr"> : le thème Rainbowstone en rouge</value>
+        <value xml:lang="ja">: 赤のレインボーストーンテーマ</value>
     </property>
     <property key="VisualTheme.description.RAINBOWSTONE_EMERALD">
         <value xml:lang="en">: Rainbowstone theme in green</value>
         <value xml:lang="fr"> : le thème Rainbowstone en vert</value>
+        <value xml:lang="ja">: 緑のレインボーストーンのテーマ</value>
     </property>
     <property key="VisualTheme.description.RAINBOWSTONE_SAPHIR">
         <value xml:lang="en">: Rainbowstone theme in blue</value>
         <value xml:lang="fr"> : le thème Rainbowstone en bleu</value>
+        <value xml:lang="ja">: 青のレインボーストーンテーマ</value>
     </property>
     <property key="VisualTheme.description.TOMAHAWK">
         <value xml:lang="cs">: evoluční verze BlueLight</value>

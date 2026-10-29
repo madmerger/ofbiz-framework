@@ -355,6 +355,7 @@ under the License.
     <screen name="main">
         <section>
             <actions>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="headerItem" value="main"/>
                 <set field="productId" from-field="parameters.productId"/>
                 <entity-one entity-name="Product" value-field="product"/>

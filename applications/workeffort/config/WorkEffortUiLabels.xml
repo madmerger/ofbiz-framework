@@ -345,6 +345,7 @@
     <property key="FormFieldTitle_newWorkEffortId">
         <value xml:lang="en">New WorkEffort ID</value>
         <value xml:lang="fr">Nvlle réf de tâche</value>
+        <value xml:lang="ja">新規ワークエフォートID</value>
     </property>
     <property key="FormFieldTitle_orderTypeDescription">
         <value xml:lang="en">Order Type Description</value>
@@ -931,6 +932,7 @@
         <value xml:lang="ar">اضافة سمة لمجهود العمل</value>
         <value xml:lang="en">Add Work Effort Attribute</value>
         <value xml:lang="fr">Ajouter un attribut à la tâche</value>
+        <value xml:lang="ja">作業の努力属性を追加する</value>
     </property>
     <property key="PageTitleAddWorkEffortCommEvent">
         <value xml:lang="ar">اضافة اتصال لمجهود العمل</value>
@@ -1452,6 +1454,7 @@
         <value xml:lang="ar">سمات مجهود العمل</value>
         <value xml:lang="en">Work Effort Attributes</value>
         <value xml:lang="fr">Attributs de la tâche</value>
+        <value xml:lang="ja">仕事の努力属性</value>
     </property>
     <property key="PageTitleListWorkEffortCommEvents">
         <value xml:lang="en">Work Effort Communication Events</value>
@@ -1952,6 +1955,7 @@
         <value xml:lang="ar">سمات</value>
         <value xml:lang="en">Attributes</value>
         <value xml:lang="fr">Attributs</value>
+        <value xml:lang="ja">属性</value>
     </property>
     <property key="WorkEffortBanner3">
         <value xml:lang="de">Existierende Kommunikationsereignis ID unten eingeben</value>
@@ -2316,7 +2320,7 @@
         <value xml:lang="es">Parte de la familia de software Apache OFBiz de código abierto</value>
         <value xml:lang="fr">Un module de la famille Apache OFBiz, logiciel libre de gestion d'entreprise.</value>
         <value xml:lang="it">Un modulo della famiglia di software open source Apache OFBiz</value>
-        <value xml:lang="ja">Part of the Apache OFBiz Family of Open Source Software</value>
+        <value xml:lang="ja">Apache OFBiz オープンソースソフトウェアファミリーの一員</value>
         <value xml:lang="nl">Deel van de Apache OFBiz-suite van Open Source Software</value>
         <value xml:lang="pt-BR">Parte da família OfBiz de software de fonte aberta</value>
         <value xml:lang="pt-PT">Parte da família OfBiz de software de fonte aberta</value>
@@ -2395,7 +2399,7 @@
         <value xml:lang="en">Security Error: to run ${resourceDescription} you must have the WORKEFFORTMGR_CREATE or WORKEFFORTMGR_ADMIN permission</value>
         <value xml:lang="fr">Erreur de sécurité: pour exécuter ${resourceDescription} vous devez avoir l'autorisation WORKEFFORTMGR_CREATE or WORKEFFORTMGR_ADMIN</value>
         <value xml:lang="it">Errore sicurezza: per eseguire ${resourceDescription} devi avere il permesso WORKEFFORTMGR_CREATE o WORKEFFORTMGR_ADMIN</value>
-        <value xml:lang="ja">セキュリティエラー: この操作の実行には WORKEFFORTMGR_CREATE または WORKEFFORTMGR_ADMIN 権限が必要です</value>
+        <value xml:lang="ja">セキュリティエラー: ${resourceDescription} を実行するには、WORKEFFORTMGR_CREATE または WORKEFFORTMGR_ADMIN 権限が必要です。</value>
         <value xml:lang="th">Security Error: ${resourceDescription} ความปลอดภัยผิดพลาด ! ถึงการดำเนินการกิจการนี้คุณต้องมี WORKEFFORTMGR_CREATE หรือ WORKEFFORTMGR_ADMIN อนุญาต</value>
         <value xml:lang="vi">Lỗi phân quyền: để thực thi ${resourceDescription} bạn cần có quyền WORKEFFORTMGR_CREATE hoặc WORKEFFORTMGR_ADMIN</value>
         <value xml:lang="zh">安全错误：要运行这个操作你必须具有 ${resourceDescription} WORKEFFORTMGR_CREATE 或 WORKEFFORTMGR_ADMIN 权限</value>
@@ -2494,7 +2498,7 @@
         <value xml:lang="en">Security Error: to run ${resourceDescription} you must have the WORKEFFORTMGR_DELETE or WORKEFFORTMGR_ADMIN permission</value>
         <value xml:lang="fr">Erreur de sécurité: pour exécuter ${resourceDescription} vous devez avoir l'autorisation WORKEFFORTMGR_DELETE or WORKEFFORTMGR_ADMIN</value>
         <value xml:lang="it">Errore sicurezza: per eseguire ${resourceDescription} devi avere il permesso WORKEFFORTMGR_DELETE o WORKEFFORTMGR_ADMIN</value>
-        <value xml:lang="ja">セキュリティエラー: この操作の実行は WORKEFFORTMGR_DELETE または WORKEFFORTMGR_ADMIN 権限が必要です</value>
+        <value xml:lang="ja">セキュリティエラー: ${resourceDescription} を実行するには、WORKEFFORTMGR_DELETE または WORKEFFORTMGR_ADMIN 権限が必要です。</value>
         <value xml:lang="th">Security Error: ${resourceDescription} ความปลอดภัยผิดพลาด ! ถึงการดำเนินการกิจการนี้คุณต้องมี WORKEFFORTMGR_DELETE หรือ WORKEFFORTMGR_ADMIN อนุญาต</value>
         <value xml:lang="vi">Lỗi phân quyền: để thực thi ${resourceDescription} bạn cần có quyền WORKEFFORTMGR_DELETE hoặc WORKEFFORTMGR_ADMIN</value>
         <value xml:lang="zh">安全错误：要运行这个操作你必须具有 ${resourceDescription} WORKEFFORTMGR_DELETE 或 WORKEFFORTMGR_ADMIN 权限</value>
@@ -2847,6 +2851,7 @@
     </property>
     <property key="WorkEffortICalendar">
         <value xml:lang="en">iCalendar</value>
+        <value xml:lang="ja">iカレンダー</value>
         <value xml:lang="vi">iCalendar (Xuất bản URL .ics)</value>
     </property>
     <property key="WorkEffortICalendarAdd">
@@ -2916,6 +2921,7 @@
     </property>
     <property key="WorkEffortICalendarHelpUrl">
         <value xml:lang="en">https://cwiki.apache.org/confluence/display/OFBENDUSER/iCalendar+Integration</value>
+        <value xml:lang="ja">https://cwiki.apache.org/confluence/display/OFBENDUSER/iCalendar+Integration</value>
     </property>
     <property key="WorkEffortICalendarName">
         <value xml:lang="de">Kalendername</value>
@@ -2935,6 +2941,7 @@
     </property>
     <property key="WorkEffortICalendarUrl">
         <value xml:lang="en">iCalendar Url</value>
+        <value xml:lang="ja">iCalendarウル</value>
         <value xml:lang="vi">Liên kết URL iCalendar</value>
         <value xml:lang="zh">iCalendar网址</value>
         <value xml:lang="zh-TW">iCal網址</value>
@@ -2990,7 +2997,7 @@
         <value xml:lang="es">Para ingresar, Nombre de usuario: admin, contraseña: ofbiz</value>
         <value xml:lang="fr">Pour que quelque chose d'intéressant, essayez de vous connecter. Identifiant de connexion : admin / Mot de passe : ofbiz</value>
         <value xml:lang="it">Assicurati di essere autenticato, prova: Nome Utente;Admin; Password Ofbiz</value>
-        <value xml:lang="ja">興味を感じたことを確実なものにするため、Username;Admin;Password Ofbiz でログインしてください</value>
+        <value xml:lang="ja">詳細を確認するにはログインしてください（ユーザー名: admin、パスワード: ofbiz）。</value>
         <value xml:lang="nl">For something interesting make sure, you are logged in try : Username;Admin;Password Ofbiz</value>
         <value xml:lang="ro">In orice caz tu trebuie sa fii sigur ca te-ai logat, incearca: Nume Utilizator;Admin;Password Ofbiz</value>
         <value xml:lang="ru">Проверьте : Username;Admin;Password Ofbiz</value>
@@ -3203,7 +3210,7 @@
     <property key="WorkEffortManufacturingError">
         <value xml:lang="en">Error retrieving manufacturing data for productId ${productId}: " ${errorString}</value>
         <value xml:lang="it">Errore nella ricerca dei dati per la produzione per il prodotto ${productId}: " ${errorString}</value>
-        <value xml:lang="ja">製品ID$ {productId} の生産確認時にエラー: " ${errorString}</value>
+        <value xml:lang="ja">製品ID ${productId} の製造データ取得中にエラーが発生しました: " ${errorString}</value>
         <value xml:lang="vi">Lỗi khi lấy dữ liệu nhà sản xuất cho sản phẩm ${productId}: " ${errorString}</value>
         <value xml:lang="zh">获取产品标识为 ${productId} 的制造数据时出错： " ${errorString}</value>
         <value xml:lang="zh-TW">獲取產品標識為 ${productId} 的製造資料時出錯: " ${errorString}</value>
@@ -3999,11 +4006,13 @@
         <value xml:lang="de">8</value>
         <value xml:lang="en">8</value>
         <value xml:lang="it">8</value>
+        <value xml:lang="ja">8</value>
     </property>
     <property key="WorkEffortPriorityFive">
         <value xml:lang="de">5</value>
         <value xml:lang="en">5</value>
         <value xml:lang="it">5</value>
+        <value xml:lang="ja">5</value>
     </property>
     <property key="WorkEffortPriorityFormatNotCorrect">
         <value xml:lang="de">Format der Dringlichkeit ist inkorrekt</value>
@@ -4020,6 +4029,7 @@
         <value xml:lang="de">4</value>
         <value xml:lang="en">4</value>
         <value xml:lang="it">4</value>
+        <value xml:lang="ja">4</value>
     </property>
     <property key="WorkEffortPriorityNine">
         <value xml:lang="de">9 (Niedrig)</value>
@@ -4051,21 +4061,25 @@
         <value xml:lang="de">7</value>
         <value xml:lang="en">7</value>
         <value xml:lang="it">7</value>
+        <value xml:lang="ja">7</value>
     </property>
     <property key="WorkEffortPrioritySix">
         <value xml:lang="de">6</value>
         <value xml:lang="en">6</value>
         <value xml:lang="it">6</value>
+        <value xml:lang="ja">6</value>
     </property>
     <property key="WorkEffortPriorityThree">
         <value xml:lang="de">3</value>
         <value xml:lang="en">3</value>
         <value xml:lang="it">3</value>
+        <value xml:lang="ja">3</value>
     </property>
     <property key="WorkEffortPriorityTwo">
         <value xml:lang="de">2</value>
         <value xml:lang="en">2</value>
         <value xml:lang="it">2</value>
+        <value xml:lang="ja">2</value>
     </property>
     <property key="WorkEffortPrivatePublic">
         <value xml:lang="ar">خاصة/عامة</value>
@@ -4443,132 +4457,175 @@
     </property>
     <property key="WorkEffortRequiredFieldMissingAttrName">
         <value xml:lang="en">Required Field Missing : Attribute Name.</value>
+        <value xml:lang="ja">必須フィールドの欠損:属性名。</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingCommunicationEventId">
         <value xml:lang="en">Required Field Missing : Communication Event Id.</value>
+        <value xml:lang="ja">必須フィールド欠損 : 通信イベントId.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingContactMechId">
         <value xml:lang="en">Required Field Missing : Contact Mech Id.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : Mech Id までお問い合わせください。</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingContactMechIdOrContactMechTypeId">
         <value xml:lang="en">Required Field Missing : At least one field is required from Contact Mech Id  or Contact Mech Type Id.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : 連絡先のMech Idまたは連絡先のMech Type Idから少なくとも1つのフィールドが必要です。</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingContactMechTypeId">
         <value xml:lang="en">Required Field Missing : ContactMech Type Id.</value>
+        <value xml:lang="ja">必須フィールドの欠損:ContactMechタイプId.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingContentId">
         <value xml:lang="en">Required Field Missing : Content Id.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : コンテンツID.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingCurrentStatusId">
         <value xml:lang="en">Required Field Missing : Current Status Id.</value>
+        <value xml:lang="ja">必須フィールドの欠損:現在のステータスID。</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingCustRequestId">
         <value xml:lang="en">Required Field Missing : Cust Request Id.</value>
+        <value xml:lang="ja">必須フィールド欠損 : リクエストID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingCustRequestItemSeqId">
         <value xml:lang="en">Required Field Missing : Cust Request Item Seq Id.</value>
+        <value xml:lang="ja">必須フィールド欠損 : リクエスト項目 Seq Id.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingFixedAssetId">
         <value xml:lang="en">Required Field Missing : Fixed Asset Id.</value>
+        <value xml:lang="ja">必須フィールドミス : 固定資産Id.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingFixedAssetTypeId">
         <value xml:lang="en">Required Field Missing : Fixed Asset Type Id.</value>
+        <value xml:lang="ja">必須フィールドミス : 固定資産タイプId.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingFromDate">
         <value xml:lang="en">Required Field Missing : From Date.</value>
+        <value xml:lang="ja">必須フィールドの欠損:日付から。</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingInternalNote">
         <value xml:lang="en">Required Field Missing : Internal Note.</value>
+        <value xml:lang="ja">必須フィールド欠損 : 内部注記</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingInventoryItemId">
         <value xml:lang="en">Required Field Missing : Inventory Item Id.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : 在庫項目 Id.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingKeyword">
         <value xml:lang="en">Required Field Missing : Keyword.</value>
+        <value xml:lang="ja">必須フィールドのミス : キーワード.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingNoteInfo">
         <value xml:lang="en">Required Field Missing : Note Info.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : 注意</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingNumPeriodType">
         <value xml:lang="en">Required Field Missing : Period Type.</value>
+        <value xml:lang="ja">必須フィールドの欠損:期間タイプ。</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingNumPeriods">
         <value xml:lang="en">Required Field Missing : Num Periods.</value>
+        <value xml:lang="ja">必須フィールドの欠損:Numの期間。</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingOldWorkEffortTypeId">
         <value xml:lang="en">Required Field Missing : Old WorkEffort Id.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : 古い作業努力 Id.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingOrderId">
         <value xml:lang="en">Required Field Missing : Order Id.</value>
+        <value xml:lang="ja">必須項目が不足しています: 注文ID。</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingPartyId">
         <value xml:lang="en">Required Field Missing : Party Id.</value>
+        <value xml:lang="ja">必須項目が不足しています: 取引先ID。</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingProductId">
         <value xml:lang="en">Required Field Missing : Product Id.</value>
+        <value xml:lang="ja">必須項目が不足しています: 製品ID。</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingQuickAssignPartyId">
         <value xml:lang="en">Required Field Missing : Quick Assign Party Id.</value>
+        <value xml:lang="ja">必須項目が不足しています: クイック割当取引先ID。</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingQuoteId">
         <value xml:lang="en">Required Field Missing : Quote Id.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : 引用ID.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingRequirementId">
         <value xml:lang="en">Required Field Missing : Requirement Id.</value>
+        <value xml:lang="ja">必須分野 欠損: 条件 Id.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingReviewDate">
         <value xml:lang="en">Required Field Missing : Review Date.</value>
+        <value xml:lang="ja">必須フィールドの欠損:レビュー日。</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingRoleTypeId">
         <value xml:lang="en">Required Field Missing : Role Type Id.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : ロールタイプId.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingSequenceId">
         <value xml:lang="en">Required Field Missing : Sequence Id.</value>
+        <value xml:lang="ja">必須フィールド欠損 : シーケンスID.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingShoppingListId">
         <value xml:lang="en">Required Field Missing : Skill Type Id.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : スキルタイプID.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingSkillTypeId">
         <value xml:lang="en">Required Field Missing : Shopping List Id.</value>
+        <value xml:lang="ja">必須フィールドミス : ショッピングリストId.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingSourceWorkEffortId">
         <value xml:lang="en">Required Field Missing : Source WorkEffort Id.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : 出典 WorkEffort Id.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingStart">
         <value xml:lang="en">Required Field Missing : Start.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : 開始</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingStatusId">
         <value xml:lang="en">Required Field Missing : Status Id.</value>
+        <value xml:lang="ja">必須フィールド欠損:ステータスID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingSurveyId">
         <value xml:lang="en">Required Field Missing : Survey Id.</value>
+        <value xml:lang="ja">必要なフィールドミス : 調査ID.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingUserLoginId">
         <value xml:lang="en">Required Field Missing : User Login Id.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : ユーザログインID.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortAssocTypeId">
         <value xml:lang="en">Required Field Missing : Work Effort Assoc Type Id.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : 作業の努力のAssocタイプId.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortContentTypeId">
         <value xml:lang="en">Required Field Missing : Work Effort Content Type Id.</value>
+        <value xml:lang="ja">必須フィールド欠損 : 作業の努力内容タイプId.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortGoodStdTypeId">
         <value xml:lang="en">Required Field Missing : Work Effort Good Std Type Id.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : 作業の努力 良好なStdタイプId.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortId">
         <value xml:lang="en">Required Field Missing : WorkEffort Id.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : 作業努力 Id.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortIdFrom">
         <value xml:lang="en">Required Field Missing : Work Effort Id From.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : 作業の努力から.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortIdTo">
         <value xml:lang="en">Required Field Missing : Work Effort Id To.</value>
+        <value xml:lang="ja">必要なフィールドミス : 作業の努力 Id へ.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortName">
         <value xml:lang="en">Required Field Missing : WorkEffort Name.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : 労働安全名.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortTypeId">
         <value xml:lang="en">Required Field Missing : WorkEffort Type Id.</value>
+        <value xml:lang="ja">必須フィールドの欠損 : 作業努力型Id.</value>
     </property>
     <property key="WorkEffortRequirementFulfillmentAlreadyExists">
         <value xml:lang="en">ERROR: WorkRequirementFulfillment [${parameters.requirementId}][${parameters.workEffortId}] already exists.</value>
@@ -4840,6 +4897,7 @@
     </property>
     <property key="WorkEffortSkills">
         <value xml:lang="en">Skills</value>
+        <value xml:lang="ja">スキル</value>
     </property>
     <property key="WorkEffortStartDate">
         <value xml:lang="de">Anfangsdatum</value>
@@ -5279,7 +5337,7 @@
         <value xml:lang="en">Security Error: to run ${resourceDescription} you must have the WORKEFFORTMGR_UPDATE or WORKEFFORTMGR_ADMIN permission</value>
         <value xml:lang="fr">Erreur de sécurité: pour exécuter ${resourceDescription} vous devez avoir l'autorisation WORKEFFORTMGR_UPDATE ou WORKEFFORTMGR_ADMIN</value>
         <value xml:lang="it">Errore sicurezza: per eseguire ${resourceDescription} devi avere il permesso WORKEFFORTMGR_UPDATE o WORKEFFORTMGR_ADMIN</value>
-        <value xml:lang="ja">セキュリティエラー: この操作の実行は WORKEFFORTMGR_UPDATE または WORKEFFORTMGR_ADMIN 権限が必要です</value>
+        <value xml:lang="ja">セキュリティエラー: ${resourceDescription} を実行するには、WORKEFFORTMGR_UPDATE または WORKEFFORTMGR_ADMIN 権限が必要です。</value>
         <value xml:lang="th">Security Error: ${resourceDescription} ความปลอดภัยผิดพลาด ! ในการดำเนินการเชื่อมต่อนี้คุณต้องมี WORKEFFORTMGR_UPDATE หรือ WORKEFFORTMGR_ADMIN อนุญาต</value>
         <value xml:lang="vi">Lỗi phân quyền: để thực thi ${resourceDescription} bạn cần có quyền WORKEFFORTMGR_UPDATE hoặc WORKEFFORTMGR_ADMIN</value>
         <value xml:lang="zh">安全错误：要运行这个操作你必须具有 ${resourceDescription} WORKEFFORTMGR_UPDATE 或 WORKEFFORTMGR_ADMIN 权限</value>
@@ -5512,8 +5570,10 @@
     </property>
     <property key="WorkeffortErrorWhileCreatingServiceMapForService">
         <value xml:lang="en">Error while creating service Map for service : ${serviceName}</value>
+        <value xml:lang="ja">サービスマップ作成時のエラー : ${serviceName}</value>
     </property>
     <property key="WorkeffortErrorWhileInvokingService">
         <value xml:lang="en">Error while invoking service : ${serviceName}</value>
+        <value xml:lang="ja">サービスの呼び出し中にエラー : ${serviceName}</value>
     </property>
 </resource>

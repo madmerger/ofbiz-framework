@@ -435,7 +435,7 @@
         <value xml:lang="es-CL">Parte de la familia de Software Apache OFBiz de código abierto</value>
         <value xml:lang="fr">Un module de la famille Apache OFBiz, logiciel libre de gestion d'entreprise.</value>
         <value xml:lang="it">Un modulo della famiglia di software open source Apache OFBiz</value>
-        <value xml:lang="ja">Part of the Apache OFBiz Family of Open Source Software</value>
+        <value xml:lang="ja">Apache OFBiz オープンソースソフトウェアファミリーの一員</value>
         <value xml:lang="nl">Deel van de Apache OFBiz-suite van Open Source Software</value>
         <value xml:lang="pt-BR">Parte da família OfBiz de software de código livre</value>
         <value xml:lang="pt-PT">Parte da família OfBiz de software de fonte aberta</value>
@@ -855,15 +855,19 @@
     <property key="MarketingContactMechNotExists">
         <value xml:lang="de">Der bevorzugte Kontaktmechanismus für Party [${partyId}] konnte nicht gefunden werden</value>
         <value xml:lang="en">Could not find the preferred contact mechanism for party [${parameters.partyId}]</value>
+        <value xml:lang="ja">取引先 [${parameters.partyId}] の優先連絡先が見つかりません。</value>
     </property>
     <property key="MarketingContactListInvalidVerifyCode">
         <value xml:lang="en">Invalid verify code for the ${contactList.contactListName}</value>
+        <value xml:lang="ja">無効な認証コード ${contactList.contactListName}</value>
     </property>
     <property key="MarketingContactListAnotherEmailNotExist">
         <value xml:lang="en">The email address (${parameters.email}) does not have the Other Email Address as contact purpose</value>
+        <value xml:lang="ja">メールアドレス (必須)${parameters.email})他のメールアドレスが連絡先の目的としてない場合</value>
     </property>
     <property key="MarketingContactListPermissionError">
         <value xml:lang="en">Security Error: to run sendContactListPartyVerifyEmail you must have the MARKETING_VIEW or MARKETING_ADMIN permissions</value>
+        <value xml:lang="ja">セキュリティエラー: sendContactListPartyVerifyEmail を実行するには、MARKETING_VIEW または MARKETING_ADMIN 権限が必要です。</value>
     </property>
     <property key="MarketingContactMechNotRightForContactList">
         <value xml:lang="de">Der bevorzugte Kontaktmechanismus [${preferredContactMechType.description}] ist vom falschen Typ für die Liste [${listContactMechType.description}].</value>
@@ -932,6 +936,7 @@
     <property key="MarketingEmailFormatError">
         <value xml:lang="en">${firstName} ${lastName} has ${emailFormatErrMsg}</value>
         <value xml:lang="es">${firstName} ${lastName} tiene ${emailFormatErrMsg}</value>
+        <value xml:lang="ja">${firstName} ${lastName} お問い合わせ ${emailFormatErrMsg}</value>
     </property>
     <property key="MarketingEmailStatusReport">
         <value xml:lang="de">E-Mail Statusbericht</value>
@@ -1049,18 +1054,22 @@
     <property key="MarketingNewsletterSubscriptionRequestSuccessMessage">
         <value xml:lang="en">Newsletter subscription request successful. Please check your inbox for verification email.</value>
         <value xml:lang="it">Richiesta di iscrizione alla Newsletter inviata con successo. Controlla la tua casella di posta per l'email di verifica.</value>
+        <value xml:lang="ja">ニュースレター購読の成功リクエスト。 確認メールの受信トレイを確認してください。</value>
     </property>
     <property key="MarketingNewsletterSubscriptionReqstAlreadyExistsMsg">
         <value xml:lang="en">You have already requested to subscribe for our newsletter. However, you have not verified your subscription. We have resent you the verification mail - please check your inbox for verification email.</value>
         <value xml:lang="it">Hai già richiesto di iscriverti a questa newsletter, ma non hai verificato la sottoscrizione. Ti abbiamo nuovamente inviato l'email di verifica - controlla la tua casella di posta.</value>
+        <value xml:lang="ja">ニュースレターの購読をリクエストしています。ただし、サブスクリプションを検証していません。 確認メールを再送信してください。 確認メールの受信トレイを確認してください。</value>
     </property>
     <property key="MarketingNewsletterSubscriptionAlreadyExistsMsg">
         <value xml:lang="en">You are already subscribed to our newsletter.</value>
         <value xml:lang="it">Sei già iscritto alla nostra newsletter.</value>
+        <value xml:lang="ja">ニュースレターを購読しています。</value>
     </property>
     <property key="MarketingNewsletterSubscriptionPendingRequestDeletedMessage">
         <value xml:lang="en">Successfully removed Newsletter subscription request.</value>
         <value xml:lang="it">Richiesta di iscrizione alla newseltter rimossa con sucesso.</value>
+        <value xml:lang="ja">ニュースレターの購読リクエストを正常に削除しました。</value>
     </property>
     <property key="MarketingNoOfEmployees">
         <value xml:lang="de">Anzahl Angestellte</value>
@@ -1079,6 +1088,7 @@
         <value xml:lang="en">No party load</value>
         <value xml:lang="es">Sin carga de participante</value>
         <value xml:lang="fr">Aucun acteur chargé</value>
+        <value xml:lang="ja">取引先データを読み込めません。</value>
     </property>
     <property key="MarketingOrderAmount">
         <value xml:lang="de">Auftragssumme</value>
@@ -1131,11 +1141,13 @@
         <value xml:lang="en">Parties Loaded</value>
         <value xml:lang="es">Participante cargado</value>
         <value xml:lang="fr">Acteurs chargés</value>
+        <value xml:lang="ja">荷を積まれる部分</value>
     </property>
     <property key="MarketingPartiesNoLoadedAlreadyExist">
         <value xml:lang="en">Parties no loaded because they already exist on the system</value>
         <value xml:lang="es">Participantes no cargados porque ya existen en el sistema.</value>
         <value xml:lang="fr">Acteurs non chargés car déjà présent dans le système</value>
+        <value xml:lang="ja">彼らは既にシステムに存在しているため、締約国はロードされません</value>
     </property>
     <property key="MarketingPartyStatusReport">
         <value xml:lang="de">Statusbericht Akteur</value>
@@ -3425,11 +3437,13 @@
         <value xml:lang="en">All parties in this vcard are duplicated.</value>
         <value xml:lang="es">Todos los participantes en este vCard están duplicados.</value>
         <value xml:lang="fr">Tous les acteurs de cette vcard sont dupliqués.</value>
+        <value xml:lang="ja">このカードの全ての関係者は重複しています。</value>
     </property>
     <property key="SfaImportVCardEmailFormatError">
         <value xml:lang="en">incorrect email format.</value>
         <value xml:lang="es">formato incorrecto de email.</value>
         <value xml:lang="fr">Format de l'addresse courriel incorrect.</value>
+        <value xml:lang="ja">間違ったメール形式。</value>
     </property>
     <property key="SfaImportVCardError">
         <value xml:lang="de">Fehler beim importieren von VCard: ${errorString}</value>
@@ -3446,6 +3460,7 @@
         <value xml:lang="en">first name or last name missing.</value>
         <value xml:lang="es">falta nombre o apellido.</value>
         <value xml:lang="fr">Prénom ou nom manquant.</value>
+        <value xml:lang="ja">姓名または姓名が不明です。</value>
     </property>
     <property key="SfaInitialAccount">
         <value xml:lang="de">Initiales Account</value>
@@ -3488,10 +3503,12 @@
     <property key="SfaNewLead">
         <value xml:lang="en">New Lead</value>
         <value xml:lang="fr">Nouveau prospect</value>
+        <value xml:lang="ja">新しいリード</value>
         <value xml:lang="nl">Nieuwe lead</value>
     </property>
     <property key="SfaLeadCreatedSuccessfully">
         <value xml:lang="en">Lead created successfully</value>
+        <value xml:lang="ja">成功するリード</value>
     </property>
     <property key="SfaLeadSource">
         <value xml:lang="de">Lead Quelle</value>
@@ -3888,5 +3905,14 @@
     <property key="SfaVCard">
         <value xml:lang="en">vCard</value>
         <value xml:lang="es">vCard</value>
+        <value xml:lang="ja">vカード</value>
+    </property>
+    <property key="MarketingAddRelatedCompanyFirst">
+        <value xml:lang="en">Please first add related company.</value>
+        <value xml:lang="ja">先に関連会社を追加してください。</value>
+    </property>
+    <property key="MarketingRemovedFromMailingList">
+        <value xml:lang="en">Successfully removed from mailing list:</value>
+        <value xml:lang="ja">メーリングリストから削除しました：</value>
     </property>
 </resource>

@@ -33,6 +33,7 @@
         <value xml:lang="de">Wollen Sie den Inhalt wirklich löschen?</value>
         <value xml:lang="en">Do you really want to delete this content?</value>
         <value xml:lang="fr">Voulez-vous vraiment supprimer ce document ?</value>
+        <value xml:lang="ja">このコンテンツを本当に削除したいですか?</value>
     </property>
     <property key="ContenCommEventContentAssocNotFoundForDelete">
         <value xml:lang="en">CommEventContentAssoc entity not found for delete, communicationEventId: ${parameters.communicationEventId} and contentId: ${parameters.contentId}</value>
@@ -434,6 +435,7 @@
     </property>
     <property key="ContentCMS">
         <value xml:lang="en">CMS</value>
+        <value xml:lang="ja">CMS</value>
         <value xml:lang="zh">内容管理系统</value>
         <value xml:lang="zh-TW">內容管理系統</value>
     </property>
@@ -623,7 +625,7 @@
         <value xml:lang="es">Parte de la familia de software Apache OFBiz de código abierto</value>
         <value xml:lang="fr">Un module de la famille Apache OFBiz, logiciel libre de gestion d'entreprise.</value>
         <value xml:lang="it">Un modulo della famiglia di software open source Apache OFBiz</value>
-        <value xml:lang="ja">Part of the Apache OFBiz Family of Open Source Software</value>
+        <value xml:lang="ja">Apache OFBiz オープンソースソフトウェアファミリーの一員</value>
         <value xml:lang="nl">Deel van de Apache OFBiz-suite van Open Source Software</value>
         <value xml:lang="pt-BR">Parte da família OfBiz de software de código livre</value>
         <value xml:lang="pt-PT">Parte da família OfBiz de software de fonte aberta</value>
@@ -736,6 +738,7 @@
     <property key="ContentContentShow">
         <value xml:lang="en">Show Content (if visible else simply Id)</value>
         <value xml:lang="fr">Montre le contenu (si visible sinon uniquement la référence</value>
+        <value xml:lang="ja">コンテンツを表示する(もし表示されていない場合は、Id)</value>
         <value xml:lang="zh">显示内容（如果可见的话，否则只显示内容标识）</value>
     </property>
     <property key="ContentContentToOrFromErrorRetriving">
@@ -784,6 +787,7 @@
     <property key="ContentConvertDocumentsTreeSuccessful">
         <value xml:lang="en">Convert Documents Tree Successful. Total : ${counterLine} rows</value>
         <value xml:lang="fr">Succès de la conversion de l'arbre de document. Total : ${counterLine} lignes</value>
+        <value xml:lang="ja">ドキュメントツリーを変換しました。合計: ${counterLine}行</value>
     </property>
     <property key="ContentCreateContentAssocMethodError">
         <value xml:lang="en">Not 2 out of ContentId/To/From</value>
@@ -899,6 +903,7 @@
     <property key="ContentDataResourceId">
         <value xml:lang="en">Data Resource ID</value>
         <value xml:lang="fr">Ressource de données</value>
+        <value xml:lang="ja">データリソースID</value>
         <value xml:lang="zh">数据资源标识</value>
     </property>
     <property key="ContentDataResourceImage">
@@ -1365,6 +1370,7 @@
     </property>
     <property key="ContentGIF">
         <value xml:lang="en">GIF</value>
+        <value xml:lang="ja">GIF</value>
         <value xml:lang="vi">Ảnh GIF</value>
         <value xml:lang="zh-TW">GIF</value>
     </property>
@@ -1410,6 +1416,7 @@
     </property>
     <property key="ContentHtml">
         <value xml:lang="en">HTML</value>
+        <value xml:lang="ja">HTML</value>
     </property>
     <property key="ContentHtmlText">
         <value xml:lang="da">Html tekst</value>
@@ -1493,6 +1500,7 @@
     </property>
     <property key="ContentJPEG">
         <value xml:lang="en">JPEG</value>
+        <value xml:lang="ja">JPEG</value>
         <value xml:lang="vi">Ảnh JPEG</value>
     </property>
     <property key="ContentKeyword">
@@ -1739,6 +1747,7 @@
     <property key="ContentMimeTypeNotSupported">
         <value xml:lang="en">Mime Type not supported</value>
         <value xml:lang="fr">Mime Type non supporté</value>
+        <value xml:lang="ja">Mimeタイプ 未対応</value>
     </property>
     <property key="ContentNavigate">
         <value xml:lang="da">Naviger</value>
@@ -1891,6 +1900,7 @@
     </property>
     <property key="ContentPDFInputMissing">
         <value xml:lang="en">No PDF was given.</value>
+        <value xml:lang="ja">PDF が付与されていません。</value>
     </property>
     <property key="ContentPDFSurveyName">
         <value xml:lang="da">Rundspørge navn</value>
@@ -1905,6 +1915,7 @@
     </property>
     <property key="ContentPNG">
         <value xml:lang="en">PNG</value>
+        <value xml:lang="ja">PNG</value>
         <value xml:lang="vi">Ảnh PNG</value>
     </property>
     <property key="ContentParent">
@@ -2094,6 +2105,7 @@
     </property>
     <property key="ContentRenderingPathTraversalError">
         <value xml:lang="en">Rejected output path: "${fileName}" resolves outside the allowed directory "${filePath}"</value>
+        <value xml:lang="ja">出力パス "${fileName}" が許可されたディレクトリ "${filePath}" の外を指すため、拒否されました。</value>
     </property>
     <property key="ContentRequiredField">
         <value xml:lang="en">Required field ${requiredField} is missing in simple method call ${resourceDescription}</value>
@@ -2209,6 +2221,7 @@
     </property>
     <property key="ContentSEO">
         <value xml:lang="en">SEO</value>
+        <value xml:lang="ja">SEO</value>
         <value xml:lang="zh">搜索引擎优化</value>
         <value xml:lang="zh-TW">搜尋引擎優化</value>
     </property>
@@ -2921,6 +2934,7 @@
     </property>
     <property key="ContentTIFF">
         <value xml:lang="en">TIFF</value>
+        <value xml:lang="ja">TIFF</value>
         <value xml:lang="vi">Ảnh TIFF</value>
     </property>
     <property key="ContentTemplate">
@@ -3231,6 +3245,7 @@
     <property key="ContentWebSiteAddError">
         <value xml:lang="en">Web Site Add Error</value>
         <value xml:lang="fr">Ajouter une erreur sur le site web</value>
+        <value xml:lang="ja">Webサイト エラーの追加</value>
     </property>
     <property key="ContentWebSiteAddMenu">
         <value xml:lang="da">Opret menu</value>
@@ -3248,6 +3263,7 @@
     <property key="ContentWebSiteAddNewErrors">
         <value xml:lang="en">Web Site Add New Errors</value>
         <value xml:lang="fr">Nouvelles erreurs du site web</value>
+        <value xml:lang="ja">Webサイトは新しいエラーを追加します。</value>
     </property>
     <property key="ContentWebSiteAddNewMenus">
         <value xml:lang="da">Højreklik for at oprette ny menu</value>
@@ -3341,6 +3357,7 @@
     </property>
     <property key="ContentWebSiteErrors">
         <value xml:lang="en">Web Site Errors</value>
+        <value xml:lang="ja">Webサイトエラー</value>
     </property>
     <property key="ContentWebSiteGenerateMissingSeoUrl">
         <value xml:lang="en">Generate missing seo url's</value>
@@ -3366,6 +3383,7 @@
     <property key="ContentWebSitePathAliasCreate">
         <value xml:lang="de">Neuen Pfad Alias erstellen</value>
         <value xml:lang="en">Create New Path Alias</value>
+        <value xml:lang="ja">新しいパスのエイリアスを作成する</value>
         <value xml:lang="nl">Aanmaken Nieuwe Path Alias</value>
         <value xml:lang="zh">新建路径别名</value>
     </property>
@@ -3412,6 +3430,7 @@
         <value xml:lang="de">Ein Fehler beim Verschieben des Inhaltes ist aufgetreten!</value>
         <value xml:lang="en">An error occured moving content!</value>
         <value xml:lang="fr">Erreur durant le déplacement du document !</value>
+        <value xml:lang="ja">エラーが発生しました。</value>
     </property>
     <property key="FormFieldTitle_acroFormContentId">
         <value xml:lang="ar">AcroForm (PDF) Content ID</value>
@@ -6650,6 +6669,7 @@
         <value xml:lang="de">WebSite Pfad Alias bearbeiten</value>
         <value xml:lang="en">Edit WebSite Path Alias</value>
         <value xml:lang="fr">Éditer les alias de chemin d'accès du site web</value>
+        <value xml:lang="ja">編集 WebSite パス エイリアス</value>
         <value xml:lang="nl">Wijzigen WebSite Path Alias</value>
         <value xml:lang="zh">编辑网站路径别名</value>
     </property>
@@ -6812,7 +6832,7 @@
         <value xml:lang="en">Purposes for forumgroup: ${objectName} [${objectId}]</value>
         <value xml:lang="fr">Buts pour le groupe de forums</value>
         <value xml:lang="it">Funzioni per gruppo forum:</value>
-        <value xml:lang="ja">フォーラムグループの目的</value>
+        <value xml:lang="ja">フォーラムグループ ${objectName} [${objectId}] の目的</value>
         <value xml:lang="pt">Objetivo do grupo de fórum:</value>
         <value xml:lang="ro">Functii pe grup forum:</value>
         <value xml:lang="th">วัตถุประสงค์สำหรับกลุ่มแสดงความคิดเห็น:</value>
@@ -6827,7 +6847,7 @@
         <value xml:lang="en">Roles for forumgroup: ${objectName} [${objectId}]</value>
         <value xml:lang="fr">Rôles pour le groupe de forums : </value>
         <value xml:lang="it">Ruoli per gruppo forum:</value>
-        <value xml:lang="ja">フォーラムグループのロール</value>
+        <value xml:lang="ja">フォーラムグループ ${objectName} [${objectId}] の役割</value>
         <value xml:lang="pt">Papéis para o grupo de fórum:</value>
         <value xml:lang="ro">Drepturi pe grup forum:</value>
         <value xml:lang="th">สถานะสำหรับแสดงความคิดเห็น:</value>

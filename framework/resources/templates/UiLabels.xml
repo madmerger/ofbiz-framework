@@ -23,14 +23,18 @@ under the License.
 <resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://ofbiz.apache.org/dtds/ofbiz-properties.xsd">
     <property key="@component-resource-name@Application">
         <value xml:lang="en">@component-resource-name@ Application</value>
+        <value xml:lang="ja">@component-resource-name@ アプリケーション</value>
     </property>
     <property key="@component-resource-name@CompanyName">
         <value xml:lang="en">OFBiz: @component-resource-name@</value>
+        <value xml:lang="ja">OFBiz: @component リソース名@</value>
     </property>
     <property key="@component-resource-name@CompanySubtitle">
         <value xml:lang="en">Part of the Apache OFBiz Family of Open Source Software</value>
+        <value xml:lang="ja">Apache OFBiz オープンソースソフトウェアファミリーの一員</value>
     </property>
     <property key="@component-resource-name@ViewPermissionError">
         <value xml:lang="en">You are not allowed to view this page.</value>
+        <value xml:lang="ja">このページは閲覧できません。</value>
     </property>
 </resource>

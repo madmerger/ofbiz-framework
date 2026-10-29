@@ -241,25 +241,31 @@
     <property key="this_week">
         <value xml:lang="en">This week</value>
         <value xml:lang="fr">Cette semaine</value>
+        <value xml:lang="ja">今週の予定</value>
     </property>
     <property key="last_week">
         <value xml:lang="en">Last week</value>
         <value xml:lang="fr">La semaine dernière</value>
+        <value xml:lang="ja">最終週</value>
     </property>
     <property key="next_week">
         <value xml:lang="en">Next week</value>
         <value xml:lang="fr">La semaine prochaine</value>
+        <value xml:lang="ja">次の週</value>
     </property>
     <property key="this_month">
         <value xml:lang="en">This month</value>
         <value xml:lang="fr">Ce mois-ci</value>
+        <value xml:lang="ja">今月は</value>
     </property>
     <property key="last_month">
         <value xml:lang="en">Last month</value>
         <value xml:lang="fr">Le mois dernier</value>
+        <value xml:lang="ja">最終月</value>
     </property>
     <property key="next_month">
         <value xml:lang="en">Next month</value>
         <value xml:lang="fr">Le mois prochain</value>
+        <value xml:lang="ja">次の月</value>
     </property>
 </resource>

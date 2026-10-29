@@ -21,57 +21,72 @@
     <property key="CharacterSet.description.ISO-8859-1">
         <value xml:lang="en">ISO-8859-1</value>
         <value xml:lang="es">ISO-8859-1 Inglés</value>
+        <value xml:lang="ja">ISO-8859-1</value>
     </property>
     <property key="CharacterSet.description.ISO-8859-10">
         <value xml:lang="en">ISO-8859-10</value>
+        <value xml:lang="ja">ISO-8859-10</value>
     </property>
     <property key="CharacterSet.description.ISO-8859-2">
         <value xml:lang="en">ISO-8859-2</value>
+        <value xml:lang="ja">ISO-8859-2</value>
     </property>
     <property key="CharacterSet.description.ISO-8859-3">
         <value xml:lang="en">ISO-8859-3</value>
+        <value xml:lang="ja">ISO-8859-3</value>
     </property>
     <property key="CharacterSet.description.ISO-8859-4">
         <value xml:lang="en">ISO-8859-4</value>
+        <value xml:lang="ja">ISO-8859-4</value>
     </property>
     <property key="CharacterSet.description.ISO-8859-5">
         <value xml:lang="en">ISO-8859-5</value>
+        <value xml:lang="ja">ISO-8859-5</value>
     </property>
     <property key="CharacterSet.description.ISO-8859-6">
         <value xml:lang="en">ISO-8859-6</value>
         <value xml:lang="es">ISO-8859-6 Latino/árabe</value>
+        <value xml:lang="ja">ISO-8859-6</value>
     </property>
     <property key="CharacterSet.description.ISO-8859-7">
         <value xml:lang="en">ISO-8859-7</value>
+        <value xml:lang="ja">ISO-8859-7</value>
     </property>
     <property key="CharacterSet.description.ISO-8859-8">
         <value xml:lang="en">ISO-8859-8</value>
         <value xml:lang="es">ISO-8859-8 Latino/Hebreo</value>
+        <value xml:lang="ja">ISO-8859-8</value>
     </property>
     <property key="CharacterSet.description.ISO-8859-9">
         <value xml:lang="en">ISO-8859-9</value>
         <value xml:lang="es">ISO-8859-9 ?</value>
+        <value xml:lang="ja">ISO-8859-9</value>
     </property>
     <property key="CharacterSet.description.US-ASCII">
         <value xml:lang="en">US-ASCII</value>
+        <value xml:lang="ja">US-ASCII</value>
     </property>
     <property key="CharacterSet.description.UTF-16">
         <value xml:lang="en">UTF-16</value>
         <value xml:lang="es">Unicode 16 bit</value>
         <value xml:lang="fr">Unicode 16 bit</value>
+        <value xml:lang="ja">UTF-16</value>
     </property>
     <property key="CharacterSet.description.UTF-8">
         <value xml:lang="en">UTF-8</value>
         <value xml:lang="es">Unicode 8 bit</value>
         <value xml:lang="fr">Unicode 8 bit</value>
+        <value xml:lang="ja">UTF-8</value>
     </property>
     <property key="Content.description.CTNT_MASTER_EXAMPLE">
         <value xml:lang="en">Example</value>
         <value xml:lang="fr">Exemple</value>
+        <value xml:lang="ja">サンプル</value>
     </property>
     <property key="Content.description.CTNT_MASTER_TURNOVER">
         <value xml:lang="en">Turnover (product)</value>
         <value xml:lang="fr">Rotation (des stocks)</value>
+        <value xml:lang="ja">売上高(製品)</value>
     </property>
     <property key="ContentAssocPredicate.description.categorizes">
         <value xml:lang="da">kategorier</value>
@@ -1595,10 +1610,12 @@
     </property>
     <property key="DataCategory.categoryName.TECH_SOFT_JAVA">
         <value xml:lang="en">Java</value>
+        <value xml:lang="ja">ログイン</value>
         <value xml:lang="th">ภาษาจาวา</value>
     </property>
     <property key="DataCategory.categoryName.TECH_SOFT_LINUX">
         <value xml:lang="en">Linux</value>
+        <value xml:lang="ja">ダウンロード</value>
         <value xml:lang="th">ระบบปฏิบัติการลีนุกซ์</value>
     </property>
     <property key="DataCategory.categoryName.TECH_SOFT_OFBIZ">
@@ -1836,6 +1853,7 @@
     </property>
     <property key="DataTemplateType.description.FTL">
         <value xml:lang="en">FreeMarker</value>
+        <value xml:lang="ja">フリーマーカー</value>
         <value xml:lang="zh-TW">FreeMarker</value>
     </property>
     <property key="DataTemplateType.description.NONE">
@@ -1868,10 +1886,12 @@
     </property>
     <property key="DataTemplateType.description.WM">
         <value xml:lang="en">WebMacro</value>
+        <value xml:lang="ja">サイトマップ</value>
         <value xml:lang="th">เว็บ Macro</value>
     </property>
     <property key="DataTemplateType.description.XSLT">
         <value xml:lang="en">XSLT</value>
+        <value xml:lang="ja">XSLT</value>
     </property>
     <property key="DocumentType.description.BILL_OF_LADING">
         <value xml:lang="da">Kannossement</value>
@@ -2048,6 +2068,7 @@
     </property>
     <property key="MimeType.description.application/msword">
         <value xml:lang="en">Microsoft Word</value>
+        <value xml:lang="ja">マイクロソフトの言葉</value>
         <value xml:lang="zh">微软Word</value>
         <value xml:lang="zh-TW">微軟Word</value>
     </property>
@@ -2090,11 +2111,13 @@
     </property>
     <property key="MimeType.description.application/vnd.ms-excel">
         <value xml:lang="en">Microsoft Excel</value>
+        <value xml:lang="ja">マイクロソフトExcel</value>
         <value xml:lang="zh">微软Excel</value>
         <value xml:lang="zh-TW">微軟Excel</value>
     </property>
     <property key="MimeType.description.application/vnd.ms-powerpoint">
         <value xml:lang="en">Microsoft PowerPoint</value>
+        <value xml:lang="ja">マイクロソフトPowerPoint</value>
         <value xml:lang="zh">微软PowerPoint</value>
         <value xml:lang="zh-TW">微軟PowerPoint</value>
     </property>
@@ -3112,6 +3135,7 @@
     </property>
     <property key="SurveyQuestionType.description.URL">
         <value xml:lang="en">URL</value>
+        <value xml:lang="ja">URL</value>
         <value xml:lang="zh">网址</value>
         <value xml:lang="zh-TW">網址</value>
     </property>

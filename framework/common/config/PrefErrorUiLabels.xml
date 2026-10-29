@@ -39,7 +39,7 @@
         <value xml:lang="es">No se pueden copiar las preferencias del usuario (error de lectura/escritura): {0}</value>
         <value xml:lang="fr">Impossible de copier les préférences de l'utilisateur (erreur d'écriture ou de lecture) : {0}</value>
         <value xml:lang="it">Non è possibile copiare le preferenze utente (lettura/scrittura fallita): {0}</value>
-        <value xml:lang="ja">ユーザ設定がコピーできません (読取/書込エラー): [0]</value>
+        <value xml:lang="ja">ユーザー設定のコピーに失敗しました（読み取り/書き込みエラー）: {0}</value>
         <value xml:lang="pt-BR">Não foi possível copiar as preferências do usuário (de leitura / gravação falha): {0}</value>
         <value xml:lang="ru">Не могут быть скопированы предпочтения пользователя (чтение/запись прервана) : {0}</value>
         <value xml:lang="th">ไม่สามารถคัดลอกสิทธิพิเศษของผู้ใช้ (อ่าน/เขียนล้มเหลว): {0}</value>
@@ -79,7 +79,7 @@
         <value xml:lang="es">No se pueden obtener las preferencias del usuario (error de lectura): {0}</value>
         <value xml:lang="fr">Impossible d'obtenir les préférences de l'utilisateur (erreur de lecture) : {0}</value>
         <value xml:lang="it">Non è possibile ottenere le preferenze utente (lettura fallita): {0}</value>
-        <value xml:lang="ja">ユーザ設定が取得できません (読取エラー): [0]</value>
+        <value xml:lang="ja">ユーザー設定を取得できませんでした（読み取りエラー）: {0}</value>
         <value xml:lang="pt-BR">Não foi possível obter as preferências do usuário (falha na leitura): {0}</value>
         <value xml:lang="ru">Не могут быть получены предпочтения пользователя (чтение прервано) : {0}</value>
         <value xml:lang="th">ไม่สามารถเรียกค่าสิทธิพิเศษของผู้ใช้ (อ่านล้มเหลว): {0}</value>
@@ -107,7 +107,7 @@
         <value xml:lang="es">No se pueden establecer las preferencias del usuario (error de escritura): {0}</value>
         <value xml:lang="fr">Impossible de définir les préférences de l'utilisateur (erreur d'écriture): {0}</value>
         <value xml:lang="it">Non è possibile ottenere le preferenze utente (scrittura fallita): {0}</value>
-        <value xml:lang="ja">ユーザ設定を設定できません (書込エラー): [0]</value>
+        <value xml:lang="ja">ユーザー設定を保存できませんでした（書き込みエラー）: {0}</value>
         <value xml:lang="pt-BR">Não foi possível definir as preferências do usuário (falha de escrita): {0}</value>
         <value xml:lang="ru">Не могут установиться предпочтения пользователя (запись ошибочна) :{0}</value>
         <value xml:lang="th">ไม่สามารถตั้งค่าสิทธิพิเศษของผู้ใช้ (เขียนล้มเหลว): {0}</value>

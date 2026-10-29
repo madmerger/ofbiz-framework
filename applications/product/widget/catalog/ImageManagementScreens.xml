@@ -174,7 +174,7 @@ under the License.
                                 </screenlet>
                             </widgets>
                             <fail-widgets>
-                                <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_UPLOAD&quot; needed)"/>
+                                <label text="${uiLabelMap.ProductImageManagementUploadPermissionError}"/>
                             </fail-widgets>
                         </section>
                     </decorator-section>
@@ -219,7 +219,7 @@ under the License.
                                 </screenlet>
                             </widgets>
                             <fail-widgets>
-                                <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_ADMIN&quot; needed)"/>
+                                <label text="${uiLabelMap.ProductImageManagementPermissionError}"/>
                             </fail-widgets>
                         </section>
                     </decorator-section>
@@ -267,7 +267,7 @@ under the License.
                                 </screenlet>
                             </widgets>
                             <fail-widgets>
-                                <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_ADMIN&quot; needed)"/>
+                                <label text="${uiLabelMap.ProductImageManagementPermissionError}"/>
                             </fail-widgets>
                         </section>
                     </decorator-section>
@@ -308,7 +308,7 @@ under the License.
                                 </screenlet>
                             </widgets>
                             <fail-widgets>
-                                <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_ADMIN&quot; needed)"/>
+                                <label text="${uiLabelMap.ProductImageManagementPermissionError}"/>
                             </fail-widgets>
                         </section>
                     </decorator-section>
@@ -354,7 +354,7 @@ under the License.
                                 </screenlet>
                             </widgets>
                             <fail-widgets>
-                                <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_ADMIN&quot; needed)"/>
+                                <label text="${uiLabelMap.ProductImageManagementPermissionError}"/>
                             </fail-widgets>
                         </section>
                     </decorator-section>
@@ -381,7 +381,7 @@ under the License.
                                 </screenlet>
                             </widgets>
                             <fail-widgets>
-                                <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_ADMIN&quot; needed)"/>
+                                <label text="${uiLabelMap.ProductImageManagementPermissionError}"/>
                             </fail-widgets>
                         </section>
                     </decorator-section>
@@ -427,7 +427,7 @@ under the License.
                                 </section>
                             </widgets>
                             <fail-widgets>
-                                <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_ADMIN&quot; needed)"/>
+                                <label text="${uiLabelMap.ProductImageManagementPermissionError}"/>
                             </fail-widgets>
                         </section>
                     </decorator-section>
@@ -452,7 +452,7 @@ under the License.
                                         </screenlet>
                                     </widgets>
                                     <fail-widgets>
-                                        <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_ADMIN&quot; needed)"/>
+                                        <label text="${uiLabelMap.ProductImageManagementPermissionError}"/>
                                     </fail-widgets>
                                 </section>
                             </decorator-section>
@@ -486,7 +486,7 @@ under the License.
                                 </screenlet>
                             </widgets>
                             <fail-widgets>
-                                <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_ADMIN&quot; needed)"/>
+                                <label text="${uiLabelMap.ProductImageManagementPermissionError}"/>
                             </fail-widgets>
                         </section>
                     </decorator-section>
@@ -518,7 +518,7 @@ under the License.
                                 </screenlet>
                             </widgets>
                             <fail-widgets>
-                                <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_ADMIN&quot; needed)"/>
+                                <label text="${uiLabelMap.ProductImageManagementPermissionError}"/>
                             </fail-widgets>
                         </section>
                     </decorator-section>
@@ -553,7 +553,7 @@ under the License.
                                 </screenlet>
                             </widgets>
                             <fail-widgets>
-                                <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_ADMIN&quot; needed)"/>
+                                <label text="${uiLabelMap.ProductImageManagementPermissionError}"/>
                             </fail-widgets>
                         </section>
                     </decorator-section>
@@ -606,7 +606,7 @@ under the License.
                                 </screenlet>
                             </widgets>
                             <fail-widgets>
-                                <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_ADMIN&quot; needed)"/>
+                                <label text="${uiLabelMap.ProductImageManagementPermissionError}"/>
                             </fail-widgets>
                         </section>
                     </decorator-section>
@@ -662,7 +662,7 @@ under the License.
                                 </section>
                             </widgets>
                             <fail-widgets>
-                                <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_ADMIN&quot; needed)"/>
+                                <label text="${uiLabelMap.ProductImageManagementPermissionError}"/>
                             </fail-widgets>
                         </section>
                    </decorator-section>
@@ -687,7 +687,7 @@ under the License.
                                         </screenlet>
                                     </widgets>
                                     <fail-widgets>
-                                        <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_ADMIN&quot; needed)"/>
+                                        <label text="${uiLabelMap.ProductImageManagementPermissionError}"/>
                                     </fail-widgets>
                                 </section>
                             </decorator-section>
@@ -753,7 +753,7 @@ under the License.
                                 </screenlet>
                             </widgets>
                             <fail-widgets>
-                                <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_ADMIN&quot; needed)"/>
+                                <label text="${uiLabelMap.ProductImageManagementPermissionError}"/>
                             </fail-widgets>
                         </section>
                     </decorator-section>
@@ -780,7 +780,7 @@ under the License.
                                 </screenlet>
                             </widgets>
                             <fail-widgets>
-                                <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_ADMIN&quot; needed)"/>
+                                <label text="${uiLabelMap.ProductImageManagementPermissionError}"/>
                             </fail-widgets>
                         </section>
                     </decorator-section>
@@ -833,7 +833,7 @@ under the License.
                                 </screenlet>
                             </widgets>
                             <fail-widgets>
-                                <label text="You do not have permission to access this page. (&quot;IMAGE_MANAGEMENT_ADMIN&quot; needed)"/>
+                                <label text="${uiLabelMap.ProductImageManagementPermissionError}"/>
                             </fail-widgets>
                         </section>
                     </decorator-section>
