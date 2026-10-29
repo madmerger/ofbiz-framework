@@ -3401,7 +3401,7 @@
         <value xml:lang="en">Please enter Person First name or Last name or Company name</value>
         <value xml:lang="es">Por favor, ingrese primer nombre de la persona o apellido o nombre de la Compañia</value>
         <value xml:lang="fr">Merci de saisir le prénom ou le nom pour une personne ou le nom pour une société</value>
-        <value xml:lang="ja">姓(FN)、名(LN)、または会社名を入力してください</value>
+        <value xml:lang="ja">名、姓、または会社名を入力してください。</value>
         <value xml:lang="pt-BR">Por favor, digite o nome da pessoa, sobrenome ou nome da empresa</value>
         <value xml:lang="vi">Bạn hãy nhập Tên hoặc Họ hoặc Tên công ty</value>
         <value xml:lang="zh">请输入人员的姓或名，或机构名称</value>

@@ -186,7 +186,7 @@ under the License.
         <menu-item name="entitymaint" title="${uiLabelMap.WebtoolsEntityDataMaintenance}">
             <link target="entitymaint"/>
         </menu-item>
-        <menu-item name="entityref" title="${uiLabelMap.WebtoolsEntityReference} - Interactive">
+        <menu-item name="entityref" title="${uiLabelMap.WebtoolsEntityReference} - ${uiLabelMap.WebtoolsEntityReferenceInteractiveVersion}">
             <link target="entityref" target-window="_BLANK"/>
         </menu-item>
         <menu-item name="entityrefStatic" title="${uiLabelMap.WebtoolsEntityReference} - ${uiLabelMap.WebtoolsEntityReferenceStaticVersion}">

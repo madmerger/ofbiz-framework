@@ -16343,4 +16343,8 @@
        <value xml:lang="it">Articolo ${productId} aggiunto con successo</value>
        <value xml:lang="ja">品目 ${productId} を追加しました。</value>
     </property>
+    <property key="OrderAddAttachment">
+        <value xml:lang="en">Add Attachment</value>
+        <value xml:lang="ja">添付を追加</value>
+    </property>
 </resource>

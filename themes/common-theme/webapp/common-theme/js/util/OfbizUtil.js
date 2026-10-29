@@ -28,6 +28,28 @@ var SP_CLICK_ON = 'clickOn';
 
 // Add observers on DOM ready.
 $(document).ready(function () {
+    if (document.querySelector("[required]") && typeof getJSONuiLabels === "function") {
+        var requiredMessage;
+        getJSONuiLabels({"CommonUiLabels": ["CommonRequiredFieldBrowserMessage"]}, function (result) {
+            var labels = result && result.responseJSON;
+            requiredMessage = labels && labels.CommonRequiredFieldBrowserMessage;
+        });
+        if (requiredMessage) {
+            document.addEventListener("invalid", function (event) {
+                if (event.target && event.target.setCustomValidity && event.target.validity && event.target.validity.valueMissing) {
+                    event.target.setCustomValidity(requiredMessage);
+                }
+            }, true);
+            var clearRequiredMessage = function (event) {
+                if (event.target && event.target.setCustomValidity) {
+                    event.target.setCustomValidity("");
+                }
+            };
+            document.addEventListener("input", clearRequiredMessage, true);
+            document.addEventListener("change", clearRequiredMessage, true);
+        }
+    }
+
     // add CSRF token to jQuery AJAX calls to the same domain
     jQuery.ajaxPrefilter(function (options, _, jqXHR) {
         var token;
@@ -1454,6 +1476,15 @@ function waitSpinnerHide(id) {
  * @return JSON Object
  */
 function getJSONuiLabels(requiredLabels, callback) {
+    if (requiredLabels && !Array.isArray(requiredLabels)) {
+        var labelNames = [];
+        Object.keys(requiredLabels).forEach(function (resource) {
+            if (Array.isArray(requiredLabels[resource])) {
+                labelNames = labelNames.concat(requiredLabels[resource]);
+            }
+        });
+        requiredLabels = labelNames;
+    }
     var requiredLabelsStr = JSON.stringify(requiredLabels)
 
     if (requiredLabels != null && requiredLabels != "") {

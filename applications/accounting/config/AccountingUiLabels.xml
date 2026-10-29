@@ -5137,7 +5137,7 @@
         <value xml:lang="fr">Prénom sur la carte</value>
         <value xml:lang="hi-IN">कार्ड पर पहला नाम</value>
         <value xml:lang="it">Nome sulla Carta</value>
-        <value xml:lang="ja">カードの名(FN)</value>
+        <value xml:lang="ja">カードの名</value>
         <value xml:lang="nl">Voornaam op de kaart</value>
         <value xml:lang="pt">Primeiro Nome no Cartão</value>
         <value xml:lang="ro">Prenume inscris pe Carte</value>
@@ -5153,7 +5153,7 @@
         <value xml:lang="en">First Name on Card is missing</value>
         <value xml:lang="es">Primer nombre en la tarjeta no se encuentra</value>
         <value xml:lang="fr">Le prénom sur la carte est manquant</value>
-        <value xml:lang="ja">カードの名(FN)が正しくありません</value>
+        <value xml:lang="ja">カードの名が未入力です</value>
         <value xml:lang="nl">Voornaam van de kaarthouder ontbreekt</value>
         <value xml:lang="pt">Primeiro nome no cartão está faltando</value>
         <value xml:lang="vi">Tên trên thẻ bị thiếu</value>
@@ -8231,7 +8231,7 @@
         <value xml:lang="fr">Nom sur la carte</value>
         <value xml:lang="hi-IN">कार्ड पर अंतिम नाम</value>
         <value xml:lang="it">Cognome sulla Carta</value>
-        <value xml:lang="ja">カードの姓(LN)</value>
+        <value xml:lang="ja">カードの姓</value>
         <value xml:lang="nl">Achternaam op de kaart</value>
         <value xml:lang="pt">Sobrenome do Cartão</value>
         <value xml:lang="ro">Numele Inscris pe Carte</value>
@@ -8247,7 +8247,7 @@
         <value xml:lang="en">Last Name on Card is missing</value>
         <value xml:lang="es">Apellido en tarjeta no se encuentra</value>
         <value xml:lang="fr">Le nom du titulaire de la carte est manquant</value>
-        <value xml:lang="ja">カードの姓(LN)が正しくありません</value>
+        <value xml:lang="ja">カードの姓が未入力です</value>
         <value xml:lang="pt">Sobrenome no cartão está faltando</value>
         <value xml:lang="vi">Họ trên Thẻ chưa có thông tin</value>
         <value xml:lang="zh">缺少卡上姓名的最后一组字母</value>
@@ -8709,7 +8709,7 @@
         <value xml:lang="fr">Nom intermédiaire sur la carte</value>
         <value xml:lang="hi-IN">कार्ड पर मध्य नाम</value>
         <value xml:lang="it">Nome Centrale sulla Carta</value>
-        <value xml:lang="ja">カードのミドル名</value>
+        <value xml:lang="ja">カードのミドルネーム</value>
         <value xml:lang="nl">tussenvoegsel naam van de kaart</value>
         <value xml:lang="pt">Nome do meio no cartão</value>
         <value xml:lang="ro">Nume Central pe Carte</value>
