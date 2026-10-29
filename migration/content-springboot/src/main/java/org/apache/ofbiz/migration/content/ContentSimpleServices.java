@@ -99,9 +99,6 @@ public final class ContentSimpleServices {
             throw new MigrationException(HttpStatus.BAD_REQUEST, "ContentNoQuestionsSurveyFound");
         }
         String partyId = (String) input.get("partyId");
-        if (!"Y".equals(store.get(survey, "isAnonymous")) && ContentEntityStore.isEmpty(partyId)) {
-            throw new MigrationException(HttpStatus.BAD_REQUEST, "ContentSurveyAnonymousResponse");
-        }
         if (!"Y".equals(store.get(survey, "allowMultiple")) && !ContentEntityStore.isEmpty(partyId)
                 && !store.findList("SurveyResponse", Map.of("partyId", partyId, "surveyId", surveyId)).isEmpty()
                 && !"Y".equals(store.get(survey, "allowUpdate"))) {
@@ -124,17 +121,29 @@ public final class ContentSimpleServices {
         Object response = null;
         if ("Y".equals(store.get(survey, "allowUpdate")) && !ContentEntityStore.isEmpty(input.get("surveyResponseId"))) {
             response = store.findOne("SurveyResponse", Map.of("surveyResponseId", input.get("surveyResponseId")));
-            // 既存回答の上書きは CONTENTMGR_UPDATE が必要。partyId は利用者と結び付かない（UserLogin 未移行）ため、
-            // 他の Survey や別 partyId の回答も更新させない
-            if (response != null && !ContentPermissionService.basePermission("CONTENTMGR", "UPDATE")) {
-                throw new MigrationException(HttpStatus.FORBIDDEN, "Service permission denied");
-            }
-            if (response != null && (!surveyId.equals(store.get(response, "surveyId"))
-                    || !java.util.Objects.equals(store.get(response, "partyId"), ContentEntityStore.isEmpty(partyId) ? null : partyId))) {
-                throw new MigrationException(HttpStatus.FORBIDDEN, "ContentSurveyResponseNotOwned");
+            if (response != null) {
+                Object responsePartyId = store.get(response, "partyId");
+                if (!surveyId.equals(store.get(response, "surveyId"))
+                        || (!ContentEntityStore.isEmpty(partyId) && !java.util.Objects.equals(responsePartyId, partyId))) {
+                    throw new MigrationException(HttpStatus.FORBIDDEN, "ContentSurveyResponseNotOwned");
+                }
+                // 既存回答はログイン ID が本人の回答か CONTENTMGR_ADMIN のみ更新できる。
+                if (!ContentPermissionService.basePermission("CONTENTMGR", "ADMIN")
+                        && (ContentEntityStore.isEmpty(responsePartyId)
+                                || !java.util.Objects.equals(responsePartyId, ContentEntityStore.currentUserLoginId()))) {
+                    throw new MigrationException(HttpStatus.FORBIDDEN, "ContentSurveyResponseNotOwned");
+                }
             }
         }
         if (response == null) {
+            if (!"Y".equals(store.get(survey, "isAnonymous")) && ContentEntityStore.isEmpty(partyId)) {
+                throw new MigrationException(HttpStatus.BAD_REQUEST, "ContentSurveyAnonymousResponse");
+            }
+            if (!ContentEntityStore.isEmpty(partyId)
+                    && !partyId.equals(ContentEntityStore.currentUserLoginId())
+                    && !ContentPermissionService.basePermission("CONTENTMGR", "ADMIN")) {
+                throw new MigrationException(HttpStatus.FORBIDDEN, "ContentSurveyResponsePartyMismatch");
+            }
             Map<String, Object> values = new LinkedHashMap<>(input);
             values.put("surveyResponseId", store.nextId("SurveyResponse"));
             store.create("SurveyResponse", values);

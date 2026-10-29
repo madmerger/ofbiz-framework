@@ -86,4 +86,5 @@ tasks.named('compileJava') {
 tasks.named('test') {
     useJUnitPlatform()
     systemProperty 'ofbiz.root', rootProject.projectDir.absolutePath
+    environment 'MANUFACTURING_DEMO_PASSWORD', 'manufacturing-test-password'
 }
