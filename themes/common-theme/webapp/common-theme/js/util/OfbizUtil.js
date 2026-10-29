@@ -51,7 +51,7 @@ $(document).ready(function () {
             getJSONuiLabels({"CommonUiLabels": pendingLabels}, function (result) {
                 var labels = result && result.responseJSON;
                 pendingLabels.forEach(function (labelName) {
-                    if (labels && Object.prototype.hasOwnProperty.call(labels, labelName)) {
+                    if (labels && Object.prototype.hasOwnProperty.call(labels, labelName) && labels[labelName] !== labelName) {
                         uiLabelCache[labelName] = labels[labelName];
                     }
                 });
@@ -193,16 +193,6 @@ $(document).ready(function () {
         }, 0);
     }, true);
 
-    enhanceFileInputs(document.body);
-    if (window.MutationObserver && document.body) {
-        var fileInputObserver = new MutationObserver(function (mutations) {
-            mutations.forEach(function (mutation) {
-                Array.prototype.forEach.call(mutation.addedNodes, enhanceFileInputs);
-            });
-        });
-        fileInputObserver.observe(document.body, {childList: true, subtree: true});
-    }
-
     // add CSRF token to jQuery AJAX calls to the same domain
     jQuery.ajaxPrefilter(function (options, _, jqXHR) {
         var token;
@@ -213,6 +203,15 @@ $(document).ready(function () {
             }
         }
     });
+    enhanceFileInputs(document.body);
+    if (window.MutationObserver && document.body) {
+        var fileInputObserver = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                Array.prototype.forEach.call(mutation.addedNodes, enhanceFileInputs);
+            });
+        });
+        fileInputObserver.observe(document.body, {childList: true, subtree: true});
+    }
     //initializing UI combobox dropdown by overriding its methods.
     ajaxAutoCompleteDropDown();
     //initializing events listener
