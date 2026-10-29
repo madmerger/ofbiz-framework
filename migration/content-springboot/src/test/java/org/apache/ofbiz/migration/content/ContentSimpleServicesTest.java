@@ -19,6 +19,7 @@
 package org.apache.ofbiz.migration.content;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -82,15 +83,15 @@ class ContentSimpleServicesTest extends ContentApiTestSupport {
 
         call("editor", "createSurveyResponse", Map.of("surveyId", surveyId, "answers", Map.of(emailQ, "a@example.com")))
                 .andExpect(status().isBadRequest());
-        call("editor", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "AC32_PARTY",
+        call("editor", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "editor",
                 "answers", Map.of(emailQ, "not-an-email", numberQ, "3")))
                 .andExpect(status().isBadRequest());
-        String responseId = body(call("editor", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "AC32_PARTY",
+        String responseId = body(call("editor", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "editor",
                 "answers", Map.of(emailQ, "a@example.com", numberQ, "3")))
                 .andExpect(status().isOk())).get("surveyResponseId").asText();
         JsonNode answers = body(entities("admin", "SurveyResponseAnswer", Map.of("surveyResponseId", responseId)));
         assertEquals(2, answers.size());
-        call("editor", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "AC32_PARTY",
+        call("editor", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "editor",
                 "answers", Map.of(emailQ, "b@example.com", numberQ, "4")))
                 .andExpect(status().isConflict());
     }
@@ -101,23 +102,77 @@ class ContentSimpleServicesTest extends ContentApiTestSupport {
                 "allowMultiple", "Y", "allowUpdate", "Y"))).get("surveyId").asText();
         String q = body(call("editor", "createSurveyQuestion", Map.of("surveyQuestionTypeId", "TEXT_SHORT",
                 "question", "Q", "surveyId", surveyId))).get("surveyQuestionId").asText();
-        String responseId = body(call("editor", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "AC35_A",
+        String responseId = body(call("creator", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "creator",
                 "answers", Map.of(q, "A")))).get("surveyResponseId").asText();
-        call("editor", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "AC35_B",
-                "surveyResponseId", responseId, "answers", Map.of(q, "B")))
+        call("editor", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "creator",
+                "surveyResponseId", responseId, "answers", Map.of(q, "spoofed")))
                 .andExpect(status().isForbidden());
-        call("creator", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "AC35_A",
-                "surveyResponseId", responseId, "answers", Map.of(q, "A3")))
+        entities("admin", "SurveyResponseAnswer", Map.of("surveyResponseId", responseId))
+                .andExpect(jsonPath("$[0].textResponse").value("A"));
+        String otherSurveyId = body(call("editor", "createSurvey", Map.of("surveyName", "AC35_OTHER", "isAnonymous", "N",
+                "allowMultiple", "Y", "allowUpdate", "Y"))).get("surveyId").asText();
+        String otherQuestionId = body(call("editor", "createSurveyQuestion", Map.of("surveyQuestionTypeId", "TEXT_SHORT",
+                "question", "Other", "surveyId", otherSurveyId))).get("surveyQuestionId").asText();
+        call("creator", "createSurveyResponse", Map.of("surveyId", otherSurveyId, "partyId", "creator",
+                "surveyResponseId", responseId, "answers", Map.of(otherQuestionId, "wrong survey")))
                 .andExpect(status().isForbidden());
-        call("editor", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "AC35_A",
+        call("creator", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "creator",
                 "surveyResponseId", responseId, "answers", Map.of(q, "A2")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.surveyResponseId").value(responseId));
+        entities("admin", "SurveyResponseAnswer", Map.of("surveyResponseId", responseId))
+                .andExpect(jsonPath("$[0].textResponse").value("A2"));
+        call("admin", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "editor",
+                "surveyResponseId", responseId, "answers", Map.of(q, "wrong party")))
+                .andExpect(status().isForbidden());
+        entities("admin", "SurveyResponseAnswer", Map.of("surveyResponseId", responseId))
+                .andExpect(jsonPath("$[0].textResponse").value("A2"));
+        call("admin", "createSurveyResponse", Map.of("surveyId", surveyId, "surveyResponseId", responseId,
+                "answers", Map.of(q, "A3")))
+                .andExpect(status().isOk());
+        entities("admin", "SurveyResponse", Map.of("surveyResponseId", responseId))
+                .andExpect(jsonPath("$[0].partyId").value("creator"));
+        entities("admin", "SurveyResponseAnswer", Map.of("surveyResponseId", responseId))
+                .andExpect(jsonPath("$[0].textResponse").value("A3"));
         String questionId = body(call("editor", "createSurveyQuestion", Map.of("surveyQuestionTypeId", "OPTION",
                 "question", "選択"))).get("surveyQuestionId").asText();
         call("editor", "createSurveyQuestionOption", Map.of("surveyQuestionId", questionId, "description", "はい"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.surveyOptionSeqId").value("00001"));
+    }
+
+    @Test
+    void ac36AnonymousSurveyResponseCanOnlyBeUpdatedByAdmin() throws Exception {
+        String surveyId = body(call("editor", "createSurvey", Map.of("surveyName", "AC36", "isAnonymous", "Y",
+                "allowMultiple", "Y", "allowUpdate", "Y"))).get("surveyId").asText();
+        String questionId = body(call("editor", "createSurveyQuestion", Map.of("surveyQuestionTypeId", "TEXT_SHORT",
+                "question", "Q", "surveyId", surveyId))).get("surveyQuestionId").asText();
+        String responseId = body(call("admin", "createSurveyResponse", Map.of("surveyId", surveyId,
+                "answers", Map.of(questionId, "anonymous"))).andExpect(status().isOk())).get("surveyResponseId").asText();
+        JsonNode response = body(entities("admin", "SurveyResponse", Map.of("surveyResponseId", responseId)));
+        assertTrue(response.get(0).get("partyId").isNull());
+
+        call("creator", "createSurveyResponse", Map.of("surveyId", surveyId, "surveyResponseId", responseId,
+                "answers", Map.of(questionId, "changed")))
+                .andExpect(status().isForbidden());
+        entities("admin", "SurveyResponseAnswer", Map.of("surveyResponseId", responseId))
+                .andExpect(jsonPath("$[0].textResponse").value("anonymous"));
+    }
+
+    @Test
+    void ac37SurveyResponsePartyMustMatchAuthenticatedLogin() throws Exception {
+        String surveyId = body(call("editor", "createSurvey", Map.of("surveyName", "AC37", "isAnonymous", "N",
+                "allowMultiple", "Y", "allowUpdate", "N"))).get("surveyId").asText();
+        String questionId = body(call("editor", "createSurveyQuestion", Map.of("surveyQuestionTypeId", "TEXT_SHORT",
+                "question", "Q", "surveyId", surveyId))).get("surveyQuestionId").asText();
+
+        call("creator", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "editor",
+                "answers", Map.of(questionId, "spoofed")))
+                .andExpect(status().isForbidden());
+        String responseId = body(call("creator", "createSurveyResponse", Map.of("surveyId", surveyId, "partyId", "creator",
+                "answers", Map.of(questionId, "own"))).andExpect(status().isOk())).get("surveyResponseId").asText();
+        entities("admin", "SurveyResponse", Map.of("surveyResponseId", responseId))
+                .andExpect(jsonPath("$[0].partyId").value("creator"));
     }
 
     @Test
