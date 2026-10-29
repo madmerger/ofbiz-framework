@@ -10874,7 +10874,7 @@
     <property key="CommonSelectFile">
         <value xml:lang="en">Select File</value>
         <value xml:lang="es">Seleccione Archivo</value>
-        <value xml:lang="ja">ファイルの選択</value>
+        <value xml:lang="ja">ファイルを選択</value>
     </property>
     <property key="CommonSelectOne">
         <value xml:lang="ar">إختر واحد</value>
@@ -16341,6 +16341,10 @@
         <value xml:lang="ja">このフィールドを入力してください。</value>
     </property>
 
+    <property key="CommonNoFileChosen">
+        <value xml:lang="en">No file chosen</value>
+        <value xml:lang="ja">ファイルが選択されていません</value>
+    </property>
 
     <!-- Fallback titles for form fields without explicit titles. -->
     <property key="FormFieldTitle__rowSubmit">

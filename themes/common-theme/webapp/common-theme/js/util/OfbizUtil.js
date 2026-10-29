@@ -28,26 +28,179 @@ var SP_CLICK_ON = 'clickOn';
 
 // Add observers on DOM ready.
 $(document).ready(function () {
-    if (document.querySelector("[required]") && typeof getJSONuiLabels === "function") {
-        var requiredMessage;
-        getJSONuiLabels({"CommonUiLabels": ["CommonRequiredFieldBrowserMessage"]}, function (result) {
-            var labels = result && result.responseJSON;
-            requiredMessage = labels && labels.CommonRequiredFieldBrowserMessage;
+    var uiLabelCache = Object.create(null);
+    var requestedUiLabels = Object.create(null);
+    var fileInputIdSequence = 0;
+
+    function getUiLabelsOnce(labelNames, callback) {
+        var pendingLabels = labelNames.filter(function (labelName) {
+            return !Object.prototype.hasOwnProperty.call(requestedUiLabels, labelName);
         });
-        if (requiredMessage) {
-            document.addEventListener("invalid", function (event) {
-                if (event.target && event.target.setCustomValidity && event.target.validity && event.target.validity.valueMissing) {
-                    event.target.setCustomValidity(requiredMessage);
-                }
-            }, true);
-            var clearRequiredMessage = function (event) {
-                if (event.target && event.target.setCustomValidity) {
-                    event.target.setCustomValidity("");
-                }
-            };
-            document.addEventListener("input", clearRequiredMessage, true);
-            document.addEventListener("change", clearRequiredMessage, true);
+        if (pendingLabels.length === 0) {
+            callback(uiLabelCache);
+            return;
         }
+        pendingLabels.forEach(function (labelName) {
+            requestedUiLabels[labelName] = true;
+        });
+        if (typeof getJSONuiLabels !== "function") {
+            callback(uiLabelCache);
+            return;
+        }
+        try {
+            getJSONuiLabels({"CommonUiLabels": pendingLabels}, function (result) {
+                var labels = result && result.responseJSON;
+                pendingLabels.forEach(function (labelName) {
+                    if (labels && Object.prototype.hasOwnProperty.call(labels, labelName)) {
+                        uiLabelCache[labelName] = labels[labelName];
+                    }
+                });
+                callback(uiLabelCache);
+            });
+        } catch (error) {
+            callback(uiLabelCache);
+        }
+    }
+
+    function clearCustomValidity(element) {
+        if (element && typeof element.setCustomValidity === "function") {
+            element.setCustomValidity("");
+        }
+    }
+
+    function isFileInput(element) {
+        return element && element.tagName === "INPUT" && element.type === "file";
+    }
+
+    function updateFileName(input) {
+        var display = input._ofbizFileNameDisplay;
+        if (!display) {
+            return;
+        }
+        var files = input.files;
+        if (!files || files.length === 0) {
+            display.textContent = uiLabelCache.CommonNoFileChosen;
+            return;
+        }
+        var fileNames = [];
+        Array.prototype.forEach.call(files, function (file) {
+            fileNames.push(file.name);
+        });
+        display.textContent = fileNames.join(", ");
+    }
+
+    function addFileInputStyles() {
+        if (document.getElementById("ofbiz-file-input-enhancement-style")) {
+            return;
+        }
+        var style = document.createElement("style");
+        style.id = "ofbiz-file-input-enhancement-style";
+        style.textContent = ".ofbiz-file-input-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important}.ofbiz-file-input-button{display:inline-block;cursor:pointer;border:1px solid currentColor;border-radius:3px;background-color:#f5f5f5;color:inherit;padding:.3em .6em;margin:0 .5em 0 0;line-height:normal;font:inherit;text-decoration:none}.ofbiz-file-input-visually-hidden:focus+.ofbiz-file-input-button{outline:2px solid Highlight;outline-offset:2px}.ofbiz-file-input-name{display:inline-block}";
+        (document.head || document.documentElement).appendChild(style);
+    }
+
+    function enhanceFileInput(input, labels) {
+        if (input.getAttribute("data-ofbiz-file-input-enhanced") === "true" || !input.parentNode) {
+            return;
+        }
+        if (!input.id) {
+            var id;
+            do {
+                id = "ofbiz-file-input-" + (++fileInputIdSequence);
+            } while (document.getElementById(id));
+            input.id = id;
+        }
+        var button = document.createElement("label");
+        button.className = "buttontext ofbiz-file-input-button";
+        button.htmlFor = input.id;
+        button.textContent = labels.CommonSelectFile;
+
+        var display = document.createElement("span");
+        display.className = "ofbiz-file-input-name";
+        display.setAttribute("aria-live", "polite");
+
+        input.classList.add("ofbiz-file-input-visually-hidden");
+        input.setAttribute("data-ofbiz-file-input-enhanced", "true");
+        input._ofbizFileNameDisplay = display;
+        input.parentNode.insertBefore(button, input.nextSibling);
+        input.parentNode.insertBefore(display, button.nextSibling);
+        updateFileName(input);
+    }
+
+    function enhanceFileInputs(container) {
+        if (!container) {
+            return;
+        }
+        var inputs = [];
+        if (isFileInput(container)) {
+            inputs.push(container);
+        }
+        if (container.querySelectorAll) {
+            Array.prototype.forEach.call(container.querySelectorAll('input[type="file"]'), function (input) {
+                inputs.push(input);
+            });
+        }
+        inputs = inputs.filter(function (input) {
+            return input.getAttribute("data-ofbiz-file-input-enhanced") !== "true";
+        });
+        if (inputs.length === 0) {
+            return;
+        }
+        getUiLabelsOnce(["CommonSelectFile", "CommonNoFileChosen"], function (labels) {
+            if (!labels.CommonSelectFile || !labels.CommonNoFileChosen) {
+                return;
+            }
+            addFileInputStyles();
+            inputs.forEach(function (input) {
+                enhanceFileInput(input, labels);
+            });
+        });
+    }
+
+    document.addEventListener("invalid", function (event) {
+        var target = event.target;
+        if (target && target.validity && target.validity.valueMissing && typeof target.setCustomValidity === "function") {
+            getUiLabelsOnce(["CommonRequiredFieldBrowserMessage"], function (labels) {
+                if (labels.CommonRequiredFieldBrowserMessage) {
+                    target.setCustomValidity(labels.CommonRequiredFieldBrowserMessage);
+                }
+            });
+        }
+    }, true);
+    document.addEventListener("input", function (event) {
+        clearCustomValidity(event.target);
+    }, true);
+    document.addEventListener("change", function (event) {
+        clearCustomValidity(event.target);
+        if (isFileInput(event.target)) {
+            updateFileName(event.target);
+        }
+    }, true);
+    document.addEventListener("reset", function (event) {
+        var form = event.target;
+        if (!form || !form.elements) {
+            return;
+        }
+        Array.prototype.forEach.call(form.elements, clearCustomValidity);
+        window.setTimeout(function () {
+            if (!event.defaultPrevented) {
+                Array.prototype.forEach.call(form.elements, function (element) {
+                    if (isFileInput(element)) {
+                        updateFileName(element);
+                    }
+                });
+            }
+        }, 0);
+    }, true);
+
+    enhanceFileInputs(document.body);
+    if (window.MutationObserver && document.body) {
+        var fileInputObserver = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                Array.prototype.forEach.call(mutation.addedNodes, enhanceFileInputs);
+            });
+        });
+        fileInputObserver.observe(document.body, {childList: true, subtree: true});
     }
 
     // add CSRF token to jQuery AJAX calls to the same domain
