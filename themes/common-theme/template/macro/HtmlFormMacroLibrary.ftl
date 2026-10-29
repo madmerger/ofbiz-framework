@@ -944,9 +944,9 @@ Parameter: delegatorName, String, optional - name of the delegator in context.
       <#if multiple>multiple</#if>
       <#if required>required</#if>
       <#if disabled>disabled</#if>
-      <#if attributes?has_content>${attributes?no_esc}</#if> /><span>${fileInputSelectText}</span></label>
-  <span class="ofbiz-file-input-name" data-ofbiz-file-input-name data-ofbiz-empty-text="${fileInputNoFileChosenText}"
-      aria-live="polite">${fileInputNoFileChosenText}</span>
+      <#if attributes?has_content>${attributes?no_esc}</#if> /><span>${fileInputSelectText?no_esc}</span></label>
+  <span class="ofbiz-file-input-name" data-ofbiz-file-input-name data-ofbiz-empty-text="${fileInputNoFileChosenText?no_esc}"
+      aria-live="polite">${fileInputNoFileChosenText?no_esc}</span>
   </#outputformat>
 </#macro>
 
