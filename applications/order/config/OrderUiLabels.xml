@@ -29,7 +29,7 @@
         <value xml:lang="de">Versandgruppe löschen</value>
         <value xml:lang="en">Delete this ship group</value>
         <value xml:lang="fr">Supprimer le groupe d'expédition</value>
-        <value xml:lang="ja">この船グループを削除します。</value>
+        <value xml:lang="ja">この配送グループを削除</value>
         <value xml:lang="nl">Verwijder verzendgroep</value>
         <value xml:lang="zh">删除这个运输组</value>
     </property>
@@ -1217,7 +1217,7 @@
         <value xml:lang="de">Retourenposition Seq ID</value>
         <value xml:lang="en">Return Item Seq ID</value>
         <value xml:lang="fr">Ref. ligne de retour</value>
-        <value xml:lang="ja">返品アイテム連番ID</value>
+        <value xml:lang="ja">返品明細連番ID</value>
         <value xml:lang="nl">Retour Itemnr ID</value>
         <value xml:lang="zh">退货明细序号</value>
     </property>
@@ -1926,7 +1926,7 @@
         <value xml:lang="de">Zur Versandgruppe hinzufügen</value>
         <value xml:lang="en">Add to ship group</value>
         <value xml:lang="fr">Ajouter au groupe d'expédition</value>
-        <value xml:lang="ja">船舶グループに追加</value>
+        <value xml:lang="ja">配送グループに追加</value>
         <value xml:lang="nl">Voeg toe aan verzendgroep</value>
         <value xml:lang="zh">添加到运输组</value>
     </property>
@@ -2082,28 +2082,28 @@
     </property>
     <property key="OrderAllocated">
         <value xml:lang="en">Allocated</value>
-        <value xml:lang="ja">アクセス</value>
+        <value xml:lang="ja">割当済み</value>
         <value xml:lang="nl">Toegewezen</value>
     </property>
     <property key="OrderAllocatedUnits">
         <value xml:lang="en">Allocated Units</value>
-        <value xml:lang="ja">割り当てられた単位</value>
+        <value xml:lang="ja">割当数量</value>
         <value xml:lang="nl">Toegewezen eenheden</value>
     </property>
     <property key="OrderAllocatedValue">
         <value xml:lang="en">Allocated Value</value>
-        <value xml:lang="ja">割り当てられた価値</value>
+        <value xml:lang="ja">割当額</value>
         <value xml:lang="nl">Toegewezen waarde</value>
     </property>
     <property key="OrderAllocation">
         <value xml:lang="en">Allocation</value>
-        <value xml:lang="ja">アクセス</value>
+        <value xml:lang="ja">割当</value>
         <value xml:lang="nl">Allocatie</value>
     </property>
     <property key="OrderAllocationPlan">
         <value xml:lang="en">Allocation Plan</value>
         <value xml:lang="fr">Plan d'allocation</value>
-        <value xml:lang="ja">配置計画</value>
+        <value xml:lang="ja">割当計画</value>
         <value xml:lang="nl">Allocatieplan</value>
     </property>
     <property key="OrderAllocationPlanNotFound">
@@ -2113,7 +2113,7 @@
     </property>
     <property key="OrderAllocationPlanViewPermissionError">
         <value xml:lang="en">You do not have the permission to view the allocation plan.</value>
-        <value xml:lang="ja">割り当てプランを表示することはできません。</value>
+        <value xml:lang="ja">割当計画を表示する権限がありません。</value>
         <value xml:lang="nl">U heeft geen permissies om het allocatieplan te zien.</value>
     </property>
     <property key="OrderAllowSolicitation">
@@ -2285,12 +2285,12 @@
     </property>
     <property key="OrderApproveItem">
         <value xml:lang="en">Approve Item</value>
-        <value xml:lang="ja">アイテム承認</value>
+        <value xml:lang="ja">注文明細を承認</value>
         <value xml:lang="nl">Bevestig item</value>
     </property>
     <property key="OrderApprovePlan">
         <value xml:lang="en">Approve Plan</value>
-        <value xml:lang="ja">承認プラン</value>
+        <value xml:lang="ja">計画を承認</value>
         <value xml:lang="nl">Plan goedkeuren</value>
     </property>
     <property key="OrderApproveOrder">
@@ -2442,7 +2442,7 @@
     </property>
     <property key="OrderAutoReserve">
         <value xml:lang="en">Auto Reserve</value>
-        <value xml:lang="ja">オートリザーブ</value>
+        <value xml:lang="ja">自動予約</value>
         <value xml:lang="nl">Automatische reserving</value>
     </property>
     <property key="OrderAverageRating">
@@ -2699,7 +2699,7 @@
     </property>
     <property key="OrderCancelEdit">
         <value xml:lang="en">Cancel Edit</value>
-        <value xml:lang="ja">キャンセル 編集</value>
+        <value xml:lang="ja">編集をキャンセル</value>
         <value xml:lang="nl">Annuleer wijziging</value>
     </property>
     <property key="OrderCancelledItemToOrder">
@@ -2715,7 +2715,7 @@
     </property>
     <property key="OrderCancelPlan">
         <value xml:lang="en">Cancel Plan</value>
-        <value xml:lang="ja">キャンセルプラン</value>
+        <value xml:lang="ja">計画をキャンセル</value>
         <value xml:lang="nl">Annuleer plan</value>
     </property>
     <property key="OrderCancelOrder">
@@ -3357,7 +3357,7 @@
     </property>
     <property key="OrderCreatePlan">
       <value xml:lang="en">Create Plan</value>
-      <value xml:lang="ja">プランの作成</value>
+      <value xml:lang="ja">計画を作成</value>
       <value xml:lang="nl">Allocatieplan aanmaken</value>
     </property>
     <property key="OrderCreateTestSalesOrderSingleError">
@@ -3606,7 +3606,7 @@
         <value xml:lang="de">Neue Bedingung für Angebot erstellen</value>
         <value xml:lang="en">Create New Quote Term</value>
         <value xml:lang="fr">Créer une condition de réglement de devis</value>
-        <value xml:lang="ja">新しい引用用語を作成する</value>
+        <value xml:lang="ja">新しい見積条件を作成</value>
         <value xml:lang="nl">Nieuwe conditie aanmaken</value>
         <value xml:lang="zh">新建询价条款</value>
         <value xml:lang="zh-TW">新建詢價條款</value>
@@ -4568,7 +4568,7 @@
     </property>
     <property key="OrderExtValue">
         <value xml:lang="en">Ext. Value</value>
-        <value xml:lang="ja">Ext. 値</value>
+        <value xml:lang="ja">拡張値</value>
         <value xml:lang="nl">Ext. waarde</value>
     </property>
     <property key="OrderExternalId">
@@ -5555,7 +5555,7 @@
         <value xml:lang="de">Bestellpos. ID</value>
         <value xml:lang="en">Ref</value>
         <value xml:lang="fr">N° ligne</value>
-        <value xml:lang="ja">参考文献</value>
+        <value xml:lang="ja">参照</value>
         <value xml:lang="nl">regel-ID</value>
         <value xml:lang="zh">参考</value>
     </property>
@@ -6150,7 +6150,7 @@
        <value xml:lang="de">Keine Artikel im Angebot</value>
        <value xml:lang="en">No Items in quote</value>
        <value xml:lang="fr">Aucune ligne dans le devis</value>
-       <value xml:lang="ja">引用符の項目無し</value>
+       <value xml:lang="ja">見積に明細がありません</value>
        <value xml:lang="nl">Geen items in offerte</value>
        <value xml:lang="zh">询价中没有明细</value>
     </property>
@@ -6231,7 +6231,7 @@
     </property>
     <property key="OrderNewAllocationPlan">
         <value xml:lang="en">New Allocation Plan</value>
-        <value xml:lang="ja">新規移転計画</value>
+        <value xml:lang="ja">新規割当計画</value>
         <value xml:lang="nl">Nieuw allocatieplan</value>
     </property>
     <property key="OrderNewDropShipmentForShipGroup">
@@ -8311,7 +8311,7 @@
     </property>
     <property key="OrderOrderQuoteCreatedSuccessfully">
         <value xml:lang="en">Quote Created Successfully</value>
-        <value xml:lang="ja">成功に成功した引用</value>
+        <value xml:lang="ja">見積を作成しました。</value>
         <value xml:lang="nl">Quote aangemaakt</value>
     </property>
     <property key="OrderOrderQuoteDefaultUnitPrice">
@@ -8479,7 +8479,7 @@
         <value xml:lang="de">Angebotsbedingung bearbeiten</value>
         <value xml:lang="en">Edit Quote Term</value>
         <value xml:lang="fr">Editer les conditions de réglement du devis</value>
-        <value xml:lang="ja">引用語句の編集</value>
+        <value xml:lang="ja">見積条件を編集</value>
         <value xml:lang="nl">Offerte-conditie aanpassen</value>
         <value xml:lang="vi">Cập nhật Điều khoản trên Báo giá</value>
         <value xml:lang="zh">编辑询价条款</value>
@@ -8651,7 +8651,7 @@
     </property>
     <property key="OrderOrderQuoteLeadTimeDays">
         <value xml:lang="en">Lead Time Days</value>
-        <value xml:lang="ja">調達期間の日</value>
+        <value xml:lang="ja">調達リードタイム（日）</value>
         <value xml:lang="nl">Doorlooptijd (dagen)</value>
     </property>
     <property key="OrderOrderQuoteListAdjustments">
@@ -8747,7 +8747,7 @@
         <value xml:lang="de">Liste der Angebotsbedingungen</value>
         <value xml:lang="en">List Quote Terms</value>
         <value xml:lang="fr">Liste des conditions de règlement du devis</value>
-        <value xml:lang="ja">リスト引用条件</value>
+        <value xml:lang="ja">見積条件一覧</value>
         <value xml:lang="nl">Voorwaarden</value>
         <value xml:lang="zh">询价条款列表</value>
         <value xml:lang="zh-TW">詢價條款清單</value>
@@ -8904,7 +8904,7 @@
     </property>
     <property key="OrderOrderQuoteRoleAddedSuccessfully">
         <value xml:lang="en">Quote Role Added Successfully.</value>
-        <value xml:lang="ja">引用ロールは成功しました。</value>
+        <value xml:lang="ja">見積の役割を追加しました。</value>
         <value xml:lang="nl">Party en rol toegevoegd.</value>
     </property>
     <property key="OrderOrderQuoteRoles">
@@ -9045,7 +9045,7 @@
     <property key="OrderOrderQuoteUpdatedSuccessfully">
         <value xml:lang="en">Quote updated successfully.</value>
         <value xml:lang="fr">Le devis a été mis à jour avec succès.</value>
-        <value xml:lang="ja">正常に更新された引用.</value>
+        <value xml:lang="ja">見積を更新しました。</value>
         <value xml:lang="nl">Update uitgevoerd</value>
     </property>
     <property key="OrderOrderQuoteViewProfit">
@@ -9190,7 +9190,7 @@
     </property>
     <property key="OrderReturnHeaderType">
         <value xml:lang="en">Return Header Type</value>
-        <value xml:lang="ja">リターンヘッダーのタイプ</value>
+        <value xml:lang="ja">返品ヘッダー種別</value>
         <value xml:lang="nl">Soort retour</value>
     </property>
     <property key="OrderOrderShortcuts">
@@ -9389,12 +9389,12 @@
     </property>
     <property key="OrderOrderedUnits">
         <value xml:lang="en">Ordered Units</value>
-        <value xml:lang="ja">注文済みユニット</value>
+        <value xml:lang="ja">注文数量</value>
         <value xml:lang="nl">Bestelde eenheden</value>
     </property>
     <property key="OrderOrderedValue">
         <value xml:lang="en">Ordered Value</value>
-        <value xml:lang="ja">注文された価値</value>
+        <value xml:lang="ja">注文額</value>
         <value xml:lang="nl">Bestelwaarde</value>
     </property>
     <property key="OrderOrders">
@@ -10011,12 +10011,12 @@
     </property>
     <property key="OrderPlanHeader">
         <value xml:lang="en">Plan Header</value>
-        <value xml:lang="ja">プランヘッダ</value>
+        <value xml:lang="ja">計画ヘッダー</value>
         <value xml:lang="nl">Kop</value>
     </property>
     <property key="OrderPlanItems">
         <value xml:lang="en">Plan Items</value>
-        <value xml:lang="ja">プランアイテム</value>
+        <value xml:lang="ja">計画明細</value>
         <value xml:lang="nl">Artikelen</value>
     </property>
     <property key="OrderPlanName">
@@ -10971,7 +10971,7 @@
         <value xml:lang="en">Empty for total quote</value>
         <value xml:lang="fr">Le total du devis est vide</value>
         <value xml:lang="it">Totale preventivo è vuoto</value>
-        <value xml:lang="ja">合計引用符の空の</value>
+        <value xml:lang="ja">見積総額が未設定です</value>
         <value xml:lang="nl">Quote legen</value>
         <value xml:lang="zh">清空全部询价</value>
         <value xml:lang="zh-TW">清空全部詢價</value>
@@ -11339,7 +11339,7 @@
         <value xml:lang="de">Promotion entfernen</value>
         <value xml:lang="en">Remove Promotion</value>
         <value xml:lang="fr">Supprimer la promotion</value>
-        <value xml:lang="ja">プロモーションの削除</value>
+        <value xml:lang="ja">プロモーションを削除</value>
         <value xml:lang="nl">Verwijder PROMO</value>
         <value xml:lang="zh">删除促销</value>
     </property>
@@ -12089,13 +12089,13 @@
     <property key="OrderReserveAfterDate">
          <value xml:lang="en">Reserve After Date</value>
          <value xml:lang="fr">Réserver après cette date</value>
-         <value xml:lang="ja">予約後日</value>
+         <value xml:lang="ja">予約開始日</value>
          <value xml:lang="nl">Reserveer na de datum</value>
     </property>
     <property key="OrderReserveAfterDateDefault">
          <value xml:lang="en">Default Reserve After Date</value>
          <value xml:lang="fr">Date de réservation par défaut</value>
-         <value xml:lang="ja">デフォルトは日付後に予約します</value>
+         <value xml:lang="ja">既定の予約開始日</value>
          <value xml:lang="nl">Reserveer na standaarddatum</value>
     </property>
     <property key="OrderReturnAccept">
@@ -13702,7 +13702,7 @@
         <value xml:lang="de">Ansicht nach Versandgruppe</value>
         <value xml:lang="en">View by ship group</value>
         <value xml:lang="fr">Voir par groupe d'expédition</value>
-        <value xml:lang="ja">船舶グループで見る</value>
+        <value xml:lang="ja">配送グループ別に表示</value>
         <value xml:lang="nl">Info per zendgroup</value>
         <value xml:lang="zh">按运输组浏览</value>
     </property>
@@ -13710,7 +13710,7 @@
         <value xml:lang="de">Ansicht Versandgruppe nach Bestellposition</value>
         <value xml:lang="en">View ship group by order item</value>
         <value xml:lang="fr">Voir les groupes d'expédition par ligne de commandes</value>
-        <value xml:lang="ja">注文項目で船グループを見る</value>
+        <value xml:lang="ja">注文明細別に配送グループを表示</value>
         <value xml:lang="nl">Zendgroep per order item</value>
         <value xml:lang="zh">按订单明细浏览运输组</value>
     </property>
@@ -15236,7 +15236,7 @@
     </property>
     <property key="OrderViewOrdersPdf">
         <value xml:lang="en">View PDF</value>
-        <value xml:lang="ja">PDFファイルを見る</value>
+        <value xml:lang="ja">PDFを表示</value>
     </property>
     <property key="OrderViewPermissionError">
         <value xml:lang="ar">ليس لديك صلاحية مشاهدة هذه الصفحة (تحتاج إلى "ORDERMGR_VIEW" أو "ORDERMGR_PURCHASE_VIEW" أو "ORDERMGR_ADMIN").</value>
@@ -15585,7 +15585,7 @@
     </property>
     <property key="PageTitleCreateAllocationPlan">
         <value xml:lang="en">Create Allocation Plan</value>
-        <value xml:lang="ja">割り当てプランを作成する</value>
+        <value xml:lang="ja">割当計画を作成</value>
         <value xml:lang="nl">Nieuw allocatieplan</value>
     </property>
     <property key="PageTitleCreateQuoteForCustRequest">
@@ -15621,7 +15621,7 @@
     </property>
     <property key="PageTitleEditAllocationPlan">
         <value xml:lang="en">Edit Allocation Plan</value>
-        <value xml:lang="ja">割り当てプランの編集</value>
+        <value xml:lang="ja">割当計画を編集</value>
         <value xml:lang="nl">Allocatieplan wijzigen</value>
     </property>
     <property key="PageTitleEditQuoteItemForCustRequest">
@@ -15736,7 +15736,7 @@
     </property>
     <property key="PageTitleFindAllocationPlan">
         <value xml:lang="en">Find Allocation Plan</value>
-        <value xml:lang="ja">割り当てプランを探す</value>
+        <value xml:lang="ja">割当計画を検索</value>
         <value xml:lang="nl">Allocatieplan zoeken/vinden</value>
     </property>
     <property key="PageTitleFindApprovedProductRequirements">
@@ -16335,12 +16335,12 @@
     </property>
     <property key="PageTitleLookupReturnHeader">
         <value xml:lang="en">Lookup Return Header</value>
-        <value xml:lang="ja">ルックアップリターンヘッダ</value>
+        <value xml:lang="ja">返品ヘッダーを検索</value>
         <value xml:lang="nl">Retouren zoeken/vinden</value>
     </property>
     <property key="ItemAddedSuccessfully">
        <value xml:lang="en">Item ${productId} added successfully</value>
        <value xml:lang="it">Articolo ${productId} aggiunto con successo</value>
-       <value xml:lang="ja">アイテム ${productId} 正常に追加</value>
+       <value xml:lang="ja">品目 ${productId} を追加しました。</value>
     </property>
 </resource>

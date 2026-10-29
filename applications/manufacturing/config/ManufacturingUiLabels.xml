@@ -801,11 +801,11 @@
     </property>
     <property key="ManufacturingReservedQuantity">
         <value xml:lang="en">Reserved</value>
-        <value xml:lang="ja">予約済</value>
+        <value xml:lang="ja">予約済み</value>
     </property>
     <property key="ManufacturingManageReservations">
         <value xml:lang="en">Manage Reservations</value>
-        <value xml:lang="ja">予約の管理</value>
+        <value xml:lang="ja">予約を管理</value>
     </property>
 
     <property key="ManufacturingAddExistingRoutingTask">
@@ -825,7 +825,7 @@
     </property>
     <property key="ManufacturingAddProdCompInCompCanStatusError">
         <value xml:lang="en">Can't Add Component in Cancelled/Closed Production Run.</value>
-        <value xml:lang="ja">コンポーネントをキャンセル/クローズド生産実行に追加できません。</value>
+        <value xml:lang="ja">取消済みまたは完了済みの生産実行には部品を追加できません。</value>
     </property>
     <property key="ManufacturingAddProductionRunFixedAssetAssign">
         <value xml:lang="de">Anlage zuweisen</value>
@@ -1002,7 +1002,7 @@
     </property>
     <property key="ManufacturingBomAssociationNotFound">
         <value xml:lang="en">BOM association was not found.</value>
-        <value xml:lang="ja">BOM協会が見つかりませんでした。</value>
+        <value xml:lang="ja">BOM関連付けが見つかりませんでした。</value>
     </property>
     <property key="ManufacturingBomErrorCreatingBillOfMaterialsTree">
         <value xml:lang="en">Error creating bill of materials tree: ${errorString}</value>
@@ -1091,19 +1091,19 @@
     </property>
     <property key="ManufacturingBomSimulationAvailabilityCheckFailed">
         <value xml:lang="en">Availability check failed for product ${productId}: ${errorString}</value>
-        <value xml:lang="ja">製品 ${productId} の在庫可能数確認に失敗しました: ${errorString}</value>
+        <value xml:lang="ja">製品 ${productId} の引当可能在庫の確認中にエラーが発生しました: ${errorString}</value>
     </property>
     <property key="ManufacturingBomSimulationAvailabilityNotChecked">
         <value xml:lang="en">Availability not checked because no facility was selected.</value>
-        <value xml:lang="ja">施設が選択されていないため、空室確認ができません。</value>
+        <value xml:lang="ja">拠点が選択されていないため、在庫利用可能数を確認できません。</value>
     </property>
     <property key="ManufacturingBomSimulationCostCheckFailed">
         <value xml:lang="en">Cost check failed for product ${productId}: ${errorString}</value>
-        <value xml:lang="ja">製品 ${productId} の原価確認に失敗しました: ${errorString}</value>
+        <value xml:lang="ja">製品 ${productId} の原価確認中にエラーが発生しました: ${errorString}</value>
     </property>
     <property key="ManufacturingBomSimulationCostNotChecked">
         <value xml:lang="en">Cost not checked because no currency was selected.</value>
-        <value xml:lang="ja">通貨が選択されていないため、手数料はチェックされません。</value>
+        <value xml:lang="ja">通貨が選択されていないため、原価を確認できません。</value>
     </property>
     <property key="ManufacturingBomType">
         <value xml:lang="de">Stücklistenart</value>
@@ -2508,40 +2508,40 @@
     <property key="ManufacturingRemainingQuantity">
         <value xml:lang="en">Remaining Quantity</value>
         <value xml:lang="it">Quantità rimanente</value>
-        <value xml:lang="ja">残り数量</value>
+        <value xml:lang="ja">残数量</value>
     </property>
     <property key="ManufacturingRequiredQuantity">
         <value xml:lang="en">Required Quantity</value>
         <value xml:lang="it">Quantità richiesta</value>
-        <value xml:lang="ja">必須の量</value>
+        <value xml:lang="ja">必要数量</value>
     </property>
     <property key="ManufacturingReservationSummary">
         <value xml:lang="en">Reservation Summary</value>
-        <value xml:lang="ja">予約内容</value>
+        <value xml:lang="ja">予約概要</value>
     </property>
     <property key="ManufacturingTotalReserved">
         <value xml:lang="en">Total Reserved</value>
-        <value xml:lang="ja">新着情報</value>
+        <value xml:lang="ja">予約合計</value>
     </property>
     <property key="ManufacturingShortfall">
         <value xml:lang="en">Confirmed Shortage (Tried &amp; Failed)</value>
-        <value xml:lang="ja">確認された不足(試用) &amp; 失敗した)</value>
+        <value xml:lang="ja">確認済み不足（試行&amp;失敗）</value>
     </property>
     <property key="ManufacturingNetReserved">
         <value xml:lang="en">Net Reserved</value>
-        <value xml:lang="ja">サイトマップ</value>
+        <value xml:lang="ja">正味予約数量</value>
     </property>
     <property key="ManufacturingShortageHelpText">
         <value xml:lang="en">Confirmed Shortage indicates inventory that could not be reserved during the last attempt because the warehouse was empty.</value>
-        <value xml:lang="ja">確認された不足分は倉庫が空だったので、最後の試みの間に予約できない在庫を示します。</value>
+        <value xml:lang="ja">確認済み不足は、倉庫在庫がなかったため直近の試行で引き当てられなかった数量を示します。</value>
     </property>
     <property key="ManufacturingUnaccountedQuantity">
         <value xml:lang="en">Pending Process (Untouched)</value>
-        <value xml:lang="ja">曲げ加工(無接触)</value>
+        <value xml:lang="ja">未処理（未試行）</value>
     </property>
     <property key="ManufacturingUnaccountedHelpText">
         <value xml:lang="en">Pending Process indicates requirements that have not yet been attempted for reservation or issuance.</value>
-        <value xml:lang="ja">保留プロセスは、予約や発行のためにまだ試みていない要件を示します。</value>
+        <value xml:lang="ja">未処理は、予約または払出をまだ試みていない所要量を示します。</value>
     </property>
     <property key="ManufacturingJobShop">
         <value xml:lang="de">Produktionsaufträge</value>
@@ -3027,11 +3027,11 @@
     </property>
     <property key="ManufacturingMrpCurrentBelowSafetyStock">
         <value xml:lang="en">Current below safety stock</value>
-        <value xml:lang="ja">安全在庫の下の流れ</value>
+        <value xml:lang="ja">現在庫が安全在庫を下回っています</value>
     </property>
     <property key="ManufacturingMrpCurrentBelowSafetyStockGuidance">
         <value xml:lang="en">Review proposed supply because current inventory is below the minimum stock policy.</value>
-        <value xml:lang="ja">現在の在庫が最低の在庫方針の下にあるので提案された供給を見直して下さい。</value>
+        <value xml:lang="ja">現在庫が最低在庫基準を下回っているため、補充案を確認してください。</value>
     </property>
     <property key="ManufacturingMrpEngineError">
         <value xml:lang="en">MRP engine error</value>
@@ -3039,7 +3039,7 @@
     </property>
     <property key="ManufacturingMrpEngineErrorGuidance">
         <value xml:lang="en">Review the MRP event ledger error before relying on this plan.</value>
-        <value xml:lang="ja">このプランに頼る前にMRPイベントレジャーエラーを確認します。</value>
+        <value xml:lang="ja">この計画を利用する前に、MRPイベント台帳のエラーを確認してください。</value>
     </property>
     <property key="ManufacturingMrpErrorExplodingProduct">
         <value xml:lang="en">An error occurred exploding the product ${productId}</value>
@@ -3066,7 +3066,7 @@
     </property>
     <property key="ManufacturingMrpEventDateFilterInvalid">
         <value xml:lang="en">Invalid MRP event date filter: ${value}</value>
-        <value xml:lang="ja">MRPイベントの日付フィルターが無効です: ${value}</value>
+        <value xml:lang="ja">MRPイベント日付フィルターが無効です: ${value}</value>
     </property>
     <property key="ManufacturingMrpEventFindError">
         <value xml:lang="en">Problem, we can not find all the items of MrpEvent, for more detail look at the log</value>
@@ -3086,7 +3086,7 @@
     </property>
     <property key="ManufacturingMrpEventLedgerSource">
         <value xml:lang="en">OFBiz MRP event ledger</value>
-        <value xml:lang="ja">OFBiz MRPイベントレジャー</value>
+        <value xml:lang="ja">OFBiz MRPイベント台帳</value>
     </property>
     <property key="ManufacturingMrpEventRemoveError">
         <value xml:lang="en">Problem, we can not remove the MrpEvent items, for more detail look at the log</value>
@@ -3138,11 +3138,11 @@
     </property>
     <property key="ManufacturingMrpForecastAllocation">
         <value xml:lang="en">Forecast allocation</value>
-        <value xml:lang="ja">予測配分</value>
+        <value xml:lang="ja">予測引当</value>
     </property>
     <property key="ManufacturingMrpForecastAllocationGuidance">
         <value xml:lang="en">Allocate this organization-level forecast to a warehouse or review forecast setup.</value>
-        <value xml:lang="ja">この組織レベルの予測を倉庫に割り当てるか、または予測のセットアップを見直します。</value>
+        <value xml:lang="ja">組織レベルの予測を倉庫に割り当てるか、予測設定を確認してください。</value>
     </property>
     <property key="ManufacturingMrpInitialisation">
         <value xml:lang="de">MRP-Initialisierung</value>
@@ -3216,11 +3216,11 @@
     </property>
     <property key="ManufacturingMrpLateProposedSupply">
         <value xml:lang="en">Proposed supply is late</value>
-        <value xml:lang="ja">提案された供給は遅れます</value>
+        <value xml:lang="ja">補充提案が遅れています</value>
     </property>
     <property key="ManufacturingMrpLateProposedSupplyGuidance">
         <value xml:lang="en">Review the late event date and source before relying on the plan.</value>
-        <value xml:lang="ja">計画に依存する前に、遅れたイベントの日付とソースを確認します。</value>
+        <value xml:lang="ja">この計画を利用する前に、遅延したイベントの日付と供給元を確認してください。</value>
     </property>
     <property key="ManufacturingMrpName">
         <value xml:lang="de">MRP-Name</value>
@@ -3238,11 +3238,11 @@
     </property>
     <property key="ManufacturingMrpNeedsAttention">
         <value xml:lang="en">Needs attention</value>
-        <value xml:lang="ja">注意が必要</value>
+        <value xml:lang="ja">要確認</value>
     </property>
     <property key="ManufacturingMrpOnTrack">
         <value xml:lang="en">On track</value>
-        <value xml:lang="ja">トラック</value>
+        <value xml:lang="ja">順調</value>
     </property>
     <property key="ManufacturingMrpOpen">
         <value xml:lang="en">Open</value>
@@ -3250,11 +3250,11 @@
     </property>
     <property key="ManufacturingMrpProjectedBelowSafetyStock">
         <value xml:lang="en">Projected below safety stock</value>
-        <value xml:lang="ja">安全在庫を下回る</value>
+        <value xml:lang="ja">予測在庫が安全在庫を下回る見込みです</value>
     </property>
     <property key="ManufacturingMrpProjectedBelowSafetyStockGuidance">
         <value xml:lang="en">Review projected inventory because the running balance falls below minimum stock.</value>
-        <value xml:lang="ja">実行中の残高が最小在庫未満に落ちるので、計画された在庫を確認します。</value>
+        <value xml:lang="ja">在庫推移が最低在庫を下回るため、予測在庫を確認してください。</value>
     </property>
     <property key="ManufacturingMrpRunDefaultName">
         <value xml:lang="en">MRP run</value>
@@ -3262,32 +3262,32 @@
     </property>
     <property key="ManufacturingMrpRunLogAndTrackerCreateError">
         <value xml:lang="en">MRP run log and tracker could not be created: ${errorString}</value>
-        <value xml:lang="ja">MRP実行ログとトラッカーを作成できませんでした: ${errorString}</value>
+        <value xml:lang="ja">MRP実行ログとトラッカーの作成中にエラーが発生しました: ${errorString}</value>
     </property>
     <property key="ManufacturingMrpRunOutcomeSummary">
         <value xml:lang="en">Created ${mrpEventCount} MRP events and ${proposedRequirementCount} proposed requirements</value>
-        <value xml:lang="ja">MRPイベントを${mrpEventCount}件、提案所要量を${proposedRequirementCount}件作成しました</value>
+        <value xml:lang="ja">${mrpEventCount} 件のMRPイベントと ${proposedRequirementCount} 件の提案所要量を作成しました。</value>
     </property>
     <property key="ManufacturingMrpRunScheduledSuccessfully">
         <value xml:lang="en">Mrp run scheduled successfully</value>
         <value xml:lang="fr">Exécution de Mrp programmée avec succès</value>
-        <value xml:lang="ja">Mrp の操業は首尾よくスケジュールしました</value>
+        <value xml:lang="ja">MRP実行をスケジュールしました。</value>
     </property>
     <property key="ManufacturingMrpSetupIssue">
         <value xml:lang="en">Setup issue</value>
-        <value xml:lang="ja">セットアップの問題</value>
+        <value xml:lang="ja">設定の問題</value>
     </property>
     <property key="ManufacturingMrpSetupIssueGuidance">
         <value xml:lang="en">Review product-facility, BOM, routing, supplier, or inventory setup.</value>
-        <value xml:lang="ja">製品の機能、BOM、ルーティング、サプライヤー、または在庫セットアップを確認します。</value>
+        <value xml:lang="ja">製品と拠点、BOM、工程、仕入先、在庫の設定を確認してください。</value>
     </property>
     <property key="ManufacturingMrpStockPolicyTrigger">
         <value xml:lang="en">Stock policy trigger</value>
-        <value xml:lang="ja">株式ポリシートリガー</value>
+        <value xml:lang="ja">在庫方針の発動条件</value>
     </property>
     <property key="ManufacturingMrpStockPolicyTriggerDescription">
         <value xml:lang="en">Current inventory is below minimum stock; MRP created this marker to trigger replenishment.</value>
-        <value xml:lang="ja">現在の在庫は最低在庫の下にあります;MRPは補充を誘発するためにこのマーカーを作成しました。</value>
+        <value xml:lang="ja">現在庫が最低在庫を下回ったため、MRPは補充を促すこのマーカーを作成しました。</value>
     </property>
     <property key="ManufacturingProductionRunTaskIssuedSuccessfully">
         <value xml:lang="en">Issued Inventory for Production Run Task [${workEffortId}]</value>
@@ -3295,11 +3295,11 @@
     </property>
     <property key="ManufacturingAutoReservePrun">
         <value xml:lang="en">Auto-Reserve Production Run Inventory</value>
-        <value xml:lang="ja">生産実行用在庫を自動予約</value>
+        <value xml:lang="ja">生産実行在庫を自動予約</value>
     </property>
     <property key="ManufacturingAllowInventoryReallocation">
         <value xml:lang="en">Allow Inventory Reallocation</value>
-        <value xml:lang="ja">在庫の移転を許可する</value>
+        <value xml:lang="ja">在庫の再割り当てを許可</value>
     </property>
     <property key="ManufacturingReconcilePrunBackorders">
         <value xml:lang="en">Auto-Reconcile Production Backorders</value>
@@ -3307,39 +3307,39 @@
     </property>
     <property key="ManufacturingRelease">
         <value xml:lang="en">Release</value>
-        <value xml:lang="ja">解除</value>
+        <value xml:lang="ja">予約を解除</value>
     </property>
     <property key="ManufacturingReserve">
         <value xml:lang="en">Reserve</value>
-        <value xml:lang="ja">予約する</value>
+        <value xml:lang="ja">予約</value>
     </property>
     <property key="ManufacturingForceIssue">
         <value xml:lang="en">Force Issue</value>
-        <value xml:lang="ja">力の問題</value>
+        <value xml:lang="ja">強制払出</value>
     </property>
     <property key="ManufacturingForceIssueImpact">
         <value xml:lang="en">Force Issue Impact Warning</value>
-        <value xml:lang="ja">力の問題 衝撃警告</value>
+        <value xml:lang="ja">強制払出による影響の警告</value>
     </property>
     <property key="ManufacturingForceIssueImpactWarning">
         <value xml:lang="en">The following inventory reservations will be reallocated if you proceed with Force Issuance:</value>
-        <value xml:lang="ja">フォース・イシュアンスに進むと、次の在庫予約がリアルタイムに行われます。</value>
+        <value xml:lang="ja">強制払出を続行すると、以下の在庫予約が再割り当てされます:</value>
     </property>
     <property key="ManufacturingImpactType">
         <value xml:lang="en">Impact Type</value>
-        <value xml:lang="ja">衝撃タイプ</value>
+        <value xml:lang="ja">影響種別</value>
     </property>
     <property key="ManufacturingImpactId">
         <value xml:lang="en">Ref ID</value>
-        <value xml:lang="ja">参考ID</value>
+        <value xml:lang="ja">参照ID</value>
     </property>
     <property key="ManufacturingImpactQuantity">
         <value xml:lang="en">Impacted Qty</value>
-        <value xml:lang="ja">影響されるQty</value>
+        <value xml:lang="ja">影響数量</value>
     </property>
     <property key="ManufacturingConfirmForceIssue">
         <value xml:lang="en">Confirm Force Issue</value>
-        <value xml:lang="ja">強制問題の確認</value>
+        <value xml:lang="ja">強制払出を確定</value>
     </property>
     <property key="ManufacturingNoImpactDetected">
         <value xml:lang="en">No significant impact on other reservations detected.</value>
@@ -3347,11 +3347,11 @@
     </property>
     <property key="ManufacturingIssuancePreview">
         <value xml:lang="en">Preview of Issuance Plan</value>
-        <value xml:lang="ja">発行計画のプレビュー</value>
+        <value xml:lang="ja">払出計画のプレビュー</value>
     </property>
     <property key="POOL_STOCK">
         <value xml:lang="en">Free Stock</value>
-        <value xml:lang="ja">無料ストック</value>
+        <value xml:lang="ja">引当可能在庫</value>
     </property>
     <property key="TASK_RESERVATION">
         <value xml:lang="en">Existing Reservation</value>
@@ -3359,7 +3359,7 @@
     </property>
     <property key="REALLOCATED_STOCK">
         <value xml:lang="en">Re-allocated Stock</value>
-        <value xml:lang="ja">再配置された在庫</value>
+        <value xml:lang="ja">再割り当て在庫</value>
     </property>
     <property key="ManufacturingNewCalendar">
         <value xml:lang="de">Neuer Kalender</value>
@@ -3806,7 +3806,7 @@
     </property>
     <property key="ManufacturingProductNotFound">
         <value xml:lang="en">Product not found: ${productId}</value>
-        <value xml:lang="ja">製品 ${productId} が見つかりません</value>
+        <value xml:lang="ja">製品 ${productId} が見つかりません。</value>
     </property>
     <property key="ManufacturingProductRoutingNotExist">
         <value xml:lang="de">Arbeitsplan-Verbindung nicht vorhanden</value>
@@ -5667,7 +5667,7 @@
     <property key="ManufacturingUsedCapacity">
         <value xml:lang="en">Manufacturing Used Capacity</value>
         <value xml:lang="fr">Capacité de fabrication utilisée</value>
-        <value xml:lang="ja">製造業の使用された容量</value>
+        <value xml:lang="ja">製造能力の使用量</value>
         <value xml:lang="nl">Capaciteit in gebruik</value>
         <value xml:lang="zh">正在制造中的产能占用</value>
     </property>

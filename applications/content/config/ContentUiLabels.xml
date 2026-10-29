@@ -33,7 +33,7 @@
         <value xml:lang="de">Wollen Sie den Inhalt wirklich löschen?</value>
         <value xml:lang="en">Do you really want to delete this content?</value>
         <value xml:lang="fr">Voulez-vous vraiment supprimer ce document ?</value>
-        <value xml:lang="ja">このコンテンツを本当に削除したいですか?</value>
+        <value xml:lang="ja">このコンテンツを本当に削除しますか？</value>
     </property>
     <property key="ContenCommEventContentAssocNotFoundForDelete">
         <value xml:lang="en">CommEventContentAssoc entity not found for delete, communicationEventId: ${parameters.communicationEventId} and contentId: ${parameters.contentId}</value>
@@ -738,7 +738,7 @@
     <property key="ContentContentShow">
         <value xml:lang="en">Show Content (if visible else simply Id)</value>
         <value xml:lang="fr">Montre le contenu (si visible sinon uniquement la référence</value>
-        <value xml:lang="ja">コンテンツを表示する(もし表示されていない場合は、Id)</value>
+        <value xml:lang="ja">コンテンツを表示（表示可能な場合。そうでなければIDのみ）</value>
         <value xml:lang="zh">显示内容（如果可见的话，否则只显示内容标识）</value>
     </property>
     <property key="ContentContentToOrFromErrorRetriving">
@@ -787,7 +787,7 @@
     <property key="ContentConvertDocumentsTreeSuccessful">
         <value xml:lang="en">Convert Documents Tree Successful. Total : ${counterLine} rows</value>
         <value xml:lang="fr">Succès de la conversion de l'arbre de document. Total : ${counterLine} lignes</value>
-        <value xml:lang="ja">ドキュメントツリーを変換しました。合計: ${counterLine}行</value>
+        <value xml:lang="ja">ドキュメントツリーを変換しました。合計: ${counterLine} 行</value>
     </property>
     <property key="ContentCreateContentAssocMethodError">
         <value xml:lang="en">Not 2 out of ContentId/To/From</value>
@@ -1747,7 +1747,7 @@
     <property key="ContentMimeTypeNotSupported">
         <value xml:lang="en">Mime Type not supported</value>
         <value xml:lang="fr">Mime Type non supporté</value>
-        <value xml:lang="ja">Mimeタイプ 未対応</value>
+        <value xml:lang="ja">サポートされていないMIMEタイプです。</value>
     </property>
     <property key="ContentNavigate">
         <value xml:lang="da">Naviger</value>
@@ -1900,7 +1900,7 @@
     </property>
     <property key="ContentPDFInputMissing">
         <value xml:lang="en">No PDF was given.</value>
-        <value xml:lang="ja">PDF が付与されていません。</value>
+        <value xml:lang="ja">PDFが指定されていません。</value>
     </property>
     <property key="ContentPDFSurveyName">
         <value xml:lang="da">Rundspørge navn</value>
@@ -3245,7 +3245,7 @@
     <property key="ContentWebSiteAddError">
         <value xml:lang="en">Web Site Add Error</value>
         <value xml:lang="fr">Ajouter une erreur sur le site web</value>
-        <value xml:lang="ja">Webサイト エラーの追加</value>
+        <value xml:lang="ja">Webサイトの追加エラー</value>
     </property>
     <property key="ContentWebSiteAddMenu">
         <value xml:lang="da">Opret menu</value>
@@ -3263,7 +3263,7 @@
     <property key="ContentWebSiteAddNewErrors">
         <value xml:lang="en">Web Site Add New Errors</value>
         <value xml:lang="fr">Nouvelles erreurs du site web</value>
-        <value xml:lang="ja">Webサイトは新しいエラーを追加します。</value>
+        <value xml:lang="ja">Webサイト追加時のエラー</value>
     </property>
     <property key="ContentWebSiteAddNewMenus">
         <value xml:lang="da">Højreklik for at oprette ny menu</value>
@@ -3357,7 +3357,7 @@
     </property>
     <property key="ContentWebSiteErrors">
         <value xml:lang="en">Web Site Errors</value>
-        <value xml:lang="ja">Webサイトエラー</value>
+        <value xml:lang="ja">Webサイトのエラー</value>
     </property>
     <property key="ContentWebSiteGenerateMissingSeoUrl">
         <value xml:lang="en">Generate missing seo url's</value>
@@ -3383,7 +3383,7 @@
     <property key="ContentWebSitePathAliasCreate">
         <value xml:lang="de">Neuen Pfad Alias erstellen</value>
         <value xml:lang="en">Create New Path Alias</value>
-        <value xml:lang="ja">新しいパスのエイリアスを作成する</value>
+        <value xml:lang="ja">新しいパスエイリアスを作成</value>
         <value xml:lang="nl">Aanmaken Nieuwe Path Alias</value>
         <value xml:lang="zh">新建路径别名</value>
     </property>
@@ -3430,7 +3430,7 @@
         <value xml:lang="de">Ein Fehler beim Verschieben des Inhaltes ist aufgetreten!</value>
         <value xml:lang="en">An error occured moving content!</value>
         <value xml:lang="fr">Erreur durant le déplacement du document !</value>
-        <value xml:lang="ja">エラーが発生しました。</value>
+        <value xml:lang="ja">コンテンツの移動中にエラーが発生しました！</value>
     </property>
     <property key="FormFieldTitle_acroFormContentId">
         <value xml:lang="ar">AcroForm (PDF) Content ID</value>
@@ -6669,7 +6669,7 @@
         <value xml:lang="de">WebSite Pfad Alias bearbeiten</value>
         <value xml:lang="en">Edit WebSite Path Alias</value>
         <value xml:lang="fr">Éditer les alias de chemin d'accès du site web</value>
-        <value xml:lang="ja">編集 WebSite パス エイリアス</value>
+        <value xml:lang="ja">Webサイトパスエイリアスを編集</value>
         <value xml:lang="nl">Wijzigen WebSite Path Alias</value>
         <value xml:lang="zh">编辑网站路径别名</value>
     </property>

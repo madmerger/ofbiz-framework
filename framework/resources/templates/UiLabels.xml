@@ -27,7 +27,7 @@ under the License.
     </property>
     <property key="@component-resource-name@CompanyName">
         <value xml:lang="en">OFBiz: @component-resource-name@</value>
-        <value xml:lang="ja">OFBiz: @component リソース名@</value>
+        <value xml:lang="ja">OFBiz: @component-resource-name@</value>
     </property>
     <property key="@component-resource-name@CompanySubtitle">
         <value xml:lang="en">Part of the Apache OFBiz Family of Open Source Software</value>

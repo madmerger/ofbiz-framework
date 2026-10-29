@@ -1357,7 +1357,7 @@
     </property>
     <property key="AccountingApprovedBy">
         <value xml:lang="en">Approved by</value>
-        <value xml:lang="ja">承認:</value>
+        <value xml:lang="ja">承認者</value>
     </property>
     <property key="AccountingApprovedGrandTotal">
         <value xml:lang="ar">الإجمالي الكلي الموافق عليه</value>
@@ -2010,7 +2010,7 @@
         <value xml:lang="de">Kopf</value>
         <value xml:lang="en">Header</value>
         <value xml:lang="es">Encabezado</value>
-        <value xml:lang="ja">ヘッダ</value>
+        <value xml:lang="ja">ヘッダー</value>
         <value xml:lang="zh">表头</value>
         <value xml:lang="zh-TW">表頭</value>
     </property>
@@ -2019,7 +2019,7 @@
         <value xml:lang="en">Items</value>
         <value xml:lang="es">Items</value>
         <value xml:lang="es-CL">Elementos</value>
-        <value xml:lang="ja">アイテム</value>
+        <value xml:lang="ja">明細</value>
         <value xml:lang="zh">明细</value>
         <value xml:lang="zh-TW">細項</value>
     </property>
@@ -2028,7 +2028,7 @@
         <value xml:lang="en">Add a new budget Item</value>
         <value xml:lang="es">Añadir una nueva partida presupuestaria</value>
         <value xml:lang="es-CL">Añadir un nuevo item de presupuesto</value>
-        <value xml:lang="ja">新しい予算項目を追加</value>
+        <value xml:lang="ja">予算明細を追加</value>
         <value xml:lang="zh">新增一行预算明细</value>
         <value xml:lang="zh-TW">增加預算細項</value>
     </property>
@@ -2044,7 +2044,7 @@
         <value xml:lang="de">Neue Budgetprüfung hinzufügen</value>
         <value xml:lang="en">Add a new Budget Review</value>
         <value xml:lang="es">Añadir una nueva revisión del presupuesto</value>
-        <value xml:lang="ja">新規予算レビューを追加</value>
+        <value xml:lang="ja">予算レビューを追加</value>
         <value xml:lang="zh">新增一行预算审核</value>
         <value xml:lang="zh-TW">增加預算查核</value>
     </property>
@@ -2068,7 +2068,7 @@
         <value xml:lang="de">Rollen</value>
         <value xml:lang="en">Roles</value>
         <value xml:lang="es">Roles</value>
-        <value xml:lang="ja">ロール</value>
+        <value xml:lang="ja">役割</value>
         <value xml:lang="zh">角色</value>
         <value xml:lang="zh-TW">角色</value>
     </property>
@@ -2098,7 +2098,7 @@
         <value xml:lang="en">Status To 'Approved'</value>
         <value xml:lang="es">Status a 'Aprobado'</value>
         <value xml:lang="es-CL">Estado a "Aprobado"</value>
-        <value xml:lang="ja">「承認される」ステータス</value>
+        <value xml:lang="ja">ステータスを「承認済み」に変更</value>
         <value xml:lang="zh">状态变为“已批准”</value>
         <value xml:lang="zh-TW">變更狀態成已核准</value>
     </property>
@@ -2107,7 +2107,7 @@
         <value xml:lang="en">Status To 'Reviewed'</value>
         <value xml:lang="es">Status a 'Revisado'</value>
         <value xml:lang="es-CL">Estado a "Revisado"</value>
-        <value xml:lang="ja">「レビュー」のステータス</value>
+        <value xml:lang="ja">ステータスを「確認済み」に変更</value>
         <value xml:lang="zh">状态变为“已审核”</value>
         <value xml:lang="zh-TW">變更狀態成已查核</value>
     </property>
@@ -2116,7 +2116,7 @@
         <value xml:lang="en">Status To 'Rejected'</value>
         <value xml:lang="es">Status a 'Rechazado'</value>
         <value xml:lang="es-CL">Estado a "Rechazado"</value>
-        <value xml:lang="ja">'Rejected' へのステータス</value>
+        <value xml:lang="ja">ステータスを「却下」に変更</value>
         <value xml:lang="zh">状态变为“已拒绝”</value>
         <value xml:lang="zh-TW">變更狀態成已拒絶</value>
     </property>
@@ -2124,7 +2124,7 @@
         <value xml:lang="de">Budget Typ</value>
         <value xml:lang="en">Budget Type</value>
         <value xml:lang="es">Tipo de Presupuesto</value>
-        <value xml:lang="ja">予算の種類</value>
+        <value xml:lang="ja">予算種別</value>
         <value xml:lang="zh">预算类型</value>
         <value xml:lang="zh-TW">預算類型</value>
     </property>
@@ -2448,19 +2448,19 @@
     </property>
     <property key="AccountingCheckCreatedSuccessfully">
         <value xml:lang="en">Check Account information created successfully.</value>
-        <value xml:lang="ja">正常に作成されたアカウント情報を確認してください。</value>
+        <value xml:lang="ja">小切手口座情報を作成しました。</value>
     </property>
     <property key="AccountingCheckNotAdded">
          <value xml:lang="en">Check Account Information can not be created.</value>
-         <value xml:lang="ja">アカウント情報は作成できません。</value>
+         <value xml:lang="ja">小切手口座情報を作成できませんでした。</value>
     </property>
     <property key="AccountingCheckUpdatedSuccessfully">
         <value xml:lang="en">Check Account information updated successfully.</value>
-        <value xml:lang="ja">正常に更新されたアカウント情報を確認してください。</value>
+        <value xml:lang="ja">小切手口座情報を更新しました。</value>
     </property>
     <property key="AccountingCheckPaymentMethodIdMissing">
         <value xml:lang="en">Check Account Payment Method ID is missing.</value>
-        <value xml:lang="ja">決済方法 ID が不足していることを確認してください。</value>
+        <value xml:lang="ja">小切手口座の支払方法IDが未入力です。</value>
     </property>
     <property key="AccountingCheckGiftCard">
         <value xml:lang="ar">تحقق مما إذا كان لدي بطاقة هدية للإستخدام اليوم</value>
@@ -3014,17 +3014,17 @@
     <property key="AccountingCreateCreditCard">
         <value xml:lang="en">Create Credit Card</value>
         <value xml:lang="hi-IN">क्रेडिट कार्ड बनाएँ</value>
-        <value xml:lang="ja">クレジット カードを作成する</value>
+        <value xml:lang="ja">クレジットカードを作成</value>
     </property>
     <property key="AccountingCreateEftAccount">
         <value xml:lang="en">Create EFT Account</value>
         <value xml:lang="hi-IN">ईएफ़टी(EFT) खाता बनाएँ</value>
-        <value xml:lang="ja">EFTアカウントの作成</value>
+        <value xml:lang="ja">EFT口座を作成</value>
     </property>
     <property key="AccountingCreateGiftCard">
         <value xml:lang="en">Create Gift Card</value>
         <value xml:lang="hi-IN">उपहार कार्ड बनाएँ</value>
-        <value xml:lang="ja">ギフトカードを作成する</value>
+        <value xml:lang="ja">ギフトカードを作成</value>
     </property>
     <property key="AccountingCreateFixedAssetMaintOrderPermissionError">
         <value xml:lang="de">Berechtigungsfehler: Um 'createFixedAssetMaintOrder' auszuführen muss man ACCOUNTING_CREATEUPDATE or ACCOUNTING_ADMIN Berechtigungen haben</value>
@@ -3472,7 +3472,7 @@
         <value xml:lang="es-CL">Este ${cardType} no es un número válido de tarjeta de crédito. (Parece ser una ${validCardType} número de Tarjeta de Crédito)</value>
         <value xml:lang="fr">Le type de carte de crédit ${cardType} n'est pas valide. (apparament dû a ${validCardType})</value>
         <value xml:lang="it">La carta di credito numero ${cardNumber} non è una ${cardType}. (Sembra che sia una ${validCardType})</value>
-        <value xml:lang="ja">カード番号が有効な ${cardType} のクレジットカード番号ではありません。（${validCardType} のクレジットカード番号と思われます）</value>
+        <value xml:lang="ja">有効な${cardType}のクレジットカード番号ではありません（${validCardType}の番号と思われます）。</value>
         <value xml:lang="pt">${cardNumber} não é válido ${cardType} número de cartão de crédito. (Parece ser um ${validCardType}) o número do cartão de crédito)</value>
         <value xml:lang="vi">Định dạng ${cardType} không hợp lệ với số thẻ. (Đúng ra phải là ${validCardType} số thẻ)</value>
         <value xml:lang="zh">不是一个有效的 ${cardType} 信用卡号。（似乎是一个 ${validCardType} 信用卡号）</value>
@@ -3845,7 +3845,7 @@
     </property>
     <property key="AccountingDebitNotEqualCredit">
         <value xml:lang="en">Debit not equal to credit</value>
-        <value xml:lang="ja">クレジットに等しくないデビット</value>
+        <value xml:lang="ja">借方と貸方が一致しません</value>
     </property>
     <property key="AccountingDebitOrCreditOfBalance">
         <value xml:lang="ar">المدين أو الدائن للحساب</value>
@@ -3984,7 +3984,7 @@
     <property key="AccountingDocumentTypeTemplate">
         <value xml:lang="en">Doc. Type template</value>
         <value xml:lang="fr">Modèle de type de doc.</value>
-        <value xml:lang="ja">Doc. 型テンプレート</value>
+        <value xml:lang="ja">文書種別テンプレート</value>
     </property>
     <property key="AccountingDueDate">
         <value xml:lang="ar">تعديل الدفعة</value>
@@ -4137,7 +4137,7 @@
         <value xml:lang="de">Budget bearbeiten</value>
         <value xml:lang="en">Edit Budget</value>
         <value xml:lang="es">Editar Presupuesto</value>
-        <value xml:lang="ja">編集予算</value>
+        <value xml:lang="ja">予算を編集</value>
         <value xml:lang="zh">编辑预算</value>
     </property>
     <property key="AccountingEditCreditCard">
@@ -4979,7 +4979,7 @@
         <value xml:lang="de">Budgets suchen</value>
         <value xml:lang="en">Find Budgets</value>
         <value xml:lang="es">Buscar Presupuestos</value>
-        <value xml:lang="ja">予算を見つける</value>
+        <value xml:lang="ja">予算を検索</value>
         <value xml:lang="zh">查找预算</value>
     </property>
     <property key="AccountingFindDepositSlip">
@@ -7495,7 +7495,7 @@
     <property key="AccountingInvoiceItemsEdit">
         <value xml:lang="en">Edit invoice Items</value>
         <value xml:lang="fr">Modifier les lignes de facturation</value>
-        <value xml:lang="ja">請求書項目の編集</value>
+        <value xml:lang="ja">請求書明細を編集</value>
     </property>
     <property key="AccountingInvoiceItemSeqId">
         <value xml:lang="ar">رقم البند</value>
@@ -7573,7 +7573,7 @@
     <property key="AccountingInvoiceNoteAdded">
         <value xml:lang="en">Invoice note added</value>
         <value xml:lang="fr">Note de facture ajoutée</value>
-        <value xml:lang="ja">請求書のノートを追加</value>
+        <value xml:lang="ja">請求書メモを追加しました。</value>
     </property>
     <property key="AccountingInvoiceNotEnough">
         <value xml:lang="ar">المبلغ المطلوب ${tooMuch?currency(${isoCode})} هو كثير جدا لهذه الفاتورة [${invoiceId}]</value>
@@ -8015,12 +8015,12 @@
     <property key="AccountingInvoiceTermsAdd">
         <value xml:lang="en">Add due date rule</value>
         <value xml:lang="fr">Ajouter une échéance</value>
-        <value xml:lang="ja">期限ルールの追加</value>
+        <value xml:lang="ja">支払期日ルールを追加</value>
     </property>
     <property key="AccountingInvoiceTermsEdit">
         <value xml:lang="en">Edit due date rules</value>
         <value xml:lang="fr">Modifier les échéances</value>
-        <value xml:lang="ja">期限規則の編集</value>
+        <value xml:lang="ja">支払期日ルールを編集</value>
     </property>
     <property key="AccountingInvoiceTimeEntries">
         <value xml:lang="ar">قيود وقتية</value>
@@ -8969,7 +8969,7 @@
         <value xml:lang="en">Create new accounting company</value>
         <value xml:lang="es">Crear nueva empresa de contabilidad</value>
         <value xml:lang="es-CL">Ingresar una Organización Interna</value>
-        <value xml:lang="ja">新しい経理会社を作成する</value>
+        <value xml:lang="ja">会計会社を新規作成</value>
         <value xml:lang="zh">新建记账公司</value>
     </property>
     <property key="AccountingNewBillingAccount">
@@ -9067,7 +9067,7 @@
     </property>
     <property key="AccountingNewInvoicesCreated">
         <value xml:lang="en">${invoicesCreated} new invoice(s) created</value>
-        <value xml:lang="ja">${invoicesCreated}件の請求書を作成しました</value>
+        <value xml:lang="ja">${invoicesCreated} 件の請求書を作成しました。</value>
     </property>
     <property key="AccountingNewPayment">
         <value xml:lang="ar">دفعة جديدة</value>
@@ -9835,7 +9835,7 @@
         <value xml:lang="es">No publicar Diario de LM con ID ${parameters.glJournalId} debido a que el balance de comprobación falló: Total Débito=${trialBalanceResultMap.debitTotal} Total Crédito=${trialBalanceResultMap.creditTotal} Diferencia Débito/Crédito=${trialBalanceResultMap.debitCreditDifference}</value>
         <value xml:lang="fr">Échec de la publication du journal ${parameters.glJournalId}, erreur dans l'équilibre : Total débit = ${trialBalanceResultMap.debitTotal}, total crédit = ${trialBalanceResultMap.creditTotal}, différence = ${trialBalanceResultMap.debitCreditDifference}</value>
         <value xml:lang="it">Non è possibile contabilizzare il giornale con ID ${parameters.glJournalId} perchè il bilancio di prova è fallito: Debito Totale=${trialBalanceResultMap.debitTotal} Credito Totale=${trialBalanceResultMap.creditTotal} Debito/Credito Differenza=${trialBalanceResultMap.debitCreditDifference}</value>
-        <value xml:lang="ja">試算表の不一致のため、GL仕訳 ${parameters.glJournalId} を転記できません。借方合計=${trialBalanceResultMap.debitTotal} 貸方合計=${trialBalanceResultMap.creditTotal} 借貸差額=${trialBalanceResultMap.debitCreditDifference}</value>
+        <value xml:lang="ja">試算表の検証に失敗したため、GL仕訳ID ${parameters.glJournalId} を転記しません: 借方合計=${trialBalanceResultMap.debitTotal} 貸方合計=${trialBalanceResultMap.creditTotal} 借貸差額=${trialBalanceResultMap.debitCreditDifference}</value>
         <value xml:lang="pt">Sem enviar diário de contabilidade com ID ${parameters.glJournalId} pois o balancete falhou: Débito Total=${trialBalanceResultMap.debitTotal} Crédito Total=${trialBalanceResultMap.creditTotal} Diferença de Débito/Crédito=${trialBalanceResultMap.debitCreditDifference}</value>
         <value xml:lang="vi">Không thể ghi lại nhật ký vào sổ cái với mã ${parameters.glJournalId} bởi vì kế toán kiểm tra thất bại: Tổng nợ=${trialBalanceResultMap.debitTotal} Tổng có=${trialBalanceResultMap.creditTotal} Chênh lệch nợ/có=${trialBalanceResultMap.debitCreditDifference}</value>
         <value xml:lang="zh">没有过账标识为${parameters.glJournalId}的总账日记账，因为试算余额时失败：借款额=${trialBalanceResultMap.debitTotal} 贷款额=${trialBalanceResultMap.creditTotal} 借/贷差额=${trialBalanceResultMap.debitCreditDifference}</value>
@@ -11437,7 +11437,7 @@
     </property>
     <property key="AccountingPaymentMethodIdBelongsToAnotherParty">
         <value xml:lang="en">Payment Method ID is already in use.</value>
-        <value xml:lang="ja">決済方法 ID は既に使用中です。</value>
+        <value xml:lang="ja">支払方法IDは既に使用されています。</value>
     </property>
     <property key="AccountingPaymentMethodIdMissing">
         <value xml:lang="ar">دليل طريقة الدفع مفقود</value>
@@ -11491,7 +11491,7 @@
     </property>
      <property key="AccountingPaymentMethodTypeMissing">
         <value xml:lang="en">Payment method type is missing</value>
-        <value xml:lang="ja">支払方法タイプが欠落している</value>
+        <value xml:lang="ja">支払方法種別が未入力です。</value>
      </property>
     <property key="AccountingPaymentMethodTypeNotHandled">
         <value xml:lang="de">Zahlungsmethode nicht verarbeitet paymentMethodTypeId :</value>
@@ -11742,7 +11742,7 @@
     </property>
     <property key="AccountingPaymentRefundedSuccessfully">
         <value xml:lang="en">Payment #${paymentId} is refunded successfully with amount ${refundAmount} for manual transaction.</value>
-        <value xml:lang="ja">手動取引で支払 ${paymentId} を金額 ${refundAmount} で正常に返金しました。</value>
+        <value xml:lang="ja">手動取引の支払 #${paymentId} を金額 ${refundAmount} で返金しました。</value>
     </property>
     <property key="AccountingPaymentTabApplications">
         <value xml:lang="ar">التطبيقات</value>
@@ -12665,7 +12665,7 @@
     </property>
     <property key="AccountingPreparedBy">
         <value xml:lang="en">Prepared by</value>
-        <value xml:lang="ja">準備完了</value>
+        <value xml:lang="ja">作成者</value>
     </property>
     <property key="AccountingPreviousBankReconciliation">
         <value xml:lang="ar">التسوية البنكية السابقة</value>
@@ -12805,7 +12805,7 @@
         <value xml:lang="fr">Erreur en recherchant la lignes de la commande ${lookup}</value>
         <value xml:lang="hi-IN">अभिलेखों OrderItem/OrderItemBilling में समस्या हो रही ${lookup}</value>
         <value xml:lang="it">Problemi leggendo OrderItem/OrderItemBilling records ${lookup}</value>
-        <value xml:lang="ja">注文項目/注文項目請求レコード ${lookup} の取得中に問題が発生しました</value>
+        <value xml:lang="ja">OrderItem/OrderItemBillingレコード ${lookup} の取得中にエラーが発生しました。</value>
         <value xml:lang="nl">Probleem met het ophalen van OrderItem/OrderItemBilling records ${lookup}</value>
         <value xml:lang="pt">Problema ao obter registros OrderItem/OrderItemBilling ${lookup}</value>
         <value xml:lang="ro">Probleme la citirea inregistrarilor OrderItem/OrderItemBilling ${lookup}</value>
@@ -13080,7 +13080,7 @@
     </property>
     <property key="AccountingReceivedBy">
         <value xml:lang="en">Received by</value>
-        <value xml:lang="ja">受付開始</value>
+        <value xml:lang="ja">受領者</value>
     </property>
     <property key="AccountingReceivePayment">
         <value xml:lang="ar">استلام دفعة</value>
@@ -13897,7 +13897,7 @@
     </property>
     <property key="AccountingStatusItemNotFound">
         <value xml:lang="en">Status [${statusId}] not found</value>
-        <value xml:lang="ja">ステータス [${statusId}] が見つかりません</value>
+        <value xml:lang="ja">ステータス [${statusId}] が見つかりません。</value>
     </property>
     <property key="AccountingSubsidiaryLedger">
         <value xml:lang="ar">دفتر الشركة التابعة</value>
@@ -14629,17 +14629,17 @@
     <property key="AccountingTplInvoiceType">
         <value xml:lang="en">Template for invoice</value>
         <value xml:lang="fr">Modèle pour facture</value>
-        <value xml:lang="ja">請求書のテンプレート</value>
+        <value xml:lang="ja">請求書テンプレート</value>
     </property>
     <property key="AccountingTplOrderType">
         <value xml:lang="en">Template for order</value>
         <value xml:lang="fr">Modèle pour commande</value>
-        <value xml:lang="ja">注文のためのテンプレート</value>
+        <value xml:lang="ja">注文テンプレート</value>
     </property>
     <property key="AccountingTplQuoteType">
         <value xml:lang="en">Template for quote</value>
         <value xml:lang="fr">Modèle pour devis</value>
-        <value xml:lang="ja">引用のためのテンプレート</value>
+        <value xml:lang="ja">見積書テンプレート</value>
     </property>
     <property key="AccountingTransactionHasBeenAlreadyPosted">
         <value xml:lang="ar">لقد تم رصد العملية سابقا</value>
@@ -15922,7 +15922,7 @@
     <property key="FormFieldTitle_agreementContentTypeId">
         <value xml:lang="en">Agreement Content Type ID</value>
         <value xml:lang="fr">Type de contenu</value>
-        <value xml:lang="ja">契約コンテンツタイプID</value>
+        <value xml:lang="ja">契約コンテンツ種別ID</value>
     </property>
     <property key="FormFieldTitle_agreementDate">
         <value xml:lang="ar">تاريخ الإتفاقية</value>
@@ -18701,7 +18701,7 @@
     <property key="FormFieldTitle_outstanding">
         <value xml:lang="en">Outstanding amount</value>
         <value xml:lang="fr">Encours</value>
-        <value xml:lang="ja">顕著な量</value>
+        <value xml:lang="ja">未決済金額</value>
         <value xml:lang="nl">Openstaand</value>
     </property>
     <property key="FormFieldTitle_overrideGlAccountId">
@@ -20986,7 +20986,7 @@
     <property key="PageTitleBudgetOverview">
         <value xml:lang="de">Budget Übersicht</value>
         <value xml:lang="en">Budget Overview</value>
-        <value xml:lang="ja">予算の概要</value>
+        <value xml:lang="ja">予算概要</value>
         <value xml:lang="zh">预算总揽</value>
     </property>
     <property key="PageTitleCopyAgreement">
@@ -21049,7 +21049,7 @@
     <property key="PageTitleAddAgreementContent">
         <value xml:lang="en">Add Agreement Content</value>
         <value xml:lang="fr">Ajout de contenu à l'accord commercial</value>
-        <value xml:lang="ja">契約内容の追加</value>
+        <value xml:lang="ja">契約コンテンツを追加</value>
     </property>
     <property key="PageTitleEditAgreementGeographicalApplic">
         <value xml:lang="de">Standort Vereinbarung bearbeiten</value>
@@ -21142,7 +21142,7 @@
         <value xml:lang="de">Vereinbarungsposition Anlage bearbeiten</value>
         <value xml:lang="en">Edit Agreement Item Facility</value>
         <value xml:lang="es">Editar Items en Acuerdo</value>
-        <value xml:lang="ja">編集契約項目施設</value>
+        <value xml:lang="ja">契約明細の拠点を編集</value>
         <value xml:lang="zh">编辑合同条款场所</value>
         <value xml:lang="zh-TW">編輯合約條款場所</value>
     </property>
@@ -21311,7 +21311,7 @@
     <property key="PageTitleEditBudget">
         <value xml:lang="de">Budget bearbeiten</value>
         <value xml:lang="en">Edit Budget</value>
-        <value xml:lang="ja">編集予算</value>
+        <value xml:lang="ja">予算を編集</value>
         <value xml:lang="zh">编辑预算</value>
         <value xml:lang="es">Presupuesto de Edición</value>
     </property>
@@ -22147,22 +22147,22 @@
     </property>
     <property key="PageTitleInvoiceAttributes">
         <value xml:lang="en">Invoice Attributes</value>
-        <value xml:lang="ja">インボイス属性</value>
+        <value xml:lang="ja">請求書属性</value>
         <value xml:lang="nl">Factuurattributen</value>
     </property>
     <property key="PageTitleInvoiceContactMech">
         <value xml:lang="en">Invoice Contact Info</value>
-        <value xml:lang="ja">請求書 連絡先情報</value>
+        <value xml:lang="ja">請求書の連絡先情報</value>
         <value xml:lang="nl">Factuurcontactgegevens</value>
     </property>
     <property key="PageTitleInvoiceContent">
         <value xml:lang="en">Invoice Content</value>
-        <value xml:lang="ja">請求書の内容</value>
+        <value xml:lang="ja">請求書コンテンツ</value>
         <value xml:lang="nl">Factuurcontent</value>
     </property>
     <property key="PageTitleInvoiceNotes">
         <value xml:lang="en">Invoice Notes</value>
-        <value xml:lang="ja">請求書のノート</value>
+        <value xml:lang="ja">請求書メモ</value>
         <value xml:lang="nl">Factuurnotities</value>
     </property>
     <property key="PageTitleListAccounts">
@@ -22271,7 +22271,7 @@
         <value xml:lang="de">Vereinbarungspositionen Anlagen auflisten</value>
         <value xml:lang="en">List Agreement Item Facilities</value>
         <value xml:lang="es">Listado de Almacenes del Ítem del Contrato</value>
-        <value xml:lang="ja">リスト契約項目 施設</value>
+        <value xml:lang="ja">契約明細の拠点一覧</value>
         <value xml:lang="zh">列出合同条款场所</value>
         <value xml:lang="zh-TW">列出合約條款場所</value>
     </property>
@@ -22346,21 +22346,21 @@
         <value xml:lang="de">Budget auflisten</value>
         <value xml:lang="en">List Budget</value>
         <value xml:lang="es">Lista de Presupuesto</value>
-        <value xml:lang="ja">リスト予算</value>
+        <value xml:lang="ja">予算一覧</value>
         <value xml:lang="zh">预算列表</value>
     </property>
     <property key="PageTitleListBudgetReviews">
         <value xml:lang="de">Budget Prüfungen auflisten</value>
         <value xml:lang="en">List Budget Reviews</value>
         <value xml:lang="es">Lista de Revisión de Presupuestos</value>
-        <value xml:lang="ja">リスト予算のレビュー</value>
+        <value xml:lang="ja">予算レビュー一覧</value>
         <value xml:lang="zh">预算审查列表</value>
     </property>
     <property key="PageTitleListBudgetRoles">
         <value xml:lang="de">Budget Rollen auflisten</value>
         <value xml:lang="en">List Budget Roles</value>
         <value xml:lang="es">Listas de Roles de Presupuesto</value>
-        <value xml:lang="ja">リスト予算の役割</value>
+        <value xml:lang="ja">予算の役割一覧</value>
         <value xml:lang="zh">预算角色列表</value>
     </property>
     <property key="PageTitleListEditInvoiceApplications">
@@ -22715,7 +22715,7 @@
     <property key="PageTitleLookupCustomTimePeriod">
         <value xml:lang="de">benutzerspezifischen Zeitraum suchen</value>
         <value xml:lang="en">Lookup Custom Time Period</value>
-        <value xml:lang="ja">調査の習慣の時間期間</value>
+        <value xml:lang="ja">任意期間を検索</value>
         <value xml:lang="zh">查找定制时间段</value>
     </property>
     <property key="PageTitleLookupFixedAsset">

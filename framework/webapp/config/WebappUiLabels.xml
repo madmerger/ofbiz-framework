@@ -341,7 +341,7 @@
     </property>
     <property key="RequestMethodNotMatchConfig">
         <value xml:lang="en">[{0}] cannot be called by [{1}] method.</value>
-        <value xml:lang="ja">[{0}] 呼ばれない [{1}] メソッド。</value>
+        <value xml:lang="ja">[{0}]は[{1}]メソッドでは呼び出せません。</value>
         <value xml:lang="zh">[{0}]不能用[{1}]方法请求。</value>
     </property>
 </resource>

@@ -25,7 +25,7 @@
         <value xml:lang="es">Añadir componente</value>
         <value xml:lang="fr">Ajouter un composant</value>
         <value xml:lang="it">Aggiungi componente</value>
-        <value xml:lang="ja">製品構成品目を追加</value>
+        <value xml:lang="ja">製品構成品を追加</value>
         <value xml:lang="nl">Component toevoegen</value>
         <value xml:lang="pt-BR">Adicionar componente de produto</value>
         <value xml:lang="ro">Adauga Componente Produs</value>
@@ -182,7 +182,7 @@
         <value xml:lang="de">Group First</value>
         <value xml:lang="en">Group First</value>
         <value xml:lang="es">Grupo primero</value>
-        <value xml:lang="ja">グループファースト</value>
+        <value xml:lang="ja">先頭の拠点グループ</value>
         <value xml:lang="nl">Eerst grouperen</value>
         <value xml:lang="zh">分组首批</value>
     </property>
@@ -656,7 +656,7 @@
         <value xml:lang="en">ProductStore ${productStore.productStoreId} does not reserve inventory; cannot use Quick Ship for Multiple Facilities</value>
         <value xml:lang="es">Tienda de productos ${productStore.productStoreId} no reserva inventario; no se puede usar el envío rápido para instalaciones múltiples</value>
         <value xml:lang="it">Negozio ${productStore.productStoreId} non riserva inventario; non è possibile utilizzare la spedizione veloce per stabilimenti multipli</value>
-        <value xml:lang="ja">製品店舗 ${productStore.productStoreId} は在庫を予約しないため、複数施設でのクイック出荷は使用できません。</value>
+        <value xml:lang="ja">製品店舗 ${productStore.productStoreId} は在庫を引き当てないため、複数拠点向けクイック出荷を利用できません。</value>
         <value xml:lang="vi">Cửa hàng ${productStore.productStoreId} không có kho hàng dự trữ, nên không thể sử dụng Chuyển hàng nhanh cho Nhiều Chi nhánh / Cơ sở</value>
         <value xml:lang="zh">产品店铺 ${productStore.productStoreId} 没有预订库存；不能为多个场所使用快速送货</value>
         <value xml:lang="zh-TW">產品商店 ${productStore.productStoreId} 沒有預訂庫存;不能為多個場所使用快速送貨</value>
@@ -666,7 +666,7 @@
         <value xml:lang="en">ProductStore ${productStore.productStoreId} explodes order items; cannot use Quick Ship for Multiple Facilities</value>
         <value xml:lang="es">Tienda de productos ${productStore.productStoreId} explota artículos de pedido; no se puede usar el envío rápido para instalaciones múltiples</value>
         <value xml:lang="it">Negozio ${productStore.productStoreId} esplosione righe ordine; non è possibile utilizzare la spedizione veloce per stabilimenti multipli</value>
-        <value xml:lang="ja">製品店舗 ${productStore.productStoreId} は注文明細を展開するため、複数施設でのクイック出荷は使用できません。</value>
+        <value xml:lang="ja">製品店舗 ${productStore.productStoreId} は注文明細を展開するため、複数拠点向けクイック出荷を利用できません。</value>
         <value xml:lang="vi">Cửa hàng ${productStore.productStoreId} không có hàng hóa đặt hàng nên không thể sử dụng Chuyển hàng nhanh cho Nhiều Chi nhánh / Cơ sở</value>
         <value xml:lang="zh">产品店铺 ${productStore.productStoreId} 分解订单明细；不能为多个场所使用快速送货</value>
         <value xml:lang="zh-TW">產品商店 ${productStore.productStoreId} 分解訂單細項;不能為多個場所使用快速送貨</value>
@@ -2162,7 +2162,7 @@
         <value xml:lang="en">Default Time Zone</value>
         <value xml:lang="es">Zona horaria predeterminada</value>
         <value xml:lang="fr">Fuseau horaire par défaut</value>
-        <value xml:lang="ja">デフォルトのタイムゾーン</value>
+        <value xml:lang="ja">既定のタイムゾーン</value>
     </property>
     <property key="FormFieldTitle_deleteCostComponent">
         <value xml:lang="de">Kostenkomponente löschen</value>
@@ -6413,7 +6413,7 @@
         <value xml:lang="de">"Lager Id benötigt"</value>
         <value xml:lang="en">"Inventory Facility Id Required"</value>
         <value xml:lang="es">"Identificación de la instalación de inventario requerida"</value>
-        <value xml:lang="ja">「インベントリー施設ID必須」</value>
+        <value xml:lang="ja">「在庫拠点IDが必要です」</value>
         <value xml:lang="zh">必须有库存场所标识</value>
     </property>
 
@@ -8287,7 +8287,7 @@
     <property key="PageTitleEditShipmentTimeEstimates">
         <value xml:lang="en">Edit Shipment Time Estimates</value>
         <value xml:lang="fr">Modification des temps de livraison estimé</value>
-        <value xml:lang="ja">出荷時間見積もりの編集</value>
+        <value xml:lang="ja">出荷所要時間見積を編集</value>
     </property>
     <property key="PageTitleEditSubscription">
         <value xml:lang="de">Abonnemente bearbeiten</value>
@@ -8910,7 +8910,7 @@
     <property key="PageTitleListShipmentTimeEstimates">
         <value xml:lang="en">Shipment Time Estimates List</value>
         <value xml:lang="fr">Liste des temps de livraison estimé</value>
-        <value xml:lang="ja">出荷時間見積もりリスト</value>
+        <value xml:lang="ja">出荷所要時間見積一覧</value>
     </property>
     <property key="PageTitleLookupBulkAddProduct">
         <value xml:lang="de">Massenhinzufügung Produkte</value>
@@ -8939,7 +8939,7 @@
         <value xml:lang="de">Lookup Kostenkalkulation</value>
         <value xml:lang="en">Lookup Cost Component Calculation</value>
         <value xml:lang="es">Cálculo del componente de costo de búsqueda</value>
-        <value xml:lang="ja">ルックアップコストコンポーネント計算</value>
+        <value xml:lang="ja">原価構成要素計算を検索</value>
         <value xml:lang="zh">查找成本组成计算</value>
     </property>
     <property key="PageTitleLookupFacility">
@@ -9069,13 +9069,13 @@
     <property key="PageTitleNewSubscription">
         <value xml:lang="en">New Subscription</value>
         <value xml:lang="es">Nueva subscripción</value>
-        <value xml:lang="ja">新規申込</value>
+        <value xml:lang="ja">新規サブスクリプション</value>
     </property>
     <property key="PageTitleNewFacilityGroup">
         <value xml:lang="en">New Facility Group</value>
         <value xml:lang="es">Nuevo grupo de Almácen</value>
         <value xml:lang="es-CL">Nuevo grupo de Bodega</value>
-        <value xml:lang="ja">新施設グループ</value>
+        <value xml:lang="ja">新規拠点グループ</value>
     </property>
     <property key="PageTitleNewFacilityContactMech">
         <value xml:lang="de">Neuer Einrichtungs-Kontaktmechanismus für ${facility.facilityName} [${facility.facilityId}]</value>
@@ -9293,7 +9293,7 @@
         <value xml:lang="en">Update Shipment Gateway Config</value>
         <value xml:lang="es">Actualizar configuración de Gateway de envío</value>
         <value xml:lang="it">Aggiorna configurazione gateway spedizione</value>
-        <value xml:lang="ja">Shipment Gateway の設定を更新する</value>
+        <value xml:lang="ja">出荷ゲートウェイ設定を更新</value>
         <value xml:lang="zh">更新送货网关配置</value>
         <value xml:lang="zh-TW">更新出貨閘道配置</value>
     </property>
@@ -9302,7 +9302,7 @@
         <value xml:lang="en">Update Shipment Gateway Config Type</value>
         <value xml:lang="es">Actualizar el tipo de configuración del Gateway de envío</value>
         <value xml:lang="it">Aggiorna tipo configurazione gateway spedizione</value>
-        <value xml:lang="ja">Shipment Gateway Config Typeの更新</value>
+        <value xml:lang="ja">出荷ゲートウェイ設定種別を更新</value>
         <value xml:lang="zh">更新送货网关配置类型</value>
         <value xml:lang="zh-TW">更新出貨閘道配置類型</value>
     </property>
@@ -9351,7 +9351,7 @@
         <value xml:lang="en">View Facility Agreements</value>
         <value xml:lang="es">Ver acuerdos de instalaciones</value>
         <value xml:lang="es-CL">Ver acuerdos de Bodegas</value>
-        <value xml:lang="ja">施設契約を表示</value>
+        <value xml:lang="ja">拠点契約を表示</value>
         <value xml:lang="nl">Contracten</value>
         <value xml:lang="zh">浏览场所合同</value>
         <value xml:lang="zh-TW">流覽場所合約</value>
@@ -10259,7 +10259,7 @@
     <property key="ProductAddProductCostComponentCalc">
         <value xml:lang="en">Add Product Cost Component Calc</value>
         <value xml:lang="es">Añadir cálculo de costo del componente del producto</value>
-        <value xml:lang="ja">製品原価構成要素の計算を追加</value>
+        <value xml:lang="ja">製品原価構成要素計算を追加</value>
     </property>
     <property key="ProductAddProductFeatureFromCategory">
         <value xml:lang="de">Produktmerkmal von Kategorie oder Gruppe hinzufügen</value>
@@ -10462,7 +10462,7 @@
         <value xml:lang="en">Add To Product Store Group</value>
         <value xml:lang="es">Agregar producto a Grupo de Tienda</value>
         <value xml:lang="fr">Ajout au groupe de centre de profit</value>
-        <value xml:lang="ja">店舗グループに追加</value>
+        <value xml:lang="ja">製品店舗グループに追加</value>
         <value xml:lang="zh">添加到产品店铺组</value>
         <value xml:lang="zh-TW">增加到產品商店群組</value>
     </property>
@@ -10805,7 +10805,7 @@
         <value xml:lang="en">Any good identification</value>
         <value xml:lang="es">Cualquier buena identificación</value>
         <value xml:lang="fr">Tous Identifiants</value>
-        <value xml:lang="ja">よい同一証明</value>
+        <value xml:lang="ja">任意の商品識別情報</value>
         <value xml:lang="nl">Iedere productidentificatie</value>
         <value xml:lang="zh">任一商品标识</value>
         <value xml:lang="zh-TW">Any good identification</value>
@@ -12410,7 +12410,7 @@
         <value xml:lang="en">Prim. Category and Facility</value>
         <value xml:lang="es">Prim. Categoría y Almacén</value>
         <value xml:lang="es-CL">Prim. Categoría y Bodega</value>
-        <value xml:lang="ja">Prim. カテゴリーと施設</value>
+        <value xml:lang="ja">主要カテゴリと拠点</value>
         <value xml:lang="nl">Sectie 6: Categorie en faciliteit</value>
         <value xml:lang="zh">主要分类和场所</value>
     </property>
@@ -12805,7 +12805,7 @@
     <property key="ProductConditionXquantityOfProduct">
         <value xml:lang="en">[Note: if you use "X quantity of Product" beware that only the "Is Greater Than" and ""Is Greater Than or Equal to" are used.]</value>
         <value xml:lang="fr">[Note: si vous utilisez "X quantité de produit", veillez à n'utiliser que les termes "est plus grand que" et "est plus grand que ou égal à".]</value>
-        <value xml:lang="ja">[注記:「商品のX量」を「Is Greater Than」と「Is Greater Than or Equal to」のみで使用している場合。]</value>
+        <value xml:lang="ja">[注:「製品の数量」条件を使用する場合、「より大きい」または「以上」の条件のみが適用されます。]</value>
     </property>
     <property key="ProductConditions">
         <value xml:lang="de">Bedingungen</value>
@@ -13161,7 +13161,7 @@
     <property key="ProductCostComponentCalcs">
         <value xml:lang="en">Cost Component Calcs</value>
         <value xml:lang="es">Cálculos Componente de Costo</value>
-        <value xml:lang="ja">コスト コンポーネント カロリー</value>
+        <value xml:lang="ja">原価構成要素計算</value>
         <value xml:lang="nl">Calculaties</value>
     </property>
     <property key="ProductCostGlAccountTypeId">
@@ -13810,12 +13810,12 @@
     <property key="ProductCreateNewThumbnailSizeSuccessful">
         <value xml:lang="en">Create new thumbnail size successful.</value>
         <value xml:lang="es">Crear nuevo tamaño de miniatura exitoso.</value>
-        <value xml:lang="ja">新しいサムネイルサイズの成功を作成します。</value>
+        <value xml:lang="ja">新しいサムネイルサイズを作成しました。</value>
     </property>
     <property key="ProductCropImageSuccessfully">
         <value xml:lang="en">Crop image successfully.</value>
         <value xml:lang="es">Recortar imagen con éxito.</value>
-        <value xml:lang="ja">うまく画像をクロップします。</value>
+        <value xml:lang="ja">画像をトリミングしました。</value>
     </property>
     <property key="ProductCrossSell">
         <value xml:lang="de">Ihnen könnte auch gefallen:</value>
@@ -15838,7 +15838,7 @@
     <property key="ProductFeatureCategories">
         <value xml:lang="en">Feature Categories</value>
         <value xml:lang="es">Categorías de características del producto</value>
-        <value xml:lang="ja">特徴の部門</value>
+        <value xml:lang="ja">特徴カテゴリ</value>
     </property>
     <property key="ProductFeatureCategory">
         <value xml:lang="de">Merkmal Kategorie</value>
@@ -15914,7 +15914,7 @@
     <property key="ProductFeatureGroups">
         <value xml:lang="en">Feature Groups</value>
         <value xml:lang="es">Grupos de funciones</value>
-        <value xml:lang="ja">特集グループ</value>
+        <value xml:lang="ja">特徴グループ</value>
     </property>
     <property key="ProductFeatureGroupAppls">
         <value xml:lang="de">Merkmalgruppe Anwendungen</value>
@@ -16341,7 +16341,7 @@
     <property key="ProductFrameImageSuccessfully">
         <value xml:lang="en">Frame image successfully.</value>
         <value xml:lang="es">Encuadre de la imagen con éxito.</value>
-        <value xml:lang="ja">フレームイメージは首尾よく。</value>
+        <value xml:lang="ja">画像にフレームを付けました。</value>
     </property>
     <property key="ProductFromAnOrder">
         <value xml:lang="de">von Auftrag</value>
@@ -16361,7 +16361,7 @@
         <value xml:lang="de">Ab Verkaufsdatum</value>
         <value xml:lang="en">From Date Sell Through</value>
         <value xml:lang="es">Desde la fecha hasta la venta</value>
-        <value xml:lang="ja">日中販売から</value>
+        <value xml:lang="ja">販売開始日</value>
         <value xml:lang="zh">开始日期的销售任务</value>
         <value xml:lang="zh-TW">From Date Sell Through</value>
     </property>
@@ -16639,7 +16639,7 @@
         <value xml:lang="de">Karenzzeit UOM ID</value>
         <value xml:lang="en">Grace Period UOM ID</value>
         <value xml:lang="es">ID de UOM del periodo de gracia</value>
-        <value xml:lang="ja">猶予期間 UOM ID</value>
+        <value xml:lang="ja">猶予期間単位ID</value>
         <value xml:lang="zh">免息期度量单位标识</value>
         <value xml:lang="zh-TW">Grace Period UOM ID</value>
     </property>
@@ -17336,7 +17336,7 @@
     </property>
     <property key="ProductInventoryATPNotAvailable">
         <value xml:lang="en">Requested quantity [${xferQty}] could not be transferred because [${unavailableQuantity}] units of inventory is unavailable.</value>
-        <value xml:lang="ja">リクエスト数量 [${xferQty}] 転送できません。 [${unavailableQuantity}] 在庫の単位は利用できません。</value>
+        <value xml:lang="ja">在庫の${unavailableQuantity}個が利用できないため、要求数量[${xferQty}]を移動できませんでした。</value>
     </property>
     <property key="ProductOperator">
         <value xml:lang="de">Operator</value>
@@ -18100,7 +18100,7 @@
     <property key="ProductCannotReserveInventoryNotEnoughStock">
         <value xml:lang="it">Impossibile riservare l'articolo ${parameters.productId}: quantità in stock non sufficiente nel deposito ${parameters.facilityId}. Quantità  non riservata è ${parameters.quantityNotReserved}</value>
         <value xml:lang="en">Cannot reserve product ${parameters.productId}: not enough quantity left in stock for facility ${parameters.facilityId}. Quantity not reserved is ${parameters.quantityNotReserved}</value>
-        <value xml:lang="ja">製品を予約できません ${parameters.productId}:施設の在庫に残らない数量 ${parameters.facilityId}. 量は予約されません ${parameters.quantityNotReserved}</value>
+        <value xml:lang="ja">拠点 ${parameters.facilityId} の在庫が不足しているため、製品 ${parameters.productId} を引き当てられません。未引当数量: ${parameters.quantityNotReserved}</value>
      </property>
     <property key="ProductItemPrc">
         <value xml:lang="de">Position Preis</value>
@@ -19106,7 +19106,7 @@
         <value xml:lang="de">Maße</value>
         <value xml:lang="en">Measures</value>
         <value xml:lang="es">Medidas</value>
-        <value xml:lang="ja">計数</value>
+        <value xml:lang="ja">単位・寸法</value>
         <value xml:lang="nl">Sectie 4: Maten</value>
         <value xml:lang="zh">度量</value>
     </property>
@@ -20235,7 +20235,7 @@
         <value xml:lang="en">Not cancelling ItemIssuance because the quantity to cancel ${toCancelQuantity} is greater than the quantity left ${qtyIssuedLeft} for ItemIssuance ${parameters.itemIssuanceId}</value>
         <value xml:lang="es">No se cancela ItemIssuance porque la cantidad a cancelar $ {toCancelQuantity} es mayor que la cantidad que queda $ {qtyIssuedLeft} para ItemIssuance $ {parameters.itemIssuanceId}</value>
         <value xml:lang="it">Non è possibile cancellare la consegna perchè la quantità da cancellare ${toCancelQuantity} è maggiore della quantità rimasta ${qtyIssuedLeft} per la consegna ${parameters.itemIssuanceId}</value>
-        <value xml:lang="ja">払出 ${parameters.itemIssuanceId} の取消数量 ${toCancelQuantity} が未取消数量 ${qtyIssuedLeft} を超えているため、取消できません。</value>
+        <value xml:lang="ja">払出 ${parameters.itemIssuanceId} の取消はできません。取消数量 ${toCancelQuantity} が未払出残数 ${qtyIssuedLeft} を超えています。</value>
         <value xml:lang="zh">没有取消物品发放（ItemIssuance），因为要取消的数量 ${toCancelQuantity} 大于剩余的数量 ${qtyIssuedLeft}，物品发放 ${parameters.itemIssuanceId}</value>
         <value xml:lang="zh-TW">沒有取消物品發放(ItemIssuance),因為要取消的數量 ${toCancelQuantity} 大於剩餘的數量 ${qtyIssuedLeft},物品發放 ${parameters.itemIssuanceId}</value>
     </property>
@@ -20250,19 +20250,19 @@
     </property>
     <property key="ProductIssueInventoryItemNotFound">
         <value xml:lang="en">Not issuing inventory item ${parameters.inventoryItemId} to shipment ${parameters.shipmentId} because the inventory item does not exist</value>
-        <value xml:lang="ja">在庫項目を発行しない ${parameters.inventoryItemId} 出荷まで ${parameters.shipmentId} 在庫項目が存在しないので</value>
+        <value xml:lang="ja">在庫品目 ${parameters.inventoryItemId} が存在しないため、出荷 ${parameters.shipmentId} に払い出せません。</value>
     </property>
     <property key="ProductIssueInventoryItemShipmentItemNotFound">
         <value xml:lang="en">Not issuing inventory item ${parameters.inventoryItemId} to shipment ${parameters.shipmentId} because shipment item ${parameters.shipmentItemSeqId} does not exist</value>
-        <value xml:lang="ja">在庫項目を発行しない ${parameters.inventoryItemId} 出荷まで ${parameters.shipmentId} 出荷品目のため ${parameters.shipmentItemSeqId} 存在しない</value>
+        <value xml:lang="ja">出荷明細 ${parameters.shipmentItemSeqId} が存在しないため、在庫品目 ${parameters.inventoryItemId} を出荷 ${parameters.shipmentId} に払い出せません。</value>
     </property>
     <property key="ProductIssueInventoryItemProductMismatch">
         <value xml:lang="en">Not issuing inventory item ${parameters.inventoryItemId} to shipment ${parameters.shipmentId} shipment item ${parameters.shipmentItemSeqId} because the product of the inventory item ${inventoryItem.productId} is not the product of the shipment item ${shipmentItem.productId}</value>
-        <value xml:lang="ja">在庫品目 ${parameters.inventoryItemId} は出荷 ${parameters.shipmentId} の出荷明細 ${parameters.shipmentItemSeqId} に払い出されません。在庫品目の製品 ${inventoryItem.productId} が出荷明細の製品 ${shipmentItem.productId} と一致しないためです。</value>
+        <value xml:lang="ja">在庫品目の製品 ${inventoryItem.productId} が出荷明細の製品 ${shipmentItem.productId} と一致しないため、在庫品目 ${parameters.inventoryItemId} を出荷 ${parameters.shipmentId} の明細 ${parameters.shipmentItemSeqId} に払い出せません。</value>
     </property>
     <property key="ProductIssueInventoryItemNoReturnItemShipment">
         <value xml:lang="en">Not issuing inventory item ${parameters.inventoryItemId} to shipment ${parameters.shipmentId} shipment item ${parameters.shipmentItemSeqId} because the shipment item is not associated with a return item</value>
-        <value xml:lang="ja">在庫項目を発行しない ${parameters.inventoryItemId} 出荷まで ${parameters.shipmentId} 出荷品目 ${parameters.shipmentItemSeqId} 出荷項目が返品項目に関連付けられていないため</value>
+        <value xml:lang="ja">出荷明細が返品明細に関連付けられていないため、在庫品目 ${parameters.inventoryItemId} を出荷 ${parameters.shipmentId} の明細 ${parameters.shipmentItemSeqId} に払い出せません。</value>
     </property>
     <property key="ProductNotIssueOrderToShipmentQuantityLess">
         <value xml:lang="de">Führe keine Reservierung durch für Lieferung [${parameters.shipmentId}] weil die Reservierungsmenge ${parameters.quantity} kleiner oder gleich 0 ist für Bestellung ${orderItemShipGrpInvRes.orderId} Auftragsposition ${orderItemShipGrpInvRes.orderItemSeqId} Bestandsposition ${orderItemShipGrpInvRes.inventoryItemId}</value>
@@ -20293,7 +20293,7 @@
     </property>
     <property key="ProductNotIssueOrderToShipmentShipGroupDestinationMismatch">
         <value xml:lang="en">Not issuing Order Item Ship Group Inventory Reservation to shipment ${parameters.shipmentId} because ship group ${orderItemShipGrpInvRes.shipGroupSeqId} for order ${orderItemShipGrpInvRes.orderId} has a different destination than ship group ${shipment.primaryShipGroupSeqId} already associated with this shipment</value>
-        <value xml:lang="ja">注文項目を発行しない 船グループ在庫出荷予約 ${parameters.shipmentId} 船舶グループ ${orderItemShipGrpInvRes.shipGroupSeqId} 注文のための ${orderItemShipGrpInvRes.orderId} 船グループよりも異なる目的地を持っている ${shipment.primaryShipGroupSeqId} すでにこの出荷に関連する</value>
+        <value xml:lang="ja">出荷 ${parameters.shipmentId} の配送先が異なるため、注文明細配送グループ在庫引当を出荷に登録できません。注文 ${orderItemShipGrpInvRes.orderId} の配送グループ ${orderItemShipGrpInvRes.shipGroupSeqId} の配送先は、この出荷に関連付けられた配送グループ ${shipment.primaryShipGroupSeqId} の配送先と異なります。</value>
     </property>
     <property key="ProductNotIssueToFixedAssetMaintQuantityLess">
         <value xml:lang="de">Füge Bestandsposition nicht zu Anlagegütern ${fixedAssetMaint.fixedAssetId:fixedAssetMaint.maintHistSeqId} hinzu da die Menge ${parameters.quantity} kleiner oder gleich 0 ist für Bestandsposition ${inventoryItem.inventoryItemId}</value>
@@ -20309,7 +20309,7 @@
         <value xml:lang="en">Not issuing InventoryItem to FixedAssetMaint ${fixedAssetMaint.fixedAssetId:fixedAssetMaint.maintHistSeqId} because the quantity to issue ${parameters.quantity} is greater than the quantity left to issue (ie the ATP or Available To Promise) ${intentoryItem.availableToPromiseTotal} for inventoryItem ${orderItemShipGrpInvRes.inventoryItemId}</value>
         <value xml:lang="es">No emitir InventoryItem a FixedAssetMaint $ {fixedAssetMaint.fixedAssetId: fixedAssetMaint.maintHistSeqId} porque la cantidad a emitir ${parameters.quantity} es mayor que la cantidad que queda por emitir (es decir, la ATP o la Promesa disponible) inventoryItem ${orderItemShipGrpInvRes.inventoryItemId}</value>
         <value xml:lang="it">Non consegnabile inventario alla manutenzione cespite ${fixedAssetMaint.fixedAssetId:fixedAssetMaint.maintHistSeqId} perchè la quantità da consegnare ${parameters.quantity} è maggiore della quantità rimasta da consegnare ${intentoryItem.availableToPromiseTotal} per la riga inventario ${orderItemShipGrpInvRes.inventoryItemId}</value>
-        <value xml:lang="ja">在庫品目 ${orderItemShipGrpInvRes.inventoryItemId} は固定資産保守 ${fixedAssetMaint.fixedAssetId:fixedAssetMaint.maintHistSeqId} に払い出せません。払出数量 ${parameters.quantity} が引当可能数量（ATP: ${intentoryItem.availableToPromiseTotal}）を超えています。</value>
+        <value xml:lang="ja">在庫品目 ${orderItemShipGrpInvRes.inventoryItemId} は FixedAssetMaint ${fixedAssetMaint.fixedAssetId:fixedAssetMaint.maintHistSeqId} に払い出せません。払出数量 ${parameters.quantity} が残数量（ATP: ${intentoryItem.availableToPromiseTotal}）を超えています。</value>
         <value xml:lang="zh">没有发放库存明细（InventoryItem）到固定资产维护（FixedAssetMaint）${fixedAssetMaint.fixedAssetId:fixedAssetMaint.maintHistSeqId}，因为要发放的数量 ${parameters.quantity} 大于剩余的可发放数量（比如可承诺数量）${intentoryItem.availableToPromiseTotal}，库存明细 ${orderItemShipGrpInvRes.inventoryItemId}</value>
         <value xml:lang="zh-TW">沒有發放庫存細項(InventoryItem)到固定資產維護(FixedAssetMaint)${fixedAssetMaint.fixedAssetId:fixedAssetMaint.maintHistSeqId},因為要發放的數量 ${parameters.quantity} 大於剩餘的可發放數量(比如可承諾數量)${intentoryItem.availableToPromiseTotal},庫存細項 ${orderItemShipGrpInvRes.inventoryItemId}</value>
     </property>
@@ -21203,7 +21203,7 @@
         <value xml:lang="de">Ausgleichskonto Typ ID</value>
         <value xml:lang="en">Off Setting GL Account Type ID</value>
         <value xml:lang="es">Fuera de ajuste de tipo de cuenta global</value>
-        <value xml:lang="ja">オフ設定GLアカウントタイプID</value>
+        <value xml:lang="ja">相手勘定科目種別ID</value>
         <value xml:lang="zh">抵扣总账账户类型标识</value>
         <value xml:lang="zh-TW">Off Setting GL Account Type ID</value>
     </property>
@@ -21239,7 +21239,7 @@
     <property key="ProductOnlyOneFacility">
         <value xml:lang="en">If there is only one facility, you need to select it to continue, no search available</value>
         <value xml:lang="fr">S'il n'y a qu'un seul lieu de stockage, vous devez le sélectionner pour continuer, aucune recherche n'est disponible.</value>
-        <value xml:lang="ja">1つの施設しかない場合は、引き続き選択する必要があります。</value>
+        <value xml:lang="ja">拠点が1つしかない場合は、続行するにはその拠点を選択してください。検索はできません。</value>
     </property>
     <property key="ProductOnlyShowingFirstN">
         <value xml:lang="de">ANMERKUNG: Es werden nur die ersten ${viewSize} von ${listSize} Produkten angezeigt. Um die restlichen Anzuzeigen verwenden Sie den Produkt-Bereich dieser Kategorie.</value>
@@ -23716,7 +23716,7 @@
         <value xml:lang="en">ProductStore with id ${productStoreId} has Y for oneInventoryFacility but inventoryFacilityId is empty, not reserving inventory.</value>
         <value xml:lang="es">Tienda de Productos con id ${productStoreId} tiene Y para una instalación de inventario pero inventoryFacilityId está vacío, no se reserva inventario.</value>
         <value xml:lang="it">Negozio con id ${productStoreId} ha impostato il flag oneInventoryFacility ad Y ma inventoryFacilityId è vuoto, nessun inventario verrà riservato.</value>
-        <value xml:lang="ja">製品店舗 ${productStoreId} は oneInventoryFacility が Y ですが、inventoryFacilityId が空のため、在庫を予約できません。</value>
+        <value xml:lang="ja">製品店舗ID ${productStoreId} ではoneInventoryFacilityがYですが、inventoryFacilityIdが空欄のため、在庫を引き当てません。</value>
         <value xml:lang="vi">Cửa hàng với Id ${productStoreId} là Có (Yes) cho Cơ sở kho nhưng lại không có Id của Cơ sở kho, không có kho nào được đặt.</value>
         <value xml:lang="zh">标识为 ${productStoreId} 的产品店铺（ProductStore）设置了单个库存场所（oneInventoryFacility）为是（Y），但是库存场所标识是空的，没有预订库存。</value>
         <value xml:lang="zh-TW">標識為 ${productStoreId} 的產品商店(ProductStore)設置了單個庫存場所(oneInventoryFacility)為是(Y),但是庫存場所標識是空的,沒有預訂庫存.</value>
@@ -23726,7 +23726,7 @@
         <value xml:lang="en">ProductStore with id ${productStoreId} has Y for oneInventoryFacility but inventoryFacilityId is empty, not checking available inventory.</value>
         <value xml:lang="es">Tienda de Productos con id ${productStoreId} tiene Y para una instalación de inventario pero inventoryFacilityId está vacío, no está verificando el inventario disponible.</value>
         <value xml:lang="it">Negozio con id ${productStoreId} ha impostato il flag oneInventoryFacility ad Y ma inventoryFacilityId è vuoto, nessun controllo di disponibilità di inventario verrà effettuato.</value>
-        <value xml:lang="ja">製品店舗 ${productStoreId} は oneInventoryFacility が Y ですが、inventoryFacilityId が空のため、引当可能な在庫を確認できません。</value>
+        <value xml:lang="ja">製品店舗ID ${productStoreId} ではoneInventoryFacilityがYですが、inventoryFacilityIdが空欄のため、引当可能在庫を確認できません。</value>
         <value xml:lang="vi">Cửa hàng với Id ${productStoreId} là Có (Yes) cho Cơ sở kho nhưng lại không có Id của Cơ sở kho, không có kho nào để thực hiện kiểm tra.</value>
         <value xml:lang="zh">标识为 ${productStoreId} 的产品店铺（ProductStore）设置了单个库存场所（oneInventoryFacility）为是（Y），但是库存场所标识是空的，不检查可用库存。</value>
         <value xml:lang="zh-TW">標識為 ${productStoreId} 的產品商店(ProductStore)設置了單個庫存場所(oneInventoryFacility)為是(Y),但是庫存場所標識是空的,不檢查可用庫存.</value>
@@ -24821,7 +24821,7 @@
     <property key="ProductQuantityUom">
         <value xml:lang="en">Quantity Uom</value>
         <value xml:lang="es">Cantidad UOM</value>
-        <value xml:lang="ja">数量 魚</value>
+        <value xml:lang="ja">数量単位</value>
     </property>
     <property key="ProductQuantityUomId">
         <value xml:lang="de">Menge Einheit ID</value>
@@ -25475,7 +25475,7 @@
     <property key="ProductRenameImageSuccessfully.">
         <value xml:lang="en">Rename image successfully.</value>
         <value xml:lang="es">Imagen renombrada con éxito.</value>
-        <value xml:lang="ja">正常に画像の名前を変更します。</value>
+        <value xml:lang="ja">画像の名前を変更しました。</value>
     </property>
     <property key="ProductReorderQuantity">
         <value xml:lang="de">Neubestellung Menge</value>
@@ -25494,7 +25494,7 @@
     <property key="ProductReplaceImageSuccessfully">
         <value xml:lang="en">Replace image successfully.</value>
         <value xml:lang="es">Imagen reemplazada correctamente.</value>
-        <value xml:lang="ja">画像を正常に置換します。</value>
+        <value xml:lang="ja">画像を置き換えました。</value>
     </property>
     <property key="ProductReplaceOriginal">
         <value xml:lang="de">Erstetzt Original</value>
@@ -25780,7 +25780,7 @@
     <property key="ProductResizeImagesSuccessful">
         <value xml:lang="en">Resize images successful.</value>
         <value xml:lang="es">Imágenes redimensionadas exitosamente.</value>
-        <value xml:lang="ja">画像を成功させる。</value>
+        <value xml:lang="ja">画像のサイズを変更しました。</value>
     </property>
     <property key="ProductResultOfImageUpload">
         <value xml:lang="de">Resultat des Bild hochladens</value>
@@ -25994,7 +25994,7 @@
         <value xml:lang="en">Rotated image successfully.</value>
         <value xml:lang="es">Imagen rotada con éxito.</value>
         <value xml:lang="es-CL">Imagen girada con éxito.</value>
-        <value xml:lang="ja">回転されたイメージは首尾よく。</value>
+        <value xml:lang="ja">画像を回転しました。</value>
     </property>
     <property key="ProductRouteSegment">
         <value xml:lang="de">Weg Abschnitt</value>
@@ -26106,7 +26106,7 @@
     <property key="ProductRunSubscriptionExpiredServiceCalledSuccessfully">
         <value xml:lang="en">runSubscriptionExpired service called successfully with subscriptionId ${subscriptionId}</value>
         <value xml:lang="es">ejecutado el servicio de suscripción caducada con éxito con el ID de suscripción ${subscriptionId}</value>
-        <value xml:lang="ja">runSubscriptionExpired サービスは、subscriptionId で正常に呼び出されます ${subscriptionId}</value>
+        <value xml:lang="ja">サブスクリプションID ${subscriptionId} を指定してrunSubscriptionExpiredサービスを正常に呼び出しました。</value>
     </property>
     <property key="ProductSRCH">
         <value xml:lang="de">Suche</value>
@@ -27407,7 +27407,7 @@
     <property key="ProductShipmentTimeEstimates">
         <value xml:lang="en">Shipment Time Estimates</value>
         <value xml:lang="fr">Temps de livraison estimé</value>
-        <value xml:lang="ja">出荷時間見積もり</value>
+        <value xml:lang="ja">出荷所要時間見積</value>
     </property>
     <property key="ProductShipmentTotalVolume">
         <value xml:lang="de">Total Volumen</value>
@@ -28891,7 +28891,7 @@
         <value xml:lang="de">Bis Verkaufsdatum</value>
         <value xml:lang="en">Through Date Sell Through</value>
         <value xml:lang="es">Hasta la fecha de venta</value>
-        <value xml:lang="ja">日中販売</value>
+        <value xml:lang="ja">販売終了日</value>
         <value xml:lang="zh-TW">Through Date Sell Through</value>
         <value xml:lang="zh">结束日期的销售任务</value>
     </property>
@@ -30074,7 +30074,7 @@
         <value xml:lang="de">Virtuelle und Varianten</value>
         <value xml:lang="en">Virtuals and Variants</value>
         <value xml:lang="es">Virtuales y Variantes</value>
-        <value xml:lang="ja">バーチャル&amp;バリアント</value>
+        <value xml:lang="ja">仮想製品とバリエーション</value>
         <value xml:lang="nl">Sectie 1: Virtuelen en varianten</value>
         <value xml:lang="zh">虚拟和可变</value>
     </property>

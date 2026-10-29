@@ -143,7 +143,7 @@
         <value xml:lang="en">Facility Name is missing</value>
         <value xml:lang="fr">Le nom du lieu de stockage est absent</value>
         <value xml:lang="it">Stabilimento mancante</value>
-        <value xml:lang="ja">施設名が見つからない場合</value>
+        <value xml:lang="ja">拠点名が未入力です。</value>
         <value xml:lang="pt-BR">Nome da Instalação está faltando</value>
         <value xml:lang="vi">Bạn chưa nhập tên cơ sở (Facility Name)</value>
         <value xml:lang="zh">缺少场所名称</value>
@@ -222,7 +222,7 @@
         <value xml:lang="en">Organization name is missing</value>
         <value xml:lang="fr">Nom de l'organisation est absente</value>
         <value xml:lang="it">Nome organizzazione è mancante</value>
-        <value xml:lang="ja">組織名が欠落している</value>
+        <value xml:lang="ja">組織名が未入力です。</value>
         <value xml:lang="pt-BR">Nome da organização está faltando</value>
         <value xml:lang="vi">Bạn chưa nhập tên doanh nghiệp</value>
         <value xml:lang="zh">缺少组织名称</value>
@@ -276,7 +276,7 @@
     <property key="SetupProductStoreNameIsMissing">
         <value xml:lang="en">Store Name is missing</value>
         <value xml:lang="it">Nome negozio è mancante</value>
-        <value xml:lang="ja">ストア名が欠落している</value>
+        <value xml:lang="ja">店舗名が未入力です。</value>
         <value xml:lang="pt-BR">Nome da loja está faltando</value>
         <value xml:lang="vi">Bạn chưa nhập tên cửa hàng</value>
         <value xml:lang="zh">缺少店铺名称</value>

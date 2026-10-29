@@ -345,7 +345,7 @@
     <property key="FormFieldTitle_newWorkEffortId">
         <value xml:lang="en">New WorkEffort ID</value>
         <value xml:lang="fr">Nvlle réf de tâche</value>
-        <value xml:lang="ja">新規ワークエフォートID</value>
+        <value xml:lang="ja">新しい作業成果ID</value>
     </property>
     <property key="FormFieldTitle_orderTypeDescription">
         <value xml:lang="en">Order Type Description</value>
@@ -932,7 +932,7 @@
         <value xml:lang="ar">اضافة سمة لمجهود العمل</value>
         <value xml:lang="en">Add Work Effort Attribute</value>
         <value xml:lang="fr">Ajouter un attribut à la tâche</value>
-        <value xml:lang="ja">作業の努力属性を追加する</value>
+        <value xml:lang="ja">作業成果属性を追加</value>
     </property>
     <property key="PageTitleAddWorkEffortCommEvent">
         <value xml:lang="ar">اضافة اتصال لمجهود العمل</value>
@@ -1454,7 +1454,7 @@
         <value xml:lang="ar">سمات مجهود العمل</value>
         <value xml:lang="en">Work Effort Attributes</value>
         <value xml:lang="fr">Attributs de la tâche</value>
-        <value xml:lang="ja">仕事の努力属性</value>
+        <value xml:lang="ja">作業成果属性一覧</value>
     </property>
     <property key="PageTitleListWorkEffortCommEvents">
         <value xml:lang="en">Work Effort Communication Events</value>
@@ -2941,7 +2941,7 @@
     </property>
     <property key="WorkEffortICalendarUrl">
         <value xml:lang="en">iCalendar Url</value>
-        <value xml:lang="ja">iCalendarウル</value>
+        <value xml:lang="ja">iCalendar URL</value>
         <value xml:lang="vi">Liên kết URL iCalendar</value>
         <value xml:lang="zh">iCalendar网址</value>
         <value xml:lang="zh-TW">iCal網址</value>
@@ -3210,7 +3210,7 @@
     <property key="WorkEffortManufacturingError">
         <value xml:lang="en">Error retrieving manufacturing data for productId ${productId}: " ${errorString}</value>
         <value xml:lang="it">Errore nella ricerca dei dati per la produzione per il prodotto ${productId}: " ${errorString}</value>
-        <value xml:lang="ja">製品ID ${productId} の製造データ取得中にエラーが発生しました: " ${errorString}</value>
+        <value xml:lang="ja">製品ID ${productId} の製造データ取得中にエラーが発生しました: ${errorString}</value>
         <value xml:lang="vi">Lỗi khi lấy dữ liệu nhà sản xuất cho sản phẩm ${productId}: " ${errorString}</value>
         <value xml:lang="zh">获取产品标识为 ${productId} 的制造数据时出错： " ${errorString}</value>
         <value xml:lang="zh-TW">獲取產品標識為 ${productId} 的製造資料時出錯: " ${errorString}</value>
@@ -4457,175 +4457,175 @@
     </property>
     <property key="WorkEffortRequiredFieldMissingAttrName">
         <value xml:lang="en">Required Field Missing : Attribute Name.</value>
-        <value xml:lang="ja">必須フィールドの欠損:属性名。</value>
+        <value xml:lang="ja">必須項目が未入力です: 属性名</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingCommunicationEventId">
         <value xml:lang="en">Required Field Missing : Communication Event Id.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 通信イベントId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 通信イベントID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingContactMechId">
         <value xml:lang="en">Required Field Missing : Contact Mech Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : Mech Id までお問い合わせください。</value>
+        <value xml:lang="ja">必須項目が未入力です: 連絡先ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingContactMechIdOrContactMechTypeId">
         <value xml:lang="en">Required Field Missing : At least one field is required from Contact Mech Id  or Contact Mech Type Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 連絡先のMech Idまたは連絡先のMech Type Idから少なくとも1つのフィールドが必要です。</value>
+        <value xml:lang="ja">必須項目が未入力です: 連絡先IDまたは連絡先種別IDのいずれか</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingContactMechTypeId">
         <value xml:lang="en">Required Field Missing : ContactMech Type Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損:ContactMechタイプId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 連絡先種別ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingContentId">
         <value xml:lang="en">Required Field Missing : Content Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : コンテンツID.</value>
+        <value xml:lang="ja">必須項目が未入力です: コンテンツID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingCurrentStatusId">
         <value xml:lang="en">Required Field Missing : Current Status Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損:現在のステータスID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 現在のステータスID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingCustRequestId">
         <value xml:lang="en">Required Field Missing : Cust Request Id.</value>
-        <value xml:lang="ja">必須フィールド欠損 : リクエストID</value>
+        <value xml:lang="ja">必須項目が未入力です: 顧客依頼ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingCustRequestItemSeqId">
         <value xml:lang="en">Required Field Missing : Cust Request Item Seq Id.</value>
-        <value xml:lang="ja">必須フィールド欠損 : リクエスト項目 Seq Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 顧客依頼明細連番ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingFixedAssetId">
         <value xml:lang="en">Required Field Missing : Fixed Asset Id.</value>
-        <value xml:lang="ja">必須フィールドミス : 固定資産Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 固定資産ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingFixedAssetTypeId">
         <value xml:lang="en">Required Field Missing : Fixed Asset Type Id.</value>
-        <value xml:lang="ja">必須フィールドミス : 固定資産タイプId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 固定資産種別ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingFromDate">
         <value xml:lang="en">Required Field Missing : From Date.</value>
-        <value xml:lang="ja">必須フィールドの欠損:日付から。</value>
+        <value xml:lang="ja">必須項目が未入力です: 開始日</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingInternalNote">
         <value xml:lang="en">Required Field Missing : Internal Note.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 内部注記</value>
+        <value xml:lang="ja">必須項目が未入力です: 内部メモ</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingInventoryItemId">
         <value xml:lang="en">Required Field Missing : Inventory Item Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 在庫項目 Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 在庫品目ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingKeyword">
         <value xml:lang="en">Required Field Missing : Keyword.</value>
-        <value xml:lang="ja">必須フィールドのミス : キーワード.</value>
+        <value xml:lang="ja">必須項目が未入力です: キーワード</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingNoteInfo">
         <value xml:lang="en">Required Field Missing : Note Info.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 注意</value>
+        <value xml:lang="ja">必須項目が未入力です: メモ内容</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingNumPeriodType">
         <value xml:lang="en">Required Field Missing : Period Type.</value>
-        <value xml:lang="ja">必須フィールドの欠損:期間タイプ。</value>
+        <value xml:lang="ja">必須項目が未入力です: 期間種別</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingNumPeriods">
         <value xml:lang="en">Required Field Missing : Num Periods.</value>
-        <value xml:lang="ja">必須フィールドの欠損:Numの期間。</value>
+        <value xml:lang="ja">必須項目が未入力です: 期間数</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingOldWorkEffortTypeId">
         <value xml:lang="en">Required Field Missing : Old WorkEffort Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 古い作業努力 Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 旧作業成果ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingOrderId">
         <value xml:lang="en">Required Field Missing : Order Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 注文ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingPartyId">
         <value xml:lang="en">Required Field Missing : Party Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 取引先ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 取引先ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingProductId">
         <value xml:lang="en">Required Field Missing : Product Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 製品ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 製品ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingQuickAssignPartyId">
         <value xml:lang="en">Required Field Missing : Quick Assign Party Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: クイック割当取引先ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: クイック割当取引先ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingQuoteId">
         <value xml:lang="en">Required Field Missing : Quote Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 引用ID.</value>
+        <value xml:lang="ja">必須項目が未入力です: 見積ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingRequirementId">
         <value xml:lang="en">Required Field Missing : Requirement Id.</value>
-        <value xml:lang="ja">必須分野 欠損: 条件 Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 要件ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingReviewDate">
         <value xml:lang="en">Required Field Missing : Review Date.</value>
-        <value xml:lang="ja">必須フィールドの欠損:レビュー日。</value>
+        <value xml:lang="ja">必須項目が未入力です: 確認日</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingRoleTypeId">
         <value xml:lang="en">Required Field Missing : Role Type Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : ロールタイプId.</value>
+        <value xml:lang="ja">必須項目が未入力です: ロール種別ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingSequenceId">
         <value xml:lang="en">Required Field Missing : Sequence Id.</value>
-        <value xml:lang="ja">必須フィールド欠損 : シーケンスID.</value>
+        <value xml:lang="ja">必須項目が未入力です: 連番ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingShoppingListId">
         <value xml:lang="en">Required Field Missing : Skill Type Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : スキルタイプID.</value>
+        <value xml:lang="ja">必須項目が未入力です: スキル種別ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingSkillTypeId">
         <value xml:lang="en">Required Field Missing : Shopping List Id.</value>
-        <value xml:lang="ja">必須フィールドミス : ショッピングリストId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 買物リストID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingSourceWorkEffortId">
         <value xml:lang="en">Required Field Missing : Source WorkEffort Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 出典 WorkEffort Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 元作業成果ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingStart">
         <value xml:lang="en">Required Field Missing : Start.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 開始</value>
+        <value xml:lang="ja">必須項目が未入力です: 開始</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingStatusId">
         <value xml:lang="en">Required Field Missing : Status Id.</value>
-        <value xml:lang="ja">必須フィールド欠損:ステータスID</value>
+        <value xml:lang="ja">必須項目が未入力です: ステータスID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingSurveyId">
         <value xml:lang="en">Required Field Missing : Survey Id.</value>
-        <value xml:lang="ja">必要なフィールドミス : 調査ID.</value>
+        <value xml:lang="ja">必須項目が未入力です: アンケートID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingUserLoginId">
         <value xml:lang="en">Required Field Missing : User Login Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : ユーザログインID.</value>
+        <value xml:lang="ja">必須項目が未入力です: ユーザーログインID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortAssocTypeId">
         <value xml:lang="en">Required Field Missing : Work Effort Assoc Type Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 作業の努力のAssocタイプId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 作業成果関連種別ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortContentTypeId">
         <value xml:lang="en">Required Field Missing : Work Effort Content Type Id.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 作業の努力内容タイプId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 作業成果コンテンツ種別ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortGoodStdTypeId">
         <value xml:lang="en">Required Field Missing : Work Effort Good Std Type Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 作業の努力 良好なStdタイプId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 作業成果成果物標準種別ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortId">
         <value xml:lang="en">Required Field Missing : WorkEffort Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 作業努力 Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 作業成果ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortIdFrom">
         <value xml:lang="en">Required Field Missing : Work Effort Id From.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 作業の努力から.</value>
+        <value xml:lang="ja">必須項目が未入力です: 開始作業成果ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortIdTo">
         <value xml:lang="en">Required Field Missing : Work Effort Id To.</value>
-        <value xml:lang="ja">必要なフィールドミス : 作業の努力 Id へ.</value>
+        <value xml:lang="ja">必須項目が未入力です: 終了作業成果ID</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortName">
         <value xml:lang="en">Required Field Missing : WorkEffort Name.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 労働安全名.</value>
+        <value xml:lang="ja">必須項目が未入力です: 作業成果名</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortTypeId">
         <value xml:lang="en">Required Field Missing : WorkEffort Type Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 作業努力型Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 作業成果種別ID</value>
     </property>
     <property key="WorkEffortRequirementFulfillmentAlreadyExists">
         <value xml:lang="en">ERROR: WorkRequirementFulfillment [${parameters.requirementId}][${parameters.workEffortId}] already exists.</value>
@@ -5570,10 +5570,10 @@
     </property>
     <property key="WorkeffortErrorWhileCreatingServiceMapForService">
         <value xml:lang="en">Error while creating service Map for service : ${serviceName}</value>
-        <value xml:lang="ja">サービスマップ作成時のエラー : ${serviceName}</value>
+        <value xml:lang="ja">サービス ${serviceName} のサービスマップを作成中にエラーが発生しました。</value>
     </property>
     <property key="WorkeffortErrorWhileInvokingService">
         <value xml:lang="en">Error while invoking service : ${serviceName}</value>
-        <value xml:lang="ja">サービスの呼び出し中にエラー : ${serviceName}</value>
+        <value xml:lang="ja">サービス ${serviceName} の呼び出し中にエラーが発生しました。</value>
     </property>
 </resource>

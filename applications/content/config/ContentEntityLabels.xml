@@ -86,7 +86,7 @@
     <property key="Content.description.CTNT_MASTER_TURNOVER">
         <value xml:lang="en">Turnover (product)</value>
         <value xml:lang="fr">Rotation (des stocks)</value>
-        <value xml:lang="ja">売上高(製品)</value>
+        <value xml:lang="ja">製品回転率</value>
     </property>
     <property key="ContentAssocPredicate.description.categorizes">
         <value xml:lang="da">kategorier</value>
@@ -1610,12 +1610,12 @@
     </property>
     <property key="DataCategory.categoryName.TECH_SOFT_JAVA">
         <value xml:lang="en">Java</value>
-        <value xml:lang="ja">ログイン</value>
+        <value xml:lang="ja">Java</value>
         <value xml:lang="th">ภาษาจาวา</value>
     </property>
     <property key="DataCategory.categoryName.TECH_SOFT_LINUX">
         <value xml:lang="en">Linux</value>
-        <value xml:lang="ja">ダウンロード</value>
+        <value xml:lang="ja">Linux</value>
         <value xml:lang="th">ระบบปฏิบัติการลีนุกซ์</value>
     </property>
     <property key="DataCategory.categoryName.TECH_SOFT_OFBIZ">
@@ -1853,7 +1853,7 @@
     </property>
     <property key="DataTemplateType.description.FTL">
         <value xml:lang="en">FreeMarker</value>
-        <value xml:lang="ja">フリーマーカー</value>
+        <value xml:lang="ja">FreeMarker</value>
         <value xml:lang="zh-TW">FreeMarker</value>
     </property>
     <property key="DataTemplateType.description.NONE">
@@ -1886,7 +1886,7 @@
     </property>
     <property key="DataTemplateType.description.WM">
         <value xml:lang="en">WebMacro</value>
-        <value xml:lang="ja">サイトマップ</value>
+        <value xml:lang="ja">WebMacro</value>
         <value xml:lang="th">เว็บ Macro</value>
     </property>
     <property key="DataTemplateType.description.XSLT">
@@ -2068,7 +2068,7 @@
     </property>
     <property key="MimeType.description.application/msword">
         <value xml:lang="en">Microsoft Word</value>
-        <value xml:lang="ja">マイクロソフトの言葉</value>
+        <value xml:lang="ja">Microsoft Word</value>
         <value xml:lang="zh">微软Word</value>
         <value xml:lang="zh-TW">微軟Word</value>
     </property>

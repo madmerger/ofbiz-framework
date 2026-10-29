@@ -55,124 +55,124 @@
     </property>
     <property key="facility.assocProducts">
         <value xml:lang="en">Required Field Missing : Assoc Products</value>
-        <value xml:lang="ja">必須項目が不足しています: 関連製品。</value>
+        <value xml:lang="ja">必須項目が未入力です: 関連製品</value>
     </property>
     <property key="facility.contactMechId">
         <value xml:lang="en">Required Field Missing : Contact Mech Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : Mech Id までお問い合わせください。</value>
+        <value xml:lang="ja">必須項目が未入力です: 連絡先ID</value>
     </property>
     <property key="facility.contactMechTypeId">
         <value xml:lang="en">Required Field Missing : Contact Mech Type Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : Mech Type Id までお問い合わせください。</value>
+        <value xml:lang="ja">必須項目が未入力です: 連絡先種別ID</value>
     </property>
     <property key="facility.containerId">
         <value xml:lang="en">Required Field Missing : Container ID</value>
-        <value xml:lang="ja">必須項目:コンテナID</value>
+        <value xml:lang="ja">必須項目が未入力です: コンテナID</value>
     </property>
     <property key="facility.emailAddress">
         <value xml:lang="en">Required Field Missing : Email Address.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : メールアドレス</value>
+        <value xml:lang="ja">必須項目が未入力です: メールアドレス</value>
     </property>
     <property key="facility.fromDate">
         <value xml:lang="en">Required Field Missing : From Date.</value>
-        <value xml:lang="ja">必須フィールドの欠損:日付から。</value>
+        <value xml:lang="ja">必須項目が未入力です: 開始日</value>
     </property>
     <property key="facility.facilityId">
         <value xml:lang="en">Required Field Missing : Facility Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 施設ID</value>
+        <value xml:lang="ja">必須項目が未入力です: 拠点ID</value>
     </property>
     <property key="facility.facilityIdTo">
         <value xml:lang="en">Required Field Missing : Facility Id To.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 施設Id to.</value>
+        <value xml:lang="ja">必須項目が未入力です: 終了拠点ID</value>
     </property>
     <property key="facility.inventoryCountDate">
         <value xml:lang="en">Required Fied Missing : Inventory Count Date.</value>
-        <value xml:lang="ja">必須 Fied Missing : 在庫カウント日.</value>
+        <value xml:lang="ja">必須項目が未入力です: 在庫棚卸日</value>
     </property>
     <property key="facility.inventoryItemId">
         <value xml:lang="en">Required Field Missing : Inventory Item Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 在庫項目 Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 在庫品目ID</value>
     </property>
     <property key="facility.inventoryItemVariance">
         <value xml:lang="en">Required Field Missing : Inventory Item Variance.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 在庫アイテムのバリエーション.</value>
+        <value xml:lang="ja">必須項目が未入力です: 在庫品目差異</value>
     </property>
     <property key="facility.itemIssuanceId">
         <value xml:lang="en">Required Field Missing : Item Issuance Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 項目 発行 Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 品目払出ID</value>
     </property>
     <property key="facility.inventoryTransferId">
         <value xml:lang="en">Required Field Missing : Inventory Transfer Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 在庫転送ID.</value>
+        <value xml:lang="ja">必須項目が未入力です: 在庫移動ID</value>
     </property>
     <property key="facility.locationSeqId">
         <value xml:lang="en">Required Field Missing : Location Sequence Id.</value>
-        <value xml:lang="ja">必須フィールドミス : 位置シーケンスId.</value>
+        <value xml:lang="ja">必須項目が未入力です: ロケーション連番ID</value>
     </property>
     <property key="facility.orderId">
         <value xml:lang="en">Required Field Missing : Order Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 注文ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文ID</value>
     </property>
     <property key="facility.orderItems">
         <value xml:lang="en">Required Field Missing: Order Items.</value>
-        <value xml:lang="ja">必須項目が不足しています: 注文明細。</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文明細</value>
     </property>
     <property key="facility.orderItemSeqId">
         <value xml:lang="en">Required Field Missing : Order Item Sequence Id.</value>
-        <value xml:lang="ja">必須フィールドミス : 注文項目シーケンスID.</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文明細連番ID</value>
     </property>
     <property key="facility.OrderItemShipGrpInvRes">
         <value xml:lang="en">Required Field Missing : Order Item Ship Grp Inv Res.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 注文項目の発送 Grp Inv Res.</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文明細配送グループ在庫引当</value>
     </property>
     <property key="facility.partyId">
         <value xml:lang="en">Requied Field Missing : Party Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 取引先ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 取引先ID</value>
     </property>
     <property key="facility.productId">
         <value xml:lang="en">Required Field Missing : Product Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 製品ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 製品ID</value>
     </property>
     <property key="facility.promisedDatetime">
         <value xml:lang="en">Required Field Missing : Promised Date Time.</value>
-        <value xml:lang="ja">必須フィールドの欠損:約束された日付時刻。</value>
+        <value xml:lang="ja">必須項目が未入力です: 約束日時</value>
     </property>
     <property key="facility.quantity">
         <value xml:lang="en">Required Field Missing : Quantity.</value>
-        <value xml:lang="ja">必須フィールド 欠損 : 数量.</value>
+        <value xml:lang="ja">必須項目が未入力です: 数量</value>
     </property>
     <property key="facility.quantityMoved">
         <value xml:lang="en">Required Field Missing : Quantity Moved.</value>
-        <value xml:lang="ja">必須 フィールド ミス : 数量 移動.</value>
+        <value xml:lang="ja">必須項目が未入力です: 移動数量</value>
     </property>
     <property key="facility.requireInventory">
         <value xml:lang="en">Required Field Missing : Require Inventory.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 在庫が必要です。</value>
+        <value xml:lang="ja">必須項目が未入力です: 在庫要否</value>
     </property>
     <property key="facility.reservedDatetime">
         <value xml:lang="en">Required Field Missing : Reserved Date Time</value>
-        <value xml:lang="ja">必須 フィールド ミス : 指定された日付時刻</value>
+        <value xml:lang="ja">必須項目が未入力です: 予約日時</value>
     </property>
     <property key="facility.reserveOrderEnumId">
         <value xml:lang="en">Required Field Missing : Reserve Order Enum Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 注文書の列Idを予約します。</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文予約区分ID</value>
     </property>
 
     <property key="facility.shipGroupSeqId">
         <value xml:lang="en">Required Field Missing : Ship Group Sequence Id.</value>
-        <value xml:lang="ja">必須フィールドミス : 船舶グループシーケンスId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 配送グループ連番ID</value>
     </property>
     <property key="facility.statusId">
         <value xml:lang="en">Required Field Missing : Status Id.</value>
-        <value xml:lang="ja">必須フィールド欠損:ステータスID</value>
+        <value xml:lang="ja">必須項目が未入力です: ステータスID</value>
     </property>
     <property key="facility.targetLocationSeqId">
         <value xml:lang="en">Required Field Missing : Target Location Sequence Id.</value>
-        <value xml:lang="ja">必須フィールドミス : ターゲット位置シーケンスId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 移動先ロケーション連番ID</value>
     </property>
     <property key="facility.xferQty">
         <value xml:lang="en">Required Field Missing : xferQty</value>
-        <value xml:lang="ja">必須フィールド ミス : xferQty</value>
+        <value xml:lang="ja">必須項目が未入力です: xferQty</value>
     </property>
     <property key="ImageManagementErrorRmoveDefaultImage">
         <value xml:lang="de">Kann Bild nicht entfernen, es ist das Standardbild.</value>
@@ -206,7 +206,7 @@
     </property>
     <property key="ProductCannotCreateTheTargetDirectory">
         <value xml:lang="en">Cannot create the target directory.</value>
-        <value xml:lang="ja">対象ディレクトリは作成できません。</value>
+        <value xml:lang="ja">対象ディレクトリを作成できません。</value>
     </property>
      <property key="ProductCannotReplaceBecauseBothImagesAreTheSameImage">
        <value xml:lang="en">Cannot replace because both images are the same image.</value>
@@ -214,7 +214,7 @@
     </property>
     <property key="ProductCannotReplaceImage">
         <value xml:lang="en">Cannot replace image.</value>
-        <value xml:lang="ja">画像を交換できません。</value>
+        <value xml:lang="ja">画像を置き換えられません。</value>
     </property>
     <property key="ProductImageManagementUploadPermissionError">
         <value xml:lang="en">You do not have permission to upload images.</value>
@@ -222,7 +222,7 @@
     </property>
     <property key="ProductImageManagementPermissionError">
         <value xml:lang="en">You do not have permission to manage images ("IMAGE_MANAGEMENT_ADMIN" needed).</value>
-        <value xml:lang="ja">必要な画像(「IMAGE MANAGEMENT ADMIN」)を管理することはできません。</value>
+        <value xml:lang="ja">画像を管理する権限がありません（"IMAGE_MANAGEMENT_ADMIN"が必要です）。</value>
     </property>
     <property key="ProductCreateCommunicationEventProductPermissionError">
         <value xml:lang="de">Berechtigungsfehler beim Erstellen des Produkt Communication Events</value>
@@ -250,7 +250,7 @@
     </property>
     <property key="ProductErrorCreatingNewVirtualProductFromVariantProducts">
         <value xml:lang="en">Error creating new virtual product from variant products: ${errorString}</value>
-        <value xml:lang="ja">バリエーション製品から新しい仮想製品を作成できませんでした: ${errorString}</value>
+        <value xml:lang="ja">バリエーション製品から仮想製品を作成中にエラーが発生しました: ${errorString}</value>
     </property>
     <property key="ProductErrorsOccurInParsingImageProperties.xml">
         <value xml:lang="en">Errors occur in parsing ImageProperties.xml: ${errorString}</value>
@@ -855,15 +855,15 @@
     </property>
     <property key="ProductPleaseChooseImageToReplace">
         <value xml:lang="en">Please choose image to replace.</value>
-        <value xml:lang="ja">交換する画像を選択してください。</value>
+        <value xml:lang="ja">置き換える画像を選択してください。</value>
     </property>
     <property key="ProductPleaseChooseReplacementImage">
         <value xml:lang="en">Please choose replacement image.</value>
-        <value xml:lang="ja">交換イメージを選択してください。</value>
+        <value xml:lang="ja">差し替え画像を選択してください。</value>
     </property>
     <property key="ProductPleaseSelectImage">
         <value xml:lang="en">Please select Image.</value>
-        <value xml:lang="ja">「イメージ」を選択してください。</value>
+        <value xml:lang="ja">画像を選択してください。</value>
     </property>
     <property key="ProductRemoveCommunicationEventProductPermissionError">
         <value xml:lang="de">Produkt Berechtigungsfehler beim Löschen des Kommunikationsevents</value>
@@ -906,7 +906,7 @@
     </property>
     <property key="ProductScaleAdditionalImageInAllDifferentSizesIsImpossible">
         <value xml:lang="en">Scale additional image in all different sizes is impossible: ${errorString}</value>
-        <value xml:lang="ja">異なるサイズの追加画像を一括で拡大縮小できません: ${errorString}</value>
+        <value xml:lang="ja">追加画像を異なるサイズで個別に拡大縮小できません: ${errorString}</value>
     </property>
     <property key="productSearchEvents.added_param_features">
         <value xml:lang="de">${numAdded} Merkmale hinzugefügt mit ID ${productFeatureId}</value>
@@ -1263,7 +1263,7 @@
     </property>
     <property key="ProductSubscriptionCouldntBeExpired">
         <value xml:lang="en">Subscription couldn't be expired for subscriptionId: ${subscriptionId}</value>
-        <value xml:lang="ja">サブスクリプションはサブスクリプションの有効期限が切れません。 ${subscriptionId}</value>
+        <value xml:lang="ja">サブスクリプションID ${subscriptionId} を期限切れにできませんでした。</value>
     </property>
     <property key="productutilservices.did_not_find_any_valid_variants_for_virtual_ID">
         <value xml:lang="de">Keine gültigen Varianten gefunden für virtuelles Produkt mit der ID [${productId}], kein Merge durchgeführt...</value>
@@ -1540,7 +1540,7 @@
     <property key="ShipmentCanChangeStatusPermissionError">
         <value xml:lang="en">Cannot perform this operation when the shipment [${testShipment.shipmentId}] is in the ${testShipmentStatus.description} [${testShipment.statusId}] status."</value>
         <value xml:lang="fr">Impossible de réaliser l'opération demandée quand l'expédition [${testShipment.shipmentId}] est dans le statut ${testShipmentStatus.description} [${testShipment.statusId}]</value>
-        <value xml:lang="ja">出荷時にこの操作を実行できません [${testShipment.shipmentId}] お問い合わせ ${testShipmentStatus.description} [${testShipment.statusId}] ステータス</value>
+        <value xml:lang="ja">出荷 [${testShipment.shipmentId}] のステータスが${testShipmentStatus.description} [${testShipment.statusId}]の場合、この操作は実行できません。"</value>
     </property>
     <property key="variantevents.variantProductId_required_but_missing_enter_an_id">
         <value xml:lang="de">variantProductId wir benötigt, fehlt aber, bitte geben Sie eine ID für die neue Produktvariante an.</value>
@@ -1557,146 +1557,146 @@
     </property>
     <property key="ProductRequiredFieldMissingAttrName">
         <value xml:lang="en">Required Field Missing : Attr Name.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : Attr 名.</value>
+        <value xml:lang="ja">必須項目が未入力です: 属性名</value>
     </property>
     <property key="ProductRequiredFieldMissingAvailable">
         <value xml:lang="en">Required Field Missing :Available.</value>
-        <value xml:lang="ja">必須分野 欠損 :可</value>
+        <value xml:lang="ja">必須項目が未入力です: 利用可能</value>
     </property>
     <property key="ProductRequiredFieldMissingAvailableOrNotRequired">
         <value xml:lang="en">Required Field Missing :Available Or Not Required.</value>
-        <value xml:lang="ja">必須分野 欠損:可燃性または必須ではありません。</value>
+        <value xml:lang="ja">必須項目が未入力です: 利用可能または必須ではない</value>
     </property>
     <property key="ProductRequiredFieldMissingCanceledQuantity">
         <value xml:lang="en">Required Field Missing :Canceled Quantity. </value>
-        <value xml:lang="ja">必須分野 見逃すこと:整理された量。 </value>
+        <value xml:lang="ja">必須項目が未入力です: キャンセル数量 </value>
     </property>
     <property key="ProductRequiredFieldMissingCategoryId">
         <value xml:lang="en">Required Field Missing : Category Id. </value>
-        <value xml:lang="ja">必須フィールドの欠損:カテゴリID。 </value>
+        <value xml:lang="ja">必須項目が未入力です: カテゴリID </value>
     </property>
     <property key="ProductRequiredFieldMissingFacilityId">
         <value xml:lang="en">Required Field Missing :Facility Id.  </value>
-        <value xml:lang="ja">必須フィールドの欠損 :施設ID.  </value>
+        <value xml:lang="ja">必須項目が未入力です: 拠点ID  </value>
     </property>
     <property key="ProductRequiredFieldMissingIdCode">
         <value xml:lang="en">Required Field Missing : Id Code. </value>
-        <value xml:lang="ja">必須フィールドの欠損:IDコード。 </value>
+        <value xml:lang="ja">必須項目が未入力です: IDコード </value>
     </property>
     <property key="ProductRequiredFieldMissingImageUrl">
         <value xml:lang="en">Required Field Missing : Image Url. </value>
-        <value xml:lang="ja">必須フィールド欠損:イメージウルル。 </value>
+        <value xml:lang="ja">必須項目が未入力です: 画像URL </value>
     </property>
     <property key="ProductRequiredFieldMissingInventoryItem">
         <value xml:lang="en">Required Field Missing : Inventory Item. </value>
-        <value xml:lang="ja">必須フィールド欠損 : 在庫アイテム. </value>
+        <value xml:lang="ja">必須項目が未入力です: 在庫品目 </value>
     </property>
     <property key="ProductRequiredFieldMissingInventoryItemId">
         <value xml:lang="en">Required Field Missing :Inventory Item Id. </value>
-        <value xml:lang="ja">必須フィールド欠損:在庫項目Id. </value>
+        <value xml:lang="ja">必須項目が未入力です: 在庫品目ID </value>
     </property>
     <property key="ProductRequiredFieldMissingItemShipList">
         <value xml:lang="en">Required Field Missing :Item Ship List. </value>
-        <value xml:lang="ja">必須フィールドの欠損 :アイテムの発送リスト。 </value>
+        <value xml:lang="ja">必須項目が未入力です: 品目配送一覧 </value>
     </property>
     <property key="ProductRequiredFieldMissingItemIssuanceId">
         <value xml:lang="en">Required Field Missing :Item Issuance Id. </value>
-        <value xml:lang="ja">必須フィールドの欠損:項目の発行 Id. </value>
+        <value xml:lang="ja">必須項目が未入力です: 品目払出ID </value>
     </property>
     <property key="ProductRequiredFieldMissingNewItemQuantity">
         <value xml:lang="en">Required Field Missing :New Item Quantity. </value>
-        <value xml:lang="ja">必須分野:新しい項目の量。 </value>
+        <value xml:lang="ja">必須項目が未入力です: 新規品目数量 </value>
     </property>
     <property key="ProductRequiredFieldMissingOrderId">
         <value xml:lang="en">Required Field Missing : Order Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 注文ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文ID</value>
     </property>
     <property key="ProductRequiredFieldMissingOrderItemSeqId">
         <value xml:lang="en">Required Field Missing :Order Item Seq Id. </value>
-        <value xml:lang="ja">必須項目が不足しています: 注文明細連番ID。 </value>
+        <value xml:lang="ja">必須項目が未入力です: 注文明細連番ID </value>
     </property>
     <property key="ProductRequiredFieldMissingProductCategoryId">
         <value xml:lang="en">Required Field Missing : Product Category Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 製品カテゴリID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 製品カテゴリID</value>
     </property>
     <property key="ProductRequiredFieldMissingProductCategoryIdTo">
         <value xml:lang="en">Required Field Missing :Product Category Id To. </value>
-        <value xml:lang="ja">必須項目が不足しています: 製品カテゴリID（終了）。 </value>
+        <value xml:lang="ja">必須項目が未入力です: 終了製品カテゴリID </value>
     </property>
     <property key="ProductRequiredFieldMissingProductCost">
         <value xml:lang="en">Required Field Missing : Product Cost. </value>
-        <value xml:lang="ja">必須項目が不足しています: 製品原価。 </value>
+        <value xml:lang="ja">必須項目が未入力です: 製品原価 </value>
     </property>
     <property key="ProductRequiredFieldMissingProductFeatureApplTypeId">
         <value xml:lang="en">Required Field Missing : Product Feature Appl TypeId. </value>
-        <value xml:lang="ja">必須項目が不足しています: 製品特徴適用タイプID。 </value>
+        <value xml:lang="ja">必須項目が未入力です: 製品特徴適用種別ID </value>
     </property>
     <property key="ProductRequiredFieldMissingProductFeatureTypeId">
         <value xml:lang="en">Required Field Missing : Product Feature TypeId. </value>
-        <value xml:lang="ja">必須項目が不足しています: 製品特徴タイプID。 </value>
+        <value xml:lang="ja">必須項目が未入力です: 製品特徴種別ID </value>
     </property>
     <property key="ProductRequiredFieldMissingProductId">
         <value xml:lang="en">Required Field Missing : Product Id. </value>
-        <value xml:lang="ja">必須項目が不足しています: 製品ID。 </value>
+        <value xml:lang="ja">必須項目が未入力です: 製品ID </value>
     </property>
     <property key="ProductRequiredFieldMissingProductStoreId">
         <value xml:lang="en">Required Field Missing : Product Store Id. </value>
-        <value xml:lang="ja">必須項目が不足しています: 店舗ID。 </value>
+        <value xml:lang="ja">必須項目が未入力です: 製品店舗ID </value>
     </property>
     <property key="ProductRequiredFieldMissingPromisedDatetime">
         <value xml:lang="en">Required Field Missing :Promised Date time. </value>
-        <value xml:lang="ja">必須フィールドの欠損 :期限の特定 </value>
+        <value xml:lang="ja">必須項目が未入力です: 約束日時 </value>
     </property>
     <property key="ProductRequiredFieldMissingQuantity">
         <value xml:lang="en">Required Field Missing : Quantity.</value>
-        <value xml:lang="ja">必須フィールド 欠損 : 数量.</value>
+        <value xml:lang="ja">必須項目が未入力です: 数量</value>
     </property>
     <property key="ProductRequiredFieldMissingQuantityAccepted">
         <value xml:lang="en">Required Field Missing :Quantity Accepted. </value>
-        <value xml:lang="ja">必須分野 欠損:受容量。 </value>
+        <value xml:lang="ja">必須項目が未入力です: 受入数量 </value>
     </property>
     <property key="ProductRequiredFieldMissingQuantityNotReserved">
         <value xml:lang="en">Required Field Missing : Quantity Not Reserved.</value>
-        <value xml:lang="ja">必須分野 欠損 : 数量 未定</value>
+        <value xml:lang="ja">必須項目が未入力です: 未引当数量</value>
     </property>
     <property key="ProductRequiredFieldMissingReceiptId">
         <value xml:lang="en">Required Field Missing :Receipt Id. </value>
-        <value xml:lang="ja">必須 フィールド ミス :Id を受け取ります。 </value>
+        <value xml:lang="ja">必須項目が未入力です: 受領ID </value>
     </property>
     <property key="ProductRequiredFieldMissingRequireInventory">
         <value xml:lang="en">Required Field Missing :Require Inventory.</value>
-        <value xml:lang="ja">必須分野 欠損:在庫の回復</value>
+        <value xml:lang="ja">必須項目が未入力です: 在庫要否</value>
     </property>
     <property key="ProductRequiredFieldMissingShipGroupSeqId">
         <value xml:lang="en">Required Field Missing :Ship Group Seq Id. </value>
-        <value xml:lang="ja">必須フィールド欠損 :ShipグループSeq Id. </value>
+        <value xml:lang="ja">必須項目が未入力です: 配送グループ連番ID </value>
     </property>
     <property key="ProductRequiredFieldMissingShipmentId">
         <value xml:lang="en">Required Field Missing :Shipment Id. </value>
-        <value xml:lang="ja">必須フィールド 欠損 :出入国 </value>
+        <value xml:lang="ja">必須項目が未入力です: 出荷ID </value>
     </property>
     <property key="ProductRequiredFieldMissingShipmentItemSeqId">
         <value xml:lang="en">Required Field Missing :Shipment Item SeqId. </value>
-        <value xml:lang="ja">必須 フィールド欠損 :Shipment 項目 SeqId. </value>
+        <value xml:lang="ja">必須項目が未入力です: 出荷明細連番ID </value>
     </property>
     <property key="ProductRequiredFieldMissingShipmentShipGroupFacilityList">
         <value xml:lang="en">Required Field Missing : Shipment Ship Group Facility List.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 船舶グループ施設一覧</value>
+        <value xml:lang="ja">必須項目が未入力です: 出荷配送グループ拠点一覧</value>
     </property>
     <property key="ProductRequiredFieldMissingSubscriptionId">
         <value xml:lang="en">Required Field Missing : Subscription Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : サブスクリプションID.</value>
+        <value xml:lang="ja">必須項目が未入力です: サブスクリプションID</value>
     </property>
     <property key="ProductRequiredFieldMissingTaskCost">
         <value xml:lang="en">Required Field Missing : Task Cost. </value>
-        <value xml:lang="ja">必須フィールドミス : タスクコスト。 </value>
+        <value xml:lang="ja">必須項目が未入力です: タスク原価 </value>
     </property>
     <property key="ProductRequiredFieldMissingTotalIssuedQty">
         <value xml:lang="en">Required Field Missing :Total Issued Qty. </value>
-        <value xml:lang="ja">必須フィールドの欠損:Qty全般の問題 </value>
+        <value xml:lang="ja">必須項目が未入力です: 払出総数量 </value>
     </property>
     <property key="CatalogViewPermissionError">
         <value xml:lang="en">You do not have permission to view Catalog Manager category data.</value>
-        <value xml:lang="ja">カタログマネージャのカテゴリデータを表示することはできません。</value>
+        <value xml:lang="ja">カタログマネージャーのカテゴリデータを表示する権限がありません。</value>
     </property>
 </resource>

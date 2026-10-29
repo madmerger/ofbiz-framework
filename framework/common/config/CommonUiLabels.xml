@@ -1090,7 +1090,7 @@
         <value xml:lang="en">As</value>
         <value xml:lang="es">Como</value>
         <value xml:lang="es-MX">Como</value>
-        <value xml:lang="ja">お問い合わせ</value>
+        <value xml:lang="ja">として</value>
         <value xml:lang="nl">Als</value>
     </property>
     <property key="CommonAsk">
@@ -1098,7 +1098,7 @@
         <value xml:lang="es">Pregunta si no entiendes este mensaje.</value>
         <value xml:lang="es-MX">Pregunta si no entiendes este mensaje.</value>
         <value xml:lang="fr">Demandez si vous ne comprenez pas ce message</value>
-        <value xml:lang="ja">このメッセージを理解していないかどうかを尋ねる</value>
+        <value xml:lang="ja">このメッセージの意味がわからない場合は、お問い合わせください。</value>
     </property>
     <property key="CommonAssociate">
         <value xml:lang="ar">شريك</value>
@@ -1509,7 +1509,7 @@
         <value xml:lang="en">branch</value>
         <value xml:lang="es">rama</value>
         <value xml:lang="fr">branche</value>
-        <value xml:lang="ja">ログイン</value>
+        <value xml:lang="ja">ブランチ</value>
         <value xml:lang="nl">Tak</value>
     </property>
     <property key="CommonBuiltOn">
@@ -1518,7 +1518,7 @@
         <value xml:lang="es-CL">construida sobre</value>
         <value xml:lang="es-MX">construida sobre</value>
         <value xml:lang="fr">compilée le</value>
-        <value xml:lang="ja">ビルド</value>
+        <value xml:lang="ja">ビルド日時</value>
         <value xml:lang="nl">Gebaseerd op</value>
         <value xml:lang="zh">编译日期为</value>
     </property>
@@ -1551,7 +1551,7 @@
         <value xml:lang="fr">De</value>
         <value xml:lang="hi-IN">के द्वारा</value>
         <value xml:lang="it">Da</value>
-        <value xml:lang="ja">によって</value>
+        <value xml:lang="ja">作成者</value>
         <value xml:lang="nl">bij/door</value>
         <value xml:lang="pt">Por</value>
         <value xml:lang="ro">De la </value>
@@ -1612,7 +1612,7 @@
         <value xml:lang="es">Error de Seguridad: para ejecutar ${callingMethodName} debes tener permiso de ${permission}.</value>
         <value xml:lang="es-MX">Error de Seguridad: para ejecutar ${callingMethodName} debes tener permiso de ${permission}.</value>
         <value xml:lang="fr">Erreur sécurité : l'appel à ${callingMethodName} ne peut se faire car nous n'avez pas la permission ${permission}.</value>
-        <value xml:lang="ja">セキュリティエラー: 実行するには ${callingMethodName} あなたが持っている必要があります ${permission} アクセス</value>
+        <value xml:lang="ja">セキュリティエラー: ${callingMethodName}を実行するには、${permission}権限が必要です。</value>
     </property>
     <property key="CommonCancel">
         <value xml:lang="ar">إلغاء</value>
@@ -1884,7 +1884,7 @@
     <property key="CommonChild">
         <value xml:lang="en">Child</value>
         <value xml:lang="es">Niño</value>
-        <value xml:lang="ja">下位(子)</value>
+        <value xml:lang="ja">子</value>
         <value xml:lang="nl">Kind</value>
     </property>
     <property key="CommonChooseLanguage">
@@ -2197,12 +2197,12 @@
     <property key="CommonCompanySelected">
         <value xml:lang="en">Selected Company</value>
         <value xml:lang="es">Empresa seleccionada</value>
-        <value xml:lang="ja">会社概要</value>
+        <value xml:lang="ja">選択中の会社</value>
     </property>
     <property key="CommonCompanyUsage">
         <value xml:lang="en">Click on a link to select a company, and then on Done to validate your choice</value>
         <value xml:lang="es">Haga clic en un enlace para seleccionar una empresa y luego en Listo para validar su elección</value>
-        <value xml:lang="ja">リンクをクリックして会社を選択し、Dane で選択を検証します</value>
+        <value xml:lang="ja">リンクをクリックして会社を選択し、[完了] をクリックして選択を確定してください。</value>
     </property>
     <property key="CommonCompleted">
         <value xml:lang="ar">تمت</value>
@@ -2445,7 +2445,7 @@
         <value xml:lang="en">Contributor</value>
         <value xml:lang="es">Contribuyente</value>
         <value xml:lang="es-MX">Contribuyente</value>
-        <value xml:lang="ja">コントリビューター</value>
+        <value xml:lang="ja">貢献者</value>
     </property>
     <property key="CommonCopy">
         <value xml:lang="ar">نسخ</value>
@@ -2477,7 +2477,7 @@
         <value xml:lang="es-MX">Derechos de autor</value>
         <value xml:lang="fr">Droit d'auteur</value>
         <value xml:lang="hi-IN">कॉपीराइट</value>
-        <value xml:lang="ja">プロフィール</value>
+        <value xml:lang="ja">著作権</value>
         <value xml:lang="ru">Авторское право</value>
         <value xml:lang="vi">Bản quyền</value>
         <value xml:lang="zh">版权所有</value>
@@ -2893,7 +2893,7 @@
         <value xml:lang="en">Date - time</value>
         <value xml:lang="es">Fecha - hora</value>
         <value xml:lang="es-MX">Fecha - hora</value>
-        <value xml:lang="ja">日付 - 時間</value>
+        <value xml:lang="ja">日時</value>
         <value xml:lang="nl">Datum - tijd</value>
     </property>
     <property key="CommonDates">
@@ -3028,7 +3028,7 @@
         <value xml:lang="es">Pantalla por defecto</value>
         <value xml:lang="es-MX">Pantalla Predeterminada</value>
         <value xml:lang="fr">Écran par défault</value>
-        <value xml:lang="ja">デフォルト画面</value>
+        <value xml:lang="ja">既定画面</value>
     </property>
     <property key="CommonDeferred">
         <value xml:lang="ar">مؤجل</value>
@@ -3605,7 +3605,7 @@
     </property>
     <property key="CommonEmailSendOAuth2Error">
         <value xml:lang="en">[OAUTH2] Error obtaining SMTP OAuth2 access token for ${sendVia}: ${errorString}</value>
-        <value xml:lang="ja">[OAUTH2] SMTP OAuth2 アクセストークンを取得するエラー ${sendVia}: ${errorString}</value>
+        <value xml:lang="ja">[OAUTH2] ${sendVia} のSMTP OAuth2アクセストークン取得中にエラーが発生しました: ${errorString}</value>
     </property>
     <property key="CommonEmailSendRenderingScreenEmailError">
         <value xml:lang="ar">خطأ في تقديم شاشة البريد الإلكتروني: ${errorString}</value>
@@ -4054,7 +4054,7 @@
     <property key="CommonExceptionThrownWhileDecodingMetric">
         <value xml:lang="en">Exception thrown while decoding metric name ${originalName}</value>
         <value xml:lang="es">Excepción lanzada al decodificar el nombre de la métrica $ {originalName}</value>
-        <value xml:lang="ja">メトリック名を解読しながらスローされた例外 ${originalName}</value>
+        <value xml:lang="ja">メトリック名 ${originalName} のデコード中に例外が発生しました。</value>
     </property>
     <property key="CommonExclude">
         <value xml:lang="ar">إستثناء</value>
@@ -5016,7 +5016,7 @@
         <value xml:lang="en">Through date can't be same or smaller than from date</value>
         <value xml:lang="es">Fecha Hasta no puede ser igual o menor que Fecha Desde</value>
         <value xml:lang="fr">La date de fin ne peut être égale ou plus récente que la date de début</value>
-        <value xml:lang="ja">日付を通すと、日付よりも小さくすることはできません</value>
+        <value xml:lang="ja">終了日は開始日と同じか、それ以前にできません。</value>
         <value xml:lang="zh">截至日期不能小于等于开始日期</value>
     </property>
     <property key="CommonFromDateTime">
@@ -5565,7 +5565,7 @@
         <value xml:lang="es">Ocultar todas las notificaciones</value>
         <value xml:lang="fr">Cacher toutes les notifications</value>
         <value xml:lang="it">Nascondere tutte le notificazioni</value>
-        <value xml:lang="ja">すべての通知を隠す</value>
+        <value xml:lang="ja">すべての通知を非表示</value>
         <value xml:lang="nl">Verbergen alle kennisgevingen</value>
     </property>
     <property key="CommonHideFields">
@@ -5612,7 +5612,7 @@
         <value xml:lang="es">Pausa</value>
         <value xml:lang="es-MX">Pausa</value>
         <value xml:lang="fr">Pause</value>
-        <value xml:lang="ja">ホールド</value>
+        <value xml:lang="ja">保留</value>
         <value xml:lang="nl">In wacht</value>
     </property>
     <property key="CommonHome">
@@ -5746,7 +5746,7 @@
         <value xml:lang="en">ID sequence will be generated if empty</value>
         <value xml:lang="es">Un ID secuencial será generado si se deja vacío</value>
         <value xml:lang="es-MX">Un ID secuencial será generado si se deja vacío</value>
-        <value xml:lang="ja">空の場合にはIDシーケンスが生成されます</value>
+        <value xml:lang="ja">空欄の場合はID連番を自動生成します。</value>
         <value xml:lang="zh">如果空着，会自动生成序号</value>
     </property>
     <property key="CommonIdentifier">
@@ -5778,7 +5778,7 @@
         <value xml:lang="fr">Références</value>
         <value xml:lang="hi-IN">क्रमांक</value>
         <value xml:lang="it">Codici</value>
-        <value xml:lang="ja">パスワード</value>
+        <value xml:lang="ja">ID</value>
         <value xml:lang="pt-BR">Identificações(IDs)</value>
         <value xml:lang="ro">Id Coduri</value>
         <value xml:lang="th">รหัส</value>
@@ -5805,28 +5805,28 @@
         <value xml:lang="es">Personificar</value>
         <value xml:lang="es-MX">Apersonar</value>
         <value xml:lang="fr">Incarner</value>
-        <value xml:lang="ja">インフォメーション</value>
+        <value xml:lang="ja">なりすまし（代理ログイン）</value>
     </property>
     <property key="CommonImpersonateUserLogin">
         <value xml:lang="en">User impersonated</value>
         <value xml:lang="es">Usuario personificado</value>
         <value xml:lang="es-MX">Usuario apersonado</value>
         <value xml:lang="fr">Utilisateur incarné</value>
-        <value xml:lang="ja">ユーザーの偽装</value>
+        <value xml:lang="ja">代理ログイン中のユーザー</value>
     </property>
     <property key="CommonImpersonateTitle">
         <value xml:lang="en">Impersonation in process</value>
         <value xml:lang="es">Personificación en proceso</value>
         <value xml:lang="es-MX">Apersonamiento en proceso</value>
         <value xml:lang="fr">Incarnation en cours</value>
-        <value xml:lang="ja">工程における改善</value>
+        <value xml:lang="ja">なりすまし（代理ログイン）中</value>
     </property>
     <property key="CommonImpersonateStop">
         <value xml:lang="en">Stop impersonation</value>
         <value xml:lang="es">Detener personificación</value>
         <value xml:lang="es-MX">Detener apersonamiento</value>
         <value xml:lang="fr">Arrêter l'incarnation</value>
-        <value xml:lang="ja">偽装の停止</value>
+        <value xml:lang="ja">代理ログインを終了</value>
     </property>
     <property key="CommonImport">
         <value xml:lang="en">Import</value>
@@ -5857,7 +5857,7 @@
         <value xml:lang="fr">En</value>
         <value xml:lang="hi-IN">अंदर</value>
         <value xml:lang="it">In</value>
-        <value xml:lang="ja">インスタグラム</value>
+        <value xml:lang="ja">内</value>
         <value xml:lang="nl">In</value>
         <value xml:lang="pt">Em</value>
         <value xml:lang="ro">In</value>
@@ -5877,7 +5877,7 @@
         <value xml:lang="fr">Dans le</value>
         <value xml:lang="hi-IN">इस में</value>
         <value xml:lang="it">Nel</value>
-        <value xml:lang="ja">お問い合わせ</value>
+        <value xml:lang="ja">内</value>
         <value xml:lang="nl">In De</value>
         <value xml:lang="pt">Em</value>
         <value xml:lang="pt-BR">No</value>
@@ -6169,7 +6169,7 @@
         <value xml:lang="es">con la versión de java:</value>
         <value xml:lang="es-MX">con la versión de java:</value>
         <value xml:lang="fr">avec la version de Java : </value>
-        <value xml:lang="ja">java 版を使って:</value>
+        <value xml:lang="ja">Javaバージョン:</value>
     </property>
     <property key="CommonJuly">
         <value xml:lang="ar">يوليو</value>
@@ -6696,14 +6696,14 @@
         <value xml:lang="es">Mail Para</value>
         <value xml:lang="es-MX">Correo Para</value>
         <value xml:lang="fr">Courriel pour</value>
-        <value xml:lang="ja">メールでのお問い合わせ</value>
+        <value xml:lang="ja">宛先</value>
     </property>
     <property key="CommonMailFrom">
         <value xml:lang="en">Mail From</value>
         <value xml:lang="es">Mail De</value>
         <value xml:lang="es-MX">Correo de</value>
         <value xml:lang="fr">Courriel venant de</value>
-        <value xml:lang="ja">メールから</value>
+        <value xml:lang="ja">差出人</value>
     </property>
     <property key="CommonMain">
         <value xml:lang="ar">الرئيسية</value>
@@ -6817,7 +6817,7 @@
         <value xml:lang="en">Map</value>
         <value xml:lang="es">Mapa</value>
         <value xml:lang="fr">Carte</value>
-        <value xml:lang="ja">サイトマップ</value>
+        <value xml:lang="ja">地図</value>
         <value xml:lang="nl">Kaart</value>
     </property>
     <property key="CommonMarch">
@@ -7050,7 +7050,7 @@
     <property key="CommonMetricNotFound">
         <value xml:lang="en">Metric ${name} not found</value>
         <value xml:lang="es">No se encontró la métrica ${name}</value>
-        <value xml:lang="ja">メトリック ${name} 見つかりませんでした</value>
+        <value xml:lang="ja">メトリック ${name} が見つかりません。</value>
     </property>
     <property key="CommonMilliSecond">
         <value xml:lang="ar">واحد بالألف من الثانية</value>
@@ -7794,7 +7794,7 @@
     <property key="CommonNoGoogleAPIkeyAvailable">
         <value xml:lang="en">No Google API key Available</value>
         <value xml:lang="fr">Aucune clef d'API Google disponible</value>
-        <value xml:lang="ja">Google API のキーは利用できません。</value>
+        <value xml:lang="ja">Google APIキーを利用できません。</value>
     </property>
     <property key="CommonNoOptions">
         <value xml:lang="ar">لا يوجد خيار: _NA_</value>
@@ -7961,7 +7961,7 @@
         <value xml:lang="fr">La relation de conversion des unités de mesure n'a pas été trouvée</value>
         <value xml:lang="hi-IN">माप की इकाई का रूपांतरण रिश्ता नहीं मिला</value>
         <value xml:lang="it">Relazione conversione UdM non trovate</value>
-        <value xml:lang="ja">単位変換が見つかりません: ${parameters.uomId} から ${parameters.uomIdTo} への変換</value>
+        <value xml:lang="ja">単位換算関係が見つかりません: ${parameters.uomId} から ${parameters.uomIdTo} への変換</value>
         <value xml:lang="nl">UOM Conversie raltie niet gevonden</value>
         <value xml:lang="pt">Relação de Conversão UOM Não Encontrada</value>
         <value xml:lang="pt-BR">Relações para a conversão de unidades de medidas não encontradas</value>
@@ -8631,7 +8631,7 @@
         <value xml:lang="es">Código de usuario de origen</value>
         <value xml:lang="fr">Identifiant de connexion d'origine</value>
         <value xml:lang="it">Codice utente di origine</value>
-        <value xml:lang="ja">原産地 ユーザログインID</value>
+        <value xml:lang="ja">元ユーザーログインID</value>
     </property>
     <property key="CommonOther">
         <value xml:lang="ar">أخرى</value>
@@ -8654,7 +8654,7 @@
     <property key="CommonOutputFileCouldNotBeCreated">
         <value xml:lang="en">The Outputfile could not be created: ${errorString}</value>
         <value xml:lang="es">No se pudo crear el archivo de salida: ${errorString}</value>
-        <value xml:lang="ja">出力ファイルは作成できません: ${errorString}</value>
+        <value xml:lang="ja">出力ファイルを作成できませんでした: ${errorString}</value>
     </property>
     <property key="CommonOverridesSelection">
         <value xml:lang="ar">تفنيد  أحد الإختيارين في الأعلى</value>
@@ -8967,7 +8967,7 @@
     <property key="CommonPer">
         <value xml:lang="en">Per</value>
         <value xml:lang="es">Por</value>
-        <value xml:lang="ja">パープル</value>
+        <value xml:lang="ja">あたり</value>
         <value xml:lang="nl">Per</value>
     </property>
     <property key="CommonPercentage">
@@ -9205,7 +9205,7 @@
         <value xml:lang="es">Por favor, seleccione una impresora</value>
         <value xml:lang="es-MX">Favor de seleccionar impresora</value>
         <value xml:lang="fr">Sélectionnez une imprimante</value>
-        <value xml:lang="ja">プリンターを選択して下さい</value>
+        <value xml:lang="ja">プリンターを選択してください。</value>
     </property>
     <property key="CommonPleaseWait">
         <value xml:lang="ar">الرجاء الإنتظار ...</value>
@@ -9332,7 +9332,7 @@
         <value xml:lang="fr">Motorisé par</value>
         <value xml:lang="hi-IN">द्वारा संचालित</value>
         <value xml:lang="it">Realizzato con</value>
-        <value xml:lang="ja">スタッフ</value>
+        <value xml:lang="ja">提供:</value>
         <value xml:lang="ru">Сделанно</value>
         <value xml:lang="vi">Tài trợ bởi</value>
         <value xml:lang="zh">运行平台</value>
@@ -9862,7 +9862,7 @@
     <property key="CommonQuoteTerms">
         <value xml:lang="en">Quote Terms</value>
         <value xml:lang="es">Términos de cotización</value>
-        <value xml:lang="ja">利用規約</value>
+        <value xml:lang="ja">見積条件</value>
     </property>
     <property key="CommonRate"> <!--  Rate as a tariff or day rate -->
         <value xml:lang="ar">النسبة</value>
@@ -10305,7 +10305,7 @@
         <value xml:lang="es">Solicitud</value>
         <value xml:lang="es-CL">Respuesta</value>
         <value xml:lang="es-MX">Solicitud</value>
-        <value xml:lang="ja">リクエスト</value>
+        <value xml:lang="ja">依頼</value>
         <value xml:lang="nl">Verzoek</value>
         <value xml:lang="zh">请求</value>
     </property>
@@ -10374,7 +10374,7 @@
     <property key="CommonRestart">
         <value xml:lang="en">Restart</value>
         <value xml:lang="fr">Redémarrer</value>
-        <value xml:lang="ja">リスタート</value>
+        <value xml:lang="ja">再起動</value>
     </property>
     <property key="CommonResultLookup">
         <value xml:lang="ar">نتيجة البحث</value>
@@ -10402,7 +10402,7 @@
         <value xml:lang="en">Retrieve</value>
         <value xml:lang="es">Cargar</value>
         <value xml:lang="es-MX">Cargar</value>
-        <value xml:lang="ja">リトリーブ</value>
+        <value xml:lang="ja">取得</value>
         <value xml:lang="nl">Ophalen</value>
     </property>
     <property key="CommonReturn">
@@ -11276,7 +11276,7 @@
         <value xml:lang="es">Envío</value>
         <value xml:lang="es-CL">Envío</value>
         <value xml:lang="es-MX">Envío</value>
-        <value xml:lang="ja">配送ステータス</value>
+        <value xml:lang="ja">出荷</value>
         <value xml:lang="nl">Zending</value>
         <value xml:lang="zh">送货</value>
     </property>
@@ -11405,7 +11405,7 @@
         <value xml:lang="fr">Depuis</value>
         <value xml:lang="hi-IN">क्योंकि</value>
         <value xml:lang="it">Fino a</value>
-        <value xml:lang="ja">お問い合わせ</value>
+        <value xml:lang="ja">以降</value>
         <value xml:lang="nl">Sinds</value>
         <value xml:lang="pt">Desde</value>
         <value xml:lang="ro">Pana la A</value>
@@ -11724,7 +11724,7 @@
         <value xml:lang="en">Street</value>
         <value xml:lang="es">Calle</value>
         <value xml:lang="es-MX">Calle</value>
-        <value xml:lang="ja">ストリート</value>
+        <value xml:lang="ja">通り</value>
         <value xml:lang="nl">Straat</value>
     </property>
     <property key="CommonSubTitle">
@@ -11886,7 +11886,7 @@
         <value xml:lang="en">Surface Area</value>
         <value xml:lang="es">Área de Superficie</value>
         <value xml:lang="es-MX">Área de Superficie</value>
-        <value xml:lang="ja">表面区域</value>
+        <value xml:lang="ja">表面積</value>
         <value xml:lang="nl">Oppervlakte</value>
     </property>
     <property key="CommonSurveys">
@@ -11995,7 +11995,7 @@
         <value xml:lang="es">Tel.</value>
         <value xml:lang="fr">Tél.</value>
         <value xml:lang="hi-IN">टेलीफोन</value>
-        <value xml:lang="ja">電話番号</value>
+        <value xml:lang="ja">電話</value>
         <value xml:lang="pt-BR">Tel.</value>
         <value xml:lang="ru">Тел</value>
         <value xml:lang="th">หมายเลขโทรศัพท์</value>
@@ -12103,7 +12103,7 @@
         <value xml:lang="fr">Le</value>
         <value xml:lang="hi-IN">इस</value>
         <value xml:lang="it">Il</value>
-        <value xml:lang="ja">ザ・オブ・ザ・</value>
+        <value xml:lang="ja">その</value>
         <value xml:lang="nl">de</value>
         <value xml:lang="pt-BR">O</value>
         <value xml:lang="ru">Это</value>
@@ -12580,7 +12580,7 @@
     <property key="CommonTotalDone">
         <value xml:lang="en">Total done</value>
         <value xml:lang="fr">Total terminé</value>
-        <value xml:lang="ja">総行</value>
+        <value xml:lang="ja">完了合計</value>
     </property>
     <property key="CommonTotalPercProfit">
         <value xml:lang="ar">إجمالي نسبة الربح</value>
@@ -12965,7 +12965,7 @@
         <value xml:lang="es-CL">Utilice el botón Atrás del navegador para que</value>
         <value xml:lang="es-MX">Utilice el botón Atrás del navegador para que</value>
         <value xml:lang="fr">Utilisez le bouton de retour de votre navigateur pour cela</value>
-        <value xml:lang="ja">そのためにブラウザのバックアップボタンを使用する</value>
+        <value xml:lang="ja">その場合はブラウザーの「戻る」ボタンを使用してください。</value>
         <value xml:lang="zh">使用浏览器的后退按钮</value>
     </property>
     <property key="CommonUsed">
@@ -13236,7 +13236,7 @@
         <value xml:lang="es-CL">Ver como CSV</value>
         <value xml:lang="es-MX">Ver como CSV</value>
         <value xml:lang="fr">Voir en csv</value>
-        <value xml:lang="ja">csv として見る</value>
+        <value xml:lang="ja">CSVで表示</value>
         <value xml:lang="zh">按逗号分隔格式浏览</value>
     </property>
     <property key="CommonViewAsPdf">
@@ -13245,7 +13245,7 @@
         <value xml:lang="es-CL">Ver como PDF</value>
         <value xml:lang="es-MX">Ver como PDF</value>
         <value xml:lang="fr">Voir en Pdf</value>
-        <value xml:lang="ja">Pdf として見る</value>
+        <value xml:lang="ja">PDFで表示</value>
         <value xml:lang="zh">按PDF格式浏览</value>
     </property>
     <property key="CommonViewAsText">
@@ -13254,7 +13254,7 @@
         <value xml:lang="es-CL">Ver como texto</value>
         <value xml:lang="es-MX">Ver como texto</value>
         <value xml:lang="fr">Voir en texte</value>
-        <value xml:lang="ja">テキストとして見る</value>
+        <value xml:lang="ja">テキストで表示</value>
         <value xml:lang="zh">按文本格式浏览</value>
     </property>
     <property key="CommonViewAsXls">
@@ -13262,11 +13262,11 @@
         <value xml:lang="es">Ver como hoja de cálculo</value>
         <value xml:lang="es-MX">Ver como hoja de cálculo</value>
         <value xml:lang="fr">Voir en tableur</value>
-        <value xml:lang="ja">スプレッドシートとして見る</value>
+        <value xml:lang="ja">スプレッドシートで表示</value>
     </property>
     <property key="CommonViewAsXlsx">
         <value xml:lang="en">View as spreadsheet (.xlsx)</value>
-        <value xml:lang="ja">スプレッドシートとして表示 (.xlsx)</value>
+        <value xml:lang="ja">スプレッドシート（.xlsx）で表示</value>
     </property>
     <property key="CommonViewAsXml">
         <value xml:lang="en">View as xml</value>
@@ -13274,7 +13274,7 @@
         <value xml:lang="es-CL">Ver como XML</value>
         <value xml:lang="es-MX">Ver como XML</value>
         <value xml:lang="fr">Voir en xml</value>
-        <value xml:lang="ja">xml として表示</value>
+        <value xml:lang="ja">XMLで表示</value>
         <value xml:lang="zh">按XML格式浏览</value>
     </property>
     <property key="CommonViewBlocked">
@@ -13698,7 +13698,7 @@
         <value xml:lang="en">with</value>
         <value xml:lang="es">con</value>
         <value xml:lang="fr">avec</value>
-        <value xml:lang="ja">お問い合わせ</value>
+        <value xml:lang="ja">とともに</value>
     </property>
     <property key="CommonWorkflowActivityUser">
         <value xml:lang="ar">مهام سيرورة العمل المعينة للمستخدم</value>
@@ -13875,7 +13875,7 @@
         <value xml:lang="es-CL">filtrar</value>
         <value xml:lang="es-MX">filtrar</value>
         <value xml:lang="fr">filtrer</value>
-        <value xml:lang="ja">フィルター</value>
+        <value xml:lang="ja">絞り込み</value>
     </property>
     <property key="Content">
         <value xml:lang="ar">المحتوى</value>
@@ -14090,7 +14090,7 @@
     <property key="ExternalPerson">
         <value xml:lang="en">External Person</value>
         <value xml:lang="es">Persona Externa</value>
-        <value xml:lang="ja">外部人物</value>
+        <value xml:lang="ja">外部個人</value>
         <value xml:lang="nl">Extern persoon</value>
     </property>
     <property key="Facility">
@@ -14497,14 +14497,14 @@
         <value xml:lang="es">Pantalla personalizada</value>
         <value xml:lang="es-MX">ID de Pantalla Personalizada</value>
         <value xml:lang="fr">Écran dédié</value>
-        <value xml:lang="ja">カスタムスクリーン</value>
+        <value xml:lang="ja">カスタム画面</value>
     </property>
     <property key="FormFieldTitle_customScreenTypeId">
         <value xml:lang="en">custom screen type</value>
         <value xml:lang="es">Identificador de tipo de pantalla personalizada</value>
         <value xml:lang="es-MX">ID tipo de pantalla personalizada</value>
         <value xml:lang="fr">Type d'écran dédié</value>
-        <value xml:lang="ja">カスタムスクリーンタイプ</value>
+        <value xml:lang="ja">カスタム画面種別</value>
     </property>
     <property key="FormFieldTitle_deleteButton">
         <value xml:lang="ar">حذف</value>
@@ -15367,7 +15367,7 @@
         <value xml:lang="en">Internal Person</value>
         <value xml:lang="es">Persona Interna</value>
         <value xml:lang="es-MX">Personal Interno</value>
-        <value xml:lang="ja">内部人</value>
+        <value xml:lang="ja">内部個人</value>
         <value xml:lang="nl">Intern persoon</value>
     </property>
     <property key="InternalTeam">
@@ -15462,7 +15462,7 @@
         <value xml:lang="es">Oagis</value>
         <value xml:lang="es-CL">Oagis</value>
         <value xml:lang="es-MX">Oagis</value>
-        <value xml:lang="ja">オアギス</value>
+        <value xml:lang="ja">OAGIS</value>
         <value xml:lang="th">การรวมภาษาทางธุรกิจ</value>
         <value xml:lang="vi">Giao thức XML Oagis</value>
         <value xml:lang="zh">OAGIS</value>
@@ -15656,7 +15656,7 @@
         <value xml:lang="es">Apersonar</value>
         <value xml:lang="es-MX">Apersonar</value>
         <value xml:lang="fr">Substitué</value>
-        <value xml:lang="ja">インフォメーション</value>
+        <value xml:lang="ja">代理ログイン中</value>
     </property>
     <property key="PageTitleListDataSource">
         <value xml:lang="ar">قائمة مصادر المعلومات</value>
@@ -15939,7 +15939,7 @@
         <value xml:lang="fr">POS Web</value>
         <value xml:lang="hi-IN">वेब Pos</value>
         <value xml:lang="it">POS web</value>
-        <value xml:lang="ja">ウェブPOS</value>
+        <value xml:lang="ja">Web POS</value>
         <value xml:lang="pt-BR">Ponto de venda Web</value>
         <value xml:lang="ru">POS web</value>
         <value xml:lang="vi">Điểm bán hàng Web POS</value>
@@ -16159,7 +16159,7 @@
         <value xml:lang="es">Español Mexicano</value>
         <value xml:lang="es-MX">Español Mexicano</value>
         <value xml:lang="fr">Espagnol Mexicain</value>
-        <value xml:lang="ja">メキシコ人 スペイン人</value>
+        <value xml:lang="ja">メキシコのスペイン語</value>
         <value xml:lang="pt">Espanhol Mexicano</value>
         <value xml:lang="pt-BR">Espanhol Mexicano</value>
         <value xml:lang="pt-PT">Espanhol Mexicano</value>

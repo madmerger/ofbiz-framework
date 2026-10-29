@@ -21,208 +21,208 @@
 <resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://ofbiz.apache.org/dtds/ofbiz-properties.xsd">
     <property key="ContentNoOrderHeaderFound">
         <value xml:lang="en">No OrderHeader found for orderId: ${orderId}</value>
-        <value xml:lang="ja">注文ID ${orderId} の注文ヘッダーが見つかりません</value>
+        <value xml:lang="ja">注文ID ${orderId} に対応する注文ヘッダーが見つかりません。</value>
     </property>
     <property key="ContentNoProductContentFound">
         <value xml:lang="en">No ProductContent found for productId: ${productId}</value>
-        <value xml:lang="ja">製品ID ${productId} の製品コンテンツが見つかりません</value>
+        <value xml:lang="ja">製品ID ${productId} に対応する製品コンテンツが見つかりません。</value>
     </property>
     <property key="ContentRequiredFieldMissingAcroFieldMap">
         <value xml:lang="en">Required Field Missing : Acro Field Map.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : アクロフィールドマップ.</value>
+        <value xml:lang="ja">必須項目が未入力です: Acroフィールドマップ</value>
     </property>
     <property key="ContentRequiredFieldMissingAnswers">
         <value xml:lang="en">Required Field Missing : Answers.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 回答.</value>
+        <value xml:lang="ja">必須項目が未入力です: 回答</value>
     </property>
     <property key="ContentRequiredFieldMissingBlogContentId">
         <value xml:lang="en">Required Field Missing : Blog Content Id.</value>
-        <value xml:lang="ja">必須フィールドミス : ブログコンテンツId.</value>
+        <value xml:lang="ja">必須項目が未入力です: ブログコンテンツID</value>
     </property>
     <property key="ContentRequiredFieldMissingCommunicationEventId">
         <value xml:lang="en">Required Field Missing : Communication Event Id.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 通信イベントId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 通信イベントID</value>
     </property>
     <property key="ContentRequiredFieldMissingContent">
         <value xml:lang="en">Required Field Missing : Content.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 内容.</value>
+        <value xml:lang="ja">必須項目が未入力です: コンテンツ</value>
     </property>
     <property key="ContentRequiredFieldMissingContentApprovalId">
         <value xml:lang="en">Required Field Missing : Content Approval Id.</value>
-        <value xml:lang="ja">必須フィールド欠損 : コンテンツ承認 Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: コンテンツ承認ID</value>
     </property>
     <property key="ContentRequiredFieldMissingContentAssocTypeId">
         <value xml:lang="en">Required Field Missing : Content Assoc Type Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : コンテンツのAssocタイプId.</value>
+        <value xml:lang="ja">必須項目が未入力です: コンテンツ関連種別ID</value>
     </property>
     <property key="ContentRequiredFieldMissingContentId">
         <value xml:lang="en">Required Field Missing : Content Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : コンテンツID.</value>
+        <value xml:lang="ja">必須項目が未入力です: コンテンツID</value>
     </property>
     <property key="ContentRequiredFieldMissingContentIdFrom">
         <value xml:lang="en">Required Field Missing : Content Id From.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : コンテンツから出ます。</value>
+        <value xml:lang="ja">必須項目が未入力です: 関連元コンテンツID</value>
     </property>
     <property key="ContentRequiredFieldMissingContentIdTo">
         <value xml:lang="en">Required Field Missing : Content Id To.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : コンテンツへ Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 関連先コンテンツID</value>
     </property>
     <property key="ContentRequiredFieldMissingContentRevisionSeqId">
         <value xml:lang="en">Required Field Missing : Content Revision Seq Id.</value>
-        <value xml:lang="ja">必須フィールドミス : コンテンツリビジョンSeq Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: コンテンツリビジョン連番ID</value>
     </property>
     <property key="ContentRequiredFieldMissingCurrentContent">
         <value xml:lang="en">Required Field Missing : Current Content.</value>
-        <value xml:lang="ja">必須フィールドの欠損:現在のコンテンツ。</value>
+        <value xml:lang="ja">必須項目が未入力です: 現在のコンテンツ</value>
     </property>
     <property key="ContentRequiredFieldMissingDataResourceId">
         <value xml:lang="en">Required Field Missing : Data Resource Id.</value>
-        <value xml:lang="ja">必須フィールド欠損:データリソースID。</value>
+        <value xml:lang="ja">必須項目が未入力です: データリソースID</value>
     </property>
     <property key="ContentRequiredFieldMissingEntityName">
         <value xml:lang="en">Required Field Missing : Entity Name.</value>
-        <value xml:lang="ja">必須フィールドの欠損:エンティティ名。</value>
+        <value xml:lang="ja">必須項目が未入力です: エンティティ名</value>
     </property>
     <property key="ContentRequiredFieldMissingFile">
         <value xml:lang="en">Required Field Missing : File.</value>
-        <value xml:lang="ja">必須フィールド:ファイル。</value>
+        <value xml:lang="ja">必須項目が未入力です: ファイル</value>
     </property>
     <property key="ContentRequiredFieldMissingFileName">
         <value xml:lang="en">Required Field Missing : File Name.</value>
-        <value xml:lang="ja">必須フィールド名 : ファイル名</value>
+        <value xml:lang="ja">必須項目が未入力です: ファイル名</value>
     </property>
     <property key="ContentRequiredFieldMissingFromDate">
         <value xml:lang="en">Required Field Missing : From Date.</value>
-        <value xml:lang="ja">必須フィールドの欠損:日付から。</value>
+        <value xml:lang="ja">必須項目が未入力です: 開始日</value>
     </property>
     <property key="ContentRequiredFieldMissingImageData">
         <value xml:lang="en">Required Field Missing : Image Data.</value>
-        <value xml:lang="ja">必須フィールドの欠損:画像データ。</value>
+        <value xml:lang="ja">必須項目が未入力です: 画像データ</value>
     </property>
     <property key="ContentRequiredFieldMissingInputList">
         <value xml:lang="en">Required Field Missing : Input List.</value>
-        <value xml:lang="ja">必須項目:入力リスト。</value>
+        <value xml:lang="ja">必須項目が未入力です: 入力リスト</value>
     </property>
     <property key="ContentRequiredFieldMissingMapIn">
         <value xml:lang="en">Required Field Missing : Map In.</value>
-        <value xml:lang="ja">必須フィールド ミス : 地図 で.</value>
+        <value xml:lang="ja">必須項目が未入力です: 入力マップ</value>
     </property>
     <property key="ContentRequiredFieldMissingMapKeys">
         <value xml:lang="en">Required Field Missing : Map Keys.</value>
-        <value xml:lang="ja">必須フィールド欠損 : マップキー。</value>
+        <value xml:lang="ja">必須項目が未入力です: マップキー</value>
     </property>
     <property key="ContentRequiredFieldMissingMasterRevisionContentId">
         <value xml:lang="en">Required Field Missing : Master Revision Content Id.</value>
-        <value xml:lang="ja">必須フィールドミス : マスターリビジョンコンテンツID.</value>
+        <value xml:lang="ja">必須項目が未入力です: マスター版コンテンツID</value>
     </property>
     <property key="ContentRequiredFieldMissingNewTopicId">
         <value xml:lang="en">Required Field Missing : New Topic Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損:新しいトピックID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 新規トピックID</value>
     </property>
     <property key="ContentRequiredFieldMissingOrderId">
         <value xml:lang="en">Required Field Missing : Order Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 注文ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文ID</value>
     </property>
     <property key="ContentRequiredFieldMissingOutWriter">
         <value xml:lang="en">Required Field Missing : Out Writer.</value>
-        <value xml:lang="ja">必須 フィールド ミス : アウト 作家.</value>
+        <value xml:lang="ja">必須項目が未入力です: 出力ライター</value>
     </property>
     <property key="ContentRequiredFieldMissingPartyId">
         <value xml:lang="en">Required Field Missing : Party Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 取引先ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 取引先ID</value>
     </property>
     <property key="ContentRequiredFieldMissingPkFieldCount">
         <value xml:lang="en">Required Field Missing : Pk Field Count.</value>
-        <value xml:lang="ja">必須フィールドの欠損:Pkフィールドカウント。</value>
+        <value xml:lang="ja">必須項目が未入力です: 主キー項目数</value>
     </property>
     <property key="ContentRequiredFieldMissingPlainBody">
         <value xml:lang="en">Required Field Missing : Plain Body.</value>
-        <value xml:lang="ja">必須フィールド欠損 : プレーンボディ.</value>
+        <value xml:lang="ja">必須項目が未入力です: 本文</value>
     </property>
     <property key="ContentRequiredFieldMissingPrefix">
         <value xml:lang="en">Required Field Missing : Prefix.</value>
-        <value xml:lang="ja">必須フィールドミス : プレフィックス.</value>
+        <value xml:lang="ja">必須項目が未入力です: 接頭辞</value>
     </property>
     <property key="ContentRequiredFieldMissingProdCatalogId">
         <value xml:lang="en">Required Field Missing : Prod Catalog Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : Prod Catalog Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 製品カタログID</value>
     </property>
     <property key="ContentRequiredFieldMissingProductId">
         <value xml:lang="en">Required Field Missing : Product Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 製品ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 製品ID</value>
     </property>
     <property key="ContentRequiredFieldMissingPubPtContentId">
         <value xml:lang="en">Required Field Missing : Publish Point Content Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 公開ポイントコンテンツID.</value>
+        <value xml:lang="ja">必須項目が未入力です: 公開ポイントコンテンツID</value>
     </property>
     <property key="ContentRequiredFieldMissingQuantity">
         <value xml:lang="en">Required Field Missing : Quantity.</value>
-        <value xml:lang="ja">必須フィールド 欠損 : 数量.</value>
+        <value xml:lang="ja">必須項目が未入力です: 数量</value>
     </property>
     <property key="ContentRequiredFieldMissingRoleTypeId">
         <value xml:lang="en">Required Field Missing : Role Type Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : ロールタイプId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 役割種別ID</value>
     </property>
     <property key="ContentRequiredFieldMissingRootContentId">
         <value xml:lang="en">Required Field Missing : Root Content Id.</value>
-        <value xml:lang="ja">必須フィールド欠損 : ルートコンテンツID.</value>
+        <value xml:lang="ja">必須項目が未入力です: ルートコンテンツID</value>
     </property>
     <property key="ContentRequiredFieldMissingScreenLocation">
         <value xml:lang="en">Required Field Missing : Screen Location.</value>
-        <value xml:lang="ja">必須フィールドの欠損:画面の場所。</value>
+        <value xml:lang="ja">必須項目が未入力です: 画面位置</value>
     </property>
     <property key="ContentRequiredFieldMissingServiceName">
         <value xml:lang="en">Required Field Missing : Service Name.</value>
-        <value xml:lang="ja">必須フィールド名 : サービス名</value>
+        <value xml:lang="ja">必須項目が未入力です: サービス名</value>
     </property>
     <property key="ContentRequiredFieldMissingStatusId">
         <value xml:lang="en">Required Field Missing : Status Id.</value>
-        <value xml:lang="ja">必須フィールド欠損:ステータスID</value>
+        <value xml:lang="ja">必須項目が未入力です: ステータスID</value>
     </property>
     <property key="ContentRequiredFieldMissingSubject">
         <value xml:lang="en">Required Field Missing : Content Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : コンテンツID.</value>
+        <value xml:lang="ja">必須項目が未入力です: コンテンツID</value>
     </property>
     <property key="ContentRequiredFieldMissingSurveyResponseId">
         <value xml:lang="en">Required Field Missing : Survey Response Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 調査応答ID.</value>
+        <value xml:lang="ja">必須項目が未入力です: アンケート回答ID</value>
     </property>
     <property key="ContentRequiredFieldMissingTemplateContext">
         <value xml:lang="en">Required Field Missing : Template Context.</value>
-        <value xml:lang="ja">必要なフィールドミス : テンプレートコンテキスト。</value>
+        <value xml:lang="ja">必須項目が未入力です: テンプレートコンテキスト</value>
     </property>
     <property key="ContentRequiredFieldMissingText">
         <value xml:lang="en">Required Field Missing : Text.</value>
-        <value xml:lang="ja">必須フィールドミス : テキスト.</value>
+        <value xml:lang="ja">必須項目が未入力です: テキスト</value>
     </property>
     <property key="ContentRequiredFieldMissingTypeGenerate">
         <value xml:lang="en">Required Field Missing : Type Generate.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 遺伝子型</value>
+        <value xml:lang="ja">必須項目が未入力です: 生成タイプ</value>
     </property>
     <property key="ContentRequiredFieldMissingUseTime">
         <value xml:lang="en">Required Field Missing : Use Time.</value>
-        <value xml:lang="ja">必須フィールドの欠損:時間を使用してください。</value>
+        <value xml:lang="ja">必須項目が未入力です: 使用時間</value>
     </property>
     <property key="ContentRequiredFieldMissingUseTimeUomId">
         <value xml:lang="en">Required Field Missing : Use Time Uom Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : タイムユームIDを使用してください。</value>
+        <value xml:lang="ja">必須項目が未入力です: 使用時間単位ID</value>
     </property>
     <property key="ContentRequiredFieldMissingUserLogin">
         <value xml:lang="en">Required Field Missing : User Login.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : ユーザログイン</value>
+        <value xml:lang="ja">必須項目が未入力です: ユーザーログイン</value>
     </property>
     <property key="ContentRequiredFieldMissingWebSiteContentTypeId">
         <value xml:lang="en">Required Field Missing : WebSite Content Type Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損:WebSiteコンテンツタイプID。</value>
+        <value xml:lang="ja">必須項目が未入力です: Webサイトコンテンツ種別ID</value>
     </property>
     <property key="ContentRequiredFieldMissingWebSiteId">
         <value xml:lang="en">Required Field Missing : WebSite Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損:WebSite Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: WebサイトID</value>
     </property>
     <property key="ContentSearchNotIndexed">
         <value xml:lang="en">Cannot find content search document. Please index all content.</value>
         <value xml:lang="fr">Les contenus ne sont pas encore indexés, aucun résultat possible.</value>
-        <value xml:lang="ja">コンテンツ検索文書が見つかりません。すべてのコンテンツをインデックス化してください。</value>
+        <value xml:lang="ja">コンテンツ検索ドキュメントが見つかりません。すべてのコンテンツにインデックスを作成してください。</value>
     </property>
     <property key="contentevents.error_getting_content_list">
         <value xml:lang="en">Error getting the content list to index: ${gee}.</value>
@@ -360,7 +360,7 @@
     <property key="ftpservices.contact_mech_must_be_ftp">
         <value xml:lang="en">ERROR: Contact mech must be an ftp server</value>
         <value xml:lang="fr">ERREUR: La coordonnée destinataire doit être un serveur ftp</value>
-        <value xml:lang="ja">ERROR: コンタクトメカは ftp サーバーでなければなりません</value>
+        <value xml:lang="ja">エラー: 連絡先情報はFTPサーバーである必要があります。</value>
     </property>
     <property key="layoutEvents.content_empty">
         <value xml:lang="da">indhold er tomt</value>
@@ -505,7 +505,7 @@
     <property key="uploadContentAndImage.noRootDirProvided">
         <value xml:lang="en">No root dir provided, please fill path in the data resource objectInfo field</value>
         <value xml:lang="fr">Aucun répertoire racine fourni. Veuillez indiquer le chemin dans le champ objectInfo de la ressource de donnée</value>
-        <value xml:lang="ja">提供されていないroot dirは、データリソースの objectInfo フィールドにパスを埋めてください。</value>
+        <value xml:lang="ja">ルートディレクトリが指定されていません。データリソースの objectInfo フィールドにパスを入力してください。</value>
         <value xml:lang="zh">没有提供根目录，请在数据资源对象信息数据项中填写路径</value>
     </property>
     <property key="uploadContentAndImage.no_files_uploaded">

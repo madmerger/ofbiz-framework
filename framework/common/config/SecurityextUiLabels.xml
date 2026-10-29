@@ -23,22 +23,22 @@
     <property key="loginevents.change_password_request_error_missing_fields">
         <value xml:lang="en">Error accessing password: ${errorMessage}.</value>
         <value xml:lang="es">Merci de renseigner tous les champs </value>
-        <value xml:lang="ja">パスワードアクセスエラー: ${errorMessage}</value>
+        <value xml:lang="ja">パスワードへのアクセス中にエラーが発生しました: ${errorMessage}</value>
     </property>
     <property key="loginevents.change_password_request_error_not_valid_parameters">
         <value xml:lang="en">Error accessing password: ${errorMessage}.</value>
         <value xml:lang="fr">La demande de changement de mot de passe n'est pas valide.</value>
-        <value xml:lang="ja">パスワードアクセスエラー: ${errorMessage}</value>
+        <value xml:lang="ja">パスワードへのアクセス中にエラーが発生しました: ${errorMessage}</value>
     </property>
     <property key="loginevents.change_password_request_error_technical_error">
         <value xml:lang="en">Error accessing password: ${errorMessage}.</value>
         <value xml:lang="fr">Une erreur technique c'est produite. La nouveau mot de passe n'a pas été pris en compte</value>
-        <value xml:lang="ja">パスワードアクセスエラー: ${errorMessage}</value>
+        <value xml:lang="ja">パスワードへのアクセス中にエラーが発生しました: ${errorMessage}</value>
     </property>
     <property key="loginevents.change_password_request_success">
         <value xml:lang="en">Error accessing password: ${errorMessage}.</value>
         <value xml:lang="fr">Le nouveau mot de passe est actif</value>
-        <value xml:lang="ja">パスワードアクセスエラー: ${errorMessage}</value>
+        <value xml:lang="ja">パスワードへのアクセス中にエラーが発生しました: ${errorMessage}</value>
     </property>
     <property key="loginevents.error_accessing_password">
         <value xml:lang="de">Fehler beim Zugriff auf Passwort: ${errorMessage}.</value>
@@ -131,27 +131,27 @@
     <property key="loginevents.impersonate_yourself">
         <value xml:lang="en">You can't impersonate yourself ... What are you trying to do ?</value>
         <value xml:lang="fr">Vous ne pouvez pas vous incarner vous même ... Qu'essayez-vous donc de faire ?</value>
-        <value xml:lang="ja">あなたは自分自身を偽装することはできません...何をしようとしている?</value>
+        <value xml:lang="ja">自分自身になりすますことはできません。何をしようとしているのですか？</value>
     </property>
     <property key="loginevents.impersonate_notEnoughPermission">
         <value xml:lang="en">You cannot impersonate a login with more permission than you have : ${missingPermissions}</value>
         <value xml:lang="fr">Vous ne pouvez pas incarner un utilisateur avec un niveau de permission supérieur au vôtre : ${missingPermissions}</value>
-        <value xml:lang="ja">あなたは、あなたが持っているよりも多くの許可でログインを偽装することはできません: ${missingPermissions}</value>
+        <value xml:lang="ja">自分より多くの権限を持つユーザーとして代理ログインすることはできません: ${missingPermissions}</value>
     </property>
     <property key="loginevents.impersonate_notAdmin">
         <value xml:lang="en">You cannot impersonate a login with ADMIN permission</value>
         <value xml:lang="fr">Vous ne pouvez pas incarner un utilisateur avec un niveau de permission ADMIN</value>
-        <value xml:lang="ja">管理者権限でログインを偽装することはできません</value>
+        <value xml:lang="ja">ADMIN権限を持つユーザーとして代理ログインすることはできません。</value>
     </property>
     <property key="loginevents.impersonation_disabled">
         <value xml:lang="en">Impersonation feature is disabled, please check security configuration</value>
         <value xml:lang="fr">La fonctionnalité d'incarnation est désactivée, merci de vérifier la configuration sécurité</value>
-        <value xml:lang="ja">変更機能が無効になっていますので、セキュリティ設定をご確認ください。</value>
+        <value xml:lang="ja">なりすまし（代理ログイン）機能は無効です。セキュリティ設定を確認してください。</value>
     </property>
     <property key="loginevents.impersonation_in_process">
         <value xml:lang="en">Impersonation of your user is in process by ${originUserLoginId}</value>
         <value xml:lang="fr">Incarnation de votre utilisateur en cours par ${originUserLoginId}</value>
-        <value xml:lang="ja">ユーザの公平性は、 ${originUserLoginId}</value>
+        <value xml:lang="ja">ユーザーは ${originUserLoginId} による代理ログイン中です。</value>
     </property>
     <property key="loginevents.new_password_createdandsent_check_email">
         <value xml:lang="de">Ein neues Passwort wurde erzeugt und Ihnen per E-Mail zugeschickt. Überprüfen Sie bitte Ihren E-Mail-Eingang.</value>
@@ -216,12 +216,12 @@
     <property key="loginevents.origin_username_is_present">
         <value xml:lang="en">You already have an impersonation in process. Please leave it before continue</value>
         <value xml:lang="fr">Vous avez déjà une incarnation en cours, veuillez mettre fin à celle-ci avant de continuer</value>
-        <value xml:lang="ja">既に工程に不快感があります。続行する前に必ず残してください。</value>
+        <value xml:lang="ja">代理ログイン中です。続行する前に終了してください。</value>
     </property>
     <property key="loginevents.password_expiration_alert">
         <value xml:lang="en">Alert: Your password will expire on ${passwordExpirationDate}. Update password before it expired.</value>
         <value xml:lang="fr">Votre mot de passe va expirer le ${passwordExpirationDate}, modifiez le avant.</value>
-        <value xml:lang="ja">アラート: パスワードが期限切れになります ${passwordExpirationDate}. 期限が切れる前にパスワードを更新します。</value>
+        <value xml:lang="ja">警告: パスワードは${passwordExpirationDate}に期限切れになります。期限切れ前にパスワードを更新してください。</value>
         <value xml:lang="ru">Уведомление: Твой пароль будет действителен на ${passwordExpirationDate}. Поменяйте пароль перед тем как его срок годности пройдет. </value>
         <value xml:lang="zh">注意：您的密码将在${passwordExpirationDate}过期，请在这之前更改密码。</value>
         <value xml:lang="zh-CN">注意：您的密码将在${passwordExpirationDate}过期，请在这之前更改密码。</value>
@@ -230,7 +230,7 @@
     <property key="loginevents.password_expired_message">
         <value xml:lang="en">Alert: Your password expired on ${passwordExpirationDate}. Update your password.</value>
         <value xml:lang="fr">Votre mot de passe a expiré le  ${passwordExpirationDate}, modifiez le.</value>
-        <value xml:lang="ja">アラート: パスワードが期限切れ ${passwordExpirationDate}. パスワードの更新</value>
+        <value xml:lang="ja">警告: パスワードは${passwordExpirationDate}に期限切れになりました。パスワードを更新してください。</value>
         <value xml:lang="ru">Уведомление: Твой пароль истек на ${passwordExpirationDate}. </value>
         <value xml:lang="zh">您的密码已于${passwordExpirationDate}过期，请更改密码。</value>
         <value xml:lang="zh-CN">您的密码已于${passwordExpirationDate}过期，请更改密码。</value>
@@ -712,7 +712,7 @@
         <value xml:lang="fr">Le mot de passe ne correspond pas au modèle: ${passwordPatternMessage}.</value>
         <value xml:lang="hi-IN">पासवर्ड पैटर्न मिलान नहीं है, कृपया निम्नलिखित पैटर्न देखें: ${passwordPatternMessage}</value>
         <value xml:lang="it">La password non è corrispondente al modello, fare riferimento seguente schema: ${passwordPatternMessage}.</value>
-        <value xml:lang="ja">パスワードはパターンに一致しません。 ${passwordPatternMessage} </value>
+        <value xml:lang="ja">パスワードが要件を満たしていません: ${passwordPatternMessage} </value>
         <value xml:lang="ru">Пароль не соответствует шаблону: ${passwordPatternMessage}</value>
         <value xml:lang="zh">密码不符合样式：${passwordPatternMessage} </value>
         <value xml:lang="zh-TW">密碼不符合格式:${passwordPatternMessage} </value>
@@ -839,7 +839,7 @@
     <property key="loginservices.password_reminder_subject">
         <value xml:lang="en">Password Reminder (${userLoginId})".</value>
         <value xml:lang="fr">Rappel du mot de passe (${userLoginId})".</value>
-        <value xml:lang="ja">パスワードリマインダー()${userLoginId})".</value>
+        <value xml:lang="ja">パスワードリマインダー（${userLoginId}）".</value>
         <value xml:lang="ru">Напоминатель о пароле (${userLoginId})".</value>
         <value xml:lang="zh">密码提示(${userLoginId})。</value>
         <value xml:lang="zh-TW">密碼提示(${userLoginId}).</value>
@@ -862,7 +862,7 @@
     <property key="loginservices.token_incorrect">
         <value xml:lang="en">Invalid Token</value>
         <value xml:lang="fr">Jeton non valide</value>
-        <value xml:lang="ja">無効トークン</value>
+        <value xml:lang="ja">無効なトークン</value>
     </property>
     <property key="loginservices.user_not_found">
         <value xml:lang="de">Benutzer konnte nicht gefunden werden</value>

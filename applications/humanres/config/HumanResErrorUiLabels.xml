@@ -23,58 +23,58 @@
     <property key="HumanResRequiredFieldMissingTrainingClassTypeId">
         <value xml:lang="de">benötigter Eintrag fehlt: Weiterbildungsklasse Typ ID.</value>
         <value xml:lang="en">Required Field Missing : Training Class Type Id.</value>
-        <value xml:lang="ja">必須フィールド欠損 : トレーニングクラスタイプId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 研修クラス種別ID</value>
     </property>
     <property key="HRRequiredFieldMissingDescription">
         <value xml:lang="en">Required Field Missing : Description.</value>
-        <value xml:lang="ja">必須フィールド ミス : 説明.</value>
+        <value xml:lang="ja">必須項目が未入力です: 説明</value>
     </property>
     <property key="HRRequiredFieldMissingEmployeePartyId">
         <value xml:lang="en">Required Field Missing : Employee Party Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 従業員取引先ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 従業員取引先ID</value>
     </property>
     <property key="HRRequiredFieldMissingEmployeeRoleTypeId">
         <value xml:lang="en">Required Field Missing : Employee Role Type Id.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 従業員のロールタイプId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 従業員役割種別ID</value>
     </property>
     <property key="HRRequiredFieldMissingPartyId">
         <value xml:lang="en">Required Field Missing : Party Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 取引先ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 取引先ID</value>
     </property>
     <property key="HRRequiredFieldMissingPartyQualTypeId">
         <value xml:lang="en">Required Field Missing : Party Qual Type Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 取引先資格種別ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 取引先資格種別ID</value>
     </property>
     <property key="HRRequiredFieldMissingPeriodTypeId">
         <value xml:lang="en">Required Field Missing : Period Type Id.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 期間タイプId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 期間種別ID</value>
     </property>
     <property key="HRRequiredFieldMissingPostalAddContactMechPurpTypeId">
         <value xml:lang="en">Required Field Missing : Postal Address Contact Mech Purpose.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 郵便アドレス 連絡方法 目的.</value>
+        <value xml:lang="ja">必須項目が未入力です: 郵便住所の連絡先用途</value>
     </property>
     <property key="HRRequiredFieldMissingPrefReviewID">
         <value xml:lang="en">Required Field Missing : Pref Review Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 事前レビューId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 優先審査ID</value>
     </property>
     <property key="HRRequiredFieldMissingTrainingClassTypeId">
         <value xml:lang="en">Required Field Missing : Training Class Type Id.</value>
-        <value xml:lang="ja">必須フィールド欠損 : トレーニングクラスタイプId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 研修クラス種別ID</value>
     </property>
     <property key="HumanResHolidayNameMissing">
         <value xml:lang="en">The Holiday Name is missing.</value>
-        <value xml:lang="ja">休日の名前は欠落しています。</value>
+        <value xml:lang="ja">休日名が未入力です。</value>
     </property>
     <property key="HumanResFromDateMissing">
         <value xml:lang="en">The FromDate is missing</value>
-        <value xml:lang="ja">FromDate が見つかりません</value>
+        <value xml:lang="ja">開始日が未入力です。</value>
     </property>
     <property key="HumanResFromDateAlreadyExist">
         <value xml:lang="en">This FromDate : ${parameters.estimatedStartDate} already exist.</value>
-        <value xml:lang="ja">開始日 ${parameters.estimatedStartDate} は既に存在します。</value>
+        <value xml:lang="ja">開始日 ${parameters.estimatedStartDate} は既に登録されています。</value>
     </property>
     <property key="HumanResViewPermissionError">
         <value xml:lang="en">You do not have permission to view Human Resources organization data.</value>
-        <value xml:lang="ja">人事組織のデータを閲覧することはできません。</value>
+        <value xml:lang="ja">人事組織データを閲覧する権限がありません。</value>
     </property>
 </resource>

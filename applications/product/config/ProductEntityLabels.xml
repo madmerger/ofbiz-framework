@@ -1335,7 +1335,7 @@
         <value xml:lang="en">Defaut Image</value>
         <value xml:lang="es">Imágen por defecto</value>
         <value xml:lang="fr">Image par défaut</value>
-        <value xml:lang="ja">Defautイメージ</value>
+        <value xml:lang="ja">既定の画像</value>
     </property>
     <property key="ProductContentType.description.ALTERNATIVE_URL">
         <value xml:lang="en">Alternative URL</value>
@@ -1995,7 +1995,7 @@
         <value xml:lang="en">Meta Description</value>
         <value xml:lang="es">Metadescripción</value>
         <value xml:lang="fr">Description méta</value>
-        <value xml:lang="ja">メタ詳細</value>
+        <value xml:lang="ja">メタディスクリプション</value>
     </property>
     <property key="ProductContentType.description.META_KEYWORD">
         <value xml:lang="en">Meta Keywords</value>
@@ -3454,7 +3454,7 @@
         <value xml:lang="en">Asset Rental</value>
         <value xml:lang="es">Alquiler de activos</value>
         <value xml:lang="fr">Actif location</value>
-        <value xml:lang="ja">アセットレンタル</value>
+        <value xml:lang="ja">資産レンタル</value>
         <value xml:lang="nl">Verhuur productiemiddel</value>
         <value xml:lang="zh">资产出租</value>
     </property>
@@ -4275,7 +4275,7 @@
         <value xml:lang="de">Zu welcher Gruppe gehört dieser Laden. Läden können gruppiert werden mit einem Preis je Ladengruppe. Kann leer bleiben, wenn keine Ladengruppen eingerichtet sind.</value>
         <value xml:lang="en">What group this store belongs to. Stores can be grouped together with a price for each store group. It can be left blank if there are no store groups set up.</value>
         <value xml:lang="fr">Le groupe d'appartenance du magasin. Les magasins peuvent être regroupés, avec un prix pour chaque groupe. Il peut être laissé vide si il n'y a aucun groupes de magasins mis en place.</value>
-        <value xml:lang="ja">どのグループが所属しているか。各店舗グループの価格と合わせて店舗をグループ化することができます。店舗グループが設定されていない場合は、空白のままにすることができます。</value>
+        <value xml:lang="ja">この店舗が所属するグループです。店舗グループごとに価格を設定して複数の店舗をまとめられます。店舗グループを設定しない場合は空欄にします。</value>
         <value xml:lang="zh">这个店铺属于哪个组。多个店铺能够编成组，每个店铺组使用同一个价格。如果没有设置店铺组，则不填。</value>
         <value xml:lang="zh-TW">這個店鋪屬於哪個群組.多個店鋪能夠編成群組,每個店鋪群組使用同一個價格.如果沒有設置店鋪群組,則不填.</value>
     </property>
@@ -4329,7 +4329,7 @@
         <value xml:lang="de">Steuert die Stornierung von Bestellungen bei Nichtzahlung nach Ablauf der hier angegebenen Tage.</value>
         <value xml:lang="en">Triggers cancellation of orders for non-payment after the number of days entered here.</value>
         <value xml:lang="fr">Déclenche l'annulation des commandes pour non-paiement après la période spécifiée(jours).</value>
-        <value xml:lang="ja">指定した日数が経過すると、未払いの注文がキャンセルされます。</value>
+        <value xml:lang="ja">ここで指定した日数が経過すると、未払いの注文がキャンセルされます。</value>
         <value xml:lang="zh">取消达到这里输入的天数后仍未付款的订单的触发器。</value>
         <value xml:lang="zh-TW">取消達到這裡輸入的天數後仍未付款的訂單的觸發器.</value>
     </property>
@@ -4413,7 +4413,7 @@
         <value xml:lang="de">Hier werden die Lagerbestände verwaltet.</value>
         <value xml:lang="en">This is where the stock levels are drawn from.</value>
         <value xml:lang="fr">Les stocks sont prélevés à partir d'ici.</value>
-        <value xml:lang="ja">在庫レベルから描画されるところです。</value>
+        <value xml:lang="ja">在庫数の取得元となる拠点です。</value>
         <value xml:lang="zh">这是库存水平数据的来源。</value>
         <value xml:lang="zh-TW">這是庫存水準資料的來源.</value>
     </property>
@@ -4510,7 +4510,7 @@
     <property key="FieldDescription.ProductStore.defaultTimeZoneString">
         <value xml:lang="en">Which time zone will be used. If none is specified the machine time zone will be used.</value>
         <value xml:lang="fr">Utilise ce fuseau horaire. Si aucun n'est spécifié le fuseau horaire de la machine sera utilisé.</value>
-        <value xml:lang="ja">どのタイムゾーンが使用されます。 どれも指定されていない場合は、マシンタイムゾーンが使用されます。</value>
+        <value xml:lang="ja">使用するタイムゾーンです。指定しない場合は、システムのタイムゾーンが使用されます。</value>
     </property>
     <property key="FieldDescription.ProductStore.defaultSalesChannelEnumId">
         <value xml:lang="de">Sofern der Verkaufskanal in der Transaktion nicht spezifiziert ist, wird angenommen, dass der Verkauf über den hier ausgewählten Kanal kommt.</value>
@@ -4675,7 +4675,7 @@
         <value xml:lang="de">Spezifiziert den Typ (Rechnungs- oder Finanzkonto) des Laden Kreditkontos für Rückzahlungen.</value>
         <value xml:lang="en">Specify the type (Billing Account or Financial Account) of Store Credit Account used for refund return.</value>
         <value xml:lang="fr">Défini le type de Compte de crédit du magasin, utilisé pour le remboursement de retour (Compte de facturation ou compte financier).</value>
-        <value xml:lang="ja">返金返品に使用するストアクレジットアカウントの型(ビル口座または金融口座)を指定します。</value>
+        <value xml:lang="ja">返品の返金に使用する店舗クレジットアカウントの種別（請求先アカウントまたは金融アカウント）を指定します。</value>
         <value xml:lang="zh">为店铺的信用账户退款指定类型（账单账户或财务账户）。</value>
         <value xml:lang="zh-TW">為店鋪的信用帳戶退款指定類型(帳單帳戶或財務帳戶).</value>
     </property>
@@ -4684,7 +4684,7 @@
         <value xml:lang="de">Wenn eingeschaltet, wird kein Eingabefeld für den Benutzernamen angezeigt, sondern die primäre Emailadresse für den Benutzernamen verwendet.</value>
         <value xml:lang="en">If set to Y then in the create customer form no entry box will be presented for a username - the primary email address will be used for username.</value>
         <value xml:lang="fr">Si Oui, utiliser l'adresse e-mail principale comme nom d'utilisateur lors de la création d'un nouveau compte client.</value>
-        <value xml:lang="ja">Y に設定すると、作成顧客フォームに入力ボックスがユーザー名に表示されません。プライマリメールアドレスはユーザー名に使用されます。</value>
+        <value xml:lang="ja">Yに設定すると、顧客作成フォームにユーザー名の入力欄は表示されず、主メールアドレスがユーザー名として使用されます。</value>
         <value xml:lang="zh">如果设为是（Y），那么在创建用户的表单中将没有用户名 —— 会使用首选电子邮件地址作为用户名。</value>
         <value xml:lang="zh-TW">如果設為是(Y),那麼在新建使用者的表單中將沒有使用者名 —— 會使用首選電子郵件地址作為使用者名.</value>
     </property>
@@ -4720,7 +4720,7 @@
         <value xml:lang="de">Wenn ausgeschaltet werden die Geschenkoptionen ('ist ein Geschenk' und 'Geschenknachricht') im Bestellprozes nicht angezeigt.</value>
         <value xml:lang="en">If set to N the options related to gifts (the 'is gift' and 'gift message' options) will not be shown during checkout.</value>
         <value xml:lang="fr">Si Non, les options appliquées aux dons («C'est un cadeau» and «Message cadeau») ne seront pas affichées lors de votre commande.</value>
-        <value xml:lang="ja">ギフトに関連するオプション('is gift' と 'gift message' オプション)が設定されている場合は、チェックアウト時に表示されません。</value>
+        <value xml:lang="ja">Nに設定すると、チェックアウト時にギフト関連のオプション（「ギフトとして購入」「ギフトメッセージ」）は表示されません。</value>
         <value xml:lang="zh">如果设为否（N），在结账时不显示与礼品（'是礼品'和'礼品信息'选项）相关的选项。</value>
         <value xml:lang="zh-TW">如果設為否(N),在結帳時不顯示與禮物('是禮物'和'禮物資訊'選項)相關的選項.</value>
     </property>

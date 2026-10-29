@@ -21,7 +21,7 @@
 <resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://ofbiz.apache.org/dtds/ofbiz-properties.xsd">
     <property key="CustomerCreatedSuccessfully">
         <value xml:lang="en">Customer created successfully.</value>
-        <value xml:lang="ja">顧客が成功しました。</value>
+        <value xml:lang="ja">顧客を作成しました。</value>
     </property>
     <property key="FormFieldTitle_annualRevenue">
         <value xml:lang="ar">الدخل السنوي</value>
@@ -2281,7 +2281,7 @@
     </property>
     <property key="PageTitleEditCheckAccount">
         <value xml:lang="en">Edit Check Account</value>
-        <value xml:lang="ja">チェックアカウントの編集</value>
+        <value xml:lang="ja">小切手口座を編集</value>
     </property>
     <property key="PageTitleEditCommContent">
         <value xml:lang="ar">تعديل محتوى الإتصال</value>
@@ -2761,7 +2761,7 @@
     <property key="PageTitleListMaritalStatus">
         <value xml:lang="en">List Marital Status</value>
         <value xml:lang="fr">Liste des situations familiale</value>
-        <value xml:lang="ja">リスト 海事状況</value>
+        <value xml:lang="ja">婚姻状況一覧</value>
     </property>
     <property key="PageTitleListPartyIdentifications">
         <value xml:lang="ar">سرد أرقام الهويات</value>
@@ -3218,7 +3218,7 @@
     <property key="PartyAddCommEventReturn">
         <value xml:lang="en">Add Communication Event Return</value>
         <value xml:lang="hi-IN">संचार घटना रिटर्न जोड़ें</value>
-        <value xml:lang="ja">コミュニケーションイベントのリターンを追加</value>
+        <value xml:lang="ja">通信イベントの返信を追加</value>
     </property>
     <property key="PartyAddListToCart">
         <value xml:lang="ar">إضافة القائمة للسلة</value>
@@ -3260,12 +3260,12 @@
     <property key="PartyAddNewMaritalStatus">
         <value xml:lang="en">New Marital Status</value>
         <value xml:lang="fr">Ajouter une situation familiale</value>
-        <value xml:lang="ja">新婚姻状況</value>
+        <value xml:lang="ja">新しい婚姻状況</value>
     </property>
     <property key="PartyAddNewMaritalStatusType">
         <value xml:lang="en">New Marital Status Type</value>
         <value xml:lang="fr">Ajouter un type de situation familiale</value>
-        <value xml:lang="ja">新海事ステータスタイプ</value>
+        <value xml:lang="ja">新しい婚姻状況種別</value>
     </property>
     <property key="PartyAddNewPersonalInformation">
         <value xml:lang="ar">أضافة معلومات شخصية جديدة</value>
@@ -4685,7 +4685,7 @@
     <property key="PartyCommEventReturns">
         <value xml:lang="en">Communication Event Returns</value>
         <value xml:lang="hi-IN">संचार घटना रिटर्न</value>
-        <value xml:lang="ja">通信イベントの返品</value>
+        <value xml:lang="ja">通信イベントの返信</value>
     </property>
     <property key="PartyCommEventRoles">
         <value xml:lang="ar">أدوار الإتصال</value>
@@ -5198,7 +5198,7 @@
     </property>
     <property key="PartyContactMechanismSuccessfullyDeleted">
         <value xml:lang="en">Record deleted successfully.</value>
-        <value xml:lang="ja">正常に削除されたレコード。</value>
+        <value xml:lang="ja">レコードを削除しました。</value>
     </property>
     <property key="PartyContactMechanismSuccessfullyUpdated">
         <value xml:lang="ar">تم تحديث وسيلة الإتصال بنجاح</value>
@@ -6941,7 +6941,7 @@
     </property>
     <property key="PartyFindCommunicationsByReturn">
         <value xml:lang="en">Find Communications by Return</value>
-        <value xml:lang="ja">返品によるコミュニケーション</value>
+        <value xml:lang="ja">返信に関連する通信を検索</value>
     </property>
     <property key="PartyFindParty">
         <value xml:lang="ar">إيجاد الطرف</value>
@@ -7470,14 +7470,14 @@
         <value xml:lang="de">Der Hostname muss das Protokoll enthalten</value>
         <value xml:lang="en">Hostname must contain the protocol</value>
         <value xml:lang="fr">Le nom d'hôte doit contenir le protocole</value>
-        <value xml:lang="ja">Hostname はプロトコルを含む必要があります。</value>
+        <value xml:lang="ja">ホスト名にはプロトコルを含める必要があります。</value>
     </property>
     <property key="PartyImportInvalidCsvFile">
         <value xml:lang="ar">نمط ملف الCSV غير صالح (المفتاح, القيمة, التسلسل)</value>
         <value xml:lang="de">Ungültiges CSV Format (Schlüssel, Wert, Sequenz)</value>
         <value xml:lang="en">Invalid format for CSV (key,value,sequence)</value>
         <value xml:lang="it">Formato file CSV non valido (chiave, valore, sequenza)</value>
-        <value xml:lang="ja">CSV(キー、値、シーケンス)の無効なフォーマット</value>
+        <value xml:lang="ja">CSV（キー、値、連番）の形式が無効です。</value>
         <value xml:lang="zh">逗号分隔格式无效(键,值,序号)</value>
         <value xml:lang="zh-TW">逗號分隔格式無效(鍵,值,序號)</value>
     </property>
@@ -7486,7 +7486,7 @@
         <value xml:lang="de">Keine Aufzeichnung in der Datei gefunden</value>
         <value xml:lang="en">No records found in file</value>
         <value xml:lang="it">Formato file CSV non valido (chiave, valore, sequenza)</value>
-        <value xml:lang="ja">ファイルが見つかったレコードなし</value>
+        <value xml:lang="ja">ファイルにレコードがありません。</value>
         <value xml:lang="zh">文件中没有记录</value>
         <value xml:lang="zh-TW">檔中沒有記錄</value>
     </property>
@@ -9251,7 +9251,7 @@
     </property>
     <property key="PartyNewPartiesCreated">
         <value xml:lang="en">${partiesCreated} new parties created"</value>
-        <value xml:lang="ja">${partiesCreated} 新しく作成されたパーティー</value>
+        <value xml:lang="ja">新しい取引先を${partiesCreated}件作成しました"</value>
     </property>
     <property key="PartyNewPassword">
         <value xml:lang="ar">كلمة سر جديدة</value>
@@ -9921,7 +9921,7 @@
     </property>
     <property key="PartyNotModifRecreateAttribute">
         <value xml:lang="en">This cannot be changed without re-creating the Attribute.</value>
-        <value xml:lang="ja">アトリビュートを再作成せずに変更することはできません。</value>
+        <value xml:lang="ja">属性を再作成しないと変更できません。</value>
     </property>
     <property key="PartyNoteCreatedSuccessfully">
         <value xml:lang="en">Party Note created successfully.</value>
@@ -11975,7 +11975,7 @@
     <property key="PartyReturnAdd">
         <value xml:lang="en">Return Add</value>
         <value xml:lang="hi-IN">वापसी जोड़ें</value>
-        <value xml:lang="ja">リターン追加</value>
+        <value xml:lang="ja">返品を追加</value>
     </property>
     <property key="PartyRole">
         <value xml:lang="ar">دور</value>
@@ -12108,7 +12108,7 @@
         <value xml:lang="de">Rollentyp ${roleTypeId} für diesen Akteur nicht gefunden.</value>
         <value xml:lang="en">Role Type ${roleTypeId} not found for the party.</value>
         <value xml:lang="fr">Le rôle ${roleTypeId} n'est pas présent pour cet acteur.</value>
-        <value xml:lang="ja">取引先に対する役割タイプ ${roleTypeId} が見つかりません。</value>
+        <value xml:lang="ja">取引先のロール種別 ${roleTypeId} が見つかりません。</value>
         <value xml:lang="zh">没有找到这个会员的角色类型${roleTypeId}。</value>
     </property>
     <property key="PartyRoleTypeTo">
@@ -13796,7 +13796,7 @@
     <property key="PartyViewCommReturns">
         <value xml:lang="en">View Communication Returns</value>
         <value xml:lang="hi-IN">संचार रिटर्न देखें</value>
-        <value xml:lang="ja">コミュニケーションのリターンを見る</value>
+        <value xml:lang="ja">通信イベントの返信を表示</value>
     </property>
     <property key="PartyViewCommunicationEvent">
         <value xml:lang="ar">إستعراض الإتصال</value>

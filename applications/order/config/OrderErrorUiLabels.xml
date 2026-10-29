@@ -84,7 +84,7 @@
     <property key="OrderApproveOrderBeforeQuickDropShip">
         <value xml:lang="de">Bestellung muss freigegeben werden bevor Streckenlieferung abgeschlossen wird.</value>
         <value xml:lang="en">Order must be approved before completing drop shipment.</value>
-        <value xml:lang="ja">注文は、ドロップ出荷を完了する前に承認する必要があります。</value>
+        <value xml:lang="ja">ドロップ出荷を完了する前に、注文を承認する必要があります。</value>
         <value xml:lang="zh">必须在完成厂家直送之前批准订单。</value>
     </property>
     <property key="OrderAProductStoreMustBeSelectedForASalesOrder">
@@ -234,7 +234,7 @@
         <value xml:lang="de">Warenkorb Versandgruppe Verknüpfung nicht gefunden</value>
         <value xml:lang="en">Cart ship group association not found</value>
         <value xml:lang="fr">Association avec le groupe d'expédition non trouvée</value>
-        <value xml:lang="ja">カートの配送グループ関連付けが見つかりません</value>
+        <value xml:lang="ja">カートの配送グループ関連付けが見つかりません。</value>
         <value xml:lang="zh">没有找到购物车和运输组之间的关联</value>
     </property>
     <property key="OrderCartShipGroupNotFound">
@@ -258,21 +258,21 @@
         <value xml:lang="de">Kein Transporteur gefunden für [${partyId}]</value>
         <value xml:lang="en">No Party Carrier found for [${partyId}]</value>
         <value xml:lang="fr">Aucun transporteur trouvé pour la reference [${partyId}]</value>
-        <value xml:lang="ja">取引先の配送業者 [${partyId}] が見つかりません</value>
+        <value xml:lang="ja">取引先 [${partyId}] に対応する運送業者が見つかりません。</value>
         <value xml:lang="zh">没有找到[${partyId}]的承运商</value>
     </property>
     <property key="OrderCartShipGroupSeqIdIsMandatory">
         <value xml:lang="de">Warenkorb shipGroupSeqId wird benötigt</value>
         <value xml:lang="en">Cart shipGroupSeqId is mandatory</value>
         <value xml:lang="fr">La reference du groupe d'expédition est obligatoire</value>
-        <value xml:lang="ja">カートの配送グループ連番IDは必須です</value>
+        <value xml:lang="ja">カートの配送グループ連番IDは必須です。</value>
         <value xml:lang="zh">购物车必须有运输组序号(shipGroupSeqId)</value>
     </property>
     <property key="OrderCartShipGroupShipmentMethodNotFound">
         <value xml:lang="de">Keine Liefermethode gefunden für [${shipmentMethodTypeId}]</value>
         <value xml:lang="en">No Shipment Method found for [${shipmentMethodTypeId}]</value>
         <value xml:lang="fr">Aucun mode d'expedition trouvé pour la reference [${shipmentMethodTypeId}]</value>
-        <value xml:lang="ja">配送方法 [${shipmentMethodTypeId}] が見つかりません</value>
+        <value xml:lang="ja">配送方法 [${shipmentMethodTypeId}] が見つかりません。</value>
         <value xml:lang="zh">没有找到[${shipmentMethodTypeId}]的运输方式</value>
     </property>
     <property key="OrderCaughtExceptionOnCartUpdate">
@@ -543,7 +543,7 @@
     </property>
     <property key="OrderCouldNotSetGrantTotalOnOrderHeader">
         <value xml:lang="en">ERROR: Could not set grantTotal on OrderHeader entity: ${errorString}</value>
-        <value xml:lang="ja">エラー: OrderHeaderエンティティに grantTotal を設定できませんでした: ${errorString}</value>
+        <value xml:lang="ja">OrderHeaderエンティティにgrantTotalを設定中にエラーが発生しました: ${errorString}</value>
     </property>
     <property key="OrderCreateCommunicationEventProductPermissionError">
         <value xml:lang="ar">خطأ إذن السلعة في خلق حدث الإتصال</value>
@@ -559,7 +559,7 @@
     </property>
     <property key="OrderDatabaseErrorCheckingIfWeShouldChangeOrderHeaderStatusToApproved">
         <value xml:lang="en">Database error checking if we should change order header status to approved: ${e.toString()}</value>
-        <value xml:lang="ja">データベースのエラーは、注文ヘッダーの状態を承認するために変更する必要があります。 ${e.toString()}</value>
+        <value xml:lang="ja">注文ヘッダーのステータスを「承認済み」に変更するか確認中に、データベースエラーが発生しました: ${e.toString()}</value>
     </property>
     <property key="OrderDispatcherOrDelegatorOrCartArgumentIsNull">
         <value xml:lang="ar">المرسل أو المفوض أو حجة العربة فارغا</value>
@@ -902,23 +902,23 @@
     </property>
     <property key="OrderErrorAllocationPlanIsNotAvailable">
         <value xml:lang="en">ERROR : Allocation plan is not available.</value>
-        <value xml:lang="ja">ERROR : 割増プランはありません。</value>
+        <value xml:lang="ja">エラー: 配賦計画を利用できません。</value>
     </property>
     <property key="OrderErrorCouldNotChangeAllocationPlanItemStatus">
         <value xml:lang="en">ERROR : Could not change allocation plan item status.</value>
-        <value xml:lang="ja">ERROR : 割り当てプラン項目の状態を変更できません。</value>
+        <value xml:lang="ja">エラー: 配賦計画項目のステータスを変更できませんでした。</value>
     </property>
     <property key="OrderErrorCouldNotChangeAllocationPlanItemStatusStatusIsNotAValidChange">
         <value xml:lang="en">ERROR : Could not change allocation plan item status; status is not a valid change. </value>
-        <value xml:lang="ja">ERROR : 割り当てプラン項目の状態を変更できません。ステータスは変更できません。 </value>
+        <value xml:lang="ja">エラー: 配賦計画項目のステータスを変更できませんでした。有効なステータス変更ではありません。 </value>
     </property>
     <property key="OrderErrorCouldNotChangeAllocationPlanStatus">
         <value xml:lang="en">ERROR : Could not change allocation plan status.</value>
-        <value xml:lang="ja">ERROR : 割り当て計画のステータスを変更できません。</value>
+        <value xml:lang="ja">エラー: 配賦計画のステータスを変更できませんでした。</value>
     </property>
     <property key="OrderErrorCouldNotChangeAllocationPlanStatusStatusIsNotAValidChange">
         <value xml:lang="en">ERROR : Could not change allocation plan status; status is not a valid change. </value>
-        <value xml:lang="ja">ERROR : 割り当て計画のステータスを変更できません。ステータスは有効な変更ではありません。 </value>
+        <value xml:lang="ja">エラー: 配賦計画のステータスを変更できませんでした。有効なステータス変更ではありません。 </value>
     </property>
     <property key="OrderErrorCouldNotChangeItemStatus">
         <value xml:lang="ar">خطأ: لا يمكن تغيير حالة البند</value>
@@ -1313,7 +1313,7 @@
         <value xml:lang="de">Bestellposition ist bereits mit dieser Liefergruppe verknüpft</value>
         <value xml:lang="en">Order Item is already related To This OISG</value>
         <value xml:lang="fr">La ligne de commande est déja associée au groupe d'expédition</value>
-        <value xml:lang="ja">注文項目は既にこのOISGに関連しています</value>
+        <value xml:lang="ja">注文項目は既にこのOISG（注文配送グループ）に関連付けられています。</value>
         <value xml:lang="zh">订单明细已经关联到了这个运输组</value>
     </property>
     <property key="OrderErrorOrderItemCantBeModified">
@@ -1723,11 +1723,11 @@
     </property>
     <property key="OrderErrorWhileCreatingNewShoppingListBasedOnOrder">
         <value xml:lang="en">Error while creating new shopping list based on order ${errorString}</value>
-        <value xml:lang="ja">注文に基づいて新しいショッピングリストを作成するときにエラー ${errorString}</value>
+        <value xml:lang="ja">注文に基づく新しい買物リストの作成中にエラーが発生しました: ${errorString}</value>
     </property>
     <property key="OrderErrorWhileCreatingNewShoppingListBasedAutomaticReorder">
         <value xml:lang="en">Error while creating new shopping list based automatic reorder ${errorString}</value>
-        <value xml:lang="ja">自動記録に基づく新規発送一覧の作成中にエラー ${errorString}</value>
+        <value xml:lang="ja">自動再注文に基づく新しい買物リストの作成中にエラーが発生しました: ${errorString}</value>
     </property>
     <property key="OrderErrorWithCreateBillingAccount">
         <value xml:lang="ar">خطأ في خلق حساب فوترة</value>
@@ -1849,7 +1849,7 @@
     </property>
     <property key="OrderFixedAssetSoldOut">
         <value xml:lang="en">ERROR: fixed_Asset_sold_out AssetId: ${fixedAssetId} on date: ${exceptionDateStartTime}</value>
-        <value xml:lang="ja">ERROR:固定 Asset sold out AssetId: ${fixedAssetId} 日付: ${exceptionDateStartTime}</value>
+        <value xml:lang="ja">エラー: fixed_Asset_sold_out（資産ID: ${fixedAssetId}、日付: ${exceptionDateStartTime}）</value>
     </property>
     <property key="OrderFrequencyOrIntervalWasNotSpecified">
         <value xml:lang="ar">لم يحدد التردد أو الفاصل</value>
@@ -1992,7 +1992,7 @@
     </property>
     <property key="OrderItemShipGroupDoesNotExist">
         <value xml:lang="en">Order Item Ship Group Does Not Exist</value>
-        <value xml:lang="ja">順序項目 船グループは主張しません</value>
+        <value xml:lang="ja">注文項目の配送グループが存在しません。</value>
     </property>
     <property key="OrderItemStatusNotChangedIsNotAValidChange">
         <value xml:lang="ar">لم يتم التغيير لحالة البند لأن التغيير ${orderStatusId} -&gt; ${statusId} غير صحيح</value>
@@ -2089,7 +2089,7 @@
         <value xml:lang="de">Kein Finanzkonto verfügbar</value>
         <value xml:lang="en">No available fin account</value>
         <value xml:lang="fr">Pas de compte financier disponible</value>
-        <value xml:lang="ja">利用可能なフィンアカウントはありません</value>
+        <value xml:lang="ja">利用可能な金融アカウントがありません。</value>
         <value xml:lang="pt-BR">Nenhuma conta de financiamento disponível</value>
         <value xml:lang="zh">没有可用的财务账户</value>
     </property>
@@ -2159,7 +2159,7 @@
     </property>
     <property key="OrderNoPaymentMethodTypeSelected">
         <value xml:lang="en">No Payment Method Type selected</value>
-        <value xml:lang="ja">支払方法の選択無し</value>
+        <value xml:lang="ja">支払方法種別が選択されていません。</value>
     </property>
     <property key="OrderNoPayToPartyIdSetOnProductStore">
         <value xml:lang="ar">لم يوضع دليل طرف الدفع على محل السلعة : ${productStoreId}</value>
@@ -2195,7 +2195,7 @@
     </property>
     <property key="OrderNoReturnAmountFound">
         <value xml:lang="en">No returnAmount found for order: ${orderId}</value>
-        <value xml:lang="ja">注文が見つかりません。 ${orderId}</value>
+        <value xml:lang="ja">注文ID ${orderId} の返品金額が見つかりません。</value>
     </property>
     <property key="OrderNoReturnQuantityAvailablePreviousReturnsMayExist">
         <value xml:lang="ar">كمية المسترجع غير متوفرة: احتمال وجود مسترجعات سابقة.</value>
@@ -2245,7 +2245,7 @@
     </property>
     <property key="OrderNoShipmentMethodSelected">
         <value xml:lang="en">No Shipment Method selected</value>
-        <value xml:lang="ja">配送方法の選択なし</value>
+        <value xml:lang="ja">出荷方法が選択されていません。</value>
     </property>
     <property key="OrderNoShoppingListAvailable">
         <value xml:lang="ar">قائمة التسوق غير متوفرة</value>
@@ -3134,7 +3134,7 @@
     <property key="OrderProblemsWithPaymentMethodLookup">
         <value xml:lang="de">Probleme beim Lesen der PaymentMethod. </value>
         <value xml:lang="en">Problems with PaymentMethod lookup. </value>
-        <value xml:lang="ja">PaymentMethod検索の問題。 </value>
+        <value xml:lang="ja">PaymentMethodの検索で問題が発生しました。 </value>
         <value xml:lang="zh">查找支付方式时出现问题。</value>
     </property>
     <property key="OrderProblemsWithPaymentTypeLookup">
@@ -3221,21 +3221,21 @@
         <value xml:lang="de">Zugeordnete Menge darf nicht null oder negativ sein.</value>
         <value xml:lang="en">Quantity associated can not be null or negative.</value>
         <value xml:lang="fr">La quantité associée ne peut être négative ou nulle.</value>
-        <value xml:lang="ja">関連する数量は、null または負することはできません。</value>
+        <value xml:lang="ja">関連数量はnullまたは負数にできません。</value>
         <value xml:lang="zh">关联的数量不能是null或负数。</value>
     </property>
     <property key="OrderQuantityAssociatedIsBiggerThanOrderItemQuantity">
         <value xml:lang="de">Die zugeordnete Menge ist größer als die Bestellmenge.</value>
         <value xml:lang="en">Quantity associated is bigger than order item quantity.</value>
         <value xml:lang="fr">La quantité associée est plus grande que celle commandée.</value>
-        <value xml:lang="ja">量は順序項目の量より大きいです。</value>
+        <value xml:lang="ja">関連数量が注文項目の数量を上回っています。</value>
         <value xml:lang="zh">关联的数量大于订单明细的数量了。</value>
     </property>
     <property key="OrderQuantityAssociatedIsLessThanOrderItemQuantity">
         <value xml:lang="de">Die zugeordnete Menge ist kleiner als die Bestellmenge.</value>
         <value xml:lang="en">Quantity associated is less than order item quantity.</value>
         <value xml:lang="fr">La quantité totale associée aux groupe(s) d'expédition(s) est plus petite que celle commandée.</value>
-        <value xml:lang="ja">量は順序項目の量より少しです。</value>
+        <value xml:lang="ja">関連数量が注文項目の数量を下回っています。</value>
         <value xml:lang="zh">关联的数量小于订单明细数量了。</value>
     </property>
     <property key="OrderQuickAddOrderItemError">
@@ -3255,12 +3255,12 @@
     <property key="OrderQuoteGetNextIdError">
         <value xml:lang="en">Error during id creation</value>
         <value xml:lang="fr">Erreur durant la création de l'ID.</value>
-        <value xml:lang="ja">id作成中のエラー</value>
+        <value xml:lang="ja">IDの採番中にエラーが発生しました。</value>
     </property>
     <property key="OrderQuoteIdAlreadyExists">
         <value xml:lang="en">ERROR: Quote with ID ${quoteId} already exists</value>
         <value xml:lang="fr">ERREUR : Un devis avec la référence ${quoteId} existe déjà.</value>
-        <value xml:lang="ja">ERROR:IDで引用 ${quoteId} 既に存在している</value>
+        <value xml:lang="ja">エラー: 見積ID ${quoteId} は既に存在します。</value>
     </property>
     <property key="OrderQuotePercent">
         <value xml:lang="ar">نسبة عرض السعر</value>
@@ -3308,11 +3308,11 @@
     </property>
     <property key="OrderQuoteDoesNotExists">
         <value xml:lang="en">Quote does not exist.</value>
-        <value xml:lang="ja">引用は存在しません。</value>
+        <value xml:lang="ja">見積が存在しません。</value>
     </property>
     <property key="OrderQuoteItemDoesNotExists">
         <value xml:lang="en">Quote Item does not exist.</value>
-        <value xml:lang="ja">引用項目は存在しません。</value>
+        <value xml:lang="ja">見積明細が存在しません。</value>
     </property>
     <property key="OrderQuoteWorkEffortDoesNotExists">
         <value xml:lang="ar">خطأ: عرض سعر جهد العمل</value>
@@ -3381,191 +3381,191 @@
     </property>
     <property key="OrderRequiredFieldMissingCardNumber">
         <value xml:lang="en">Required Field Missing : Card Number.</value>
-        <value xml:lang="ja">必須項目 : カード番号</value>
+        <value xml:lang="ja">必須項目が未入力です: カード番号</value>
     </property>
     <property key="OrderRequiredFieldMissingCardType">
         <value xml:lang="en">Required Field Missing : Card Type.</value>
-        <value xml:lang="ja">必須フィールドの欠損:カードタイプ。</value>
+        <value xml:lang="ja">必須項目が未入力です: カード種別</value>
     </property>
     <property key="OrderRequiredFieldMissingCart">
         <value xml:lang="en">Required Field Missing : Cart.</value>
-        <value xml:lang="ja">必須項目 : カート</value>
+        <value xml:lang="ja">必須項目が未入力です: カート</value>
     </property>
     <property key="OrderRequiredFieldMissingChangeMap">
         <value xml:lang="en">Required Field Missing : Change Map.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 変更マップ.</value>
+        <value xml:lang="ja">必須項目が未入力です: 変更マップ</value>
     </property>
     <property key="OrderRequiredFieldMissingContactMechId">
         <value xml:lang="en">Required Field Missing : Contact Mech Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : Mech Id までお問い合わせください。</value>
+        <value xml:lang="ja">必須項目が未入力です: 連絡先ID</value>
     </property>
     <property key="OrderRequiredFieldMissingContactMechPurposeTypeId">
         <value xml:lang="en">Required Field Missing : Contact Mech Purpose Type Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損:Mechの目的のタイプIDに連絡して下さい。</value>
+        <value xml:lang="ja">必須項目が未入力です: 連絡先用途種別ID</value>
     </property>
     <property key="OrderRequiredFieldMissingCurrency">
         <value xml:lang="en">Required Field Missing : Currency.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 通貨.</value>
+        <value xml:lang="ja">必須項目が未入力です: 通貨</value>
     </property>
     <property key="OrderRequiredFieldMissingCurrencyUom">
         <value xml:lang="en">Required Field Missing : Currency Uom.</value>
-        <value xml:lang="ja">必須フィールド 欠損 : 通貨 免除.</value>
+        <value xml:lang="ja">必須項目が未入力です: 通貨単位</value>
     </property>
     <property key="OrderRequiredFieldMissingEmailType">
         <value xml:lang="en">Required Field Missing : Email Type.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : メールタイプ.</value>
+        <value xml:lang="ja">必須項目が未入力です: メール種別</value>
     </property>
     <property key="OrderRequiredFieldMissingExpMonth">
         <value xml:lang="en">Required Field Missing : Expiry Month.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 満月</value>
+        <value xml:lang="ja">必須項目が未入力です: 有効期限（月）</value>
     </property>
     <property key="OrderRequiredFieldMissingExpYear">
         <value xml:lang="en">Required Field Missing : Expiry Year.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 満期</value>
+        <value xml:lang="ja">必須項目が未入力です: 有効期限（年）</value>
     </property>
     <property key="OrderRequiredFieldMissingFacilityId">
         <value xml:lang="en">Required Field Missing : Facility Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 施設ID</value>
+        <value xml:lang="ja">必須項目が未入力です: 拠点ID</value>
     </property>
     <property key="OrderRequiredFieldMissingFirstNameOnCard">
         <value xml:lang="en">Required Field Missing : First Name On Card.</value>
-        <value xml:lang="ja">必須フィールドの欠損:カードの最初の名前。</value>
+        <value xml:lang="ja">必須項目が未入力です: カード名義（名）</value>
     </property>
     <property key="OrderRequiredFieldMissingInternalNote">
         <value xml:lang="en">Required Field Missing : Internal Note.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 内部注記</value>
+        <value xml:lang="ja">必須項目が未入力です: 内部メモ</value>
     </property>
     <property key="OrderRequiredFieldMissingItemMap">
         <value xml:lang="en">Required Field Missing : Item Map.</value>
-        <value xml:lang="ja">必須フィールドのミス : アイテムマップ.</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文明細マップ</value>
     </property>
     <property key="OrderRequiredFieldMissingLastNameOnCard">
         <value xml:lang="en">Required Field Missing : Last Name On Card.</value>
-        <value xml:lang="ja">必須フィールド欠損 : カードの姓名</value>
+        <value xml:lang="ja">必須項目が未入力です: カード名義（姓）</value>
     </property>
     <property key="OrderRequiredFieldMissingNoteId">
         <value xml:lang="en">Required Field Missing : Note Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 注意</value>
+        <value xml:lang="ja">必須項目が未入力です: メモID</value>
     </property>
     <property key="OrderRequiredFieldMissingNoteInfo">
         <value xml:lang="en">Required Field Missing : Note Info.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 注意</value>
+        <value xml:lang="ja">必須項目が未入力です: メモ内容</value>
     </property>
     <property key="OrderRequiredFieldMissingOldContactMechId">
         <value xml:lang="en">Required Field Missing : Old Contact Mech Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損:古い連絡先メックID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 旧連絡先ID</value>
     </property>
     <property key="OrderRequiredFieldMissingOldStatusId">
         <value xml:lang="en">Required Field Missing : Old Status Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 古いステータスID.</value>
+        <value xml:lang="ja">必須項目が未入力です: 旧ステータスID</value>
     </property>
     <property key="OrderRequiredFieldMissingOrderAdjustmentId">
         <value xml:lang="en">Required Field Missing : Order Adjustment Id.</value>
-        <value xml:lang="ja">必須フィールドミス : 注文調整ID.</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文調整ID</value>
     </property>
     <property key="OrderRequiredFieldMissingOrderAdjustmentTypeId">
         <value xml:lang="en">Required Field Missing : Order Adjustment Type Id.</value>
-        <value xml:lang="ja">必須フィールドミス : 注文調整タイプId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文調整種別ID</value>
     </property>
     <property key="OrderRequiredFieldMissingOrderAdjustments">
         <value xml:lang="en">Required Field Missing : Order Adjustments.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 注文調整.</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文調整</value>
     </property>
     <property key="OrderRequiredFieldMissingOrderId">
         <value xml:lang="en">Required Field Missing : Order Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 注文ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文ID</value>
     </property>
     <property key="OrderRequiredFieldMissingOrderIdList">
         <value xml:lang="en">Required Field Missing : Order Id List.</value>
-        <value xml:lang="ja">必須項目が不足しています: 注文ID一覧。</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文ID一覧</value>
     </property>
     <property key="OrderRequiredFieldMissingOrderItem">
         <value xml:lang="en">Required Field Missing : Order Item.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 注文項目.</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文明細</value>
     </property>
     <property key="OrderRequiredFieldMissingOrderItemSeqId">
         <value xml:lang="en">Required Field Missing : Order Item Sequence Id.</value>
-        <value xml:lang="ja">必須フィールドミス : 注文項目シーケンスID.</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文明細連番ID</value>
     </property>
     <property key="OrderRequiredFieldMissingOrderItems">
         <value xml:lang="en">Required Field Missing : Order Items.</value>
-        <value xml:lang="ja">必須項目が不足しています: 注文明細。</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文明細</value>
     </property>
     <property key="OrderRequiredFieldMissingOrderPaymentPreferenceId">
         <value xml:lang="en">Required Field Missing : Order Payment Preference Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 注文支払いの優先順位 Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 注文支払設定ID</value>
     </property>
     <property key="OrderRequiredFieldMissingPartyId">
         <value xml:lang="en">Required Field Missing : Party Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 取引先ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 取引先ID</value>
     </property>
     <property key="OrderRequiredFieldMissingPaymentMethodId">
         <value xml:lang="en">Required Field Missing : Payment Method Id.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 支払方法 Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 支払方法ID</value>
     </property>
     <property key="OrderRequiredFieldMissingProductId">
         <value xml:lang="en">Required Field Missing : Product Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 製品ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 製品ID</value>
     </property>
     <property key="OrderRequiredFieldMissingProductStoreId">
         <value xml:lang="en">Required Field Missing : Product Store Id.</value>
-        <value xml:lang="ja">必須項目が不足しています: 店舗ID。</value>
+        <value xml:lang="ja">必須項目が未入力です: 製品店舗ID</value>
     </property>
     <property key="OrderRequiredFieldMissingQuantity">
         <value xml:lang="en">Required Field Missing : Quantity.</value>
-        <value xml:lang="ja">必須フィールド 欠損 : 数量.</value>
+        <value xml:lang="ja">必須項目が未入力です: 数量</value>
     </property>
     <property key="OrderRequiredFieldMissingScreenLocation">
         <value xml:lang="en">Required Field Missing : Screen Location.</value>
-        <value xml:lang="ja">必須フィールドの欠損:画面の場所。</value>
+        <value xml:lang="ja">必須項目が未入力です: 画面位置</value>
     </property>
     <property key="OrderRequiredFieldMissingShipGroupSeqId">
         <value xml:lang="en">Required Field Missing : Ship Group Sequence Id.</value>
-        <value xml:lang="ja">必須フィールドミス : 船舶グループシーケンスId.</value>
+        <value xml:lang="ja">必須項目が未入力です: 配送グループ連番ID</value>
     </property>
     <property key="OrderRequiredFieldMissingShipToAddress1">
         <value xml:lang="en">Required Field Missing : Ship To Address 1.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 発送先住所1</value>
+        <value xml:lang="ja">必須項目が未入力です: 配送先住所1</value>
     </property>
     <property key="OrderRequiredFieldMissingShoppingCart">
         <value xml:lang="en">Required Field Missing : Shopping Cart.</value>
-        <value xml:lang="ja">必須項目 : ショッピングカート</value>
+        <value xml:lang="ja">必須項目が未入力です: ショッピングカート</value>
     </property>
     <property key="OrderRequiredFieldMissingShipToCountryGeoId">
         <value xml:lang="en">Required Field Missing : Ship To Country Geo Id.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 国ジオIDへの発送</value>
+        <value xml:lang="ja">必須項目が未入力です: 配送先国ID</value>
     </property>
     <property key="OrderRequiredFieldMissingShipToPostalCode">
         <value xml:lang="en">Required Field Missing : Ship To Postal Code.</value>
-        <value xml:lang="ja">必須フィールドミス : 郵便番号への発送</value>
+        <value xml:lang="ja">必須項目が未入力です: 配送先郵便番号</value>
     </property>
     <property key="OrderRequiredFieldMissingShipToStateProvinceGeoId">
         <value xml:lang="en">Required Field Missing : Ship To State Province Geo Id.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 州の地IDに出荷します。</value>
+        <value xml:lang="ja">必須項目が未入力です: 配送先州・都道府県ID</value>
     </property>
     <property key="OrderRequiredFieldMissingShippingAmount">
         <value xml:lang="en">Required Field Missing : Shipping Amount.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 発送数量.</value>
+        <value xml:lang="ja">必須項目が未入力です: 配送料金</value>
     </property>
     <property key="OrderRequiredFieldMissingShipmentId">
         <value xml:lang="en">Required Field Missing : Shipment Id.</value>
-        <value xml:lang="ja">必須フィールド ミス : 出荷 Id.</value>
+        <value xml:lang="ja">必須項目が未入力です: 出荷ID</value>
     </property>
     <property key="OrderRequiredFieldMissingShipmentMethodAndAmount">
         <value xml:lang="en">Required Field Missing : Shipment Method And Amount.</value>
-        <value xml:lang="ja">必須フィールドミス : 出荷方法と量.</value>
+        <value xml:lang="ja">必須項目が未入力です: 出荷方法と料金</value>
     </property>
     <property key="OrderRequiredFieldMissingShipmentRouteSegmentId">
         <value xml:lang="en">Required Field Missing : Shipment Route Segment Id.</value>
-        <value xml:lang="ja">必須フィールド欠損 : 出荷ルートセグメントID</value>
+        <value xml:lang="ja">必須項目が未入力です: 出荷経路セグメントID</value>
     </property>
     <property key="OrderRequiredFieldMissingStatusId">
         <value xml:lang="en">Required Field Missing : Status Id.</value>
-        <value xml:lang="ja">必須フィールド欠損:ステータスID</value>
+        <value xml:lang="ja">必須項目が未入力です: ステータスID</value>
     </property>
     <property key="OrderRequiredFieldMissingTrackingNumber">
         <value xml:lang="en">Required Field Missing : Tracking Number.</value>
-        <value xml:lang="ja">必須フィールドの欠損 : 追跡番号.</value>
+        <value xml:lang="ja">必須項目が未入力です: 追跡番号</value>
     </property>
     <property key="OrderRequestedReturnQuantityNotAvailablePreviousReturnsMayExist">
         <value xml:lang="ar">كمية الإرجاع المطلوبة [ ${parameters.returnQuantity} ] غير متوفرة: كميات استرجاع سابقة ربما تكون موجودة [ ${returnableQuantity} ].</value>
@@ -3601,7 +3601,7 @@
     </property>
     <property key="OrderReturnItemResponseNotFound">
         <value xml:lang="en">${errorMsg} Return Item Response not found with ID [${responseId}].</value>
-        <value xml:lang="ja">${errorMsg} 返品・返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換・交換 返品・交換 返品・交換・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品・交換 返品 [${responseId}].</value>
+        <value xml:lang="ja">${errorMsg} ID [${responseId}] の返品項目応答が見つかりません。</value>
     </property>
     <property key="OrderReturnItemTypeIsNotDefined">
         <value xml:lang="ar">نوع البند المسترجع غير معرف لهذا البند: أو لا يوجد تربيط</value>
@@ -4670,7 +4670,7 @@
     </property>
     <property key="OrderServiceOrderItemShipGroupAssocNotExist">
         <value xml:lang="en">The orderItemShipGroupAssoc qualified by orderId=${parameters.orderId} orderItemSeqId=${parameters.orderItemSeqId} shipGroupSeqId=${parameters.fromGroupIndex} does not exist</value>
-        <value xml:lang="ja">orderItemShipGroupAssoc は orderId= によって修飾されます。${parameters.orderId} 注文項目SeqId=${parameters.orderItemSeqId} 船グループSeqId=${parameters.fromGroupIndex} 存在しない</value>
+        <value xml:lang="ja">orderItemShipGroupAssoc（orderId=${parameters.orderId}、orderItemSeqId=${parameters.orderItemSeqId}、shipGroupSeqId=${parameters.fromGroupIndex}）が存在しません。</value>
     </property>
     <property key="OrderSetCurrencyError">
         <value xml:lang="ar">حدد خطأ العملة : </value>
@@ -4831,7 +4831,7 @@
         <value xml:lang="de">Kann Bestellposition nicht zur Versandgruppe hinzufügen: </value>
         <value xml:lang="en">Unable to add order item to ship group: </value>
         <value xml:lang="fr">Impossible d'ajouter la ligne de commande au groupe d'expédition : </value>
-        <value xml:lang="ja">グループを出荷するために注文項目を追加できません。 </value>
+        <value xml:lang="ja">配送グループに注文明細を追加できません: </value>
         <value xml:lang="zh">无法向运输组添加订单明细：</value>
     </property>
     <property key="OrderUnableToAddItemToShoppingList">
@@ -4854,7 +4854,7 @@
         <value xml:lang="de">Kann Versandgruppe nicht zur Bestellung hinzufügen: </value>
         <value xml:lang="en">Unable to add ship group to order: </value>
         <value xml:lang="fr">Impossible d'ajouter le groupe d'expédition : </value>
-        <value xml:lang="ja">順序に船グループを加えることができない: </value>
+        <value xml:lang="ja">注文に配送グループを追加できません: </value>
         <value xml:lang="zh">无法把运输组添加到订单：</value>
     </property>
     <property key="OrderUnableToCancelItemInventoryReservation">
@@ -5148,7 +5148,7 @@
         <value xml:lang="de">Kann Bestellposition nicht aktualisieren für Versandgruppe: </value>
         <value xml:lang="en">Unable to update order item from the ship group: </value>
         <value xml:lang="fr">Impossible de mettre à jour la ligne de commande depuis le groupe d'expédition : </value>
-        <value xml:lang="ja">船舶グループから注文項目を更新できません。 </value>
+        <value xml:lang="ja">配送グループの注文明細を更新できません: </value>
         <value xml:lang="zh">不能更新来自这个运输组的订单明细</value>
     </property>
     <property key="OrderUnableToUpdateInventoryReservations">
@@ -5466,7 +5466,7 @@
     <property key="cart.addToCart.quantityInDecimalNotAllowed">
         <value xml:lang="de">Dezimalmenge ist nicht erlaubt.</value>
         <value xml:lang="en">Quantity in decimal is not allowed.</value>
-        <value xml:lang="ja">解読の数量は認められません。</value>
+        <value xml:lang="ja">数量に小数は指定できません。</value>
         <value xml:lang="zh">数量不能有小数。</value>
     </property>
     <property key="cart.addToCart.rental.endDate">
@@ -6990,6 +6990,6 @@
     </property>
     <property key="OrderReturnRequestPaymentMethodId">
         <value xml:lang="en">Invalid paymentMethodId; can not locate Payment Method.</value>
-        <value xml:lang="ja">無効な支払方法MethodId;支払方法を見つけることができません。</value>
+        <value xml:lang="ja">支払方法IDが無効です。支払方法が見つかりません。</value>
     </property>
 </resource>
