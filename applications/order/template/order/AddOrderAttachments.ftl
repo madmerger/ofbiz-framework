@@ -18,7 +18,7 @@ under the License.
 -->
 <div class="screenlet add-order-attachments">
   <div class="screenlet-title-bar">
-    Add Order Attachments
+    ${uiLabelMap.OrderAddOrderAttachments}
   </div>
   <div class="screenlet-body">
     <form name="AddOrderAttachmentsForm" method="post" action="<@ofbizUrl>addOrderAttachments</@ofbizUrl>" enctype="multipart/form-data">
@@ -39,7 +39,7 @@ under the License.
         </select>
       </div>
       <div>
-        OrderContentTypeId
+        ${uiLabelMap.OrderOrderContentTypeId}
         <select name="orderContentTypeId">
           <#if orderContentTypes?has_content>
             <#list orderContentTypes as orderContentType>
