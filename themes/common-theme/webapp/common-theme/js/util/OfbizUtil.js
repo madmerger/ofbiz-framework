@@ -74,12 +74,18 @@ $(document).ready(function () {
 
     function updateFileName(input) {
         var display = input._ofbizFileNameDisplay;
+        if (!display && input.id) {
+            var escapedId = window.CSS && typeof window.CSS.escape === "function"
+                ? window.CSS.escape(input.id)
+                : input.id.replace(/[\\"]/g, "\\$&");
+            display = document.querySelector('[data-ofbiz-file-input-name-for="' + escapedId + '"]');
+        }
         if (!display) {
             return;
         }
         var files = input.files;
         if (!files || files.length === 0) {
-            display.textContent = uiLabelCache.CommonNoFileChosen;
+            display.textContent = uiLabelCache.CommonNoFileChosen || display.getAttribute("data-ofbiz-empty-text") || "";
             return;
         }
         var fileNames = [];
@@ -117,6 +123,8 @@ $(document).ready(function () {
 
         var display = document.createElement("span");
         display.className = "ofbiz-file-input-name";
+        display.setAttribute("data-ofbiz-file-input-name-for", input.id);
+        display.setAttribute("data-ofbiz-empty-text", labels.CommonNoFileChosen);
         display.setAttribute("aria-live", "polite");
 
         input.classList.add("ofbiz-file-input-visually-hidden");
@@ -192,6 +200,10 @@ $(document).ready(function () {
             }
         }, 0);
     }, true);
+
+    if (document.querySelector("[data-ofbiz-file-input-name-for]")) {
+        addFileInputStyles();
+    }
 
     // add CSRF token to jQuery AJAX calls to the same domain
     jQuery.ajaxPrefilter(function (options, _, jqXHR) {

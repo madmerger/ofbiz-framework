@@ -38,7 +38,7 @@ under the License.
                 ${uiLabelMap.ProductPromotionPerCode}</span><input type="text" size="5" name="useLimitPerCode" />
                 <span class="label">${uiLabelMap.ProductPromotionPerCustomer}</span><input type="text" size="5" name="useLimitPerCustomer" />
                 <div>
-                  <input type="file" size="40" name="uploadedFile" />
+                  <@htmlTemplate.fileInput name="uploadedFile" size="40"/>
                   <input type="submit" value="${uiLabelMap.CommonUpload}" />
                 </div>
             </form>

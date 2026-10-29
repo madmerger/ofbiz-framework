@@ -49,7 +49,7 @@ under the License.
         </select>
       </div>
       <div>
-        <input type="file" name="uploadedFile" class="required" size="25"/>
+        <@htmlTemplate.fileInput name="uploadedFile" className="required" size="25"/>
       </div>
       <div>
         <button type="submit">

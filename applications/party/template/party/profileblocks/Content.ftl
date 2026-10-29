@@ -32,7 +32,7 @@ under the License.
         <input type="hidden" name="contentTypeId" value="DOCUMENT"/>
         <input type="hidden" name="statusId" value="CTNT_PUBLISHED"/>
         <input type="hidden" name="partyId" value="${partyId}" id="contentPartyId"/>
-        <input type="file" name="uploadedFile" class="required error" size="25"/>
+        <@htmlTemplate.fileInput name="uploadedFile" className="required error" size="25"/>
         <div>
         <select name="partyContentTypeId" class="required error">
           <option value="">${uiLabelMap.PartySelectPurpose}</option>

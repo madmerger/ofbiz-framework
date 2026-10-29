@@ -28,19 +28,19 @@ under the License.
     <tbody>
       <tr>
         <td><#if productAdditionalImage1?has_content><a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage1}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage1}</@ofbizContentUrl>" class="cssImgSmall" alt="" /></a></#if></td>
-        <td><input id="additionalImageOne" type="file" size="20" name="additionalImageOne" /></td>
+        <td><@htmlTemplate.fileInput id="additionalImageOne" name="additionalImageOne" size="20"/></td>
       </tr>
       <tr>
         <td><#if productAdditionalImage2?has_content><a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage2}</@ofbizContentUrl>" ><img src="<@ofbizContentUrl>${productAdditionalImage2}</@ofbizContentUrl>" class="cssImgSmall" alt="" /></a></#if></td>
-        <td><input type="file" size="20" name="additionalImageTwo" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
+        <td><@htmlTemplate.fileInput size="20" name="additionalImageTwo" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
       </tr>
       <tr>
         <td><#if productAdditionalImage3?has_content><a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage3}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage3}</@ofbizContentUrl>" class="cssImgSmall" alt="" /></a></#if></td>
-        <td><input type="file" size="20" name="additionalImageThree" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
+        <td><@htmlTemplate.fileInput size="20" name="additionalImageThree" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
       </tr>
       <tr>
         <td><#if productAdditionalImage4?has_content><a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage4}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage4}</@ofbizContentUrl>" class="cssImgSmall" alt="" /></a></#if></td>
-        <td><input type="file" size="20" name="additionalImageFour" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
+        <td><@htmlTemplate.fileInput size="20" name="additionalImageFour" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/></td>
       </tr>
       <tr>
         <td></td>

@@ -46,7 +46,7 @@ under the License.
                 <form method="post" action="<@ofbizUrl>createBulkProductPromoCodeEmail?productPromoCodeId=${productPromoCodeId!}</@ofbizUrl>" enctype="multipart/form-data" style="margin: 0;">
                     <input type="hidden" name="productPromoCodeId" value="${productPromoCodeId!}"/>
                     <input type="hidden" name="productPromoId" value="${productPromoId}"/>
-                    <input type="file" size="40" name="uploadedFile" />
+                    <@htmlTemplate.fileInput name="uploadedFile" size="40"/>
                     <input type="submit" value="${uiLabelMap.CommonUpload}" />
                 </form>
             </div>

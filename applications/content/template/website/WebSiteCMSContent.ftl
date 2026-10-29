@@ -334,16 +334,16 @@
               <td>
                 <input type="hidden" name="isUploadObject" value="Y"/>
                 <#if dataResourceTypeId == 'IMAGE_OBJECT'>
-                    <input type="file" name="uploadedFile" size="30" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/>
+                    <@htmlTemplate.fileInput name="uploadedFile" size="30" accept=".png,.gif,.jpg,.jpeg,.tiff,.tif"/>
                 </#if>
                 <#if dataResourceTypeId == 'VIDEO_OBJECT'>
-                    <input type="file" name="uploadedFile" size="30" accept=".mpeg,.mpg,.mp4,.m4v,.mov,.qt,.asf,.avi,.asx,.asf,.flv,.wvx,.wm,.wmv,.wmx,.avi"/>
+                    <@htmlTemplate.fileInput name="uploadedFile" size="30" accept=".mpeg,.mpg,.mp4,.m4v,.mov,.qt,.asf,.avi,.asx,.asf,.flv,.wvx,.wm,.wmv,.wmx,.avi"/>
                 </#if>
                 <#if dataResourceTypeId == 'AUDIO_OBJECT'>
-                    <input type="file" name="uploadedFile" size="30" accept=".mp3,.ogg,.vorbis,.flac,.wav"/>
+                    <@htmlTemplate.fileInput name="uploadedFile" size="30" accept=".mp3,.ogg,.vorbis,.flac,.wav"/>
                 </#if>
                 <#if dataResourceTypeId == 'OTHER_OBJECT' || dataResourceTypeId == 'LOCAL_FILE' || dataResourceTypeId == 'OFBIZ_FILE' >
-                    <input type="file" name="uploadedFile" size="30"/>
+                    <@htmlTemplate.fileInput name="uploadedFile" size="30"/>
                 </#if>
               </td>
             </tr>
