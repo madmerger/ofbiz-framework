@@ -26,6 +26,7 @@ import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -61,6 +62,18 @@ class PostgresSmokeTest {
     @Autowired
     private TransactionTemplate transactions;
 
+    @Autowired
+    private JdbcTemplate jdbc;
+
+    @Test
+    void readsNativeTextWrittenThroughTheOriginalSchema() {
+        jdbc.update("insert into DATA_RESOURCE (DATA_RESOURCE_ID) values (?)", "PG_NATIVE_TEXT");
+        jdbc.update("insert into ELECTRONIC_TEXT (DATA_RESOURCE_ID, TEXT_DATA) values (?, ?)",
+                "PG_NATIVE_TEXT", "Original plain text");
+        assertEquals("Original plain text", transactions.execute(status -> store.get(
+                store.findOne("ElectronicText", Map.of("dataResourceId", "PG_NATIVE_TEXT")), "textData")));
+    }
+
     @Test
     void ac48PostgresCrudAndMainFlowSmoke() {
         dispatcher.execute("content", "createContentType", Map.of("contentTypeId", "PG_TYPE", "description", "PostgreSQL"));
@@ -74,5 +87,7 @@ class PostgresSmokeTest {
         Map<String, Object> electronicText = dispatcher.execute("content", "getElectronicText",
                 Map.of("contentId", text.get("contentId")));
         assertEquals("本文", electronicText.get("textData"));
+        assertEquals("本文", jdbc.queryForObject(
+                "select TEXT_DATA from ELECTRONIC_TEXT where DATA_RESOURCE_ID = ?", String.class, text.get("dataResourceId")));
     }
 }

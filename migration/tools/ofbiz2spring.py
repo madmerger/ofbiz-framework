@@ -80,7 +80,7 @@ TYPE_MAPPING: dict[str, dict[str, Any]] = {
     "floating-point": {"java_type": "Double"},
     "integer": {"java_type": "Integer"},
     "numeric": {"java_type": "Long"},
-    "very-long": {"java_type": "String", "lob": True, "column_definition": "TEXT"},
+    "very-long": {"java_type": "String", "column_definition": "TEXT"},
     "blob": {"java_type": "byte[]", "lob": True},
     "byte-array": {"java_type": "byte[]", "lob": True},
     "object": {"java_type": "byte[]", "lob": True},

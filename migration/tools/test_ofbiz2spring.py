@@ -115,7 +115,7 @@ class Ofbiz2SpringTest(unittest.TestCase):
             with self.subTest(field_type=field_type):
                 self.assertEqual(java_type, TYPE_MAPPING[field_type]["java_type"])
                 self.assertEqual(length, TYPE_MAPPING[field_type].get("length"))
-        self.assertTrue(TYPE_MAPPING["very-long"]["lob"])
+        self.assertFalse(TYPE_MAPPING["very-long"].get("lob", False))
         self.assertEqual("TEXT", TYPE_MAPPING["very-long"]["column_definition"])
         self.assertTrue(TYPE_MAPPING["blob"]["lob"])
 
