@@ -13,11 +13,14 @@ import secrets
 import signal
 import ssl
 import subprocess
+import sys
 import time
 import urllib.error
 import urllib.request
 
-from compare import Normalizer, bind_created_keys, delta, encoded, mismatches
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+from eca_catalog import generate
+from compare import Normalizer, bind_created_keys, delta, encoded, mismatches, response_contract
 from setup import CONTAINER, ROOT, STATE, command, setup, sql
 
 HERE = Path(__file__).resolve().parent
@@ -88,6 +91,7 @@ def assertions(step, rows, bindings, result):
 
 
 def run_cases(manifest, until=None):
+    contracts = generate({})['parameters']
     bindings = {'old': {}, 'new': {}}
     normalizer = Normalizer()
     results = []
@@ -121,6 +125,10 @@ def run_cases(manifest, until=None):
                 continue
             bind_created_keys(normalizer, step['id'], table, fields, before, after)
         comparisons = {}
+        responses, info = response_contract({side: row[side]['response'] for side in ['old', 'new']},
+                                            contracts[step['service']],
+                                            {side: successful(row[side]) for side in ['old', 'new']})
+        row['responseInfo'] = info
         for side in ['old', 'new']:
             changes = delta(before[side], after[side], normalizer, side)
             failures = assertions(step, after[side], bindings[side], row[side])
@@ -128,7 +136,7 @@ def run_cases(manifest, until=None):
                 failures.append('Error changed persisted business rows')
             row[side]['assertionFailures'] = failures
             row[side]['changes'] = changes
-            comparisons[side] = {'response': normalizer.normalize(row[side]['response'], side), 'changes': changes}
+            comparisons[side] = {'response': normalizer.normalize(responses[side], side), 'changes': changes}
         row['differences'] = mismatches(comparisons['old'], comparisons['new'])
         row['fingerprint'] = hashlib.sha256(encoded(row['differences']).encode()).hexdigest()
         failed = bool(row['old']['assertionFailures'] or row['new']['assertionFailures'])

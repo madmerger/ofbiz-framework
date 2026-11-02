@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-11-02T13:23:02.525933+00:00",
+  "generatedAt": "2026-11-02T13:28:39.358601+00:00",
   "totals": {
-    "MATCH": 4,
+    "MATCH": 18,
     "ACCEPTED_DIFFERENCE": 0,
-    "MISMATCH": 18
+    "MISMATCH": 4
   },
   "cases": [
     {
@@ -223,6 +223,10 @@
           }
         }
       },
+      "responseInfo": {
+        "old": {},
+        "new": {}
+      },
       "differences": [],
       "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "status": "MATCH"
@@ -396,6 +400,10 @@
           }
         }
       },
+      "responseInfo": {
+        "old": {},
+        "new": {}
+      },
       "differences": [],
       "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "status": "MATCH"
@@ -529,8 +537,8 @@
           "birthDate": null,
           "cardId": null,
           "comments": null,
-          "createdStamp": "2026-11-02T13:22:23.333+00:00",
-          "createdTxStamp": "2026-11-02T13:22:23.333+00:00",
+          "createdStamp": "2026-11-02T13:27:55.727+00:00",
+          "createdTxStamp": "2026-11-02T13:27:55.727+00:00",
           "deceasedDate": null,
           "employmentStatusEnumId": null,
           "existingCustomer": null,
@@ -540,8 +548,8 @@
           "height": null,
           "lastName": "Person",
           "lastNameLocal": null,
-          "lastUpdatedStamp": "2026-11-02T13:22:23.333+00:00",
-          "lastUpdatedTxStamp": "2026-11-02T13:22:23.333+00:00",
+          "lastUpdatedStamp": "2026-11-02T13:27:55.727+00:00",
+          "lastUpdatedTxStamp": "2026-11-02T13:27:55.727+00:00",
           "maritalStatusTypeId": null,
           "memberId": null,
           "middleName": null,
@@ -565,7 +573,7 @@
           "yearsWithEmployer": null,
           "responseMessage": "success"
         },
-        "wireBody": "{\"birthDate\":null,\"cardId\":null,\"comments\":null,\"createdStamp\":\"2026-11-02T13:22:23.333+00:00\",\"createdTxStamp\":\"2026-11-02T13:22:23.333+00:00\",\"deceasedDate\":null,\"employmentStatusEnumId\":null,\"existingCustomer\":null,\"firstName\":\"Renamed\",\"firstNameLocal\":null,\"gender\":null,\"height\":null,\"lastName\":\"Person\",\"lastNameLocal\":null,\"lastUpdatedStamp\":\"2026-11-02T13:22:23.333+00:00\",\"lastUpdatedTxStamp\":\"2026-11-02T13:22:23.333+00:00\",\"maritalStatusTypeId\":null,\"memberId\":null,\"middleName\":null,\"middleNameLocal\":null,\"monthsWithEmployer\":null,\"mothersMaidenName\":null,\"nickname\":null,\"occupation\":null,\"oldMaritalStatusEnumId\":null,\"otherLocal\":null,\"partyId\":\"10000\",\"passportExpireDate\":null,\"passportNumber\":null,\"personalTitle\":null,\"residenceStatusEnumId\":null,\"salutation\":null,\"socialSecurityNumber\":null,\"suffix\":null,\"totalYearsWorkExperience\":null,\"weight\":null,\"yearsWithEmployer\":null,\"responseMessage\":\"success\"}",
+        "wireBody": "{\"birthDate\":null,\"cardId\":null,\"comments\":null,\"createdStamp\":\"2026-11-02T13:27:55.727+00:00\",\"createdTxStamp\":\"2026-11-02T13:27:55.727+00:00\",\"deceasedDate\":null,\"employmentStatusEnumId\":null,\"existingCustomer\":null,\"firstName\":\"Renamed\",\"firstNameLocal\":null,\"gender\":null,\"height\":null,\"lastName\":\"Person\",\"lastNameLocal\":null,\"lastUpdatedStamp\":\"2026-11-02T13:27:55.727+00:00\",\"lastUpdatedTxStamp\":\"2026-11-02T13:27:55.727+00:00\",\"maritalStatusTypeId\":null,\"memberId\":null,\"middleName\":null,\"middleNameLocal\":null,\"monthsWithEmployer\":null,\"mothersMaidenName\":null,\"nickname\":null,\"occupation\":null,\"oldMaritalStatusEnumId\":null,\"otherLocal\":null,\"partyId\":\"10000\",\"passportExpireDate\":null,\"passportNumber\":null,\"personalTitle\":null,\"residenceStatusEnumId\":null,\"salutation\":null,\"socialSecurityNumber\":null,\"suffix\":null,\"totalYearsWorkExperience\":null,\"weight\":null,\"yearsWithEmployer\":null,\"responseMessage\":\"success\"}",
         "assertionFailures": [],
         "changes": {
           "party": {
@@ -677,238 +685,53 @@
           }
         }
       },
-      "differences": [
-        {
-          "path": "/response/birthDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
+      "responseInfo": {
+        "old": {
+          "successMessage": "Person successfully updated."
         },
-        {
-          "path": "/response/cardId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/comments",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdTxStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/deceasedDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/employmentStatusEnumId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/existingCustomer",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/firstName",
-          "old": null,
-          "new": "Renamed",
-          "missing": "old"
-        },
-        {
-          "path": "/response/firstNameLocal",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/gender",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/height",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastName",
-          "old": null,
-          "new": "Person",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastNameLocal",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastUpdatedStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastUpdatedTxStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/maritalStatusTypeId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/memberId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/middleName",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/middleNameLocal",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/monthsWithEmployer",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/mothersMaidenName",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/nickname",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/occupation",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/oldMaritalStatusEnumId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/otherLocal",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/partyId",
-          "old": null,
-          "new": "$person",
-          "missing": "old"
-        },
-        {
-          "path": "/response/passportExpireDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/passportNumber",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/personalTitle",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/residenceStatusEnumId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/salutation",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/socialSecurityNumber",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/successMessage",
-          "old": "Person successfully updated.",
-          "new": null,
-          "missing": "new"
-        },
-        {
-          "path": "/response/suffix",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/totalYearsWorkExperience",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/weight",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/yearsWithEmployer",
-          "old": null,
-          "new": null,
-          "missing": "old"
+        "new": {
+          "birthDate": null,
+          "cardId": null,
+          "comments": null,
+          "createdStamp": "2026-11-02T13:27:55.727+00:00",
+          "createdTxStamp": "2026-11-02T13:27:55.727+00:00",
+          "deceasedDate": null,
+          "employmentStatusEnumId": null,
+          "existingCustomer": null,
+          "firstName": "Renamed",
+          "firstNameLocal": null,
+          "gender": null,
+          "height": null,
+          "lastName": "Person",
+          "lastNameLocal": null,
+          "lastUpdatedStamp": "2026-11-02T13:27:55.727+00:00",
+          "lastUpdatedTxStamp": "2026-11-02T13:27:55.727+00:00",
+          "maritalStatusTypeId": null,
+          "memberId": null,
+          "middleName": null,
+          "middleNameLocal": null,
+          "monthsWithEmployer": null,
+          "mothersMaidenName": null,
+          "nickname": null,
+          "occupation": null,
+          "oldMaritalStatusEnumId": null,
+          "otherLocal": null,
+          "partyId": "10000",
+          "passportExpireDate": null,
+          "passportNumber": null,
+          "personalTitle": null,
+          "residenceStatusEnumId": null,
+          "salutation": null,
+          "socialSecurityNumber": null,
+          "suffix": null,
+          "totalYearsWorkExperience": null,
+          "weight": null,
+          "yearsWithEmployer": null
         }
-      ],
-      "fingerprint": "40ffbc5e3d739a8dc866b75d50407214dd89aeba93066a10f394046cea00db40",
-      "status": "MISMATCH"
+      },
+      "differences": [],
+      "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "MATCH"
     },
     {
       "id": "party-customer-role",
@@ -942,15 +765,15 @@
       "new": {
         "httpStatus": 200,
         "response": {
-          "createdStamp": "2026-11-02T13:22:27.346+00:00",
-          "createdTxStamp": "2026-11-02T13:22:27.346+00:00",
-          "lastUpdatedStamp": "2026-11-02T13:22:27.346+00:00",
-          "lastUpdatedTxStamp": "2026-11-02T13:22:27.346+00:00",
+          "createdStamp": "2026-11-02T13:28:02.123+00:00",
+          "createdTxStamp": "2026-11-02T13:28:02.123+00:00",
+          "lastUpdatedStamp": "2026-11-02T13:28:02.123+00:00",
+          "lastUpdatedTxStamp": "2026-11-02T13:28:02.123+00:00",
           "partyId": "10000",
           "roleTypeId": "CUSTOMER",
           "responseMessage": "success"
         },
-        "wireBody": "{\"createdStamp\":\"2026-11-02T13:22:27.346+00:00\",\"createdTxStamp\":\"2026-11-02T13:22:27.346+00:00\",\"lastUpdatedStamp\":\"2026-11-02T13:22:27.346+00:00\",\"lastUpdatedTxStamp\":\"2026-11-02T13:22:27.346+00:00\",\"partyId\":\"10000\",\"roleTypeId\":\"CUSTOMER\",\"responseMessage\":\"success\"}",
+        "wireBody": "{\"createdStamp\":\"2026-11-02T13:28:02.123+00:00\",\"createdTxStamp\":\"2026-11-02T13:28:02.123+00:00\",\"lastUpdatedStamp\":\"2026-11-02T13:28:02.123+00:00\",\"lastUpdatedTxStamp\":\"2026-11-02T13:28:02.123+00:00\",\"partyId\":\"10000\",\"roleTypeId\":\"CUSTOMER\",\"responseMessage\":\"success\"}",
         "assertionFailures": [],
         "changes": {
           "party_role": {
@@ -968,52 +791,22 @@
           }
         }
       },
-      "differences": [
-        {
-          "path": "/response/createdStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
+      "responseInfo": {
+        "old": {
+          "successMessage": "Party Role created successfully"
         },
-        {
-          "path": "/response/createdTxStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastUpdatedStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastUpdatedTxStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/partyId",
-          "old": null,
-          "new": "$person",
-          "missing": "old"
-        },
-        {
-          "path": "/response/roleTypeId",
-          "old": null,
-          "new": "CUSTOMER",
-          "missing": "old"
-        },
-        {
-          "path": "/response/successMessage",
-          "old": "Party Role created successfully",
-          "new": null,
-          "missing": "new"
+        "new": {
+          "createdStamp": "2026-11-02T13:28:02.123+00:00",
+          "createdTxStamp": "2026-11-02T13:28:02.123+00:00",
+          "lastUpdatedStamp": "2026-11-02T13:28:02.123+00:00",
+          "lastUpdatedTxStamp": "2026-11-02T13:28:02.123+00:00",
+          "partyId": "10000",
+          "roleTypeId": "CUSTOMER"
         }
-      ],
-      "fingerprint": "9a389995a8d943d756965815d4644a9db63d2894934dd706ef82d8554eca92dc",
-      "status": "MISMATCH"
+      },
+      "differences": [],
+      "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "MATCH"
     },
     {
       "id": "party-contact",
@@ -1115,16 +908,15 @@
           }
         }
       },
-      "differences": [
-        {
-          "path": "/response/successMessage",
-          "old": "Contact Mechanism created successfully",
-          "new": null,
-          "missing": "new"
-        }
-      ],
-      "fingerprint": "e374b4d585c26d229dfcbeb171d0fc92ead7c1b06ae941a7e072348a25d5864e",
-      "status": "MISMATCH"
+      "responseInfo": {
+        "old": {
+          "successMessage": "Contact Mechanism created successfully"
+        },
+        "new": {}
+      },
+      "differences": [],
+      "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "MATCH"
     },
     {
       "id": "content-electronic-text",
@@ -1189,15 +981,15 @@
       "new": {
         "httpStatus": 200,
         "response": {
-          "createdStamp": "2026-11-02T13:22:29.022+00:00",
-          "createdTxStamp": "2026-11-02T13:22:29.022+00:00",
+          "createdStamp": "2026-11-02T13:28:04.147+00:00",
+          "createdTxStamp": "2026-11-02T13:28:04.147+00:00",
           "dataResourceId": "10000",
-          "lastUpdatedStamp": "2026-11-02T13:22:29.022+00:00",
-          "lastUpdatedTxStamp": "2026-11-02T13:22:29.022+00:00",
+          "lastUpdatedStamp": "2026-11-02T13:28:04.147+00:00",
+          "lastUpdatedTxStamp": "2026-11-02T13:28:04.147+00:00",
           "textData": "Equivalence electronic text",
           "responseMessage": "success"
         },
-        "wireBody": "{\"createdStamp\":\"2026-11-02T13:22:29.022+00:00\",\"createdTxStamp\":\"2026-11-02T13:22:29.022+00:00\",\"dataResourceId\":\"10000\",\"lastUpdatedStamp\":\"2026-11-02T13:22:29.022+00:00\",\"lastUpdatedTxStamp\":\"2026-11-02T13:22:29.022+00:00\",\"textData\":\"Equivalence electronic text\",\"responseMessage\":\"success\"}",
+        "wireBody": "{\"createdStamp\":\"2026-11-02T13:28:04.147+00:00\",\"createdTxStamp\":\"2026-11-02T13:28:04.147+00:00\",\"dataResourceId\":\"10000\",\"lastUpdatedStamp\":\"2026-11-02T13:28:04.147+00:00\",\"lastUpdatedTxStamp\":\"2026-11-02T13:28:04.147+00:00\",\"textData\":\"Equivalence electronic text\",\"responseMessage\":\"success\"}",
         "assertionFailures": [],
         "changes": {
           "data_resource": {
@@ -1245,46 +1037,21 @@
           }
         }
       },
-      "differences": [
-        {
-          "path": "/response/createdStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
+      "responseInfo": {
+        "old": {
+          "successMessage": "Electronic Text created successfully"
         },
-        {
-          "path": "/response/createdTxStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastUpdatedStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastUpdatedTxStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/successMessage",
-          "old": "Electronic Text created successfully",
-          "new": null,
-          "missing": "new"
-        },
-        {
-          "path": "/response/textData",
-          "old": null,
-          "new": "Equivalence electronic text",
-          "missing": "old"
+        "new": {
+          "createdStamp": "2026-11-02T13:28:04.147+00:00",
+          "createdTxStamp": "2026-11-02T13:28:04.147+00:00",
+          "lastUpdatedStamp": "2026-11-02T13:28:04.147+00:00",
+          "lastUpdatedTxStamp": "2026-11-02T13:28:04.147+00:00",
+          "textData": "Equivalence electronic text"
         }
-      ],
-      "fingerprint": "b7f377dcf7c0ee91a26033b50132d1318add559a6b2d6d79846d776be2416a4b",
-      "status": "MISMATCH"
+      },
+      "differences": [],
+      "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "MATCH"
     },
     {
       "id": "marketing-campaign",
@@ -1346,8 +1113,8 @@
           "campaignSummary": null,
           "convertedLeads": null,
           "createdByUserLogin": null,
-          "createdStamp": "2026-11-02T13:22:29.541+00:00",
-          "createdTxStamp": "2026-11-02T13:22:29.541+00:00",
+          "createdStamp": "2026-11-02T13:28:04.887+00:00",
+          "createdTxStamp": "2026-11-02T13:28:04.887+00:00",
           "currencyUomId": null,
           "estimatedCost": null,
           "expectedResponsePercent": null,
@@ -1355,8 +1122,8 @@
           "fromDate": null,
           "isActive": null,
           "lastModifiedByUserLogin": null,
-          "lastUpdatedStamp": "2026-11-02T13:22:29.541+00:00",
-          "lastUpdatedTxStamp": "2026-11-02T13:22:29.541+00:00",
+          "lastUpdatedStamp": "2026-11-02T13:28:04.887+00:00",
+          "lastUpdatedTxStamp": "2026-11-02T13:28:04.887+00:00",
           "marketingCampaignId": "10000",
           "numSent": null,
           "parentCampaignId": null,
@@ -1365,7 +1132,7 @@
           "thruDate": null,
           "responseMessage": "success"
         },
-        "wireBody": "{\"actualCost\":null,\"budgetedCost\":null,\"campaignName\":\"Equivalence Campaign\",\"campaignSummary\":null,\"convertedLeads\":null,\"createdByUserLogin\":null,\"createdStamp\":\"2026-11-02T13:22:29.541+00:00\",\"createdTxStamp\":\"2026-11-02T13:22:29.541+00:00\",\"currencyUomId\":null,\"estimatedCost\":null,\"expectedResponsePercent\":null,\"expectedRevenue\":null,\"fromDate\":null,\"isActive\":null,\"lastModifiedByUserLogin\":null,\"lastUpdatedStamp\":\"2026-11-02T13:22:29.541+00:00\",\"lastUpdatedTxStamp\":\"2026-11-02T13:22:29.541+00:00\",\"marketingCampaignId\":\"10000\",\"numSent\":null,\"parentCampaignId\":null,\"startDate\":null,\"statusId\":null,\"thruDate\":null,\"responseMessage\":\"success\"}",
+        "wireBody": "{\"actualCost\":null,\"budgetedCost\":null,\"campaignName\":\"Equivalence Campaign\",\"campaignSummary\":null,\"convertedLeads\":null,\"createdByUserLogin\":null,\"createdStamp\":\"2026-11-02T13:28:04.887+00:00\",\"createdTxStamp\":\"2026-11-02T13:28:04.887+00:00\",\"currencyUomId\":null,\"estimatedCost\":null,\"expectedResponsePercent\":null,\"expectedRevenue\":null,\"fromDate\":null,\"isActive\":null,\"lastModifiedByUserLogin\":null,\"lastUpdatedStamp\":\"2026-11-02T13:28:04.887+00:00\",\"lastUpdatedTxStamp\":\"2026-11-02T13:28:04.887+00:00\",\"marketingCampaignId\":\"10000\",\"numSent\":null,\"parentCampaignId\":null,\"startDate\":null,\"statusId\":null,\"thruDate\":null,\"responseMessage\":\"success\"}",
         "assertionFailures": [],
         "changes": {
           "marketing_campaign": {
@@ -1404,148 +1171,38 @@
           }
         }
       },
-      "differences": [
-        {
-          "path": "/response/actualCost",
-          "old": null,
-          "new": null,
-          "missing": "old"
+      "responseInfo": {
+        "old": {
+          "successMessage": "Marketing Campaign created successfully"
         },
-        {
-          "path": "/response/budgetedCost",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/campaignName",
-          "old": null,
-          "new": "Equivalence Campaign",
-          "missing": "old"
-        },
-        {
-          "path": "/response/campaignSummary",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/convertedLeads",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdByUserLogin",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdTxStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/currencyUomId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimatedCost",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/expectedResponsePercent",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/expectedRevenue",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/fromDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/isActive",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastModifiedByUserLogin",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastUpdatedStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastUpdatedTxStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/numSent",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/parentCampaignId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/startDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/statusId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/successMessage",
-          "old": "Marketing Campaign created successfully",
-          "new": null,
-          "missing": "new"
-        },
-        {
-          "path": "/response/thruDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
+        "new": {
+          "actualCost": null,
+          "budgetedCost": null,
+          "campaignName": "Equivalence Campaign",
+          "campaignSummary": null,
+          "convertedLeads": null,
+          "createdByUserLogin": null,
+          "createdStamp": "2026-11-02T13:28:04.887+00:00",
+          "createdTxStamp": "2026-11-02T13:28:04.887+00:00",
+          "currencyUomId": null,
+          "estimatedCost": null,
+          "expectedResponsePercent": null,
+          "expectedRevenue": null,
+          "fromDate": null,
+          "isActive": null,
+          "lastModifiedByUserLogin": null,
+          "lastUpdatedStamp": "2026-11-02T13:28:04.887+00:00",
+          "lastUpdatedTxStamp": "2026-11-02T13:28:04.887+00:00",
+          "numSent": null,
+          "parentCampaignId": null,
+          "startDate": null,
+          "statusId": null,
+          "thruDate": null
         }
-      ],
-      "fingerprint": "13e027cf39468aac1a9524ee3a0bf3eb977de2f3efa4883945d9d19ec037aa07",
-      "status": "MISMATCH"
+      },
+      "differences": [],
+      "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "MATCH"
     },
     {
       "id": "manufacturing-calendar",
@@ -1582,14 +1239,14 @@
         "response": {
           "calendarId": "EQ_CALENDAR",
           "calendarWeekId": null,
-          "createdStamp": "2026-11-02T13:22:29.950+00:00",
-          "createdTxStamp": "2026-11-02T13:22:29.950+00:00",
+          "createdStamp": "2026-11-02T13:28:05.648+00:00",
+          "createdTxStamp": "2026-11-02T13:28:05.648+00:00",
           "description": "Equivalence calendar",
-          "lastUpdatedStamp": "2026-11-02T13:22:29.950+00:00",
-          "lastUpdatedTxStamp": "2026-11-02T13:22:29.950+00:00",
+          "lastUpdatedStamp": "2026-11-02T13:28:05.648+00:00",
+          "lastUpdatedTxStamp": "2026-11-02T13:28:05.648+00:00",
           "responseMessage": "success"
         },
-        "wireBody": "{\"calendarId\":\"EQ_CALENDAR\",\"calendarWeekId\":null,\"createdStamp\":\"2026-11-02T13:22:29.950+00:00\",\"createdTxStamp\":\"2026-11-02T13:22:29.950+00:00\",\"description\":\"Equivalence calendar\",\"lastUpdatedStamp\":\"2026-11-02T13:22:29.950+00:00\",\"lastUpdatedTxStamp\":\"2026-11-02T13:22:29.950+00:00\",\"responseMessage\":\"success\"}",
+        "wireBody": "{\"calendarId\":\"EQ_CALENDAR\",\"calendarWeekId\":null,\"createdStamp\":\"2026-11-02T13:28:05.648+00:00\",\"createdTxStamp\":\"2026-11-02T13:28:05.648+00:00\",\"description\":\"Equivalence calendar\",\"lastUpdatedStamp\":\"2026-11-02T13:28:05.648+00:00\",\"lastUpdatedTxStamp\":\"2026-11-02T13:28:05.648+00:00\",\"responseMessage\":\"success\"}",
         "assertionFailures": [],
         "changes": {
           "tech_data_calendar": {
@@ -1608,58 +1265,23 @@
           }
         }
       },
-      "differences": [
-        {
-          "path": "/response/calendarId",
-          "old": null,
-          "new": "EQ_CALENDAR",
-          "missing": "old"
+      "responseInfo": {
+        "old": {
+          "successMessage": "Calendar created successfully"
         },
-        {
-          "path": "/response/calendarWeekId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdTxStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/description",
-          "old": null,
-          "new": "Equivalence calendar",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastUpdatedStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastUpdatedTxStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/successMessage",
-          "old": "Calendar created successfully",
-          "new": null,
-          "missing": "new"
+        "new": {
+          "calendarId": "EQ_CALENDAR",
+          "calendarWeekId": null,
+          "createdStamp": "2026-11-02T13:28:05.648+00:00",
+          "createdTxStamp": "2026-11-02T13:28:05.648+00:00",
+          "description": "Equivalence calendar",
+          "lastUpdatedStamp": "2026-11-02T13:28:05.648+00:00",
+          "lastUpdatedTxStamp": "2026-11-02T13:28:05.648+00:00"
         }
-      ],
-      "fingerprint": "99bc9d6831e7cc4b66b904c21899fe6ae04327f1332974d6f5c6c7d5ba30f99a",
-      "status": "MISMATCH"
+      },
+      "differences": [],
+      "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "MATCH"
     },
     {
       "id": "humanres-position-type",
@@ -1719,16 +1341,15 @@
           }
         }
       },
-      "differences": [
-        {
-          "path": "/response/successMessage",
-          "old": "EmplPosition Type created successfully",
-          "new": null,
-          "missing": "new"
-        }
-      ],
-      "fingerprint": "03c4d7225801f6534f8e1d568eee169eee81bd560b68883ded8a54ec99dc5817",
-      "status": "MISMATCH"
+      "responseInfo": {
+        "old": {
+          "successMessage": "EmplPosition Type created successfully"
+        },
+        "new": {}
+      },
+      "differences": [],
+      "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "MATCH"
     },
     {
       "id": "workeffort-create",
@@ -1834,9 +1455,9 @@
           "actualSetupMillis": null,
           "actualStartDate": null,
           "createdByUserLogin": "admin",
-          "createdDate": "2026-11-02T13:22:31.955+00:00",
-          "createdStamp": "2026-11-02T13:22:31.956+00:00",
-          "createdTxStamp": "2026-11-02T13:22:31.956+00:00",
+          "createdDate": "2026-11-02T13:28:08.677+00:00",
+          "createdStamp": "2026-11-02T13:28:08.679+00:00",
+          "createdTxStamp": "2026-11-02T13:28:08.679+00:00",
           "currentStatusId": "CAL_TENTATIVE",
           "description": null,
           "estimateCalcMethod": null,
@@ -1848,10 +1469,10 @@
           "fixedAssetId": null,
           "infoUrl": null,
           "lastModifiedByUserLogin": "admin",
-          "lastModifiedDate": "2026-11-02T13:22:31.955+00:00",
-          "lastStatusUpdate": "2026-11-02T13:22:31.955+00:00",
-          "lastUpdatedStamp": "2026-11-02T13:22:31.956+00:00",
-          "lastUpdatedTxStamp": "2026-11-02T13:22:31.956+00:00",
+          "lastModifiedDate": "2026-11-02T13:28:08.677+00:00",
+          "lastStatusUpdate": "2026-11-02T13:28:08.677+00:00",
+          "lastUpdatedStamp": "2026-11-02T13:28:08.679+00:00",
+          "lastUpdatedTxStamp": "2026-11-02T13:28:08.679+00:00",
           "locationDesc": null,
           "moneyUomId": null,
           "noteId": null,
@@ -1884,7 +1505,7 @@
           "workEffortTypeId": "EVENT",
           "responseMessage": "success"
         },
-        "wireBody": "{\"accommodationMapId\":null,\"accommodationSpotId\":null,\"actualCompletionDate\":null,\"actualMilliSeconds\":null,\"actualSetupMillis\":null,\"actualStartDate\":null,\"createdByUserLogin\":\"admin\",\"createdDate\":\"2026-11-02T13:22:31.955+00:00\",\"createdStamp\":\"2026-11-02T13:22:31.956+00:00\",\"createdTxStamp\":\"2026-11-02T13:22:31.956+00:00\",\"currentStatusId\":\"CAL_TENTATIVE\",\"description\":null,\"estimateCalcMethod\":null,\"estimatedCompletionDate\":null,\"estimatedMilliSeconds\":null,\"estimatedSetupMillis\":null,\"estimatedStartDate\":null,\"facilityId\":null,\"fixedAssetId\":null,\"infoUrl\":null,\"lastModifiedByUserLogin\":\"admin\",\"lastModifiedDate\":\"2026-11-02T13:22:31.955+00:00\",\"lastStatusUpdate\":\"2026-11-02T13:22:31.955+00:00\",\"lastUpdatedStamp\":\"2026-11-02T13:22:31.956+00:00\",\"lastUpdatedTxStamp\":\"2026-11-02T13:22:31.956+00:00\",\"locationDesc\":null,\"moneyUomId\":null,\"noteId\":null,\"percentComplete\":null,\"priority\":null,\"quantityProduced\":null,\"quantityRejected\":null,\"quantityToProduce\":null,\"recurrenceInfoId\":null,\"reserv2ndPPPerc\":null,\"reservNthPPPerc\":null,\"reservPersons\":null,\"revisionNumber\":1,\"runtimeDataId\":null,\"scopeEnumId\":null,\"sendNotificationEmail\":null,\"serviceLoaderName\":null,\"showAsEnumId\":null,\"sourceReferenceId\":null,\"specialTerms\":null,\"tempExprId\":null,\"timeTransparency\":null,\"totalMilliSecondsAllowed\":null,\"totalMoneyAllowed\":null,\"universalId\":null,\"workEffortId\":\"10000\",\"workEffortName\":\"Equivalence pickup\",\"workEffortParentId\":null,\"workEffortPurposeTypeId\":null,\"workEffortTypeId\":\"EVENT\",\"responseMessage\":\"success\"}",
+        "wireBody": "{\"accommodationMapId\":null,\"accommodationSpotId\":null,\"actualCompletionDate\":null,\"actualMilliSeconds\":null,\"actualSetupMillis\":null,\"actualStartDate\":null,\"createdByUserLogin\":\"admin\",\"createdDate\":\"2026-11-02T13:28:08.677+00:00\",\"createdStamp\":\"2026-11-02T13:28:08.679+00:00\",\"createdTxStamp\":\"2026-11-02T13:28:08.679+00:00\",\"currentStatusId\":\"CAL_TENTATIVE\",\"description\":null,\"estimateCalcMethod\":null,\"estimatedCompletionDate\":null,\"estimatedMilliSeconds\":null,\"estimatedSetupMillis\":null,\"estimatedStartDate\":null,\"facilityId\":null,\"fixedAssetId\":null,\"infoUrl\":null,\"lastModifiedByUserLogin\":\"admin\",\"lastModifiedDate\":\"2026-11-02T13:28:08.677+00:00\",\"lastStatusUpdate\":\"2026-11-02T13:28:08.677+00:00\",\"lastUpdatedStamp\":\"2026-11-02T13:28:08.679+00:00\",\"lastUpdatedTxStamp\":\"2026-11-02T13:28:08.679+00:00\",\"locationDesc\":null,\"moneyUomId\":null,\"noteId\":null,\"percentComplete\":null,\"priority\":null,\"quantityProduced\":null,\"quantityRejected\":null,\"quantityToProduce\":null,\"recurrenceInfoId\":null,\"reserv2ndPPPerc\":null,\"reservNthPPPerc\":null,\"reservPersons\":null,\"revisionNumber\":1,\"runtimeDataId\":null,\"scopeEnumId\":null,\"sendNotificationEmail\":null,\"serviceLoaderName\":null,\"showAsEnumId\":null,\"sourceReferenceId\":null,\"specialTerms\":null,\"tempExprId\":null,\"timeTransparency\":null,\"totalMilliSecondsAllowed\":null,\"totalMoneyAllowed\":null,\"universalId\":null,\"workEffortId\":\"10000\",\"workEffortName\":\"Equivalence pickup\",\"workEffortParentId\":null,\"workEffortPurposeTypeId\":null,\"workEffortTypeId\":\"EVENT\",\"responseMessage\":\"success\"}",
         "assertionFailures": [],
         "changes": {
           "work_effort": {
@@ -1967,334 +1588,68 @@
           }
         }
       },
-      "differences": [
-        {
-          "path": "/response/accommodationMapId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/accommodationSpotId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/actualCompletionDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/actualMilliSeconds",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/actualSetupMillis",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/actualStartDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdByUserLogin",
-          "old": null,
-          "new": "admin",
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdDate",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdTxStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/currentStatusId",
-          "old": null,
-          "new": "CAL_TENTATIVE",
-          "missing": "old"
-        },
-        {
-          "path": "/response/description",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimateCalcMethod",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimatedCompletionDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimatedMilliSeconds",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimatedSetupMillis",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimatedStartDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/facilityId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/fixedAssetId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/infoUrl",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastModifiedByUserLogin",
-          "old": null,
-          "new": "admin",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastModifiedDate",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastStatusUpdate",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastUpdatedStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastUpdatedTxStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/locationDesc",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/moneyUomId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/noteId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/percentComplete",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/priority",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/quantityProduced",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/quantityRejected",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/quantityToProduce",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/recurrenceInfoId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/reserv2ndPPPerc",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/reservNthPPPerc",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/reservPersons",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/revisionNumber",
-          "old": null,
-          "new": "1",
-          "missing": "old"
-        },
-        {
-          "path": "/response/runtimeDataId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/scopeEnumId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/sendNotificationEmail",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/serviceLoaderName",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/showAsEnumId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/sourceReferenceId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/specialTerms",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/tempExprId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/timeTransparency",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/totalMilliSecondsAllowed",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/totalMoneyAllowed",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/universalId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/workEffortName",
-          "old": null,
-          "new": "Equivalence pickup",
-          "missing": "old"
-        },
-        {
-          "path": "/response/workEffortParentId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/workEffortPurposeTypeId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/workEffortTypeId",
-          "old": null,
-          "new": "EVENT",
-          "missing": "old"
+      "responseInfo": {
+        "old": {},
+        "new": {
+          "accommodationMapId": null,
+          "accommodationSpotId": null,
+          "actualCompletionDate": null,
+          "actualMilliSeconds": null,
+          "actualSetupMillis": null,
+          "actualStartDate": null,
+          "createdByUserLogin": "admin",
+          "createdDate": "2026-11-02T13:28:08.677+00:00",
+          "createdStamp": "2026-11-02T13:28:08.679+00:00",
+          "createdTxStamp": "2026-11-02T13:28:08.679+00:00",
+          "currentStatusId": "CAL_TENTATIVE",
+          "description": null,
+          "estimateCalcMethod": null,
+          "estimatedCompletionDate": null,
+          "estimatedMilliSeconds": null,
+          "estimatedSetupMillis": null,
+          "estimatedStartDate": null,
+          "facilityId": null,
+          "fixedAssetId": null,
+          "infoUrl": null,
+          "lastModifiedByUserLogin": "admin",
+          "lastModifiedDate": "2026-11-02T13:28:08.677+00:00",
+          "lastStatusUpdate": "2026-11-02T13:28:08.677+00:00",
+          "lastUpdatedStamp": "2026-11-02T13:28:08.679+00:00",
+          "lastUpdatedTxStamp": "2026-11-02T13:28:08.679+00:00",
+          "locationDesc": null,
+          "moneyUomId": null,
+          "noteId": null,
+          "percentComplete": null,
+          "priority": null,
+          "quantityProduced": null,
+          "quantityRejected": null,
+          "quantityToProduce": null,
+          "recurrenceInfoId": null,
+          "reserv2ndPPPerc": null,
+          "reservNthPPPerc": null,
+          "reservPersons": null,
+          "revisionNumber": 1,
+          "runtimeDataId": null,
+          "scopeEnumId": null,
+          "sendNotificationEmail": null,
+          "serviceLoaderName": null,
+          "showAsEnumId": null,
+          "sourceReferenceId": null,
+          "specialTerms": null,
+          "tempExprId": null,
+          "timeTransparency": null,
+          "totalMilliSecondsAllowed": null,
+          "totalMoneyAllowed": null,
+          "universalId": null,
+          "workEffortName": "Equivalence pickup",
+          "workEffortParentId": null,
+          "workEffortPurposeTypeId": null,
+          "workEffortTypeId": "EVENT"
         }
-      ],
-      "fingerprint": "85d93385bd4179c96b91d7bf00a1e2cd8549532e290e544481a5397a81287f18",
-      "status": "MISMATCH"
+      },
+      "differences": [],
+      "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "MATCH"
     },
     {
       "id": "workeffort-update",
@@ -2445,9 +1800,9 @@
           "actualSetupMillis": null,
           "actualStartDate": null,
           "createdByUserLogin": "admin",
-          "createdDate": "2026-11-02T13:22:31.955+00:00",
-          "createdStamp": "2026-11-02T13:22:31.956+00:00",
-          "createdTxStamp": "2026-11-02T13:22:31.956+00:00",
+          "createdDate": "2026-11-02T13:28:08.677+00:00",
+          "createdStamp": "2026-11-02T13:28:08.679+00:00",
+          "createdTxStamp": "2026-11-02T13:28:08.679+00:00",
           "currentStatusId": "CAL_TENTATIVE",
           "description": "Updated equivalence pickup",
           "estimateCalcMethod": null,
@@ -2459,10 +1814,10 @@
           "fixedAssetId": null,
           "infoUrl": null,
           "lastModifiedByUserLogin": "admin",
-          "lastModifiedDate": "2026-11-02T13:22:32.588+00:00",
-          "lastStatusUpdate": "2026-11-02T13:22:31.955+00:00",
-          "lastUpdatedStamp": "2026-11-02T13:22:32.590+00:00",
-          "lastUpdatedTxStamp": "2026-11-02T13:22:32.590+00:00",
+          "lastModifiedDate": "2026-11-02T13:28:09.913+00:00",
+          "lastStatusUpdate": "2026-11-02T13:28:08.677+00:00",
+          "lastUpdatedStamp": "2026-11-02T13:28:09.915+00:00",
+          "lastUpdatedTxStamp": "2026-11-02T13:28:09.915+00:00",
           "locationDesc": null,
           "moneyUomId": null,
           "noteId": null,
@@ -2495,7 +1850,7 @@
           "workEffortTypeId": "EVENT",
           "responseMessage": "success"
         },
-        "wireBody": "{\"accommodationMapId\":null,\"accommodationSpotId\":null,\"actualCompletionDate\":null,\"actualMilliSeconds\":null,\"actualSetupMillis\":null,\"actualStartDate\":null,\"createdByUserLogin\":\"admin\",\"createdDate\":\"2026-11-02T13:22:31.955+00:00\",\"createdStamp\":\"2026-11-02T13:22:31.956+00:00\",\"createdTxStamp\":\"2026-11-02T13:22:31.956+00:00\",\"currentStatusId\":\"CAL_TENTATIVE\",\"description\":\"Updated equivalence pickup\",\"estimateCalcMethod\":null,\"estimatedCompletionDate\":null,\"estimatedMilliSeconds\":null,\"estimatedSetupMillis\":null,\"estimatedStartDate\":null,\"facilityId\":null,\"fixedAssetId\":null,\"infoUrl\":null,\"lastModifiedByUserLogin\":\"admin\",\"lastModifiedDate\":\"2026-11-02T13:22:32.588+00:00\",\"lastStatusUpdate\":\"2026-11-02T13:22:31.955+00:00\",\"lastUpdatedStamp\":\"2026-11-02T13:22:32.590+00:00\",\"lastUpdatedTxStamp\":\"2026-11-02T13:22:32.590+00:00\",\"locationDesc\":null,\"moneyUomId\":null,\"noteId\":null,\"percentComplete\":null,\"priority\":null,\"quantityProduced\":null,\"quantityRejected\":null,\"quantityToProduce\":null,\"recurrenceInfoId\":null,\"reserv2ndPPPerc\":null,\"reservNthPPPerc\":null,\"reservPersons\":null,\"revisionNumber\":2,\"runtimeDataId\":null,\"scopeEnumId\":null,\"sendNotificationEmail\":null,\"serviceLoaderName\":null,\"showAsEnumId\":null,\"sourceReferenceId\":null,\"specialTerms\":null,\"tempExprId\":null,\"timeTransparency\":null,\"totalMilliSecondsAllowed\":null,\"totalMoneyAllowed\":null,\"universalId\":null,\"workEffortId\":\"10000\",\"workEffortName\":\"Equivalence pickup\",\"workEffortParentId\":null,\"workEffortPurposeTypeId\":null,\"workEffortTypeId\":\"EVENT\",\"responseMessage\":\"success\"}",
+        "wireBody": "{\"accommodationMapId\":null,\"accommodationSpotId\":null,\"actualCompletionDate\":null,\"actualMilliSeconds\":null,\"actualSetupMillis\":null,\"actualStartDate\":null,\"createdByUserLogin\":\"admin\",\"createdDate\":\"2026-11-02T13:28:08.677+00:00\",\"createdStamp\":\"2026-11-02T13:28:08.679+00:00\",\"createdTxStamp\":\"2026-11-02T13:28:08.679+00:00\",\"currentStatusId\":\"CAL_TENTATIVE\",\"description\":\"Updated equivalence pickup\",\"estimateCalcMethod\":null,\"estimatedCompletionDate\":null,\"estimatedMilliSeconds\":null,\"estimatedSetupMillis\":null,\"estimatedStartDate\":null,\"facilityId\":null,\"fixedAssetId\":null,\"infoUrl\":null,\"lastModifiedByUserLogin\":\"admin\",\"lastModifiedDate\":\"2026-11-02T13:28:09.913+00:00\",\"lastStatusUpdate\":\"2026-11-02T13:28:08.677+00:00\",\"lastUpdatedStamp\":\"2026-11-02T13:28:09.915+00:00\",\"lastUpdatedTxStamp\":\"2026-11-02T13:28:09.915+00:00\",\"locationDesc\":null,\"moneyUomId\":null,\"noteId\":null,\"percentComplete\":null,\"priority\":null,\"quantityProduced\":null,\"quantityRejected\":null,\"quantityToProduce\":null,\"recurrenceInfoId\":null,\"reserv2ndPPPerc\":null,\"reservNthPPPerc\":null,\"reservPersons\":null,\"revisionNumber\":2,\"runtimeDataId\":null,\"scopeEnumId\":null,\"sendNotificationEmail\":null,\"serviceLoaderName\":null,\"showAsEnumId\":null,\"sourceReferenceId\":null,\"specialTerms\":null,\"tempExprId\":null,\"timeTransparency\":null,\"totalMilliSecondsAllowed\":null,\"totalMoneyAllowed\":null,\"universalId\":null,\"workEffortId\":\"10000\",\"workEffortName\":\"Equivalence pickup\",\"workEffortParentId\":null,\"workEffortPurposeTypeId\":null,\"workEffortTypeId\":\"EVENT\",\"responseMessage\":\"success\"}",
         "assertionFailures": [],
         "changes": {
           "work_effort": {
@@ -2624,340 +1979,69 @@
           }
         }
       },
-      "differences": [
-        {
-          "path": "/response/accommodationMapId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/accommodationSpotId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/actualCompletionDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/actualMilliSeconds",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/actualSetupMillis",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/actualStartDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdByUserLogin",
-          "old": null,
-          "new": "admin",
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdDate",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdTxStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/currentStatusId",
-          "old": null,
-          "new": "CAL_TENTATIVE",
-          "missing": "old"
-        },
-        {
-          "path": "/response/description",
-          "old": null,
-          "new": "Updated equivalence pickup",
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimateCalcMethod",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimatedCompletionDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimatedMilliSeconds",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimatedSetupMillis",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimatedStartDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/facilityId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/fixedAssetId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/infoUrl",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastModifiedByUserLogin",
-          "old": null,
-          "new": "admin",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastModifiedDate",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastStatusUpdate",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastUpdatedStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastUpdatedTxStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/locationDesc",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/moneyUomId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/noteId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/percentComplete",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/priority",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/quantityProduced",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/quantityRejected",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/quantityToProduce",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/recurrenceInfoId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/reserv2ndPPPerc",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/reservNthPPPerc",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/reservPersons",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/revisionNumber",
-          "old": null,
-          "new": "2",
-          "missing": "old"
-        },
-        {
-          "path": "/response/runtimeDataId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/scopeEnumId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/sendNotificationEmail",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/serviceLoaderName",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/showAsEnumId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/sourceReferenceId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/specialTerms",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/tempExprId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/timeTransparency",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/totalMilliSecondsAllowed",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/totalMoneyAllowed",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/universalId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/workEffortId",
-          "old": null,
-          "new": "$pickup",
-          "missing": "old"
-        },
-        {
-          "path": "/response/workEffortName",
-          "old": null,
-          "new": "Equivalence pickup",
-          "missing": "old"
-        },
-        {
-          "path": "/response/workEffortParentId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/workEffortPurposeTypeId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/workEffortTypeId",
-          "old": null,
-          "new": "EVENT",
-          "missing": "old"
+      "responseInfo": {
+        "old": {},
+        "new": {
+          "accommodationMapId": null,
+          "accommodationSpotId": null,
+          "actualCompletionDate": null,
+          "actualMilliSeconds": null,
+          "actualSetupMillis": null,
+          "actualStartDate": null,
+          "createdByUserLogin": "admin",
+          "createdDate": "2026-11-02T13:28:08.677+00:00",
+          "createdStamp": "2026-11-02T13:28:08.679+00:00",
+          "createdTxStamp": "2026-11-02T13:28:08.679+00:00",
+          "currentStatusId": "CAL_TENTATIVE",
+          "description": "Updated equivalence pickup",
+          "estimateCalcMethod": null,
+          "estimatedCompletionDate": null,
+          "estimatedMilliSeconds": null,
+          "estimatedSetupMillis": null,
+          "estimatedStartDate": null,
+          "facilityId": null,
+          "fixedAssetId": null,
+          "infoUrl": null,
+          "lastModifiedByUserLogin": "admin",
+          "lastModifiedDate": "2026-11-02T13:28:09.913+00:00",
+          "lastStatusUpdate": "2026-11-02T13:28:08.677+00:00",
+          "lastUpdatedStamp": "2026-11-02T13:28:09.915+00:00",
+          "lastUpdatedTxStamp": "2026-11-02T13:28:09.915+00:00",
+          "locationDesc": null,
+          "moneyUomId": null,
+          "noteId": null,
+          "percentComplete": null,
+          "priority": null,
+          "quantityProduced": null,
+          "quantityRejected": null,
+          "quantityToProduce": null,
+          "recurrenceInfoId": null,
+          "reserv2ndPPPerc": null,
+          "reservNthPPPerc": null,
+          "reservPersons": null,
+          "revisionNumber": 2,
+          "runtimeDataId": null,
+          "scopeEnumId": null,
+          "sendNotificationEmail": null,
+          "serviceLoaderName": null,
+          "showAsEnumId": null,
+          "sourceReferenceId": null,
+          "specialTerms": null,
+          "tempExprId": null,
+          "timeTransparency": null,
+          "totalMilliSecondsAllowed": null,
+          "totalMoneyAllowed": null,
+          "universalId": null,
+          "workEffortId": "10000",
+          "workEffortName": "Equivalence pickup",
+          "workEffortParentId": null,
+          "workEffortPurposeTypeId": null,
+          "workEffortTypeId": "EVENT"
         }
-      ],
-      "fingerprint": "7fd4e145e62821201d8b9dcd452c28334a803904d9cc971a146e1ff7630078d9",
-      "status": "MISMATCH"
+      },
+      "differences": [],
+      "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "MATCH"
     },
     {
       "id": "workeffort-shipment-fixture",
@@ -3038,9 +2122,9 @@
           "additionalShippingCharge": null,
           "addtlShippingChargeDesc": null,
           "createdByUserLogin": "admin",
-          "createdDate": "2026-11-02T13:22:33.248+00:00",
-          "createdStamp": "2026-11-02T13:22:33.249+00:00",
-          "createdTxStamp": "2026-11-02T13:22:33.249+00:00",
+          "createdDate": "2026-11-02T13:28:10.699+00:00",
+          "createdStamp": "2026-11-02T13:28:10.699+00:00",
+          "createdTxStamp": "2026-11-02T13:28:10.699+00:00",
           "currencyUomId": null,
           "destinationContactMechId": null,
           "destinationFacilityId": null,
@@ -3053,9 +2137,9 @@
           "estimatedShipWorkEffId": "10000",
           "handlingInstructions": null,
           "lastModifiedByUserLogin": "admin",
-          "lastModifiedDate": "2026-11-02T13:22:33.248+00:00",
-          "lastUpdatedStamp": "2026-11-02T13:22:33.249+00:00",
-          "lastUpdatedTxStamp": "2026-11-02T13:22:33.249+00:00",
+          "lastModifiedDate": "2026-11-02T13:28:10.699+00:00",
+          "lastUpdatedStamp": "2026-11-02T13:28:10.699+00:00",
+          "lastUpdatedTxStamp": "2026-11-02T13:28:10.699+00:00",
           "latestCancelDate": null,
           "originContactMechId": null,
           "originFacilityId": null,
@@ -3071,7 +2155,7 @@
           "statusId": "SHIPMENT_INPUT",
           "responseMessage": "success"
         },
-        "wireBody": "{\"additionalShippingCharge\":null,\"addtlShippingChargeDesc\":null,\"createdByUserLogin\":\"admin\",\"createdDate\":\"2026-11-02T13:22:33.248+00:00\",\"createdStamp\":\"2026-11-02T13:22:33.249+00:00\",\"createdTxStamp\":\"2026-11-02T13:22:33.249+00:00\",\"currencyUomId\":null,\"destinationContactMechId\":null,\"destinationFacilityId\":null,\"destinationTelecomNumberId\":null,\"estimatedArrivalDate\":null,\"estimatedArrivalWorkEffId\":null,\"estimatedReadyDate\":null,\"estimatedShipCost\":null,\"estimatedShipDate\":null,\"estimatedShipWorkEffId\":\"10000\",\"handlingInstructions\":null,\"lastModifiedByUserLogin\":\"admin\",\"lastModifiedDate\":\"2026-11-02T13:22:33.248+00:00\",\"lastUpdatedStamp\":\"2026-11-02T13:22:33.249+00:00\",\"lastUpdatedTxStamp\":\"2026-11-02T13:22:33.249+00:00\",\"latestCancelDate\":null,\"originContactMechId\":null,\"originFacilityId\":null,\"originTelecomNumberId\":null,\"partyIdFrom\":null,\"partyIdTo\":null,\"picklistBinId\":null,\"primaryOrderId\":null,\"primaryReturnId\":null,\"primaryShipGroupSeqId\":null,\"shipmentId\":\"EQ_LINKED_SHIPMENT\",\"shipmentTypeId\":\"SALES_SHIPMENT\",\"statusId\":\"SHIPMENT_INPUT\",\"responseMessage\":\"success\"}",
+        "wireBody": "{\"additionalShippingCharge\":null,\"addtlShippingChargeDesc\":null,\"createdByUserLogin\":\"admin\",\"createdDate\":\"2026-11-02T13:28:10.699+00:00\",\"createdStamp\":\"2026-11-02T13:28:10.699+00:00\",\"createdTxStamp\":\"2026-11-02T13:28:10.699+00:00\",\"currencyUomId\":null,\"destinationContactMechId\":null,\"destinationFacilityId\":null,\"destinationTelecomNumberId\":null,\"estimatedArrivalDate\":null,\"estimatedArrivalWorkEffId\":null,\"estimatedReadyDate\":null,\"estimatedShipCost\":null,\"estimatedShipDate\":null,\"estimatedShipWorkEffId\":\"10000\",\"handlingInstructions\":null,\"lastModifiedByUserLogin\":\"admin\",\"lastModifiedDate\":\"2026-11-02T13:28:10.699+00:00\",\"lastUpdatedStamp\":\"2026-11-02T13:28:10.699+00:00\",\"lastUpdatedTxStamp\":\"2026-11-02T13:28:10.699+00:00\",\"latestCancelDate\":null,\"originContactMechId\":null,\"originFacilityId\":null,\"originTelecomNumberId\":null,\"partyIdFrom\":null,\"partyIdTo\":null,\"picklistBinId\":null,\"primaryOrderId\":null,\"primaryReturnId\":null,\"primaryShipGroupSeqId\":null,\"shipmentId\":\"EQ_LINKED_SHIPMENT\",\"shipmentTypeId\":\"SALES_SHIPMENT\",\"statusId\":\"SHIPMENT_INPUT\",\"responseMessage\":\"success\"}",
         "assertionFailures": [],
         "changes": {
           "shipment": {
@@ -3132,214 +2216,49 @@
           }
         }
       },
-      "differences": [
-        {
-          "path": "/response/additionalShippingCharge",
-          "old": null,
-          "new": null,
-          "missing": "old"
+      "responseInfo": {
+        "old": {
+          "successMessage": "Shipment created successfully"
         },
-        {
-          "path": "/response/addtlShippingChargeDesc",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdByUserLogin",
-          "old": null,
-          "new": "admin",
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdDate",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/createdTxStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/currencyUomId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/destinationContactMechId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/destinationFacilityId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/destinationTelecomNumberId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimatedArrivalDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimatedArrivalWorkEffId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimatedReadyDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimatedShipCost",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimatedShipDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/estimatedShipWorkEffId",
-          "old": null,
-          "new": "$pickup",
-          "missing": "old"
-        },
-        {
-          "path": "/response/handlingInstructions",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastModifiedByUserLogin",
-          "old": null,
-          "new": "admin",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastModifiedDate",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastUpdatedStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/lastUpdatedTxStamp",
-          "old": null,
-          "new": "<timestamp-present>",
-          "missing": "old"
-        },
-        {
-          "path": "/response/latestCancelDate",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/originContactMechId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/originFacilityId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/originTelecomNumberId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/partyIdFrom",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/partyIdTo",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/picklistBinId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/primaryOrderId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/primaryReturnId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/primaryShipGroupSeqId",
-          "old": null,
-          "new": null,
-          "missing": "old"
-        },
-        {
-          "path": "/response/shipmentTypeId",
-          "old": null,
-          "new": "SALES_SHIPMENT",
-          "missing": "old"
-        },
-        {
-          "path": "/response/statusId",
-          "old": null,
-          "new": "SHIPMENT_INPUT",
-          "missing": "old"
-        },
-        {
-          "path": "/response/successMessage",
-          "old": "Shipment created successfully",
-          "new": null,
-          "missing": "new"
+        "new": {
+          "additionalShippingCharge": null,
+          "addtlShippingChargeDesc": null,
+          "createdByUserLogin": "admin",
+          "createdDate": "2026-11-02T13:28:10.699+00:00",
+          "createdStamp": "2026-11-02T13:28:10.699+00:00",
+          "createdTxStamp": "2026-11-02T13:28:10.699+00:00",
+          "currencyUomId": null,
+          "destinationContactMechId": null,
+          "destinationFacilityId": null,
+          "destinationTelecomNumberId": null,
+          "estimatedArrivalDate": null,
+          "estimatedArrivalWorkEffId": null,
+          "estimatedReadyDate": null,
+          "estimatedShipCost": null,
+          "estimatedShipDate": null,
+          "estimatedShipWorkEffId": "10000",
+          "handlingInstructions": null,
+          "lastModifiedByUserLogin": "admin",
+          "lastModifiedDate": "2026-11-02T13:28:10.699+00:00",
+          "lastUpdatedStamp": "2026-11-02T13:28:10.699+00:00",
+          "lastUpdatedTxStamp": "2026-11-02T13:28:10.699+00:00",
+          "latestCancelDate": null,
+          "originContactMechId": null,
+          "originFacilityId": null,
+          "originTelecomNumberId": null,
+          "partyIdFrom": null,
+          "partyIdTo": null,
+          "picklistBinId": null,
+          "primaryOrderId": null,
+          "primaryReturnId": null,
+          "primaryShipGroupSeqId": null,
+          "shipmentTypeId": "SALES_SHIPMENT",
+          "statusId": "SHIPMENT_INPUT"
         }
-      ],
-      "fingerprint": "0878fd3f8253d31e9ddd427f8b8495b448833acd4545760706fdcd80f1920c49",
-      "status": "MISMATCH"
+      },
+      "differences": [],
+      "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "MATCH"
     },
     {
       "id": "workeffort-shipment-sync",
@@ -3662,6 +2581,10 @@
           }
         }
       },
+      "responseInfo": {
+        "old": {},
+        "new": {}
+      },
       "differences": [],
       "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "status": "MATCH"
@@ -3693,10 +2616,10 @@
       "new": {
         "httpStatus": 400,
         "response": {
-          "errorMessage": "Missing required input: partyId",
-          "responseMessage": "error"
+          "responseMessage": "error",
+          "errorMessage": "Missing required input: partyId"
         },
-        "wireBody": "{\"errorMessage\":\"Missing required input: partyId\",\"responseMessage\":\"error\"}",
+        "wireBody": "{\"responseMessage\":\"error\",\"errorMessage\":\"Missing required input: partyId\"}",
         "assertionFailures": [],
         "changes": {
           "party": {
@@ -3709,15 +2632,17 @@
           }
         }
       },
-      "differences": [
-        {
-          "path": "/response/errorMessage",
-          "old": "The following required parameter is missing: partyId",
-          "new": "Missing required input: partyId"
+      "responseInfo": {
+        "old": {
+          "errorMessage": "The following required parameter is missing: partyId"
+        },
+        "new": {
+          "errorMessage": "Missing required input: partyId"
         }
-      ],
-      "fingerprint": "959dc99a42e2ae2b852b2d18dfa120584facc18ae3ed5107d23b3cde4dab21a7",
-      "status": "MISMATCH"
+      },
+      "differences": [],
+      "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "MATCH"
     },
     {
       "id": "negative-permission",
@@ -3742,10 +2667,10 @@
       "new": {
         "httpStatus": 403,
         "response": {
-          "errorMessage": "Service permission denied",
-          "responseMessage": "error"
+          "responseMessage": "error",
+          "errorMessage": "Service permission denied"
         },
-        "wireBody": "{\"errorMessage\":\"Service permission denied\",\"responseMessage\":\"error\"}",
+        "wireBody": "{\"responseMessage\":\"error\",\"errorMessage\":\"Service permission denied\"}",
         "assertionFailures": [],
         "changes": {
           "tech_data_calendar": {
@@ -3754,15 +2679,17 @@
           }
         }
       },
-      "differences": [
-        {
-          "path": "/response/errorMessage",
-          "old": "You haven't the permission for the service createCalendar, reason : Security Error: To run createCalendar you must have the one of the following permissions: MANUFACTURING_CREATE, MANUFACTURING_ADMIN",
-          "new": "Service permission denied"
+      "responseInfo": {
+        "old": {
+          "errorMessage": "You haven't the permission for the service createCalendar, reason : Security Error: To run createCalendar you must have the one of the following permissions: MANUFACTURING_CREATE, MANUFACTURING_ADMIN"
+        },
+        "new": {
+          "errorMessage": "Service permission denied"
         }
-      ],
-      "fingerprint": "0b2e26e8b78c6b82852d4061d3fdbea738282080fe81bbcd66fe31955b22b780",
-      "status": "MISMATCH"
+      },
+      "differences": [],
+      "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "MATCH"
     },
     {
       "id": "negative-duplicate-fixture",
@@ -3981,6 +2908,10 @@
           }
         }
       },
+      "responseInfo": {
+        "old": {},
+        "new": {}
+      },
       "differences": [],
       "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "status": "MATCH"
@@ -4020,10 +2951,10 @@
       "new": {
         "httpStatus": 409,
         "response": {
-          "errorMessage": "PARTY_DUPLICATE: Person",
-          "responseMessage": "error"
+          "responseMessage": "error",
+          "errorMessage": "PARTY_DUPLICATE: Person"
         },
-        "wireBody": "{\"errorMessage\":\"PARTY_DUPLICATE: Person\",\"responseMessage\":\"error\"}",
+        "wireBody": "{\"responseMessage\":\"error\",\"errorMessage\":\"PARTY_DUPLICATE: Person\"}",
         "assertionFailures": [],
         "changes": {
           "party": {
@@ -4044,15 +2975,17 @@
           }
         }
       },
-      "differences": [
-        {
-          "path": "/response/errorMessage",
-          "old": "Cannot create person, a person with the specified party ID already exists",
-          "new": "PARTY_DUPLICATE: Person"
+      "responseInfo": {
+        "old": {
+          "errorMessage": "Cannot create person, a person with the specified party ID already exists"
+        },
+        "new": {
+          "errorMessage": "PARTY_DUPLICATE: Person"
         }
-      ],
-      "fingerprint": "5cca6527d761c02d825350df634d6f46913deae27d07b22f1c5387c5c858fe1f",
-      "status": "MISMATCH"
+      },
+      "differences": [],
+      "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "MATCH"
     },
     {
       "id": "sales-order-create",
@@ -4410,7 +3343,7 @@
             "removed": [],
             "added": [
               {
-                "created_datetime": "2026-11-02T13:22:40.505+00:00",
+                "created_datetime": "2026-11-02T13:28:17.386+00:00",
                 "created_stamp": "<timestamp-present>",
                 "created_tx_stamp": "<timestamp-present>",
                 "current_promised_date": null,
@@ -4424,7 +3357,7 @@
                 "quantity": "2",
                 "quantity_not_available": null,
                 "reserve_order_enum_id": "INVRO_FIFO_REC",
-                "reserved_datetime": "2026-11-02T13:22:40.505+00:00",
+                "reserved_datetime": "2026-11-02T13:28:17.386+00:00",
                 "sequence_id": null,
                 "ship_group_seq_id": "00001"
               }
@@ -4690,6 +3623,12 @@
           }
         }
       },
+      "responseInfo": {
+        "old": {},
+        "new": {
+          "grandTotal": "10.00"
+        }
+      },
       "differences": [
         {
           "path": "/changes/inventory_item/added",
@@ -4805,7 +3744,7 @@
           "path": "/changes/order_item_ship_grp_inv_res/added",
           "old": [
             {
-              "created_datetime": "2026-11-02T13:22:40.505+00:00",
+              "created_datetime": "2026-11-02T13:28:17.386+00:00",
               "created_stamp": "<timestamp-present>",
               "created_tx_stamp": "<timestamp-present>",
               "current_promised_date": null,
@@ -4819,18 +3758,12 @@
               "quantity": "2",
               "quantity_not_available": null,
               "reserve_order_enum_id": "INVRO_FIFO_REC",
-              "reserved_datetime": "2026-11-02T13:22:40.505+00:00",
+              "reserved_datetime": "2026-11-02T13:28:17.386+00:00",
               "sequence_id": null,
               "ship_group_seq_id": "00001"
             }
           ],
           "new": []
-        },
-        {
-          "path": "/response/grandTotal",
-          "old": null,
-          "new": "10",
-          "missing": "old"
         },
         {
           "path": "/response/orderTypeId",
@@ -4839,7 +3772,7 @@
           "missing": "new"
         }
       ],
-      "fingerprint": "29a2ca6f93d84ca6cbafc98199ff395d64c5c9e44dd58b00051054565bc33684",
+      "fingerprint": "f0e7505149ee032c381081bc32f88a70901ac1d9ebcd8ec5733c9c1ac29dc2dd",
       "status": "MISMATCH"
     },
     {
@@ -5352,16 +4285,15 @@
           }
         }
       },
-      "differences": [
-        {
-          "path": "/response/statusId",
-          "old": null,
-          "new": "ORDER_APPROVED",
-          "missing": "old"
+      "responseInfo": {
+        "old": {},
+        "new": {
+          "statusId": "ORDER_APPROVED"
         }
-      ],
-      "fingerprint": "21063093914d9941fb5a5578c9910c1486b0f1ae8ae20573c8aeedc175d654da",
-      "status": "MISMATCH"
+      },
+      "differences": [],
+      "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "MATCH"
     },
     {
       "id": "inventory-receive",
@@ -5412,7 +4344,7 @@
                 "scheduled_posting_date": null,
                 "shipment_id": null,
                 "their_acctg_trans_id": null,
-                "transaction_date": "2026-11-02T13:22:45.659+00:00",
+                "transaction_date": "2026-11-02T13:28:22.151+00:00",
                 "voucher_date": null,
                 "voucher_ref": null,
                 "work_effort_id": null
@@ -5462,7 +4394,7 @@
               {
                 "created_stamp": "<timestamp-present>",
                 "created_tx_stamp": "<timestamp-present>",
-                "datetime_received": "2026-11-02T13:22:44.52+00:00",
+                "datetime_received": "2026-11-02T13:28:21.175+00:00",
                 "inventory_item_id": "$inventory",
                 "item_description": null,
                 "last_updated_stamp": "<timestamp-present>",
@@ -5646,7 +4578,7 @@
                 "created_tx_stamp": "<timestamp-present>",
                 "currency_uom_id": "USD",
                 "datetime_manufactured": null,
-                "datetime_received": "2026-11-02T13:22:51.584+00:00",
+                "datetime_received": "2026-11-02T13:28:27.765+00:00",
                 "expire_date": null,
                 "facility_id": "WebStoreWarehouse",
                 "fixed_asset_id": null,
@@ -5674,7 +4606,7 @@
               {
                 "created_stamp": "<timestamp-present>",
                 "created_tx_stamp": "<timestamp-present>",
-                "datetime_received": "2026-11-02T13:22:51.608+00:00",
+                "datetime_received": "2026-11-02T13:28:27.783+00:00",
                 "inventory_item_id": "$inventory",
                 "item_description": null,
                 "last_updated_stamp": "<timestamp-present>",
@@ -5734,6 +4666,20 @@
           }
         }
       },
+      "responseInfo": {
+        "old": {
+          "successMessageList": [
+            "Received 10 of GZ-2644 in inventory item 10000."
+          ]
+        },
+        "new": {
+          "receiptId": "10000",
+          "successMessageList": [
+            "Received 10 of GZ-2644 in inventory item 10000."
+          ],
+          "sideEffectNotes": "Receipt accounting and receipt SECA/ECA callbacks are no-ops."
+        }
+      },
       "differences": [
         {
           "path": "/changes/acctg_trans/added",
@@ -5767,7 +4713,7 @@
               "scheduled_posting_date": null,
               "shipment_id": null,
               "their_acctg_trans_id": null,
-              "transaction_date": "2026-11-02T13:22:45.659+00:00",
+              "transaction_date": "2026-11-02T13:28:22.151+00:00",
               "voucher_date": null,
               "voucher_ref": null,
               "work_effort_id": null
@@ -5892,7 +4838,7 @@
               "created_tx_stamp": "<timestamp-present>",
               "currency_uom_id": "USD",
               "datetime_manufactured": null,
-              "datetime_received": "2026-11-02T13:22:51.584+00:00",
+              "datetime_received": "2026-11-02T13:28:27.765+00:00",
               "expire_date": null,
               "facility_id": "WebStoreWarehouse",
               "fixed_asset_id": null,
@@ -6011,7 +4957,7 @@
             {
               "created_stamp": "<timestamp-present>",
               "created_tx_stamp": "<timestamp-present>",
-              "datetime_received": "2026-11-02T13:22:44.52+00:00",
+              "datetime_received": "2026-11-02T13:28:21.175+00:00",
               "inventory_item_id": "$inventory",
               "item_description": null,
               "last_updated_stamp": "<timestamp-present>",
@@ -6035,7 +4981,7 @@
             {
               "created_stamp": "<timestamp-present>",
               "created_tx_stamp": "<timestamp-present>",
-              "datetime_received": "2026-11-02T13:22:51.608+00:00",
+              "datetime_received": "2026-11-02T13:28:27.783+00:00",
               "inventory_item_id": "$inventory",
               "item_description": null,
               "last_updated_stamp": "<timestamp-present>",
@@ -6055,21 +5001,9 @@
               "shipment_package_seq_id": null
             }
           ]
-        },
-        {
-          "path": "/response/receiptId",
-          "old": null,
-          "new": "10000",
-          "missing": "old"
-        },
-        {
-          "path": "/response/sideEffectNotes",
-          "old": null,
-          "new": "Receipt accounting and receipt SECA/ECA callbacks are no-ops.",
-          "missing": "old"
         }
       ],
-      "fingerprint": "cacef2d4e54f3933c2e65391996507d9b51f926f09b0199869725e97f9ed1ab2",
+      "fingerprint": "f373a016ad521f493f4feaf4843d7e5d45d54e4eabc895dfeb74401fc88df25a",
       "status": "MISMATCH"
     },
     {
@@ -6192,7 +5126,7 @@
           "order_item_ship_grp_inv_res": {
             "removed": [
               {
-                "created_datetime": "2026-11-02T13:22:40.505+00:00",
+                "created_datetime": "2026-11-02T13:28:17.386+00:00",
                 "created_stamp": "<timestamp-present>",
                 "created_tx_stamp": "<timestamp-present>",
                 "current_promised_date": null,
@@ -6206,14 +5140,14 @@
                 "quantity": "2",
                 "quantity_not_available": null,
                 "reserve_order_enum_id": "INVRO_FIFO_REC",
-                "reserved_datetime": "2026-11-02T13:22:40.505+00:00",
+                "reserved_datetime": "2026-11-02T13:28:17.386+00:00",
                 "sequence_id": null,
                 "ship_group_seq_id": "00001"
               }
             ],
             "added": [
               {
-                "created_datetime": "2026-11-02T13:22:40.505+00:00",
+                "created_datetime": "2026-11-02T13:28:17.386+00:00",
                 "created_stamp": "<timestamp-present>",
                 "created_tx_stamp": "<timestamp-present>",
                 "current_promised_date": null,
@@ -6227,7 +5161,7 @@
                 "quantity": "4",
                 "quantity_not_available": "0",
                 "reserve_order_enum_id": "INVRO_FIFO_REC",
-                "reserved_datetime": "2026-11-02T13:22:40.505+00:00",
+                "reserved_datetime": "2026-11-02T13:28:17.386+00:00",
                 "sequence_id": null,
                 "ship_group_seq_id": "00001"
               }
@@ -6351,7 +5285,7 @@
             "removed": [],
             "added": [
               {
-                "created_datetime": "2026-11-02T13:22:53.645+00:00",
+                "created_datetime": "2026-11-02T13:28:30.12+00:00",
                 "created_stamp": "<timestamp-present>",
                 "created_tx_stamp": "<timestamp-present>",
                 "current_promised_date": null,
@@ -6361,17 +5295,21 @@
                 "order_id": "$order",
                 "order_item_seq_id": "00001",
                 "priority": null,
-                "promised_datetime": "2026-11-17T13:22:41.857+00:00",
+                "promised_datetime": "2026-11-17T13:28:18.723+00:00",
                 "quantity": "2",
                 "quantity_not_available": null,
                 "reserve_order_enum_id": "INVRO_FIFO_REC",
-                "reserved_datetime": "2026-11-02T13:22:53.645+00:00",
+                "reserved_datetime": "2026-11-02T13:28:30.12+00:00",
                 "sequence_id": null,
                 "ship_group_seq_id": "00001"
               }
             ]
           }
         }
+      },
+      "responseInfo": {
+        "old": {},
+        "new": {}
       },
       "differences": [
         {
@@ -6583,7 +5521,7 @@
           "path": "/changes/order_item_ship_grp_inv_res/added",
           "old": [
             {
-              "created_datetime": "2026-11-02T13:22:40.505+00:00",
+              "created_datetime": "2026-11-02T13:28:17.386+00:00",
               "created_stamp": "<timestamp-present>",
               "created_tx_stamp": "<timestamp-present>",
               "current_promised_date": null,
@@ -6597,14 +5535,14 @@
               "quantity": "4",
               "quantity_not_available": "0",
               "reserve_order_enum_id": "INVRO_FIFO_REC",
-              "reserved_datetime": "2026-11-02T13:22:40.505+00:00",
+              "reserved_datetime": "2026-11-02T13:28:17.386+00:00",
               "sequence_id": null,
               "ship_group_seq_id": "00001"
             }
           ],
           "new": [
             {
-              "created_datetime": "2026-11-02T13:22:53.645+00:00",
+              "created_datetime": "2026-11-02T13:28:30.12+00:00",
               "created_stamp": "<timestamp-present>",
               "created_tx_stamp": "<timestamp-present>",
               "current_promised_date": null,
@@ -6614,11 +5552,11 @@
               "order_id": "$order",
               "order_item_seq_id": "00001",
               "priority": null,
-              "promised_datetime": "2026-11-17T13:22:41.857+00:00",
+              "promised_datetime": "2026-11-17T13:28:18.723+00:00",
               "quantity": "2",
               "quantity_not_available": null,
               "reserve_order_enum_id": "INVRO_FIFO_REC",
-              "reserved_datetime": "2026-11-02T13:22:53.645+00:00",
+              "reserved_datetime": "2026-11-02T13:28:30.12+00:00",
               "sequence_id": null,
               "ship_group_seq_id": "00001"
             }
@@ -6628,7 +5566,7 @@
           "path": "/changes/order_item_ship_grp_inv_res/removed",
           "old": [
             {
-              "created_datetime": "2026-11-02T13:22:40.505+00:00",
+              "created_datetime": "2026-11-02T13:28:17.386+00:00",
               "created_stamp": "<timestamp-present>",
               "created_tx_stamp": "<timestamp-present>",
               "current_promised_date": null,
@@ -6642,7 +5580,7 @@
               "quantity": "2",
               "quantity_not_available": null,
               "reserve_order_enum_id": "INVRO_FIFO_REC",
-              "reserved_datetime": "2026-11-02T13:22:40.505+00:00",
+              "reserved_datetime": "2026-11-02T13:28:17.386+00:00",
               "sequence_id": null,
               "ship_group_seq_id": "00001"
             }
@@ -6650,7 +5588,7 @@
           "new": []
         }
       ],
-      "fingerprint": "27ed94a581ba8b8338faf8b959d2b51a6be622431838a6587c3afdf07d2a4ec5",
+      "fingerprint": "d8f522e8a54b39a47b92f20d9058bf7fe9880ba3584b73a52b4ea82f0992f7da",
       "status": "MISMATCH"
     },
     {
@@ -6893,7 +5831,7 @@
                 "scheduled_posting_date": null,
                 "shipment_id": "10000",
                 "their_acctg_trans_id": null,
-                "transaction_date": "2026-11-02T13:22:56.307+00:00",
+                "transaction_date": "2026-11-02T13:28:32.938+00:00",
                 "voucher_date": null,
                 "voucher_ref": null,
                 "work_effort_id": null
@@ -6927,7 +5865,7 @@
                 "scheduled_posting_date": null,
                 "shipment_id": null,
                 "their_acctg_trans_id": null,
-                "transaction_date": "2026-11-02T13:23:00.927+00:00",
+                "transaction_date": "2026-11-02T13:28:37.812+00:00",
                 "voucher_date": null,
                 "voucher_ref": null,
                 "work_effort_id": null
@@ -7099,7 +6037,7 @@
                 "fixed_asset_id": null,
                 "inventory_item_id": "9001",
                 "issued_by_user_login_id": "admin",
-                "issued_date_time": "2026-11-02T13:22:56.307+00:00",
+                "issued_date_time": "2026-11-02T13:28:32.938+00:00",
                 "item_issuance_id": "10000",
                 "last_updated_stamp": "<timestamp-present>",
                 "last_updated_tx_stamp": "<timestamp-present>",
@@ -7332,7 +6270,7 @@
                 "box_width": null,
                 "created_stamp": "<timestamp-present>",
                 "created_tx_stamp": "<timestamp-present>",
-                "date_created": "2026-11-02T13:23:00.883+00:00",
+                "date_created": "2026-11-02T13:28:37.763+00:00",
                 "dimension_uom_id": null,
                 "insured_value": null,
                 "last_updated_stamp": "<timestamp-present>",
@@ -7574,7 +6512,7 @@
           "order_item_ship_grp_inv_res": {
             "removed": [
               {
-                "created_datetime": "2026-11-02T13:22:40.505+00:00",
+                "created_datetime": "2026-11-02T13:28:17.386+00:00",
                 "created_stamp": "<timestamp-present>",
                 "created_tx_stamp": "<timestamp-present>",
                 "current_promised_date": null,
@@ -7588,7 +6526,7 @@
                 "quantity": "4",
                 "quantity_not_available": "0",
                 "reserve_order_enum_id": "INVRO_FIFO_REC",
-                "reserved_datetime": "2026-11-02T13:22:40.505+00:00",
+                "reserved_datetime": "2026-11-02T13:28:17.386+00:00",
                 "sequence_id": null,
                 "ship_group_seq_id": "00001"
               }
@@ -7907,7 +6845,7 @@
                 "fixed_asset_id": null,
                 "inventory_item_id": "9001",
                 "issued_by_user_login_id": "admin",
-                "issued_date_time": "2026-11-02T13:23:02.205+00:00",
+                "issued_date_time": "2026-11-02T13:28:39.012+00:00",
                 "item_issuance_id": "10000",
                 "last_updated_stamp": "<timestamp-present>",
                 "last_updated_tx_stamp": "<timestamp-present>",
@@ -8055,7 +6993,7 @@
                 "box_width": null,
                 "created_stamp": "<timestamp-present>",
                 "created_tx_stamp": "<timestamp-present>",
-                "date_created": "2026-11-02T13:23:02.267+00:00",
+                "date_created": "2026-11-02T13:28:39.087+00:00",
                 "dimension_uom_id": null,
                 "insured_value": null,
                 "last_updated_stamp": "<timestamp-present>",
@@ -8129,7 +7067,7 @@
           "order_item_ship_grp_inv_res": {
             "removed": [
               {
-                "created_datetime": "2026-11-02T13:22:53.645+00:00",
+                "created_datetime": "2026-11-02T13:28:30.12+00:00",
                 "created_stamp": "<timestamp-present>",
                 "created_tx_stamp": "<timestamp-present>",
                 "current_promised_date": null,
@@ -8139,17 +7077,30 @@
                 "order_id": "$order",
                 "order_item_seq_id": "00001",
                 "priority": null,
-                "promised_datetime": "2026-11-17T13:22:41.857+00:00",
+                "promised_datetime": "2026-11-17T13:28:18.723+00:00",
                 "quantity": "2",
                 "quantity_not_available": null,
                 "reserve_order_enum_id": "INVRO_FIFO_REC",
-                "reserved_datetime": "2026-11-02T13:22:53.645+00:00",
+                "reserved_datetime": "2026-11-02T13:28:30.12+00:00",
                 "sequence_id": null,
                 "ship_group_seq_id": "00001"
               }
             ],
             "added": []
           }
+        }
+      },
+      "responseInfo": {
+        "old": {
+          "successMessageList": [
+            "Created shipment with ID 10000 for ship group ID 00001 for facility ID WebStoreWarehouse"
+          ]
+        },
+        "new": {
+          "successMessageList": [
+            "FacilityShipmentIdCreated 10000 00001 WebStoreWarehouse"
+          ],
+          "sideEffectNotes": []
         }
       },
       "differences": [
@@ -8185,7 +7136,7 @@
               "scheduled_posting_date": null,
               "shipment_id": "10000",
               "their_acctg_trans_id": null,
-              "transaction_date": "2026-11-02T13:22:56.307+00:00",
+              "transaction_date": "2026-11-02T13:28:32.938+00:00",
               "voucher_date": null,
               "voucher_ref": null,
               "work_effort_id": null
@@ -8219,7 +7170,7 @@
               "scheduled_posting_date": null,
               "shipment_id": null,
               "their_acctg_trans_id": null,
-              "transaction_date": "2026-11-02T13:23:00.927+00:00",
+              "transaction_date": "2026-11-02T13:28:37.812+00:00",
               "voucher_date": null,
               "voucher_ref": null,
               "work_effort_id": null
@@ -8749,7 +7700,7 @@
               "fixed_asset_id": null,
               "inventory_item_id": "9001",
               "issued_by_user_login_id": "admin",
-              "issued_date_time": "2026-11-02T13:22:56.307+00:00",
+              "issued_date_time": "2026-11-02T13:28:32.938+00:00",
               "item_issuance_id": "10000",
               "last_updated_stamp": "<timestamp-present>",
               "last_updated_tx_stamp": "<timestamp-present>",
@@ -8770,7 +7721,7 @@
               "fixed_asset_id": null,
               "inventory_item_id": "9001",
               "issued_by_user_login_id": "admin",
-              "issued_date_time": "2026-11-02T13:23:02.205+00:00",
+              "issued_date_time": "2026-11-02T13:28:39.012+00:00",
               "item_issuance_id": "10000",
               "last_updated_stamp": "<timestamp-present>",
               "last_updated_tx_stamp": "<timestamp-present>",
@@ -8808,7 +7759,7 @@
           "path": "/changes/order_item_ship_grp_inv_res/removed",
           "old": [
             {
-              "created_datetime": "2026-11-02T13:22:40.505+00:00",
+              "created_datetime": "2026-11-02T13:28:17.386+00:00",
               "created_stamp": "<timestamp-present>",
               "created_tx_stamp": "<timestamp-present>",
               "current_promised_date": null,
@@ -8822,14 +7773,14 @@
               "quantity": "4",
               "quantity_not_available": "0",
               "reserve_order_enum_id": "INVRO_FIFO_REC",
-              "reserved_datetime": "2026-11-02T13:22:40.505+00:00",
+              "reserved_datetime": "2026-11-02T13:28:17.386+00:00",
               "sequence_id": null,
               "ship_group_seq_id": "00001"
             }
           ],
           "new": [
             {
-              "created_datetime": "2026-11-02T13:22:53.645+00:00",
+              "created_datetime": "2026-11-02T13:28:30.12+00:00",
               "created_stamp": "<timestamp-present>",
               "created_tx_stamp": "<timestamp-present>",
               "current_promised_date": null,
@@ -8839,11 +7790,11 @@
               "order_id": "$order",
               "order_item_seq_id": "00001",
               "priority": null,
-              "promised_datetime": "2026-11-17T13:22:41.857+00:00",
+              "promised_datetime": "2026-11-17T13:28:18.723+00:00",
               "quantity": "2",
               "quantity_not_available": null,
               "reserve_order_enum_id": "INVRO_FIFO_REC",
-              "reserved_datetime": "2026-11-02T13:22:53.645+00:00",
+              "reserved_datetime": "2026-11-02T13:28:30.12+00:00",
               "sequence_id": null,
               "ship_group_seq_id": "00001"
             }
@@ -9043,7 +7994,7 @@
               "box_width": null,
               "created_stamp": "<timestamp-present>",
               "created_tx_stamp": "<timestamp-present>",
-              "date_created": "2026-11-02T13:23:00.883+00:00",
+              "date_created": "2026-11-02T13:28:37.763+00:00",
               "dimension_uom_id": null,
               "insured_value": null,
               "last_updated_stamp": "<timestamp-present>",
@@ -9062,7 +8013,7 @@
               "box_width": null,
               "created_stamp": "<timestamp-present>",
               "created_tx_stamp": "<timestamp-present>",
-              "date_created": "2026-11-02T13:23:02.267+00:00",
+              "date_created": "2026-11-02T13:28:39.087+00:00",
               "dimension_uom_id": null,
               "insured_value": null,
               "last_updated_stamp": "<timestamp-present>",
@@ -9105,24 +8056,9 @@
               "sub_product_quantity": null
             }
           ]
-        },
-        {
-          "path": "/response/sideEffectNotes",
-          "old": null,
-          "new": [],
-          "missing": "old"
-        },
-        {
-          "path": "/response/successMessageList",
-          "old": [
-            "Created shipment with ID 10000 for ship group ID 00001 for facility ID WebStoreWarehouse"
-          ],
-          "new": [
-            "FacilityShipmentIdCreated 10000 00001 WebStoreWarehouse"
-          ]
         }
       ],
-      "fingerprint": "e55563f5677226f3f1ac63947b1a275c960c414ffa2ae3c897fe46e5cec4e3ad",
+      "fingerprint": "d506e3cd8d68aec8b6d8809c3ce9ea64d07fc4b39af0eebc56d7b2441aa961c0",
       "status": "MISMATCH"
     }
   ]

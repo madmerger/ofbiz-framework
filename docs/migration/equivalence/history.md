@@ -36,6 +36,13 @@ completed delivery or an assertion that all requested flows are covered.
 
 ## Incomplete coverage
 
+The agreed response-contract policy now compares original declared OUT/INOUT
+parameters (including implemented interfaces), success/error classification, and
+shared error codes/categories. Migration extensions and localized message wording
+are retained as information. With strict row comparison unchanged, the rerun has
+**18 MATCH, 4 MISMATCH, 0 accepted**. All remaining mismatches are commercial-flow
+row effects (plus the missing original storeOrder orderTypeId output).
+
 An explicit invoice creation/READY/payment/application/PAID sequence has not yet
 been added or executed. The shipping probe does exercise original invoice
 creation as a side effect, but it does not replace those requested cases.

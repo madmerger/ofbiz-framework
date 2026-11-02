@@ -103,3 +103,20 @@ def mismatches(left, right, path=''):
                 result.extend(mismatches(left[key], right[key], location))
         return result
     return [] if left == right else [{'path': path, 'old': left, 'new': right}]
+
+
+def response_contract(responses, parameters, success):
+    messages = {'responseMessage', 'successMessage', 'successMessageList',
+                'errorMessage', 'errorMessageList', 'errorMessageMap'}
+    categories = {'errorCode', 'errorCategory'}
+    outputs = {key for key, mode in parameters.items() if mode in ('OUT', 'INOUT')} - messages - categories
+    shared_categories = {key for key in categories if all(key in responses[side] for side in ('old', 'new'))}
+    compared = {}
+    info = {}
+    for side in ('old', 'new'):
+        compared[side] = {key: value for key, value in responses[side].items()
+                          if key in outputs or key in shared_categories}
+        compared[side]['classification'] = 'success' if success[side] else 'error'
+        info[side] = {key: value for key, value in responses[side].items()
+                      if key not in outputs and key not in shared_categories and key != 'responseMessage'}
+    return compared, info

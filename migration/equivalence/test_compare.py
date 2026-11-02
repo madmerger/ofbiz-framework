@@ -1,7 +1,7 @@
 import unittest
 from decimal import Decimal
 
-from compare import Normalizer, bind_created_keys, delta, difference, mismatches
+from compare import Normalizer, bind_created_keys, delta, difference, mismatches, response_contract
 
 
 class ComparisonTest(unittest.TestCase):
@@ -54,6 +54,25 @@ class ComparisonTest(unittest.TestCase):
     def test_empty_and_matching_response_maps_match(self):
         self.assertEqual([], mismatches({}, {}))
         self.assertEqual([], mismatches({'responseMessage': 'success'}, {'responseMessage': 'success'}))
+
+    def test_declared_outputs_are_compared_but_extensions_and_wording_are_information(self):
+        compared, info = response_contract({'old': {'id': '1', 'successMessage': 'Done'},
+                                           'new': {'id': '1', 'firstName': 'Extra', 'successMessage': 'OK'}},
+                                          {'id': 'OUT', 'firstName': 'IN'}, {'old': True, 'new': True})
+        self.assertEqual(compared['old'], compared['new'])
+        self.assertEqual('Extra', info['new']['firstName'])
+        compared, _ = response_contract({'old': {'id': '1'}, 'new': {}}, {'id': 'INOUT'},
+                                        {'old': True, 'new': True})
+        self.assertTrue(mismatches(compared['old'], compared['new']))
+
+    def test_error_classification_and_shared_codes_remain_observable(self):
+        for old, new, success, equal in [
+                ({'errorMessage': 'Denied'}, {'errorMessage': 'Access refused'}, {'old': False, 'new': False}, True),
+                ({'errorCode': 'DENIED'}, {'errorCode': 'INVALID'}, {'old': False, 'new': False}, False),
+                ({}, {}, {'old': False, 'new': True}, False),
+                ({}, {}, {'old': True, 'new': True}, True)]:
+            compared, _ = response_contract({'old': old, 'new': new}, {}, success)
+            self.assertEqual(equal, compared['old'] == compared['new'])
 
     def test_updates_never_treat_existing_primary_keys_as_generated(self):
         before = {side: {'party': [{'party_id': 'DemoCustomer', 'description': None}]} for side in ['old', 'new']}

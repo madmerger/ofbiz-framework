@@ -76,8 +76,10 @@ the comparator. PostgreSQL query errors are fatal rather than silently omitting 
   not in that list.
 - Decimal scale and list/row ordering are normalized.
 - Statuses, amounts, role types, posted flags and row counts are never suppressed.
-- Response maps are compared in full, including error messages and extra keys. HTTP status
-  and exact response bodies are also retained as evidence.
+- Responses compare only original declared OUT/INOUT parameters (including inherited
+  interfaces), success/error classification, and shared error codes/categories. Localized
+  message wording and migration extensions are retained as `responseInfo`, not mismatches.
+  HTTP status and exact response bodies are also retained as evidence. Row deltas remain strict.
 - Every positive case must actually succeed. Every negative case must actually fail and
   change no declared business rows. Both sides returning errors is not a positive match.
 - Accepted differences, when introduced, require an investigation reason and an exact
