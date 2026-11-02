@@ -9,15 +9,15 @@ Entity rules cover entity-auto operations; direct JPA/repository writes are not 
 
 | Component | Active | Disabled hand-wired | Target unported | Unsupported condition | Total |
 |---|---:|---:|---:|---:|---:|
-| accounting | 30 | 11 | 27 | 0 | 68 |
+| accounting | 34 | 11 | 23 | 0 | 68 |
 | commonext | 0 | 0 | 0 | 0 | 0 |
 | content | 14 | 10 | 12 | 0 | 36 |
 | humanres | 0 | 0 | 0 | 0 | 0 |
 | manufacturing | 0 | 0 | 4 | 2 | 6 |
 | marketing | 5 | 5 | 0 | 0 | 10 |
-| order | 42 | 0 | 68 | 1 | 111 |
+| order | 45 | 0 | 65 | 1 | 111 |
 | party | 17 | 0 | 10 | 0 | 27 |
-| product | 23 | 5 | 42 | 0 | 70 |
+| product | 33 | 5 | 32 | 0 | 70 |
 | workeffort | 15 | 0 | 5 | 0 | 20 |
 
 | Rule ID / source | Kind | Trigger | Event / operation | Actions | Status / reason |
@@ -57,8 +57,8 @@ Entity rules cover entity-auto operations; direct JPA/repository writes are not 
 | `accounting/servicedef/secas_payment.xml#4`<br>applications/accounting/servicedef/secas_payment.xml:51 | service | setFinAccountTransStatus | commit  | expirePaymentAssociationsOnFinAccountTransCancel, updatePaymentOnFinAccTransStatusSetToCancel, updateFinAccountBalancesFromTrans | active  |
 | `accounting/servicedef/secas_payment.xml#5`<br>applications/accounting/servicedef/secas_payment.xml:60 | service | removePaymentApplication | invoke  | revertAcctgTransOnRemovePaymentApplications | active  |
 | `accounting/servicedef/secas_payment.xml#6`<br>applications/accounting/servicedef/secas_payment.xml:65 | service | voidPayment | commit  | setFinAccountTransStatus | active  |
-| `accounting/servicedef/secas_payment.xml#7`<br>applications/accounting/servicedef/secas_payment.xml:71 | service | setPaymentStatus | commit  | createMatchingPaymentApplication (unported) | target-unported  |
-| `accounting/servicedef/secas_payment.xml#8`<br>applications/accounting/servicedef/secas_payment.xml:77 | service | setPaymentStatus | commit  | createMatchingPaymentApplication (unported) | target-unported  |
+| `accounting/servicedef/secas_payment.xml#7`<br>applications/accounting/servicedef/secas_payment.xml:71 | service | setPaymentStatus | commit  | createMatchingPaymentApplication | active  |
+| `accounting/servicedef/secas_payment.xml#8`<br>applications/accounting/servicedef/secas_payment.xml:77 | service | setPaymentStatus | commit  | createMatchingPaymentApplication | active  |
 | `accounting/servicedef/secas_ledger.xml#1`<br>applications/accounting/servicedef/secas_ledger.xml:25 | service | createAcctgTransAndEntries | commit  | postAcctgTrans | active  |
 | `accounting/servicedef/secas_ledger.xml#2`<br>applications/accounting/servicedef/secas_ledger.xml:31 | service | createItemIssuance | commit  | createAcctgTransForSalesShipmentIssuance | active  |
 | `accounting/servicedef/secas_ledger.xml#3`<br>applications/accounting/servicedef/secas_ledger.xml:40 | service | cancelOrderItemIssuanceFromSalesShipment | commit  | createAcctgTransForCanceledSalesShipmentIssuance | active  |
@@ -87,8 +87,8 @@ Entity rules cover entity-auto operations; direct JPA/repository writes are not 
 | `accounting/servicedef/secas_invoice.xml#1`<br>applications/accounting/servicedef/secas_invoice.xml:25 | service | cancelInvoice | invoke  | revertAcctgTransOnCancelInvoice | active  |
 | `accounting/servicedef/secas_invoice.xml#2`<br>applications/accounting/servicedef/secas_invoice.xml:30 | service | cancelInvoice | commit  | removeInvoiceItemAssocOnCancelInvoice (unported) | target-unported  |
 | `accounting/servicedef/secas_invoice.xml#3`<br>applications/accounting/servicedef/secas_invoice.xml:35 | service | cancelInvoice | commit  | resetOrderItemBillingAndOrderAdjustmentBillingOnCancelInvoice (unported) | target-unported  |
-| `accounting/servicedef/secas_invoice.xml#4`<br>applications/accounting/servicedef/secas_invoice.xml:39 | service | setInvoiceStatus | commit  | createMatchingPaymentApplication (unported) | target-unported  |
-| `accounting/servicedef/secas_invoice.xml#5`<br>applications/accounting/servicedef/secas_invoice.xml:44 | service | setInvoiceStatus | return  | createMatchingPaymentApplication (unported) | target-unported  |
+| `accounting/servicedef/secas_invoice.xml#4`<br>applications/accounting/servicedef/secas_invoice.xml:39 | service | setInvoiceStatus | commit  | createMatchingPaymentApplication | active  |
+| `accounting/servicedef/secas_invoice.xml#5`<br>applications/accounting/servicedef/secas_invoice.xml:44 | service | setInvoiceStatus | return  | createMatchingPaymentApplication | active  |
 | `accounting/servicedef/secas_invoice.xml#6`<br>applications/accounting/servicedef/secas_invoice.xml:50 | service | setInvoiceStatus | commit  | checkInvoicePaymentApplications, capturePaymentsByInvoice (unported) | active  |
 | `content/entitydef/eecas.xml#1`<br>applications/content/entitydef/eecas.xml:25 | entity | ElectronicText | return store-remove | clearAssociatedRenderCache (unported) | target-unported  |
 | `content/entitydef/eecas.xml#2`<br>applications/content/entitydef/eecas.xml:30 | entity | Content | return create | indexContentKeywords (unported) | target-unported  |
@@ -144,7 +144,7 @@ Entity rules cover entity-auto operations; direct JPA/repository writes are not 
 | `marketing/servicedef/secas.xml#10`<br>applications/marketing/servicedef/secas.xml:70 | service | createContact | commit  | createContactListParty | active  |
 | `order/entitydef/eecas.xml#1`<br>applications/order/entitydef/eecas.xml:24 | entity | OrderHeader | return create-store | issueImmediatelyFulfilledOrder (unported) | target-unported  |
 | `order/entitydef/eecas.xml#2`<br>applications/order/entitydef/eecas.xml:30 | entity | OrderItem | return create-store | checkUpdateQuoteStatus (unported) | target-unported  |
-| `order/entitydef/eecas.xml#3`<br>applications/order/entitydef/eecas.xml:35 | entity | OrderPaymentPreference | return create-store | changeOrderPaymentStatus (unported) | target-unported  |
+| `order/entitydef/eecas.xml#3`<br>applications/order/entitydef/eecas.xml:35 | entity | OrderPaymentPreference | return create-store | changeOrderPaymentStatus | active  |
 | `order/servicedef/secas.xml#1`<br>applications/order/servicedef/secas.xml:24 | service | storeOrder | return  | resetGrandTotal (unported), addSuggestionsToShoppingList (unported) | target-unported  |
 | `order/servicedef/secas.xml#2`<br>applications/order/servicedef/secas.xml:28 | service | storeOrder | return  | checkCreateDropShipPurchaseOrders (unported) | target-unported  |
 | `order/servicedef/secas.xml#3`<br>applications/order/servicedef/secas.xml:32 | service | storeOrder | return  | balanceOrderItemsWithNegativeReservations | active  |
@@ -160,8 +160,8 @@ Entity rules cover entity-auto operations; direct JPA/repository writes are not 
 | `order/servicedef/secas.xml#13`<br>applications/order/servicedef/secas.xml:81 | service | changeOrderItemStatus | commit  | invoiceServiceItems (unported) | target-unported  |
 | `order/servicedef/secas.xml#14`<br>applications/order/servicedef/secas.xml:86 | service | changeOrderStatus | commit  | releaseOrderPayments (unported), processRefundReturnForReplacement (unported) | target-unported  |
 | `order/servicedef/secas.xml#15`<br>applications/order/servicedef/secas.xml:91 | service | changeOrderStatus | global-commit-post-run  | createInvoiceFromOrder (unported), resetGrandTotal (unported), sendOrderCompleteNotification (unported), createReturnItemForRental (unported) | target-unported  |
-| `order/servicedef/secas.xml#16`<br>applications/order/servicedef/secas.xml:101 | service | changeOrderStatus | commit  | createPaymentFromOrder (unported) | target-unported  |
-| `order/servicedef/secas.xml#17`<br>applications/order/servicedef/secas.xml:109 | service | changeOrderStatus | commit  | createPaymentFromOrder (unported) | target-unported  |
+| `order/servicedef/secas.xml#16`<br>applications/order/servicedef/secas.xml:101 | service | changeOrderStatus | commit  | createPaymentFromOrder | active  |
+| `order/servicedef/secas.xml#17`<br>applications/order/servicedef/secas.xml:109 | service | changeOrderStatus | commit  | createPaymentFromOrder | active  |
 | `order/servicedef/secas.xml#18`<br>applications/order/servicedef/secas.xml:124 | service | changeOrderStatus | commit  | updateContentSubscriptionByOrder (unported), processExtendSubscriptionByOrder (unported) | target-unported  |
 | `order/servicedef/secas.xml#19`<br>applications/order/servicedef/secas.xml:133 | service | createOrderAdjustment | commit  | resetGrandTotal (unported) | target-unported  |
 | `order/servicedef/secas.xml#20`<br>applications/order/servicedef/secas.xml:136 | service | updateOrderAdjustment | commit  | resetGrandTotal (unported) | target-unported  |
@@ -321,22 +321,22 @@ Entity rules cover entity-auto operations; direct JPA/repository writes are not 
 | `product/servicedef/secas.xml#25`<br>applications/product/servicedef/secas.xml:148 | service | updateProductStoreGroup | commit  | checkProductStoreGroupRollup (unported) | target-unported  |
 | `product/servicedef/secas.xml#26`<br>applications/product/servicedef/secas.xml:152 | service | createProductStoreGroupRollup | commit  | checkProductStoreGroupRollup (unported) | target-unported  |
 | `product/servicedef/secas_shipment.xml#1`<br>applications/product/servicedef/secas_shipment.xml:24 | service | updateShipment | commit  | checkCancelItemIssuanceAndOrderShipmentFromShipment (unported) | target-unported  |
-| `product/servicedef/secas_shipment.xml#2`<br>applications/product/servicedef/secas_shipment.xml:31 | service | updateShipment | commit  | createInvoicesFromShipment (unported) | target-unported  |
-| `product/servicedef/secas_shipment.xml#3`<br>applications/product/servicedef/secas_shipment.xml:38 | service | updateShipment | commit  | createInvoicesFromShipment (unported), setInvoicesToReadyFromShipment (unported) | target-unported  |
+| `product/servicedef/secas_shipment.xml#2`<br>applications/product/servicedef/secas_shipment.xml:31 | service | updateShipment | commit  | createInvoicesFromShipment | active  |
+| `product/servicedef/secas_shipment.xml#3`<br>applications/product/servicedef/secas_shipment.xml:38 | service | updateShipment | commit  | createInvoicesFromShipment, setInvoicesToReadyFromShipment | active  |
 | `product/servicedef/secas_shipment.xml#4`<br>applications/product/servicedef/secas_shipment.xml:46 | service | updateShipment | commit  | sendShipmentCompleteNotification (unported) | target-unported  |
-| `product/servicedef/secas_shipment.xml#5`<br>applications/product/servicedef/secas_shipment.xml:54 | service | updateShipment | commit  | balanceItemIssuancesForShipment (unported), createInvoicesFromShipment (unported) | target-unported  |
-| `product/servicedef/secas_shipment.xml#6`<br>applications/product/servicedef/secas_shipment.xml:63 | service | updateShipment | commit  | createInvoicesFromShipment (unported) | target-unported  |
+| `product/servicedef/secas_shipment.xml#5`<br>applications/product/servicedef/secas_shipment.xml:54 | service | updateShipment | commit  | balanceItemIssuancesForShipment (unported), createInvoicesFromShipment | active  |
+| `product/servicedef/secas_shipment.xml#6`<br>applications/product/servicedef/secas_shipment.xml:63 | service | updateShipment | commit  | createInvoicesFromShipment | active  |
 | `product/servicedef/secas_shipment.xml#7`<br>applications/product/servicedef/secas_shipment.xml:71 | service | updateShipment | commit  | createSalesInvoicesFromDropShipment (unported) | target-unported  |
 | `product/servicedef/secas_shipment.xml#8`<br>applications/product/servicedef/secas_shipment.xml:81 | service | updateShipment | commit  | createInvoicesFromReturnShipment (unported) | target-unported  |
 | `product/servicedef/secas_shipment.xml#9`<br>applications/product/servicedef/secas_shipment.xml:89 | service | updateShipment | commit  | createInvoicesFromReturnShipment (unported) | target-unported  |
 | `product/servicedef/secas_shipment.xml#10`<br>applications/product/servicedef/secas_shipment.xml:97 | service | createShipment | commit  | sendShipmentScheduledNotification (unported) | target-unported  |
 | `product/servicedef/secas_shipment.xml#11`<br>applications/product/servicedef/secas_shipment.xml:101 | service | updateShipment | commit  | sendShipmentScheduledNotification (unported) | target-unported  |
-| `product/servicedef/secas_shipment.xml#12`<br>applications/product/servicedef/secas_shipment.xml:108 | service | createShipment | commit  | setShipmentSettingsFromFacilities (unported) | target-unported  |
-| `product/servicedef/secas_shipment.xml#13`<br>applications/product/servicedef/secas_shipment.xml:112 | service | createShipment | commit  | setShipmentSettingsFromFacilities (unported) | target-unported  |
-| `product/servicedef/secas_shipment.xml#14`<br>applications/product/servicedef/secas_shipment.xml:116 | service | updateShipment | commit  | setShipmentSettingsFromFacilities (unported) | target-unported  |
-| `product/servicedef/secas_shipment.xml#15`<br>applications/product/servicedef/secas_shipment.xml:121 | service | updateShipment | commit  | setShipmentSettingsFromFacilities (unported) | target-unported  |
-| `product/servicedef/secas_shipment.xml#16`<br>applications/product/servicedef/secas_shipment.xml:127 | service | createShipment | commit  | setShipmentSettingsFromPrimaryOrder (unported) | target-unported  |
-| `product/servicedef/secas_shipment.xml#17`<br>applications/product/servicedef/secas_shipment.xml:131 | service | updateShipment | commit  | setShipmentSettingsFromPrimaryOrder (unported) | target-unported  |
+| `product/servicedef/secas_shipment.xml#12`<br>applications/product/servicedef/secas_shipment.xml:108 | service | createShipment | commit  | setShipmentSettingsFromFacilities | active  |
+| `product/servicedef/secas_shipment.xml#13`<br>applications/product/servicedef/secas_shipment.xml:112 | service | createShipment | commit  | setShipmentSettingsFromFacilities | active  |
+| `product/servicedef/secas_shipment.xml#14`<br>applications/product/servicedef/secas_shipment.xml:116 | service | updateShipment | commit  | setShipmentSettingsFromFacilities | active  |
+| `product/servicedef/secas_shipment.xml#15`<br>applications/product/servicedef/secas_shipment.xml:121 | service | updateShipment | commit  | setShipmentSettingsFromFacilities | active  |
+| `product/servicedef/secas_shipment.xml#16`<br>applications/product/servicedef/secas_shipment.xml:127 | service | createShipment | commit  | setShipmentSettingsFromPrimaryOrder | active  |
+| `product/servicedef/secas_shipment.xml#17`<br>applications/product/servicedef/secas_shipment.xml:131 | service | updateShipment | commit  | setShipmentSettingsFromPrimaryOrder | active  |
 | `product/servicedef/secas_shipment.xml#18`<br>applications/product/servicedef/secas_shipment.xml:137 | service | createShipment | commit  | checkAndCreateWorkEffort (unported) | target-unported  |
 | `product/servicedef/secas_shipment.xml#19`<br>applications/product/servicedef/secas_shipment.xml:141 | service | createShipment | commit  | checkAndCreateWorkEffort (unported) | target-unported  |
 | `product/servicedef/secas_shipment.xml#20`<br>applications/product/servicedef/secas_shipment.xml:145 | service | createShipment | commit  | createShipmentStatus | active  |

@@ -137,4 +137,19 @@ abstract class OrderItemStatusScenarios {
         assertThrows(MigrationException.class, () -> dispatcher.execute("order", "getNextOrderId", Map.of()));
         assertEquals(0, data.find("OrderHeader", Map.of("orderId", "WSCO123")).size());
     }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void preferenceEntityEcaWritesOnePaymentHistoryAndRejectsMissingReferences() {
+        data.create("OrderHeader", Map.of("orderId", "GAP_PAYMENT_ORDER", "statusId", "ORDER_CREATED", "orderTypeId", "SALES_ORDER"));
+        Map<String, Object> preference = dispatcher.execute("order", "createOrderPaymentPreference", Map.of(
+                "orderId", "GAP_PAYMENT_ORDER", "paymentMethodTypeId", "COMPANY_ACCOUNT", "statusId", "PMNT_NOT_PAID"));
+        Map<String, Object> key = Map.of("orderPaymentPreferenceId", preference.get("orderPaymentPreferenceId"));
+        assertEquals(1, data.find("OrderStatus", key).size());
+        dispatcher.execute("order", "changeOrderPaymentStatus", key);
+        assertEquals(1, data.find("OrderStatus", key).size());
+        assertThrows(MigrationException.class, () -> dispatcher.execute("order", "changeOrderPaymentStatus", Map.of()));
+        assertThrows(MigrationException.class, () -> dispatcher.execute("order", "changeOrderPaymentStatus", Map.of("orderPaymentPreferenceId", "MISSING")));
+    }
 }
