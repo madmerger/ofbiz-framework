@@ -22,7 +22,7 @@ claim that all original OFBiz branches have been ported; see `unported.md`.
 
 The diagnostic checkpoint had **4 MATCH / 18 MISMATCH** across 22 cases. Applying
 the agreed response contract yielded **18 MATCH / 4 MISMATCH**; expanded payment
-coverage later yielded **23 MATCH / 4 MISMATCH**, then **26 MATCH / 2 MISMATCH**.
+coverage later yielded **26 MATCH / 2 MISMATCH**.
 The final expanded manifest has **28 MATCH / 0 MISMATCH**. The extra release case
 allows a positive cash application rather than hiding an original preallocation.
 
