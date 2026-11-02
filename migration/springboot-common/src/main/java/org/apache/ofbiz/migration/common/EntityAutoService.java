@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -38,25 +39,48 @@ public class EntityAutoService {
     private final EntityManager entityManager;
     private final EntityRegistry entityRegistry;
     private final SequenceService sequenceService;
+    private final EcaEngine ecas;
 
-    public EntityAutoService(EntityManager entityManager, EntityRegistry entityRegistry, SequenceService sequenceService) {
+    public EntityAutoService(EntityManager entityManager, EntityRegistry entityRegistry, SequenceService sequenceService,
+            EcaEngine ecas) {
         this.entityManager = entityManager;
         this.entityRegistry = entityRegistry;
         this.sequenceService = sequenceService;
+        this.ecas = ecas;
     }
 
     @Transactional
     public Map<String, Object> execute(ServiceHandlerRegistry.ServiceDefinition definition, Map<String, ?> input) {
+        return executeEca(definition, input);
+    }
+
+    Map<String, Object> executeEca(ServiceHandlerRegistry.ServiceDefinition definition, Map<String, ?> input) {
         validateText(input);
         Class<?> type = entityRegistry.entityClass(definition.entity());
         entityRegistry.requireSensitiveView(type);
-        return switch (definition.invoke().toLowerCase()) {
+        Map<String, Object> result = switch (definition.invoke().toLowerCase()) {
             case "create" -> create(definition, type, input);
             case "update" -> update(definition, type, input);
             case "expire" -> expire(definition, type, input);
             case "delete" -> delete(definition, type, input);
             default -> throw new MigrationException(HttpStatus.BAD_REQUEST, "Unsupported invoke: " + definition.invoke());
         };
+        String operation = switch (definition.invoke().toLowerCase()) {
+            case "create" -> "create";
+            case "delete" -> "remove";
+            default -> "store";
+        };
+        Object entity = operation.equals("remove") ? null : entityRegistry.findByPrimaryKey(type, result);
+        Map<String, Object> original = new LinkedHashMap<>(result);
+        ecas.entity("", definition.entity(), operation, "return", result, entity);
+        if (entity != null) {
+            Set<String> keys = Set.copyOf(entityRegistry.primaryKeys(type));
+            result.forEach((name, value) -> {
+                if (!keys.contains(name) && original.containsKey(name)
+                        && !java.util.Objects.equals(original.get(name), value)) entityRegistry.set(entity, name, value);
+            });
+        }
+        return result;
     }
 
     private Map<String, Object> create(
@@ -165,6 +189,7 @@ public class EntityAutoService {
                 .filter(param -> "IN".equalsIgnoreCase(param.mode()) || "INOUT".equalsIgnoreCase(param.mode()))
                 .map(ServiceHandlerRegistry.ParamDefinition::name)
                 .collect(java.util.stream.Collectors.toSet());
+        allowed.addAll(List.of("userLogin", "locale", "timeZone"));
         for (String name : input.keySet()) {
             if (!allowed.contains(name)) {
                 throw new MigrationException(HttpStatus.BAD_REQUEST, "Unknown field: " + name);

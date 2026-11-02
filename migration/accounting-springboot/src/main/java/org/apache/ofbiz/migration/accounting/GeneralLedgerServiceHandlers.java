@@ -229,7 +229,8 @@ public class GeneralLedgerServiceHandlers {
     }
 
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:199. */
-    Map<String, Object> createTransactionAndEntries(Map<String, Object> input) {
+    @org.apache.ofbiz.migration.common.EcaService("createAcctgTransAndEntries")
+    public Map<String, Object> createTransactionAndEntries(Map<String, Object> input) {
         Object rawEntries = input.get("acctgTransEntries");
         if (!(rawEntries instanceof List<?> entryValues) || entryValues.isEmpty()) {
             return Map.of();

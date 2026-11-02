@@ -116,6 +116,20 @@ class SimpleServicesAcceptanceTest {
     }
 
     @Test
+    void authenticatedContextMetadataIsNotTreatedAsManufacturingEntityInput() {
+        Timestamp from = Timestamp.from(Instant.parse("2035-01-01T00:00:00Z"));
+        Map<String, Object> response = call("createBOMAssoc", Map.of(
+                "productId", "MFG_FG", "productIdTo", "MFG_RAW2",
+                "productAssocTypeId", "MANUF_COMPONENT", "fromDate", from,
+                "locale", "en", "timeZone", "UTC"));
+        assertEquals("success", response.get("responseMessage"));
+        assertFalse(response.containsKey("userLogin"));
+        assertFalse(response.containsKey("locale"));
+        assertFalse(response.containsKey("timeZone"));
+        assertTrue(productsContains("MFG_FG", "MFG_RAW2", from));
+    }
+
+    @Test
     void ac03_searchDuplicatedAncestorReturnsTheAssociationOrEmpty() {
         Timestamp fromDate = Timestamp.from(Instant.parse("2020-01-01T00:00:00Z"));
         Map<String, Object> association = call("createBOMAssoc", Map.of(

@@ -97,6 +97,8 @@ public class ManufacturingServiceHandlers {
     }
 
     private Map<String, Object> execute(String service, Map<String, Object> input) {
+        input = new LinkedHashMap<>(input);
+        input.keySet().removeAll(Set.of("userLogin", "locale", "timeZone"));
         return switch (service) {
             case "createBOMAssoc" -> createBomAssoc(input);
             case "copyBOMAssocs" -> copyBomAssocs(input);

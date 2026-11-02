@@ -37,20 +37,30 @@ public class MigrationServiceDispatcher {
     private final EntityAutoService entityAutoService;
     private final EntityRegistry entityRegistry;
     private final MigrationSecurityProperties securityProperties;
+    private final EcaEngine ecas;
 
     public MigrationServiceDispatcher(
             ServiceHandlerRegistry registry,
             EntityAutoService entityAutoService,
             EntityRegistry entityRegistry,
-            MigrationSecurityProperties securityProperties) {
+            MigrationSecurityProperties securityProperties, EcaEngine ecas) {
         this.registry = registry;
         this.entityAutoService = entityAutoService;
         this.entityRegistry = entityRegistry;
         this.securityProperties = securityProperties;
+        this.ecas = ecas;
     }
 
     @Transactional
     public Map<String, Object> execute(String component, String serviceName, Map<String, ?> input) {
+        return executeRegistered(component, serviceName, input);
+    }
+
+    Map<String, Object> executeEca(String component, String serviceName, Map<String, ?> input) {
+        return executeRegistered(component, serviceName, input);
+    }
+
+    private Map<String, Object> executeRegistered(String component, String serviceName, Map<String, ?> input) {
         ServiceHandlerRegistry.ServiceDefinition definition = registry.find(component, serviceName)
                 .orElse(null);
         ServiceHandlerRegistry.HandlerRegistration handler = registry.handler(component, serviceName)
@@ -70,11 +80,12 @@ public class MigrationServiceDispatcher {
                 entityRegistry.requireSensitiveView(entityRegistry.entityClass(handler.sensitiveResultEntity()));
             }
         }
-        Map<String, Object> output = handler == null
-                ? entityAutoService.execute(definition, input)
-                : handler.handler().execute(new LinkedHashMap<>(input));
+        Map<String, Object> values = new LinkedHashMap<>(input);
+        Map<String, Object> output = ecas.service(component, serviceName, values, () -> handler == null
+                ? entityAutoService.executeEca(definition, values)
+                : handler.handler().execute(values));
         Map<String, Object> response = new LinkedHashMap<>(output);
-        response.put("responseMessage", "success");
+        response.putIfAbsent("responseMessage", "success");
         return response;
     }
 

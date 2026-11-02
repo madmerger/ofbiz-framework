@@ -49,14 +49,15 @@ class MultiRollbackTest {
         mockMvc.perform(post("/api/party/services/createPartyRole/multi")
                         .with(httpBasic("admin", "admin-password"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("[{\"partyId\":\"AC32_GROUP\",\"roleTypeId\":\"_NA_\"},"
-                                + "{\"partyId\":\"AC32_GROUP\",\"roleTypeId\":\"_NA_\"}]"))
+                        .content("[{\"partyId\":\"AC32_GROUP\",\"roleTypeId\":\"CUSTOMER\"},"
+                                + "{\"partyId\":\"AC32_GROUP\",\"roleTypeId\":\"CUSTOMER\"}]"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.errors[0].errorMessage").value("ServiceValueFound"));
         mockMvc.perform(get("/api/party/entities/PartyRole")
                         .with(httpBasic("admin", "admin-password"))
                         .param("partyId", "AC32_GROUP"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isEmpty());
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].roleTypeId").value("_NA_"));
     }
 }

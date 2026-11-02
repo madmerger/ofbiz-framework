@@ -83,3 +83,21 @@ tasks.named('compileJava') {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+def ecaResources = layout.buildDirectory.dir('generated/resources/eca')
+tasks.register('generateEcaCatalog', Exec) {
+    inputs.files(rootProject.fileTree('applications') {
+        include '*/ofbiz-component.xml', '*/servicedef/*.xml', '*/entitydef/*.xml'
+    }, rootProject.fileTree('framework') { include '*/servicedef/*.xml', '*/entitydef/*.xml' },
+            rootProject.fileTree('migration') { include '*/src/main/java/**/*.java' })
+    inputs.files(rootProject.file('migration/tools/eca_catalog.py'),
+            rootProject.file('migration/tools/ofbiz_inventory.py'), file('src/main/resources/eca-disabled-rules.json'))
+    outputs.dir(ecaResources)
+    outputs.file(rootProject.file('docs/migration/eca-coverage.md'))
+    commandLine 'python3', rootProject.file('migration/tools/eca_catalog.py'),
+            '--out', ecaResources.get().file('eca-catalog.json').asFile,
+            '--coverage', rootProject.file('docs/migration/eca-coverage.md'),
+            '--disabled', file('src/main/resources/eca-disabled-rules.json')
+}
+sourceSets.main.resources.srcDir(ecaResources)
+tasks.named('processResources') { dependsOn tasks.named('generateEcaCatalog') }
