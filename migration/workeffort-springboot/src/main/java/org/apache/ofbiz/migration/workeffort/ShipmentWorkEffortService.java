@@ -33,7 +33,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ShipmentWorkEffortService {
+public final class ShipmentWorkEffortService {
     private final EntityRegistry entities;
     private final ServiceHandlerRegistry registry;
     private final ObjectProvider<MigrationServiceDispatcher> dispatcher;
@@ -73,8 +73,11 @@ public class ShipmentWorkEffortService {
         if (value == null || value.toString().isEmpty()) return false;
         Object previous = entities.get(shipment, field);
         if (field.endsWith("Date") && value instanceof String text) {
-            try { value = Timestamp.valueOf(text); }
-            catch (IllegalArgumentException ignored) { value = Timestamp.from(Instant.parse(text)); }
+            try {
+                value = Timestamp.valueOf(text);
+            } catch (IllegalArgumentException ignored) {
+                value = Timestamp.from(Instant.parse(text));
+            }
         }
         return !Objects.equals(value, previous);
     }
@@ -91,10 +94,10 @@ public class ShipmentWorkEffortService {
         }
         if (input.get(facility) != null) values.put("facilityId", input.get(facility));
         String next = status == null ? null : switch (status.toString()) {
-            case "SHIPMENT_CANCELLED" -> "CAL_CANCELLED";
-            case "SHIPMENT_PACKED" -> "CAL_CONFIRMED";
-            case "SHIPMENT_SHIPPED" -> "CAL_COMPLETED";
-            default -> null;
+        case "SHIPMENT_CANCELLED" -> "CAL_CANCELLED";
+        case "SHIPMENT_PACKED" -> "CAL_CONFIRMED";
+        case "SHIPMENT_SHIPPED" -> "CAL_COMPLETED";
+        default -> null;
         };
         if (next != null) values.put("currentStatusId", next);
         invoke("updateWorkEffort", values);
@@ -110,8 +113,10 @@ public class ShipmentWorkEffortService {
                     Timestamp thru = (Timestamp) entities.get(row, "thruDate");
                     return (from == null || !from.after(now)) && (thru == null || thru.after(now));
                 });
-        if (!active) invoke("assignPartyToWorkEffort",
-                Map.of("workEffortId", id, "partyId", party, "roleTypeId", "CAL_ATTENDEE", "statusId", "CAL_SENT"));
+        if (!active) {
+            invoke("assignPartyToWorkEffort",
+                    Map.of("workEffortId", id, "partyId", party, "roleTypeId", "CAL_ATTENDEE", "statusId", "CAL_SENT"));
+        }
     }
 
     private void invoke(String service, Map<String, Object> input) {

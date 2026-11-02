@@ -105,8 +105,8 @@ class WorkEffortAcceptanceTest {
     @Transactional
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
     void unknownShipmentIsRejected() {
-        org.junit.jupiter.api.Assertions.assertThrows(org.apache.ofbiz.migration.common.MigrationException.class,
-                () -> dispatcher.execute("workeffort", "checkAndUpdateWorkEffort", Map.of("shipmentId", "GAP_MISSING")));
+        org.junit.jupiter.api.Assertions.assertThrows(org.apache.ofbiz.migration.common.MigrationException.class, () ->
+                dispatcher.execute("workeffort", "checkAndUpdateWorkEffort", Map.of("shipmentId", "GAP_MISSING")));
     }
 
     private void persistShipmentFixture(String name, Map<String, ?> values) {
