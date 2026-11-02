@@ -94,4 +94,32 @@ abstract class OrderItemStatusScenarios {
     private void seed(String id, String status) {
         data.create("OrderHeader", Map.of("orderId", id, "orderTypeId", "SALES_ORDER", "statusId", status));
     }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void headerStatusResponseContainsBusinessStatusRatherThanHistoryPrimaryKey() {
+        seed("GAP_STATUS_OUTPUT", "ORDER_CREATED");
+        Object header = data.require("OrderHeader", Map.of("orderId", "GAP_STATUS_OUTPUT"));
+        data.set(header, "needsInventoryIssuance", "Y");
+        Map<String, Object> result = dispatcher.execute("order", "changeOrderStatus",
+                Map.of("orderId", "GAP_STATUS_OUTPUT", "statusId", "ORDER_APPROVED"));
+        assertEquals("ORDER_APPROVED", result.get("orderStatusId"));
+        assertEquals("Y", result.get("needsInventoryIssuance"));
+        assertEquals("ORDER_CREATED", result.get("oldStatusId"));
+        Map<String, Object> repeated = dispatcher.execute("order", "changeOrderStatus",
+                Map.of("orderId", "GAP_STATUS_OUTPUT", "statusId", "ORDER_APPROVED"));
+        assertEquals(false, repeated.containsKey("orderStatusId"));
+        assertEquals(1, data.find("OrderStatus", Map.of("orderId", "GAP_STATUS_OUTPUT")).size());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void missingHeaderStatusInputsDoNotCreateHistory() {
+        assertThrows(MigrationException.class, () -> dispatcher.execute("order", "changeOrderStatus", Map.of()));
+        assertThrows(MigrationException.class, () -> dispatcher.execute("order", "changeOrderStatus",
+                Map.of("orderId", "GAP_STATUS_MISSING", "statusId", "ORDER_APPROVED")));
+        assertEquals(0, data.find("OrderStatus", Map.of("orderId", "GAP_STATUS_MISSING")).size());
+    }
 }
