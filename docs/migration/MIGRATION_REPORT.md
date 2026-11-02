@@ -66,6 +66,6 @@
 | 7 | product | 同じ親の下に同時に登録すると枝番が衝突する | OFBiz と同じ挙動（409）のまま |
 | 8 | 全体 | PostgreSQL の実データでの新旧比較、本番 HTTPS／プロキシ配下での確認 | 未実施 |
 | 9 | 全体 | 画面（Widget/FTL）、ECA、view-entity | 未移植（各 `unported.md` に記載） |
-| 10 | order | 明細がすべて完了しても、受注ヘッダーが ORDER_COMPLETED にならない（ECA が未移植） | 未対応 |
-| 11 | product | 出荷すると、未移植の WorkEffort への通知が 501 として応答に含まれる（出荷そのものは成功する） | 未対応 |
-| 12 | accounting | 自動作成した仕訳は未転記（isPosted=N）。試算表 API は acct-clerk の権限では 403 | 転記と試算表は未確認 |
+| 10 | order | Resolved: original item-status SECAs aggregate completed, cancelled and approved items into the header status, including original hold/store guards. Shipping and cancellation use the same path without duplicate header history. | H2 and PostgreSQL acceptance coverage |
+| 11 | product | Resolved when WorkEffort is registered in the same application: shipment changes update linked calendar WorkEfforts and party assignments. Standalone integration still returns an explicit 501 note; no remote WorkEffort adapter is configured. Other shipment invoice/notification placeholders remain. | Local adapter and H2 service coverage; standalone limitation remains |
+| 12 | accounting | Resolved for valid journals: the original commit SECA posts balanced GL transactions (isPosted=Y), validating fiscal periods, scheduling, accounts and amounts; invalid journals remain unposted or use the configured error journal. Trial balance retains the original CREATE permission (ACCTG_ATX_CREATE), now granted to integration acct-clerk. | H2 and PostgreSQL posting coverage; valid organization fiscal periods are required |

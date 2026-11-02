@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entity-engine-xml>
+    <CustomTimePeriod customTimePeriodId="INTEGRATION_FISCAL" organizationPartyId="Company"
+                      periodTypeId="FISCAL_YEAR" periodName="Integration demo posting period"
+                      fromDate="2020-01-01 00:00:00" thruDate="2099-12-31 00:00:00" isClosed="N"/>
     <Party partyId="Company" partyTypeId="PARTY_GROUP" preferredCurrencyUomId="USD"/>
     <PartyGroup partyId="Company" groupName="Integration Demo Company"/>
     <PartyRole partyId="Company" roleTypeId="INTERNAL_ORGANIZATIO"/>

@@ -41,6 +41,22 @@ import org.springframework.transaction.annotation.Transactional;
         properties = "migration.security.require-https=false")
 @AutoConfigureMockMvc
 class UpdateShipmentFlowTest {
+    @Test
+    void localWorkEffortAdapterDispatchesWhenRegisteredAndPropagatesFailure() {
+        var registry = new org.apache.ofbiz.migration.common.ServiceHandlerRegistry();
+        var dispatcher = org.mockito.Mockito.mock(org.apache.ofbiz.migration.common.MigrationServiceDispatcher.class);
+        registry.registerHandler("workeffort", "checkAndUpdateWorkEffort", values -> Map.of());
+        var adapter = new org.apache.ofbiz.migration.product.flow.LocalShipmentSideEffectAdapter(registry, dispatcher);
+        Map<String, Object> input = Map.of("shipmentId", "LOCAL_WORK_EFFORT");
+        org.mockito.Mockito.when(dispatcher.execute("workeffort", "checkAndUpdateWorkEffort", input))
+                .thenReturn(Map.of("responseMessage", "success"));
+        org.junit.jupiter.api.Assertions.assertTrue(adapter.checkAndUpdateWorkEffort(input).isEmpty());
+        org.mockito.Mockito.verify(dispatcher).execute("workeffort", "checkAndUpdateWorkEffort", input);
+        org.mockito.Mockito.when(dispatcher.execute("workeffort", "checkAndUpdateWorkEffort", input))
+                .thenReturn(Map.of("responseMessage", "error", "errorMessage", "Rejected work effort"));
+        org.junit.jupiter.api.Assertions.assertThrows(org.apache.ofbiz.migration.common.MigrationException.class,
+                () -> adapter.checkAndUpdateWorkEffort(input));
+    }
     private static final ObjectMapper JSON = new ObjectMapper();
 
     @Autowired
@@ -70,7 +86,7 @@ class UpdateShipmentFlowTest {
                 .andExpect(jsonPath("$.oldStatusId").value("SHIPMENT_INPUT"))
                 .andExpect(jsonPath("$.shipmentTypeId").value("SALES_SHIPMENT"))
                 .andExpect(jsonPath("$.sideEffectNotes[0]").value(
-                        "501: checkAndUpdateWorkEffort (work-effort integration is not ported)"))
+                        "501: checkAndUpdateWorkEffort (workeffort component is not registered; no remote adapter configured)"))
                 .andExpect(jsonPath("$.sideEffectNotes[1]").value("No-op: createInvoicesFromShipment"));
 
         var shipment = entities.findByPrimaryKey(entities.entityClass("Shipment"), Map.of("shipmentId", "FLOW_SHIP_01"));

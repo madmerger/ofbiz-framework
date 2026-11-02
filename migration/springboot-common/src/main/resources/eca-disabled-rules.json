@@ -25,7 +25,6 @@
   "marketing/servicedef/secas.xml#4": "ContactListServices.updateContactListParty sends unsubscribe mail inline.",
   "marketing/servicedef/secas.xml#5": "ContactListServices.runStatusEcas sends unsubscribe mail inline.",
   "marketing/servicedef/secas.xml#6": "ContactListServices.runStatusEcas sends unsubscribe verification mail inline.",
-  "order/servicedef/secas.xml#10": "OrderFlowService explicitly completes the header after shipping items; generic checkOrderItemStatus is not ported.",
   "product/entitydef/eecas.xml#8": "InventoryServices maintains serialized inventory totals inline.",
   "product/entitydef/eecas.xml#9": "InventoryServices initializes inventory quantities inline.",
   "product/entitydef/eecas.xml#10": "InventoryServices creates initial inventory status inline.",

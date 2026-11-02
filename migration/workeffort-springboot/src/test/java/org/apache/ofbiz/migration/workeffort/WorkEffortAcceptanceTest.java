@@ -61,6 +61,61 @@ import org.springframework.test.web.servlet.MockMvc;
 })
 class WorkEffortAcceptanceTest {
     @Autowired
+    private org.apache.ofbiz.migration.common.MigrationServiceDispatcher dispatcher;
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
+    void shipmentChangesUpdateLinkedEventsAndAssignPartiesWithoutDuplicates() {
+        Timestamp old = Timestamp.valueOf("2026-01-01 12:00:00");
+        persistWorkEffort("GAP_SHIP", "Pickup", old);
+        persistWorkEffort("GAP_ARRIVE", "Delivery", old);
+        persistShipmentFixture("Shipment", Map.of("shipmentId", "GAP_SHIPMENT", "statusId", "SHIPMENT_INPUT",
+                "estimatedShipWorkEffId", "GAP_SHIP", "estimatedArrivalWorkEffId", "GAP_ARRIVE"));
+        Map<String, Object> transition = Map.of("statusId", "CAL_CREATED", "statusIdTo", "CAL_CONFIRMED");
+        if (entities.findByEquality(entities.entityClass("StatusValidChange"), transition).isEmpty()) {
+            persistShipmentFixture("StatusValidChange", transition);
+        }
+        Map<String, Object> changes = Map.of("shipmentId", "GAP_SHIPMENT", "statusId", "SHIPMENT_PACKED",
+                "estimatedShipDate", "2026-02-01T12:00:00Z", "estimatedArrivalDate", "2026-02-02T12:00:00Z",
+                "originFacilityId", "GAP_ORIGIN", "destinationFacilityId", "GAP_DEST", "partyIdFrom", "DemoEmployee",
+                "partyIdTo", "DemoCustomer");
+        dispatcher.execute("workeffort", "checkAndUpdateWorkEffort", changes);
+        dispatcher.execute("workeffort", "checkAndUpdateWorkEffort", changes);
+        Object ship = entities.findByPrimaryKey(entities.entityClass("WorkEffort"), Map.of("workEffortId", "GAP_SHIP"));
+        Object arrive = entities.findByPrimaryKey(entities.entityClass("WorkEffort"), Map.of("workEffortId", "GAP_ARRIVE"));
+        assertThat(entities.get(ship, "currentStatusId")).isEqualTo("CAL_CONFIRMED");
+        assertThat(entities.get(ship, "estimatedStartDate")).isEqualTo(Timestamp.valueOf("2026-02-01 12:00:00"));
+        assertThat(entities.get(arrive, "estimatedCompletionDate")).isEqualTo(Timestamp.valueOf("2026-02-02 12:00:00"));
+        assertThat(entities.get(arrive, "facilityId")).isEqualTo("GAP_DEST");
+        assertThat(entities.findByEquality(entities.entityClass("WorkEffortPartyAssignment"), Map.of("workEffortId", "GAP_SHIP"))).hasSize(1);
+        assertThat(entities.findByEquality(entities.entityClass("WorkEffortStatus"), Map.of("workEffortId", "GAP_SHIP"))).hasSize(1);
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
+    void shipmentWithoutEventLinksIsANoOp() {
+        persistShipmentFixture("Shipment", Map.of("shipmentId", "GAP_NO_LINKS"));
+        assertThat(dispatcher.execute("workeffort", "checkAndUpdateWorkEffort",
+                Map.of("shipmentId", "GAP_NO_LINKS", "partyIdFrom", "DemoEmployee"))).containsEntry("responseMessage", "success");
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
+    void unknownShipmentIsRejected() {
+        org.junit.jupiter.api.Assertions.assertThrows(org.apache.ofbiz.migration.common.MigrationException.class,
+                () -> dispatcher.execute("workeffort", "checkAndUpdateWorkEffort", Map.of("shipmentId", "GAP_MISSING")));
+    }
+
+    private void persistShipmentFixture(String name, Map<String, ?> values) {
+        Object row = entities.newEntity(entities.entityClass(name));
+        values.forEach((field, value) -> entities.set(row, field, value));
+        entityManager.persist(row);
+        entityManager.flush();
+    }
+    @Autowired
     private ServiceHandlerRegistry registry;
 
     @Autowired

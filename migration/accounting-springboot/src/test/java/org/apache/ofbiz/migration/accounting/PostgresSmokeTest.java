@@ -43,7 +43,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(
         classes = AccountingMigrationApplication.class,
         properties = "spring.profiles.active=postgres")
-class PostgresSmokeTest {
+class PostgresSmokeTest extends GlPostingScenarios {
     @Container
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
 

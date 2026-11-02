@@ -44,7 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-class AcctgTransServicesTest {
+class AcctgTransServicesTest extends GlPostingScenarios {
     @Autowired
     private EntityManager entityManager;
 
@@ -142,6 +142,8 @@ class AcctgTransServicesTest {
 
     @Test
     void postAcctgTransUsesOFBizLedgerRoundingForTotalsAndDifference() throws Exception {
+        persist("CustomTimePeriod", Map.of("customTimePeriodId", "MIG_ATX_ROUND_PERIOD", "organizationPartyId", "MIG_DEMO_VENDOR",
+                "periodTypeId", "FISCAL_YEAR", "fromDate", "2020-01-01T00:00:00Z", "thruDate", "2099-12-31T00:00:00Z", "isClosed", "N"));
         createTransaction("MIG_ATX_ROUND");
         persist("GlAccount", Map.of("glAccountId", "MIG_ATX_ROUND_DEBIT"));
         persist("GlAccount", Map.of("glAccountId", "MIG_ATX_ROUND_CREDIT"));
@@ -159,6 +161,7 @@ class AcctgTransServicesTest {
         Object transaction = entities.newEntity(entities.entityClass("AcctgTrans"));
         entities.set(transaction, "acctgTransId", transactionId);
         entities.set(transaction, "isPosted", "N");
+        entities.set(transaction, "transactionDate", "2026-01-15 12:00:00");
         entityManager.persist(transaction);
         entityManager.flush();
     }
@@ -170,6 +173,7 @@ class AcctgTransServicesTest {
         entities.set(entry, "debitCreditFlag", flag);
         entities.set(entry, "amount", amount);
         entities.set(entry, "glAccountId", accountId);
+        entities.set(entry, "organizationPartyId", "MIG_DEMO_VENDOR");
         entityManager.persist(entry);
         entityManager.flush();
     }

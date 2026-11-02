@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.SequenceService;
+import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +44,7 @@ public class OrderFlowService {
     private final InvoicePort invoices;
     private final OrderStatusService orderStatuses;
     private final OrderItemStatusService itemStatuses;
+    private final ObjectProvider<MigrationServiceDispatcher> dispatcher;
 
     public OrderFlowService(
             OrderEntitySupport data,
@@ -50,7 +53,7 @@ public class OrderFlowService {
             ShipmentPort shipments,
             InvoicePort invoices,
             OrderStatusService orderStatuses,
-            OrderItemStatusService itemStatuses) {
+            OrderItemStatusService itemStatuses, ObjectProvider<MigrationServiceDispatcher> dispatcher) {
         this.data = data;
         this.sequences = sequences;
         this.productPrices = productPrices;
@@ -58,6 +61,7 @@ public class OrderFlowService {
         this.invoices = invoices;
         this.orderStatuses = orderStatuses;
         this.itemStatuses = itemStatuses;
+        this.dispatcher = dispatcher;
     }
 
     public Map<String, Object> storeOrder(Map<String, Object> input) {
@@ -186,8 +190,8 @@ public class OrderFlowService {
             throw new MigrationException(HttpStatus.CONFLICT, "出荷には全明細の承認が必要です");
         }
         List<String> shipmentIds = shipments.quickShipEntireOrder(orderId, currentUser());
-        itemStatuses.changeItemStatus(orderId, null, null, "ITEM_COMPLETED", null);
-        orderStatuses.changeHeaderStatus(orderId, "ORDER_COMPLETED", false, null);
+        dispatcher.getObject().execute("order", "changeOrderItemStatus",
+                Map.of("orderId", orderId, "statusId", "ITEM_COMPLETED"));
         return Map.of("orderId", orderId, "shipmentIds", shipmentIds, "statusId", "ORDER_COMPLETED");
     }
 
@@ -252,18 +256,15 @@ public class OrderFlowService {
             BigDecimal updatedCancelled = alreadyCancelled.add(cancelQuantity);
             data.set(item, "cancelQuantity", updatedCancelled);
             if (updatedCancelled.compareTo(quantity) >= 0) {
-                itemStatuses.changeItemStatus(
-                        orderId, text(data.get(item, "orderItemSeqId")), currentStatus, "ITEM_CANCELLED",
-                        text(input.get("changeReason")));
+                Map<String, Object> change = new LinkedHashMap<>();
+                change.put("orderId", orderId);
+                change.put("orderItemSeqId", data.get(item, "orderItemSeqId"));
+                change.put("fromStatusId", currentStatus);
+                change.put("statusId", "ITEM_CANCELLED");
+                change.put("changeReason", input.get("changeReason"));
+                dispatcher.getObject().execute("order", "changeOrderItemStatus", change);
             }
             cancelledItems.add(text(data.get(item, "orderItemSeqId")));
-        }
-        List<?> allItems = data.find("OrderItem", Map.of("orderId", orderId));
-        boolean fullyCancelled = !allItems.isEmpty() && allItems.stream().allMatch(item ->
-                decimal(data.get(item, "cancelQuantity"), "cancelQuantity")
-                        .compareTo(decimal(data.get(item, "quantity"), "quantity")) >= 0);
-        if (fullyCancelled) {
-            orderStatuses.changeHeaderStatus(orderId, "ORDER_CANCELLED", false, text(input.get("changeReason")));
         }
         return Map.of("orderId", orderId, "cancelledOrderItemSeqIds", cancelledItems);
     }
