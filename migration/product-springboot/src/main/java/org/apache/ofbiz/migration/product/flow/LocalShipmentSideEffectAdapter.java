@@ -21,13 +21,33 @@ package org.apache.ofbiz.migration.product.flow;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.ofbiz.migration.common.ServiceHandlerRegistry;
+import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
+import org.apache.ofbiz.migration.common.MigrationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
 public class LocalShipmentSideEffectAdapter implements ShipmentSideEffectPort {
+    private final ServiceHandlerRegistry registry;
+    private final MigrationServiceDispatcher dispatcher;
+
+    public LocalShipmentSideEffectAdapter(ServiceHandlerRegistry registry, MigrationServiceDispatcher dispatcher) {
+        this.registry = registry;
+        this.dispatcher = dispatcher;
+    }
+
     @Override
     public List<String> checkAndUpdateWorkEffort(Map<String, Object> input) {
-        return List.of("501: checkAndUpdateWorkEffort (work-effort integration is not ported)");
+        var component = registry.componentFor("workeffort", "checkAndUpdateWorkEffort");
+        if (component.isEmpty()) {
+            return List.of("501: checkAndUpdateWorkEffort (workeffort component is not registered; no remote adapter configured)");
+        }
+        Map<String, Object> result = dispatcher.execute(component.get(), "checkAndUpdateWorkEffort", input);
+        if ("error".equals(result.get("responseMessage")) || "fail".equals(result.get("responseMessage"))) {
+            throw new MigrationException(HttpStatus.BAD_REQUEST, result.getOrDefault("errorMessage", "WorkEffort update failed").toString());
+        }
+        return List.of();
     }
 
     @Override

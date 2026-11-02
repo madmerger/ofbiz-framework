@@ -61,7 +61,7 @@ import org.w3c.dom.NodeList;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class OrderApiAcceptanceTest {
+class OrderApiAcceptanceTest extends OrderItemStatusScenarios {
     private static final ObjectMapper JSON = new ObjectMapper();
 
     @Autowired

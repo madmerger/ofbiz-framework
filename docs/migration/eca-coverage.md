@@ -15,8 +15,8 @@ Entity rules cover entity-auto operations; direct JPA/repository writes are not 
 | humanres | 0 | 0 | 0 | 0 | 0 |
 | manufacturing | 0 | 0 | 4 | 2 | 6 |
 | marketing | 5 | 5 | 0 | 0 | 10 |
-| order | 40 | 1 | 69 | 1 | 111 |
-| party | 15 | 0 | 12 | 0 | 27 |
+| order | 42 | 0 | 68 | 1 | 111 |
+| party | 17 | 0 | 10 | 0 | 27 |
 | product | 23 | 5 | 42 | 0 | 70 |
 | workeffort | 15 | 0 | 5 | 0 | 20 |
 
@@ -153,9 +153,9 @@ Entity rules cover entity-auto operations; direct JPA/repository writes are not 
 | `order/servicedef/secas.xml#6`<br>applications/order/servicedef/secas.xml:45 | service | updateOrderItems | commit  | setUnitPriceAsLastPrice (unported) | target-unported  |
 | `order/servicedef/secas.xml#7`<br>applications/order/servicedef/secas.xml:50 | service | receiveInventoryProduct | commit  | addProductsBackToCategory (unported), setUnitPriceAsLastPrice (unported) | target-unported  |
 | `order/servicedef/secas.xml#8`<br>applications/order/servicedef/secas.xml:55 | service | receiveInventoryProduct | commit  | addProductsBackToCategory (unported) | target-unported  |
-| `order/servicedef/secas.xml#9`<br>applications/order/servicedef/secas.xml:60 | service | changeOrderItemStatus | commit  | cancelOrderInventoryReservation, cancleOrderItemGroupOrder (unported), recalcShippingTotal (unported), recalcTaxTotal (unported), resetGrandTotal (unported), checkOrderItemStatus (unported) | active  |
-| `order/servicedef/secas.xml#10`<br>applications/order/servicedef/secas.xml:69 | service | changeOrderItemStatus | commit  | checkOrderItemStatus (unported) | disabled-hand-wired OrderFlowService explicitly completes the header after shipping items; generic checkOrderItemStatus is not ported. |
-| `order/servicedef/secas.xml#11`<br>applications/order/servicedef/secas.xml:73 | service | changeOrderItemStatus | commit  | checkOrderItemStatus (unported) | target-unported  |
+| `order/servicedef/secas.xml#9`<br>applications/order/servicedef/secas.xml:60 | service | changeOrderItemStatus | commit  | cancelOrderInventoryReservation, cancleOrderItemGroupOrder (unported), recalcShippingTotal (unported), recalcTaxTotal (unported), resetGrandTotal (unported), checkOrderItemStatus | active  |
+| `order/servicedef/secas.xml#10`<br>applications/order/servicedef/secas.xml:69 | service | changeOrderItemStatus | commit  | checkOrderItemStatus | active  |
+| `order/servicedef/secas.xml#11`<br>applications/order/servicedef/secas.xml:73 | service | changeOrderItemStatus | commit  | checkOrderItemStatus | active  |
 | `order/servicedef/secas.xml#12`<br>applications/order/servicedef/secas.xml:77 | service | changeOrderItemStatus | commit  | checkDigitalItemFulfillment (unported) | target-unported  |
 | `order/servicedef/secas.xml#13`<br>applications/order/servicedef/secas.xml:81 | service | changeOrderItemStatus | commit  | invoiceServiceItems (unported) | target-unported  |
 | `order/servicedef/secas.xml#14`<br>applications/order/servicedef/secas.xml:86 | service | changeOrderStatus | commit  | releaseOrderPayments (unported), processRefundReturnForReplacement (unported) | target-unported  |
@@ -258,9 +258,9 @@ Entity rules cover entity-auto operations; direct JPA/repository writes are not 
 | `party/servicedef/secas.xml#3`<br>applications/party/servicedef/secas.xml:30 | service | createProductStoreRole | invoke  | ensurePartyRole | active  |
 | `party/servicedef/secas.xml#4`<br>applications/party/servicedef/secas.xml:33 | service | createPartyGroup | commit  | ensureNaPartyRole | active  |
 | `party/servicedef/secas.xml#5`<br>applications/party/servicedef/secas.xml:36 | service | createAffiliate | commit  | ensureNaPartyRole | active  |
-| `party/servicedef/secas.xml#6`<br>applications/party/servicedef/secas.xml:40 | service | updatePerson | invoke  | savePartyNameChange (unported) | target-unported  |
+| `party/servicedef/secas.xml#6`<br>applications/party/servicedef/secas.xml:40 | service | updatePerson | invoke  | savePartyNameChange | active  |
 | `party/servicedef/secas.xml#7`<br>applications/party/servicedef/secas.xml:43 | service | updatePerson | invoke  | saveMaritalStatusChange (unported) | target-unported  |
-| `party/servicedef/secas.xml#8`<br>applications/party/servicedef/secas.xml:47 | service | updatePartyGroup | invoke  | savePartyNameChange (unported) | target-unported  |
+| `party/servicedef/secas.xml#8`<br>applications/party/servicedef/secas.xml:47 | service | updatePartyGroup | invoke  | savePartyNameChange | active  |
 | `party/servicedef/secas.xml#9`<br>applications/party/servicedef/secas.xml:52 | service | createPartyRelationship | invoke  | ensurePartyRoleFrom | active  |
 | `party/servicedef/secas.xml#10`<br>applications/party/servicedef/secas.xml:56 | service | createPartyRelationship | invoke  | ensurePartyRoleTo | active  |
 | `party/servicedef/secas.xml#11`<br>applications/party/servicedef/secas.xml:63 | service | createPartyContactMech | commit  | createPartyContactMechPurpose | active  |

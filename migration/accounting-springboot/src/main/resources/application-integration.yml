@@ -22,7 +22,7 @@ migration:
       - username: acct-admin
         authorities: [OFBTOOLS_VIEW, ACCOUNTING_ADMIN]
       - username: acct-clerk
-        authorities: [OFBTOOLS_VIEW, ACCOUNTING_VIEW, ACCOUNTING_CREATE, ACCOUNTING_UPDATE, ACCOUNTING_DELETE]
+        authorities: [OFBTOOLS_VIEW, ACCOUNTING_VIEW, ACCOUNTING_CREATE, ACCOUNTING_UPDATE, ACCOUNTING_DELETE, ACCTG_ATX_CREATE]
       - username: acct-viewer
         authorities: [OFBTOOLS_VIEW, ACCOUNTING_VIEW]
       - username: acct-sensitive

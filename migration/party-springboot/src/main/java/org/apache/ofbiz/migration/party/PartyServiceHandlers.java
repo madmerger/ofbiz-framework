@@ -69,6 +69,7 @@ public class PartyServiceHandlers {
         handler("updatePerson", "UPDATE", this::updatePerson);
         handler("createPartyGroup", "CREATE", this::createPartyGroup);
         handler("updatePartyGroup", "UPDATE", this::updatePartyGroup);
+        registry.registerHandler("party", "savePartyNameChange", "OFBTOOLS_VIEW", this::savePartyNameChange);
         handler("createPartyContactMechPurpose", "CREATE", this::createPurpose);
         handler("createPartyRelationship", "CREATE", this::createRelationship);
         handler("updatePartyRelationship", "UPDATE", this::updateRelationship);
@@ -185,6 +186,30 @@ public class PartyServiceHandlers {
 
     private Map<String, Object> updatePartyGroup(Map<String, Object> input) {
         return update("PartyGroup", input);
+    }
+
+    private Map<String, Object> savePartyNameChange(Map<String, Object> input) {
+        List<String> personNames = List.of("firstName", "middleName", "lastName", "personalTitle", "suffix");
+        boolean group = input.get("groupName") != null && !input.get("groupName").toString().isEmpty();
+        if (!group && personNames.stream().noneMatch(name -> input.get(name) != null && !input.get(name).toString().isEmpty())) {
+            return Map.of("responseMessage", "success");
+        }
+        Object partyId = input.get("partyId");
+        if ((partyId == null || partyId.toString().isEmpty()) && input.get("userLogin") instanceof Map<?, ?> login) {
+            partyId = login.get("partyId");
+        }
+        if (partyId == null) throw notFound(NOT_FOUND);
+        Object previous = find(group ? "PartyGroup" : "Person", Map.of("partyId", partyId));
+        if (previous == null) throw notFound(NOT_FOUND);
+        List<String> names = group ? List.of("groupName") : personNames;
+        if (names.stream().anyMatch(name -> !java.util.Objects.equals(entities.get(previous, name), input.get(name)))) {
+            Map<String, Object> history = new LinkedHashMap<>();
+            history.put("partyId", partyId);
+            history.put("changeDate", now());
+            for (String name : names) history.put(name, entities.get(previous, name));
+            create("PartyNameHistory", history);
+        }
+        return Map.of("responseMessage", "success");
     }
 
     private Map<String, Object> createPurpose(Map<String, Object> input) {

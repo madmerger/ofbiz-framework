@@ -23,7 +23,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class OrderServiceHandlers {
     public OrderServiceHandlers(
-            ServiceHandlerRegistry registry, OrderFlowService flows, OrderSimpleServices simpleServices) {
+            ServiceHandlerRegistry registry, OrderFlowService flows, OrderSimpleServices simpleServices,
+            OrderItemStatusCheckService itemStatusCheck) {
+        register(registry, "checkOrderItemStatus", "UPDATE", itemStatusCheck::checkOrderItemStatus);
         register(registry, "storeOrder", "CREATE", flows::storeOrder);
         register(registry, "changeOrderStatus", "UPDATE", flows::changeOrderStatus);
         register(registry, "changeOrderItemStatus", "UPDATE", flows::changeOrderItemStatus);

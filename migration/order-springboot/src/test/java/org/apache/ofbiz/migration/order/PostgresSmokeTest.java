@@ -44,7 +44,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @AutoConfigureMockMvc
 @ActiveProfiles({"postgres", "test"})
 @Testcontainers(disabledWithoutDocker = true)
-class PostgresSmokeTest {
+class PostgresSmokeTest extends OrderItemStatusScenarios {
     private static final ObjectMapper JSON = new ObjectMapper();
 
     @Container

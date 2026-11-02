@@ -207,11 +207,12 @@ public class AcctgTransServiceHandlers {
         BigDecimal debit = money(totals.get("debitTotal"));
         BigDecimal credit = money(totals.get("creditTotal"));
         BigDecimal difference = debit.subtract(credit);
+        List<String> errors = new ArrayList<>();
         if (difference.compareTo(new BigDecimal("0.01")) >= 0
                 || difference.compareTo(new BigDecimal("-0.01")) <= 0
                 || (debit.signum() == 0 && credit.signum() != 0)
                 || (credit.signum() == 0 && debit.signum() != 0)) {
-            throw badRequest("Accounting transaction trial balance failed");
+            errors.add("Accounting transaction trial balance failed");
         }
         List<?> entries = new ArrayList<>(AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTransEntry"),
                 Map.of("acctgTransId", transactionId)));
@@ -219,9 +220,8 @@ public class AcctgTransServiceHandlers {
                 entry -> text(entities.get(entry, "acctgTransEntrySeqId")))).toList();
         Date scheduled = asDate(entities.get(transaction, "scheduledPostingDate"));
         if (scheduled != null && scheduled.after(new Date())) {
-            throw badRequest("Accounting transaction is not scheduled to be posted yet");
+            errors.add("Accounting transaction is not scheduled to be posted yet");
         }
-        List<String> errors = new ArrayList<>();
         for (Object entry : entries) {
             if (blank(entities.get(entry, "glAccountId"))) {
                 errors.add("GL account is required for every accounting transaction entry");
@@ -230,15 +230,29 @@ public class AcctgTransServiceHandlers {
                 errors.add("Amount is required for every accounting transaction entry");
             }
             String organizationPartyId = text(entities.get(entry, "organizationPartyId"));
-            if (organizationPartyId != null && !hasOpenPeriod(organizationPartyId,
-                    asDate(entities.get(transaction, "transactionDate")))) {
+            List<?> periods = financialPeriods(organizationPartyId, asDate(entities.get(transaction, "transactionDate")));
+            if (periods.isEmpty()) {
                 errors.add("No open financial period found for transaction date");
+            }
+            if (periods.stream().anyMatch(period -> "Y".equals(entities.get(period, "isClosed")))) {
+                errors.add("Financial period is closed");
             }
         }
         if ("Y".equals(input.get("verifyOnly"))) {
             return errors.isEmpty() ? Map.of() : Map.of("successMessageList", errors);
         }
         if (!errors.isEmpty()) {
+            for (Object entry : entries) {
+                Map<String, Object> preferences = accountingPreferences(text(entities.get(entry, "organizationPartyId")));
+                if ("N".equals(preferences.get("enableAccounting"))) return Map.of();
+                Object errorJournal = preferences.get("errorGlJournalId");
+                if (!blank(errorJournal)) {
+                    entities.set(transaction, "glJournalId", errorJournal);
+                    return Map.of("successMessageList", List.of("The accounting transaction [" + transactionId
+                            + "] has been posted to the Error Journal [" + errorJournal + "]."));
+                }
+                throw badRequest(String.join("; ", errors));
+            }
             throw badRequest(String.join("; ", errors));
         }
         entities.set(transaction, "isPosted", "Y");
@@ -343,23 +357,71 @@ public class AcctgTransServiceHandlers {
                 "debitCreditDifference", debit.subtract(credit));
     }
 
-    private boolean hasOpenPeriod(String organizationPartyId, Date transactionDate) {
-        if (transactionDate == null) {
-            return false;
-        }
-        List<?> periods = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("CustomTimePeriod"),
-                Map.of("organizationPartyId", organizationPartyId));
-        for (Object period : periods) {
-            String type = text(entities.get(period, "periodTypeId"));
-            Date from = asDate(entities.get(period, "fromDate"));
-            Date thru = asDate(entities.get(period, "thruDate"));
-            if (List.of("FISCAL_YEAR", "FISCAL_QUARTER", "FISCAL_MONTH", "FISCAL_WEEK", "FISCAL_BIWEEK")
-                    .contains(type) && from != null && thru != null && !transactionDate.before(from)
-                    && transactionDate.before(thru) && !"Y".equals(entities.get(period, "isClosed"))) {
-                return true;
+    private List<?> financialPeriods(String organizationPartyId, Date transactionDate) {
+        if (transactionDate == null || organizationPartyId == null) return List.of();
+        java.util.Set<String> organizations = new java.util.LinkedHashSet<>();
+        collectParents(organizationPartyId, organizations);
+        List<Object> matches = new ArrayList<>();
+        for (String organization : organizations) {
+            for (Object period : AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("CustomTimePeriod"),
+                    Map.of("organizationPartyId", organization))) {
+                String type = text(entities.get(period, "periodTypeId"));
+                Date from = asDate(entities.get(period, "fromDate"));
+                Date thru = asDate(entities.get(period, "thruDate"));
+                if (List.of("FISCAL_YEAR", "FISCAL_QUARTER", "FISCAL_MONTH", "FISCAL_WEEK", "FISCAL_BIWEEK")
+                        .contains(type) && from != null && !transactionDate.before(from)
+                        && (thru == null || !transactionDate.after(thru))) matches.add(period);
             }
         }
-        return false;
+        return matches;
+    }
+
+    private void collectParents(String organization, java.util.Set<String> visited) {
+        if (!visited.add(organization)) return;
+        for (String side : List.of("From", "To")) {
+            String other = "From".equals(side) ? "To" : "From";
+            for (Object relationship : AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("PartyRelationship"),
+                    Map.of("partyId" + side, organization, "partyRelationshipTypeId", "GROUP_ROLLUP",
+                            "roleTypeId" + other, "PARENT_ORGANIZATION"))) {
+                String role = text(entities.get(relationship, "roleTypeId" + side));
+                java.util.Set<String> seen = new java.util.HashSet<>();
+                while (role != null && seen.add(role) && !"ORGANIZATION_UNIT".equals(role)) {
+                    Object type = findOne("RoleType", Map.of("roleTypeId", role));
+                    role = type == null ? null : text(entities.get(type, "parentTypeId"));
+                }
+                if ("ORGANIZATION_UNIT".equals(role) && activeRelationship(relationship)) {
+                    collectParents(text(entities.get(relationship, "partyId" + other)), visited);
+                }
+            }
+        }
+    }
+
+    private boolean activeRelationship(Object relationship) {
+        Date now = new Date();
+        Date from = asDate(entities.get(relationship, "fromDate"));
+        Date thru = asDate(entities.get(relationship, "thruDate"));
+        return (from == null || !from.after(now)) && (thru == null || thru.after(now));
+    }
+
+    private Map<String, Object> accountingPreferences(String organization) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        java.util.Set<String> visited = new java.util.HashSet<>();
+        while (organization != null && visited.add(organization)) {
+            Object preference = findOne("PartyAcctgPreference", Map.of("partyId", organization));
+            boolean missing = preference == null;
+            if (preference != null) {
+                for (var field : entities.toMap(preference).entrySet()) {
+                    if (blank(field.getValue())) missing = true;
+                    else result.put(field.getKey(), field.getValue());
+                }
+            }
+            if (!missing) break;
+            List<?> parents = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("PartyRelationship"),
+                    Map.of("partyIdTo", organization, "partyRelationshipTypeId", "GROUP_ROLLUP", "roleTypeIdFrom", "_NA_", "roleTypeIdTo", "_NA_"));
+            organization = parents.stream().filter(this::activeRelationship).findFirst()
+                    .map(parent -> text(entities.get(parent, "partyIdFrom"))).orElse(null);
+        }
+        return result;
     }
 
     private void updateTransactionLastModified(Object transaction) {
