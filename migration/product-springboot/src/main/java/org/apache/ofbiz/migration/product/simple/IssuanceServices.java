@@ -715,8 +715,7 @@ public class IssuanceServices extends UnportedSimpleMethodFile {
     }
 
     private Object callCreateItemIssuance(Env parent, Map<String, Object> input) {
-        Env child = new Env(input, entities, parent.get("userLogin"));
-        Map<String, Object> result = createItemIssuance(child);
+        Map<String, Object> result = dispatcher.execute("product", "createItemIssuance", input);
         return result.get("itemIssuanceId");
     }
 

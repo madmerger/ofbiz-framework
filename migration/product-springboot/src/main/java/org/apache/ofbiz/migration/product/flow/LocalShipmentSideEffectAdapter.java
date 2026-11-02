@@ -54,8 +54,8 @@ public class LocalShipmentSideEffectAdapter implements ShipmentSideEffectPort {
     public List<String> onStatusChange(String shipmentTypeId, String oldStatusId, String statusId) {
         List<String> notes = new ArrayList<>();
         if ("SALES_SHIPMENT".equals(shipmentTypeId) && "SHIPMENT_PACKED".equals(statusId)) {
-            notes.add("No-op: createInvoicesFromShipment");
-            notes.add("No-op: setInvoicesToReadyFromShipment");
+            if (registry.componentFor("accounting", "createInvoicesFromShipment").isEmpty()) notes.add("No-op: createInvoicesFromShipment");
+            if (registry.componentFor("accounting", "setInvoicesToReadyFromShipment").isEmpty()) notes.add("No-op: setInvoicesToReadyFromShipment");
         }
         if ("SALES_SHIPMENT".equals(shipmentTypeId) && "SHIPMENT_SHIPPED".equals(statusId)) {
             notes.add("No-op: sendShipmentCompleteNotification");
