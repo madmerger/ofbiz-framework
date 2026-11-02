@@ -90,6 +90,16 @@ def assertions(step, rows, bindings, result):
     return failures
 
 
+def capture_created_rows(before, after, specification):
+    captured = {}
+    for table, fields in specification.items():
+        previous = {tuple(row.get(field) for field in fields) for row in before[table]}
+        created = [row for row in after[table] if tuple(row.get(field) for field in fields) not in previous]
+        if len(created) == 1:
+            captured.update({label: created[0][field] for field, label in fields.items()})
+    return captured
+
+
 def run_cases(manifest, until=None):
     contracts = generate({})['parameters']
     bindings = {'old': {}, 'new': {}}
@@ -103,6 +113,7 @@ def run_cases(manifest, until=None):
         after = {}
         for side in ['old', 'new']:
             values = resolve(step['input'], bindings[side])
+            normalizer.preserve_input_times(values)
             if side == 'old':
                 result = request('https://127.0.0.1:18443/equivalence/control/dispatch',
                                  {'service': step['service'], 'input': values, 'runAs': step['runAs'],
@@ -115,6 +126,7 @@ def run_cases(manifest, until=None):
                 result = request(url, values, step['runAs'])
             row[side] = result
             after[side] = snapshot('equiv_' + side, step['tables'])
+            bindings[side].update(capture_created_rows(before[side], after[side], step.get('captureCreatedRows', {})))
             for field, label in step.get('capture', {}).items():
                 if field in result['response']:
                     bindings[side][label] = result['response'][field]
@@ -157,7 +169,9 @@ def run_cases(manifest, until=None):
         (STATE / 'results-in-progress.json').write_text(json.dumps(results, indent=2, default=str) + '\n')
         if failed:
             print(json.dumps({side: row[side]['assertionFailures'] for side in ['old', 'new']}, default=str), flush=True)
-        missing = [label for label in step.get('capture', {}).values()
+        expected_captures = list(step.get('capture', {}).values()) + [label
+                for fields in step.get('captureCreatedRows', {}).values() for label in fields.values()]
+        missing = [label for label in expected_captures
                    if label not in bindings['old'] or label not in bindings['new']]
         if missing:
             raise RuntimeError(f"{step['id']} cannot bind {missing}; inspect results-in-progress.json")
@@ -230,12 +244,16 @@ def publish(results, partial=False):
     report += [f"| {r['id']} | {r['flow']} | `{r['service']}` | {r['status']} |" for r in results]
     report += ['', '## Accepted differences', '']
     report += [f"- **{r['id']}**: {r['acceptedReason']}" for r in results if 'acceptedReason' in r]
+    if not any('acceptedReason' in r for r in results):
+        report += ['None. No business-value or row-count difference is accepted for these cases.']
     report += ['', '## Mismatch → cause → action history', '',
                'See [history.md](history.md) for investigations and fixes. Raw responses, row changes,',
                'assertion failures and exact differences are retained in [results.json](results.json).', '',
                '## Rerun', '', '```sh', 'bash migration/equivalence/run.sh', '```', '',
                'See [the harness README](../../../migration/equivalence/README.md) for prerequisites,',
-               'schema/transaction boundaries and the precise normalization policy.', '']
+               'schema/transaction boundaries and the precise normalization policy.',
+               'See [unported.md](unported.md) for excluded original branches. Matching these cases',
+               'does not certify the complete original applications.', '']
     (target / 'report.md').write_text('\n'.join(report))
     print(json.dumps(totals))
 

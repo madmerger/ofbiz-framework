@@ -74,6 +74,16 @@ class ComparisonTest(unittest.TestCase):
             compared, _ = response_contract({'old': old, 'new': new}, {}, success)
             self.assertEqual(equal, compared['old'] == compared['new'])
 
+    def test_supplied_receipt_dates_are_not_treated_as_generated(self):
+        normalizer = Normalizer()
+        normalizer.preserve_input_times({'datetimeReceived': '2024-01-02T03:04:05Z'})
+        self.assertEqual('2024-01-02 03:04:05', normalizer.normalize('2024-01-02 03:04:05', 'old', 'datetime_received'))
+        self.assertEqual('<timestamp-present>', normalizer.normalize('2024-01-02 03:04:06', 'new', 'datetime_received'))
+        normalizer.preserve_input_times({'datetimeReceived': '2024-01-02T06:04:05+03:00'})
+        self.assertEqual({normalizer.timestamp('2024-01-02T03:04:05Z')}, normalizer.supplied_times)
+        normalizer.preserve_input_times({'datetimeReceived': '2024-99-99T03:04:05Z'})
+        self.assertEqual(1, len(normalizer.supplied_times))
+
     def test_updates_never_treat_existing_primary_keys_as_generated(self):
         before = {side: {'party': [{'party_id': 'DemoCustomer', 'description': None}]} for side in ['old', 'new']}
         after = {side: {'party': [{'party_id': 'DemoCustomer', 'description': 'Changed'}]} for side in ['old', 'new']}

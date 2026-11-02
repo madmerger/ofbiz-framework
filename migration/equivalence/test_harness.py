@@ -1,9 +1,18 @@
 import unittest
 
-from harness import assertions, resolve
+from harness import assertions, resolve, capture_created_rows
 
 
 class HarnessTest(unittest.TestCase):
+    def test_captures_a_unique_created_row_and_refuses_empty_or_ambiguous_deltas(self):
+        specification = {'invoice': {'invoice_id': 'invoice'}}
+        before = {'invoice': [{'invoice_id': 'existing'}]}
+        after = {'invoice': [{'invoice_id': 'existing'}, {'invoice_id': 'CI1'}]}
+        self.assertEqual({'invoice': 'CI1'}, capture_created_rows(before, after, specification))
+        self.assertEqual({}, capture_created_rows(before, before, specification))
+        after['invoice'].append({'invoice_id': 'CI2'})
+        self.assertEqual({}, capture_created_rows(before, after, specification))
+
     def test_nested_references_use_each_runners_captured_identifiers(self):
         values = {'orderId': '$order', 'items': [{'partyId': '$person'}]}
         self.assertEqual({'orderId': 'WSCO10000', 'items': [{'partyId': '10000'}]},

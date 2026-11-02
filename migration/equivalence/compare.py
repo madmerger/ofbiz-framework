@@ -1,6 +1,7 @@
 """Conservative normalization: business values and multiplicity remain observable."""
 from collections import Counter
 from decimal import Decimal
+from datetime import datetime, timezone
 import json
 import re
 
@@ -10,6 +11,8 @@ GENERATED_TIMES = {
     'order_date', 'entry_date', 'created_date', 'last_modified_date', 'invoice_date',
     'effective_date', 'paid_date', 'last_modified_date_time',
     'last_status_update', 'timestamp',
+    'datetime_received', 'created_datetime', 'reserved_datetime', 'promised_datetime',
+    'issued_date_time', 'date_created', 'transaction_date', 'datetime_performed',
 }
 ALIASES = {
     'party_id': ['party_id_from', 'party_id_to', 'organization_party_id', 'owner_party_id',
@@ -31,6 +34,25 @@ def encoded(value):
 class Normalizer:
     def __init__(self):
         self.ids = {'old': {}, 'new': {}}
+        self.supplied_times = set()
+
+    def preserve_input_times(self, value):
+        if isinstance(value, dict):
+            for item in value.values():
+                self.preserve_input_times(item)
+        elif isinstance(value, list):
+            for item in value:
+                self.preserve_input_times(item)
+        elif isinstance(value, str) and re.match(r'^\d{4}-\d\d-\d\d[T ]\d\d:', value):
+            try:
+                self.supplied_times.add(self.timestamp(value))
+            except ValueError:
+                pass
+
+    @staticmethod
+    def timestamp(value):
+        parsed = datetime.fromisoformat(str(value).replace('Z', '+00:00'))
+        return (parsed.astimezone(timezone.utc) if parsed.tzinfo else parsed).replace(tzinfo=None)
 
     def bind(self, field, old, new, label):
         domain = snake(field)
@@ -51,6 +73,13 @@ class Normalizer:
         if (field, str(value)) in self.ids[side]:
             return self.ids[side][(field, str(value))]
         if field in GENERATED_TIMES:
+            if self.supplied_times:
+                try:
+                    supplied = self.timestamp(value)
+                    if supplied in self.supplied_times:
+                        return str(value)
+                except ValueError:
+                    pass
             return '<timestamp-present>'
         if isinstance(value, (Decimal, int, float)) and not isinstance(value, bool):
             return format(Decimal(str(value)).normalize(), 'f')

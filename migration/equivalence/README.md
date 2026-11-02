@@ -1,9 +1,9 @@
 # PostgreSQL equivalence harness
 
-**Work in progress:** the 22-step manifest covers party/content/marketing/manufacturing/
-HR/WorkEffort and negative cases, plus order creation, approval, receipt, reservation,
-and shipping probes. Explicit invoice READY/payment/application/PAID cases and complete
-business-flow equivalence have not yet been implemented or verified.
+The 28-step manifest covers party/content/marketing/manufacturing/HR/WorkEffort,
+negative cases, and the order → inventory → shipment → invoice → payment lifecycle.
+See [the generated report](../../docs/migration/equivalence/report.md) for verified
+totals and [unported branches](../../docs/migration/equivalence/unported.md) for scope.
 
 ## Prerequisites and safety
 
@@ -72,8 +72,8 @@ the comparator. PostgreSQL query errors are fatal rather than silently omitting 
 - Additional declared generated keys are mapped only when each side creates exactly one row.
   Ambiguous multi-row mappings are not guessed.
 - Generated timestamp fields explicitly listed in `compare.GENERATED_TIMES` compare presence,
-  not their clock values. Null and present remain different. Explicit shipment dates are
-  not in that list.
+  not their clock values. Null and present remain different. Timestamp values supplied in
+  service inputs remain observable, including explicitly supplied receipt dates.
 - Decimal scale and list/row ordering are normalized.
 - Statuses, amounts, role types, posted flags and row counts are never suppressed.
 - Responses compare only original declared OUT/INOUT parameters (including inherited
