@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:${EQUIV_PG_PORT:15432}/equiv_new
+    username: ofbiz
+    password: ofbiz
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate.ddl-auto: none
+server:
+  address: 127.0.0.1
+  port: 18091
+humanres:
+  security:
+    users:
+      - username: admin
+        password: ${EQUIV_PASSWORD}
+        authorities: [OFBTOOLS_VIEW, HUMANRES_ADMIN]
+migration:
+  security.require-https: false

@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:${EQUIV_PG_PORT:15432}/equiv_new
+    username: ofbiz
+    password: ofbiz
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  jackson.serialization.write-dates-as-timestamps: false
+server:
+  address: 127.0.0.1
+  port: 18090
+springdoc:
+  api-docs.enabled: false
+  swagger-ui.enabled: false
+migration:
+  security:
+    component: equivalence
+    require-https: false
+    service-permission-prefix: EQUIV
+    base-permissions: [OFBTOOLS]
+    users:
+      - username: admin
+        password: ${EQUIV_PASSWORD}
+        authorities: [OFBTOOLS_VIEW, EQUIV_ADMIN, WORKEFFORTMGR_ADMIN, PARTYMGR_ADMIN, ORDERMGR_ADMIN, FACILITY_ADMIN, CATALOG_ADMIN, ACCOUNTING_ADMIN, ACCTG_ATX_ADMIN, MARKETING_ADMIN, CONTENTMGR_ADMIN, MANUFACTURING_ADMIN]
+      - username: anonymous
+        password: ${EQUIV_PASSWORD}
+        authorities: [OFBTOOLS_VIEW, EQUIV_VIEW]
