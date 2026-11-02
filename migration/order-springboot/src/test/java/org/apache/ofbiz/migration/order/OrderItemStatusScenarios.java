@@ -122,4 +122,19 @@ abstract class OrderItemStatusScenarios {
                 Map.of("orderId", "GAP_STATUS_MISSING", "statusId", "ORDER_APPROVED")));
         assertEquals(0, data.find("OrderStatus", Map.of("orderId", "GAP_STATUS_MISSING")).size());
     }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void nextOrderIdHonorsBothOriginalPrefixesAndRejectsMissingOrganization() {
+        data.create("Party", Map.of("partyId", "GAP_PREFIX_ORG", "partyTypeId", "PARTY_GROUP"));
+        data.create("PartyAcctgPreference", Map.of("partyId", "GAP_PREFIX_ORG", "orderIdPrefix", "CO"));
+        data.create("ProductStore", Map.of("productStoreId", "GAP_PREFIX_STORE", "orderNumberPrefix", "WS"));
+        assertEquals("WSCO123", dispatcher.execute("order", "getNextOrderId", Map.of("partyId", "GAP_PREFIX_ORG",
+                "productStoreId", "GAP_PREFIX_STORE", "orderId", "123")).get("orderId"));
+        assertEquals("456", dispatcher.execute("order", "getNextOrderId",
+                Map.of("partyId", "GAP_NO_PREFERENCES", "orderId", "456")).get("orderId"));
+        assertThrows(MigrationException.class, () -> dispatcher.execute("order", "getNextOrderId", Map.of()));
+        assertEquals(0, data.find("OrderHeader", Map.of("orderId", "WSCO123")).size());
+    }
 }

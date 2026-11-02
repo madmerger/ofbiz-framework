@@ -247,8 +247,8 @@ public class InventoryReserveServices extends UnportedSimpleMethodFile {
         env.nowTimestamp = new Timestamp(System.currentTimeMillis());
         Object reservation = entityOne("OrderItemShipGrpInvRes", env.parameters);
         Object orderItem = entityOne("OrderItem", env.parameters);
-        setIfNotNull(env.parameters, "promisedDatetime", value(orderItem, "shipBeforeDate"));
-        setIfNotNull(env.parameters, "currentPromisedDate", value(orderItem, "shipBeforeDate"));
+        env.parameters.put("promisedDatetime", value(orderItem, "shipBeforeDate"));
+        env.parameters.put("currentPromisedDate", value(orderItem, "shipBeforeDate"));
 
         if (reservation == null) {
             reservation = entities.newEntity(entities.entityClass("OrderItemShipGrpInvRes"));

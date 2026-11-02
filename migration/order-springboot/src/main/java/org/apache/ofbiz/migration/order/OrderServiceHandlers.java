@@ -27,6 +27,7 @@ public class OrderServiceHandlers {
             OrderItemStatusCheckService itemStatusCheck) {
         register(registry, "checkOrderItemStatus", "UPDATE", itemStatusCheck::checkOrderItemStatus);
         register(registry, "storeOrder", "CREATE", flows::storeOrder);
+        registry.registerHandler("order", "getNextOrderId", "OFBTOOLS_VIEW", flows::getNextOrderId);
         register(registry, "changeOrderStatus", "UPDATE", flows::changeOrderStatus);
         register(registry, "changeOrderItemStatus", "UPDATE", flows::changeOrderItemStatus);
         register(registry, "cancelOrderItem", "UPDATE", flows::cancelOrderItem);

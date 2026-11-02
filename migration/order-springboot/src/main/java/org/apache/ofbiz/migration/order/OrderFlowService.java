@@ -29,6 +29,7 @@ import java.util.Optional;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.SequenceService;
 import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
+import org.apache.ofbiz.migration.common.ServiceHandlerRegistry;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -48,6 +49,7 @@ public class OrderFlowService {
     private final OrderStatusService orderStatuses;
     private final OrderItemStatusService itemStatuses;
     private final ObjectProvider<MigrationServiceDispatcher> dispatcher;
+    private final ServiceHandlerRegistry serviceRegistry;
 
     public OrderFlowService(
             OrderEntitySupport data,
@@ -56,7 +58,8 @@ public class OrderFlowService {
             ShipmentPort shipments,
             InvoicePort invoices,
             OrderStatusService orderStatuses,
-            OrderItemStatusService itemStatuses, ObjectProvider<MigrationServiceDispatcher> dispatcher) {
+            OrderItemStatusService itemStatuses, ObjectProvider<MigrationServiceDispatcher> dispatcher,
+            ServiceHandlerRegistry serviceRegistry) {
         this.data = data;
         this.sequences = sequences;
         this.productPrices = productPrices;
@@ -65,6 +68,7 @@ public class OrderFlowService {
         this.orderStatuses = orderStatuses;
         this.itemStatuses = itemStatuses;
         this.dispatcher = dispatcher;
+        this.serviceRegistry = serviceRegistry;
     }
 
     public Map<String, Object> storeOrder(Map<String, Object> input) {
@@ -99,7 +103,18 @@ public class OrderFlowService {
         }
 
         Timestamp now = Timestamp.from(Instant.now());
-        String orderId = sequences.nextId("OrderHeader");
+        String orderId = text(input.get("orderId"));
+        if (orderId == null) {
+            String organization = "SALES_ORDER".equals(orderTypeId) && productStore != null
+                    ? text(data.get(productStore, "payToPartyId")) : text(input.get("billFromVendorPartyId"));
+            if (organization == null) {
+                orderId = sequences.nextId("OrderHeader");
+            } else {
+                Map<String, Object> nextId = new LinkedHashMap<>(input);
+                nextId.put("partyId", organization);
+                orderId = requiredText(dispatcher.getObject().execute("order", "getNextOrderId", nextId), "orderId");
+            }
+        }
         String userLoginId = currentUser();
         Map<String, Object> header = new LinkedHashMap<>();
         header.put("orderId", orderId);
@@ -149,6 +164,7 @@ public class OrderFlowService {
             item.put("isPromo", "N");
             item.put("statusId", "ITEM_CREATED");
             item.put("changeByUserLoginId", source.get("changeByUserLoginId"));
+            item.put("reserveAfterDate", source.get("reserveAfterDate"));
             data.create("OrderItem", item);
             List<Map<String, Object>> associations = shipGroupInfo.stream()
                     .filter(group -> orderItemSeqId.equals(group.get("orderItemSeqId"))).toList();
@@ -164,12 +180,58 @@ public class OrderFlowService {
         orderStatuses.recordInitialStatus(orderId, null, "ORDER_CREATED");
         createOrderRoles(orderId, orderTypeId, partyId, input, productStore);
         createOrderContactMechs(orderId, input.get("orderContactMechs"));
+        if ("SALES_ORDER".equals(orderTypeId) && productStore != null
+                && !"Y".equals(data.get(productStore, "isImmediatelyFulfilled"))
+                && !"Y".equals(data.get(productStore, "allocateInventory"))
+                && serviceRegistry.componentFor("product", "reserveStoreInventory").filter("product"::equals).isPresent()) {
+            for (Object association : data.find("OrderItemShipGroupAssoc", Map.of("orderId", orderId))) {
+                Object group = data.require("OrderItemShipGroup", Map.of("orderId", orderId,
+                        "shipGroupSeqId", data.get(association, "shipGroupSeqId")));
+                if (text(data.get(group, "supplierPartyId")) != null) continue;
+                Object item = data.require("OrderItem", Map.of("orderId", orderId,
+                        "orderItemSeqId", data.get(association, "orderItemSeqId")));
+                Object reserveAfter = data.get(item, "reserveAfterDate");
+                if (reserveAfter instanceof Timestamp date && date.after(now)) continue;
+                if (List.of("ITEM_CANCELLED", "ITEM_REJECTED", "ITEM_COMPLETED").contains(data.get(item, "statusId"))) continue;
+                Map<String, Object> reserve = new LinkedHashMap<>();
+                reserve.put("orderId", orderId);
+                reserve.put("orderItemSeqId", data.get(item, "orderItemSeqId"));
+                reserve.put("shipGroupSeqId", data.get(association, "shipGroupSeqId"));
+                reserve.put("productStoreId", input.get("productStoreId"));
+                reserve.put("productId", data.get(item, "productId"));
+                reserve.put("quantity", data.get(association, "quantity"));
+                reserve.put("facilityId", data.get(group, "facilityId"));
+                dispatcher.getObject().execute("product", "reserveStoreInventory", reserve);
+            }
+        }
 
         Map<String, Object> output = new LinkedHashMap<>();
         output.put("orderId", orderId);
+        output.put("orderTypeId", orderTypeId);
         output.put("grandTotal", grandTotal);
         output.put("statusId", "ORDER_CREATED");
         return output;
+    }
+
+    public Map<String, Object> getNextOrderId(Map<String, Object> input) {
+        String partyId = requiredText(input, "partyId");
+        List<?> preferences = data.find("PartyAcctgPreference", Map.of("partyId", partyId));
+        Object preference = preferences.isEmpty() ? null : preferences.get(0);
+        String temporaryId = text(input.get("orderId"));
+        Object methodId = preference == null ? null : data.get(preference, "orderSeqCustMethId");
+        if (methodId != null) {
+            Object method = data.require("CustomMethod", Map.of("customMethodId", methodId));
+            Map<String, Object> parameters = new LinkedHashMap<>(input);
+            parameters.put("partyAcctgPreference", preference);
+            temporaryId = requiredText(dispatcher.getObject().execute("order",
+                    data.get(method, "customMethodName").toString(), parameters), "orderId");
+        }
+        if (temporaryId == null) temporaryId = sequences.nextId("OrderHeader");
+        Object store = optionalEntity("ProductStore", text(input.get("productStoreId")), "productStoreId");
+        String storePrefix = store == null ? null : text(data.get(store, "orderNumberPrefix"));
+        String organizationPrefix = preference == null ? null : text(data.get(preference, "orderIdPrefix"));
+        return Map.of("orderId", (storePrefix == null ? "" : storePrefix)
+                + (organizationPrefix == null ? "" : organizationPrefix) + temporaryId);
     }
 
     public Map<String, Object> changeOrderStatus(Map<String, Object> input) {
