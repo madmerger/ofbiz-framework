@@ -256,7 +256,14 @@ public final class WorkEffortBusinessServices {
                         Map.of("statusId", currentStatus, "statusIdTo", nextStatus)).isEmpty()) {
             throw new MigrationException(HttpStatus.BAD_REQUEST, "Invalid WorkEffort status transition");
         }
+        Map<String, Object> previous = entities.toMap(workEffort);
         updateEntity(workEffort, input);
+        if (!previous.equals(entities.toMap(workEffort))) {
+            setIfPresent(workEffort, "lastModifiedDate", Timestamp.from(Instant.now()));
+            setIfPresent(workEffort, "lastModifiedByUserLogin", userLoginId(input));
+            Number revision = (Number) property(workEffort, "revisionNumber");
+            setIfPresent(workEffort, "revisionNumber", revision == null ? 1L : revision.longValue() + 1);
+        }
         if (nextStatus != null && !nextStatus.equals(currentStatus)) {
             Map<String, Object> status = new LinkedHashMap<>();
             status.put("workEffortId", id);

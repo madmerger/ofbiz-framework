@@ -65,6 +65,24 @@ class WorkEffortAcceptanceTest {
 
     @Test
     @Transactional
+    @WithMockUser(username = "revision-user", authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
+    void changedWorkEffortsIncrementRevisionButEmptyOrIdenticalUpdatesDoNot() {
+        Object id = dispatcher.execute("workeffort", "createWorkEffort", Map.of("workEffortName", "Revision event")).get("workEffortId");
+        Object event = entities.findByPrimaryKey(entities.entityClass("WorkEffort"), Map.of("workEffortId", id));
+        dispatcher.execute("workeffort", "updateWorkEffort", Map.of("workEffortId", id));
+        assertThat(entities.get(event, "revisionNumber")).isEqualTo(1L);
+        dispatcher.execute("workeffort", "updateWorkEffort", Map.of("workEffortId", id, "description", "Changed"));
+        assertThat(entities.get(event, "revisionNumber")).isEqualTo(2L);
+        assertThat(entities.get(event, "lastModifiedByUserLogin")).isEqualTo("revision-user");
+        dispatcher.execute("workeffort", "updateWorkEffort", Map.of("workEffortId", id, "description", "Changed"));
+        assertThat(entities.get(event, "revisionNumber")).isEqualTo(2L);
+        assertThatThrownBy(() -> dispatcher.execute("workeffort", "updateWorkEffort", Map.of("workEffortId", "UNKNOWN")))
+                .isInstanceOf(MigrationException.class);
+        assertThat(entities.get(event, "revisionNumber")).isEqualTo(2L);
+    }
+
+    @Test
+    @Transactional
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
     void shipmentChangesUpdateLinkedEventsAndAssignPartiesWithoutDuplicates() {
         Timestamp old = Timestamp.valueOf("2026-01-01 12:00:00");
