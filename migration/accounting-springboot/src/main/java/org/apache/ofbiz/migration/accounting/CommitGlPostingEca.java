@@ -104,28 +104,36 @@ public class CommitGlPostingEca {
 
     private void schedule(Action... actions) {
         List<Action> work = List.of(actions);
+        Authentication actor = SecurityContextHolder.getContext().getAuthentication();
         if (TransactionSynchronizationManager.isSynchronizationActive()
                 && TransactionSynchronizationManager.isActualTransactionActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
-                    run(work);
+                    run(work, actor);
                 }
             });
         } else {
-            run(work);
+            run(work, actor);
         }
     }
 
-    private void run(List<Action> actions) {
+    private void run(List<Action> actions, Authentication actor) {
         SecurityContext previousContext = SecurityContextHolder.getContext();
         Authentication previousAuthentication = previousContext.getAuthentication();
         SecurityContext ecaContext = SecurityContextHolder.createEmptyContext();
         ecaContext.setAuthentication(new UsernamePasswordAuthenticationToken(
-                "accounting-commit-eca", null, List.of(new SimpleGrantedAuthority("ACCTG_ATX_CREATE"))));
+                actor == null ? "accounting-commit-eca" : actor.getName(), null,
+                List.of(new SimpleGrantedAuthority("ACCTG_ATX_CREATE"))));
         SecurityContextHolder.setContext(ecaContext);
         try {
             for (Action action : actions) {
+                if (List.of("createAcctgTransForSalesInvoice", "createAcctgTransForPurchaseInvoice",
+                        "createAcctgTransForCustomerReturnInvoice", "createAcctgTransAndEntriesForIncomingPayment",
+                        "createAcctgTransAndEntriesForOutgoingPayment").contains(action.service())) {
+                    ecaContext.setAuthentication(new UsernamePasswordAuthenticationToken("system", null,
+                            List.of(new SimpleGrantedAuthority("ACCTG_ATX_CREATE"))));
+                }
                 try {
                     transaction.executeWithoutResult(status ->
                             posting.executeDirect(action.service(), new java.util.LinkedHashMap<>(action.input())));

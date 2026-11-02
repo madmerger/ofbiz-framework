@@ -607,8 +607,8 @@ public class GeneralLedgerServiceHandlers {
                         && "D".equals(input.get("debitCreditFlag"))))) {
             Object payment = findOne("Payment", Map.of("paymentId", input.get("paymentId")));
             if (payment != null) {
-                Object paymentMethod = findOne("PaymentMethod",
-                        Map.of("paymentMethodId", entities.get(payment, "paymentMethodId")));
+                Object methodId = entities.get(payment, "paymentMethodId");
+                Object paymentMethod = methodId == null ? null : findOne("PaymentMethod", Map.of("paymentMethodId", methodId));
                 if (paymentMethod != null) {
                     accountId = entities.get(paymentMethod, "glAccountId");
                 }
