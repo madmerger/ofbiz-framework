@@ -38,6 +38,17 @@ import org.springframework.test.context.ActiveProfiles;
 class ContentMainFlowTest extends ContentApiTestSupport {
 
     @Test
+    void electronicTextWithoutIdCreatesResourceBeforePersistingText() throws Exception {
+        JsonNode result = body(call("editor", "createElectronicText", Map.of("textData", "Generated resource body"))
+                .andExpect(status().isOk()));
+        String id = result.get("dataResourceId").asText();
+        entities("editor", "DataResource", Map.of("dataResourceId", id)).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].dataResourceTypeId").value("ELECTRONIC_TEXT"));
+        entities("editor", "ElectronicText", Map.of("dataResourceId", id)).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].textData").value("Generated resource body"));
+    }
+
+    @Test
     void ac20DataResourceContentAssocAndRetrieval() throws Exception {
         String dataResourceId = body(call("editor", "createDataResourceAndText", Map.of(
                 "dataResourceTypeId", "ELECTRONIC_TEXT", "dataResourceName", "AC20 本文", "textData", "こんにちは")))

@@ -61,6 +61,28 @@ class EcaEngineTest {
     }
 
     @Test
+    void generatedInheritedOutputSurvivesElectronicTextActionContextFiltering() throws Exception {
+        EcaCatalog original = new EcaCatalog(mapper);
+        JsonNode electronic = original.rules("service", "createDataText", "invoke").get(0).deepCopy();
+        ((com.fasterxml.jackson.databind.node.ObjectNode) electronic).put("disabledReason", "");
+        register("createElectronicText");
+        when(dispatcher.executeEca(eq("test"), eq("createElectronicText"), anyMap()))
+                .thenReturn(Map.of("dataResourceId", "CREATED_ID", "undeclared", "not an output"));
+        JsonNode generated;
+        try (var stream = new org.springframework.core.io.ClassPathResource("eca-catalog.json").getInputStream()) {
+            generated = mapper.valueToTree(Map.of("rules", List.of(electronic), "parameters", mapper.readTree(stream).path("parameters")));
+        }
+        EcaEngine engine = engine(generated);
+        Map<String, Object> input = new LinkedHashMap<>(Map.of("dataResourceTypeId", "ELECTRONIC_TEXT", "textData", "body"));
+        engine.service("test", "createDataText", input, () -> {
+            assertEquals("CREATED_ID", input.get("dataResourceId"));
+            assertFalse(input.containsKey("undeclared"));
+            return Map.of();
+        });
+        verify(dispatcher).executeEca(eq("test"), eq("createElectronicText"), argThat(values -> !values.containsKey("dataResourceId")));
+    }
+
+    @Test
     void eventsHaveDefinedOrderAndCommitBoundaries() throws Exception {
         List<String> events = new ArrayList<>();
         List<String> rules = new ArrayList<>();

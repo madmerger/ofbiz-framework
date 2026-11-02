@@ -42,6 +42,13 @@ class EcaCatalogTest(unittest.TestCase):
         self.assertIn('partyId', params['ensureNaPartyRole'])
         self.assertIn('budgetId', params['createBudgetStatus'])
 
+    def test_inherited_output_modes_are_combined_before_explicit_overrides(self):
+        params = self.catalog['parameters']
+        self.assertEqual('OUT', params['createDataResource']['dataResourceId'])
+        self.assertEqual('INOUT', params['createElectronicText']['dataResourceId'])
+        self.assertEqual('INOUT', params['createElectronicTextForm']['dataResourceId'])
+        self.assertEqual('IN', params['createElectronicText']['dataResourceTypeId'])
+
 
 if __name__ == '__main__':
     unittest.main()

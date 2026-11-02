@@ -27,7 +27,11 @@ def generate(disabled):
     services = {}
     for parent in ['framework', 'applications']:
         for path in sorted((ROOT / parent).glob('*/servicedef/*.xml')):
+            xml, _ = parse_xml(path)
+            overrides = {s.get('name'): {p.get('name'): p.get('mode') for p in s.findall('override')
+                                      if p.get('mode')} for s in xml.iter('service')}
             for service in parse_service_file(ROOT, path, fields):
+                service['override_modes'] = overrides.get(service['name'], {})
                 services[service['name']] = service
     source = '\n'.join(p.read_text() for c in COMPONENTS
                        for p in (ROOT / 'migration' / (c + '-springboot') / 'src/main/java').rglob('*.java'))
@@ -42,10 +46,13 @@ def generate(disabled):
         if name not in services or name in visiting:
             return {}
         service = services[name]
-        result = {}
+        result = {p['name']: p.get('mode') for p in service['params']}
         for inherited in service.get('implements', []):
-            result.update(parameters(inherited['service'], (*visiting, name)))
-        result.update({p['name']: p.get('mode') or 'IN' for p in service['params']})
+            for field, mode in parameters(inherited['service'], (*visiting, name)).items():
+                existing = result.get(field)
+                result[field] = 'INOUT' if existing and existing != mode else mode
+        result = {field: mode or 'IN' for field, mode in result.items()}
+        result.update(service['override_modes'])
         params[name] = result
         return result
 
