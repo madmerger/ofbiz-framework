@@ -1,5 +1,16 @@
 # OFBiz → Spring Boot 移行プレイブック
 
+## English summary
+
+Use the [English migration guide](README.md) as the entry point for the implemented
+Spring Boot architecture, build/test commands, and old-vs-new PostgreSQL harness.
+The recorded WP3 result is 3,347 passing JUnit tests and 28/28 equivalence cases;
+this certifies the documented manifest, not every original service branch. The
+guide links the ECA coverage, mismatch history, and explicit not-certified scope.
+The Japanese playbook below is retained as the original migration methodology and
+planning record, including historical names and sequencing rather than a current
+deployment prescription.
+
 humanres のパイロット（`docs/migration/humanres/` の spec / notes / review）から一般化した、全コンポーネントで共通に使う移行手順書。
 
 ## 0. 次に着手するコンポーネントと推奨順序

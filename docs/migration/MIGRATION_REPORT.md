@@ -1,5 +1,17 @@
 # OFBiz → Spring Boot 全体移行レポート
 
+## English summary
+
+Start with the [English migration guide](README.md) for the architecture, build/test
+commands, PostgreSQL equivalence procedure, and certification boundaries. The
+recorded WP3 baseline is 3,347 passing JUnit tests and 28/28 PostgreSQL equivalence
+cases, with no accepted differences. Generated ECA coverage is 348 rules: 163
+active, 31 disabled hand-wired, 151 target-unported, and 3 unsupported-condition.
+The guide distinguishes that baseline from later regression additions and explains
+faithful-to-original behaviors retained intentionally. The Japanese report below
+is preserved as a historical implementation record; its earlier per-component
+counts and review statements are not a replacement for the linked current evidence.
+
 ## 1. 概要
 
 - **方針（ユーザーの決定事項）**
