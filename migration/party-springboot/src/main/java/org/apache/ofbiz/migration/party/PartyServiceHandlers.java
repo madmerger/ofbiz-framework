@@ -354,7 +354,6 @@ public class PartyServiceHandlers {
         fields.put("contactMechId", contactMechId);
         copy(input, fields, "fromDate", "comments", "extension", "allowSolicitation");
         fields.putIfAbsent("fromDate", now());
-        fields.putIfAbsent("allowSolicitation", "Y");
         create("PartyContactMech", fields);
         createPurposeIfPresent(partyId, contactMechId, text(input, "contactMechPurposeTypeId"));
         return result("contactMechId", contactMechId);
