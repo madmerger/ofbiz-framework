@@ -77,6 +77,47 @@ class EntityAutoServiceApiTest {
     @Autowired
     private ServiceHandlerRegistry serviceRegistry;
 
+    @Autowired
+    private EntityAutoService entityAuto;
+
+    @Test
+    void entityAutoCreatesOriginalAuditMetadataAndStatusActors() throws Exception {
+        serviceRegistry.registerCatalog("test", Map.of(
+                "createShipmentAuditTest", new ServiceHandlerRegistry.ServiceDefinition("createShipmentAuditTest", "Shipment", "create", "CREATE",
+                        List.of(new ServiceHandlerRegistry.ParamDefinition("shipmentId", "INOUT", false, "String"))),
+                "updateShipmentAuditTest", new ServiceHandlerRegistry.ServiceDefinition("updateShipmentAuditTest", "Shipment", "update", "UPDATE",
+                        List.of(new ServiceHandlerRegistry.ParamDefinition("shipmentId", "IN", false, "String"))),
+                "createShipmentStatusAuditTest", new ServiceHandlerRegistry.ServiceDefinition("createShipmentStatusAuditTest", "ShipmentStatus", "create", "CREATE",
+                        List.of(new ServiceHandlerRegistry.ParamDefinition("shipmentId", "IN", false, "String"),
+                                new ServiceHandlerRegistry.ParamDefinition("statusDate", "IN", false, "Timestamp"),
+                                new ServiceHandlerRegistry.ParamDefinition("statusId", "IN", false, "String")))));
+        mockMvc.perform(post("/api/test/services/createShipmentAuditTest")
+                        .with(httpBasic("writer", "writer-password")).contentType("application/json")
+                        .content("{\"shipmentId\":\"AUDIT_SHIPMENT\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.createdByUserLogin").value("writer"))
+                .andExpect(jsonPath("$.lastModifiedByUserLogin").value("writer"))
+                .andExpect(jsonPath("$.createdDate").isNotEmpty()).andExpect(jsonPath("$.lastModifiedDate").isNotEmpty());
+        mockMvc.perform(post("/api/test/services/updateShipmentAuditTest")
+                        .with(httpBasic("admin", "admin-password")).contentType("application/json")
+                        .content("{\"shipmentId\":\"AUDIT_SHIPMENT\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.createdByUserLogin").value("writer"))
+                .andExpect(jsonPath("$.lastModifiedByUserLogin").value("admin"));
+        mockMvc.perform(post("/api/test/services/createShipmentStatusAuditTest")
+                        .with(httpBasic("writer", "writer-password")).contentType("application/json")
+                        .content("{\"shipmentId\":\"AUDIT_SHIPMENT\",\"statusDate\":\"2026-01-01T00:00:00Z\",\"statusId\":\"SHIPMENT_INPUT\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.changeByUserLoginId").value("writer"));
+    }
+
+    @Test
+    void entityAutoStatusCreationRejectsMissingActorsAndEmptyInputs() {
+        var definition = new ServiceHandlerRegistry.ServiceDefinition("noActorStatus", "ShipmentStatus", "create", "CREATE",
+                List.of(new ServiceHandlerRegistry.ParamDefinition("shipmentId", "IN", false, "String"),
+                        new ServiceHandlerRegistry.ParamDefinition("statusId", "IN", false, "String")));
+        org.junit.jupiter.api.Assertions.assertThrows(MigrationException.class,
+                () -> entityAuto.execute(definition, Map.of("shipmentId", "NO_ACTOR", "statusId", "SHIPMENT_INPUT")));
+        org.junit.jupiter.api.Assertions.assertThrows(MigrationException.class, () -> entityAuto.execute(definition, Map.of()));
+    }
+
     @Test
     void entityAutoCreateRunsOriginalWorkEffortKeywordEeca() throws Exception {
         var observed = new java.util.concurrent.atomic.AtomicReference<Object>();
