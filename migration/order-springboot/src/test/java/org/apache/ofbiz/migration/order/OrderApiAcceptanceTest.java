@@ -77,6 +77,31 @@ class OrderApiAcceptanceTest extends OrderItemStatusScenarios {
     private OrderEntitySupport data;
 
     @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void storeOrderPreservesStoreChannelShipGroupsAndAbsentItemAuditFields() throws Exception {
+        data.create("ProductStore", Map.of("productStoreId", "AC_CHANNEL_STORE", "defaultSalesChannelEnumId", "WEB_SALES_CHANNEL"));
+        MvcResult result = postService("storeOrder", Map.of("partyId", "DemoCustomer", "orderTypeId", "SALES_ORDER",
+                "productStoreId", "AC_CHANNEL_STORE", "orderItems", List.of(Map.of(
+                        "productId", "DEMO_ORDER_PRODUCT_1", "quantity", 2, "unitPrice", "5.00")),
+                "orderItemShipGroupInfo", List.of(Map.of("shipGroupSeqId", "00001", "facilityId", "AC_WAREHOUSE"),
+                        Map.of("shipGroupSeqId", "00001", "orderItemSeqId", "00001", "quantity", 2))))
+                .andExpect(status().isOk()).andReturn();
+        String id = JSON.readTree(result.getResponse().getContentAsString()).get("orderId").asText();
+        Object header = data.require("OrderHeader", Map.of("orderId", id));
+        assertEquals("WEB_SALES_CHANNEL", data.get(header, "salesChannelEnumId"));
+        assertEquals("Y", data.get(header, "invoicePerShipment"));
+        Object item = data.require("OrderItem", Map.of("orderId", id, "orderItemSeqId", "00001"));
+        assertEquals(null, data.get(item, "cancelQuantity"));
+        assertEquals(null, data.get(item, "changeByUserLoginId"));
+        Object group = data.require("OrderItemShipGroup", Map.of("orderId", id, "shipGroupSeqId", "00001"));
+        assertEquals("AC_WAREHOUSE", data.get(group, "facilityId"));
+        assertEquals("CARRIER", data.get(group, "carrierRoleTypeId"));
+        assertEquals(1, data.find("OrderItemShipGroupAssoc", Map.of("orderId", id)).size());
+        assertEquals(0, data.find("OrderRole", Map.of("orderId", id, "roleTypeId", "END_USER_CUSTOMER")).size());
+    }
+
+    @Test
     void ac01_generatedCatalogContainsAll220EntityAutoServices() throws Exception {
         List<String> serviceNames = new ArrayList<>();
         Path root = Path.of(System.getProperty("ofbiz.root", "."));

@@ -30,6 +30,7 @@ import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.SequenceService;
 import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class OrderFlowService {
+    @Value("${migration.order.invoice-per-shipment:Y}")
+    private String invoicePerShipment;
     private final OrderEntitySupport data;
     private final SequenceService sequences;
     private final ProductPricePort productPrices;
@@ -108,14 +111,27 @@ public class OrderFlowService {
         header.put("createdBy", userLoginId);
         header.put("currencyUom", currencyUom);
         header.put("productStoreId", input.get("productStoreId"));
+        String salesChannel = text(input.get("salesChannelEnumId"));
+        if (salesChannel == null || "UNKNWN_SALES_CHANNEL".equals(salesChannel)) {
+            salesChannel = "SALES_ORDER".equals(orderTypeId) && productStore != null
+                    ? text(data.get(productStore, "defaultSalesChannelEnumId")) : null;
+        }
+        header.put("salesChannelEnumId", salesChannel == null ? "UNKNWN_SALES_CHANNEL" : salesChannel);
+        if (invoicePerShipment != null && !invoicePerShipment.isEmpty()) header.put("invoicePerShipment", invoicePerShipment);
         header.put("grandTotal", grandTotal);
         header.put("remainingSubTotal", grandTotal);
         data.create("OrderHeader", header);
 
         String shipGroupSeqId = "00001";
-        data.create("OrderItemShipGroup", Map.of(
-                "orderId", orderId,
-                "shipGroupSeqId", shipGroupSeqId));
+        List<Map<String, Object>> shipGroupInfo = itemInputs(input.get("orderItemShipGroupInfo"));
+        List<Map<String, Object>> groups = shipGroupInfo.stream().filter(group -> !group.containsKey("orderItemSeqId")).toList();
+        if (groups.isEmpty()) groups = List.of(Map.of("shipGroupSeqId", shipGroupSeqId));
+        for (Map<String, Object> group : groups) {
+            Map<String, Object> values = new LinkedHashMap<>(group);
+            values.put("orderId", orderId);
+            values.putIfAbsent("carrierRoleTypeId", "CARRIER");
+            data.create("OrderItemShipGroup", values);
+        }
         int sequence = 0;
         for (OrderLine line : lines) {
             String orderItemSeqId = String.format("%05d", ++sequence);
@@ -125,19 +141,24 @@ public class OrderFlowService {
             item.put("orderItemTypeId", "PRODUCT_ORDER_ITEM");
             item.put("productId", line.productId());
             item.put("quantity", line.quantity());
-            item.put("cancelQuantity", BigDecimal.ZERO);
+            Map<String, Object> source = items.get(sequence - 1);
+            if (source.get("cancelQuantity") != null) item.put("cancelQuantity", decimal(source.get("cancelQuantity"), "cancelQuantity"));
             item.put("unitPrice", line.unitPrice());
             item.put("unitListPrice", line.unitPrice());
             item.put("itemDescription", line.itemDescription());
             item.put("isPromo", "N");
             item.put("statusId", "ITEM_CREATED");
-            item.put("changeByUserLoginId", userLoginId);
+            item.put("changeByUserLoginId", source.get("changeByUserLoginId"));
             data.create("OrderItem", item);
-            data.create("OrderItemShipGroupAssoc", Map.of(
-                    "orderId", orderId,
-                    "orderItemSeqId", orderItemSeqId,
-                    "shipGroupSeqId", shipGroupSeqId,
-                    "quantity", line.quantity()));
+            List<Map<String, Object>> associations = shipGroupInfo.stream()
+                    .filter(group -> orderItemSeqId.equals(group.get("orderItemSeqId"))).toList();
+            if (associations.isEmpty()) associations = List.of(Map.of("orderItemSeqId", orderItemSeqId,
+                    "shipGroupSeqId", shipGroupSeqId, "quantity", line.quantity()));
+            for (Map<String, Object> association : associations) {
+                Map<String, Object> values = new LinkedHashMap<>(association);
+                values.put("orderId", orderId);
+                data.create("OrderItemShipGroupAssoc", values);
+            }
             orderStatuses.recordInitialStatus(orderId, orderItemSeqId, "ITEM_CREATED");
         }
         orderStatuses.recordInitialStatus(orderId, null, "ORDER_CREATED");
@@ -244,7 +265,8 @@ public class OrderFlowService {
                 continue;
             }
             BigDecimal quantity = decimal(data.get(item, "quantity"), "quantity");
-            BigDecimal alreadyCancelled = decimal(data.get(item, "cancelQuantity"), "cancelQuantity");
+            BigDecimal alreadyCancelled = data.get(item, "cancelQuantity") == null
+                    ? BigDecimal.ZERO : decimal(data.get(item, "cancelQuantity"), "cancelQuantity");
             BigDecimal remaining = quantity.subtract(alreadyCancelled);
             BigDecimal cancelQuantity = requested.orElse(remaining);
             if (cancelQuantity.signum() <= 0 || cancelQuantity.compareTo(remaining) > 0) {
@@ -309,7 +331,7 @@ public class OrderFlowService {
             createRole(orderId, text(input.getOrDefault("billToCustomerPartyId", partyId)), "BILL_TO_CUSTOMER");
             createRole(orderId, text(input.getOrDefault("placingCustomerPartyId", partyId)), "PLACING_CUSTOMER");
             createRole(orderId, text(input.getOrDefault("shipToCustomerPartyId", partyId)), "SHIP_TO_CUSTOMER");
-            createRole(orderId, text(input.getOrDefault("endUserCustomerPartyId", partyId)), "END_USER_CUSTOMER");
+            createRole(orderId, text(input.get("endUserCustomerPartyId")), "END_USER_CUSTOMER");
         }
         String vendorId = text(input.get("billFromVendorPartyId"));
         if (vendorId == null && productStore != null) {
