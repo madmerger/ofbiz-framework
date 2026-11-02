@@ -626,7 +626,8 @@ public class GlPostingServiceHandlers {
             if ("N".equals(preference.get("enableAccounting"))) {
                 return Map.of();
             }
-            Object shipment = one("Shipment", Map.of("shipmentId", value(receipt, "shipmentId")));
+            Object shipment = value(receipt, "shipmentId") == null ? null
+                    : one("Shipment", Map.of("shipmentId", value(receipt, "shipmentId")));
             boolean returned = value(receipt, "returnId") != null;
             String creditType = returned ? "COGS_ACCOUNT" : "UNINVOICED_SHIP_RCPT";
             BigDecimal unitCost = money(item.get("unitCost"));
@@ -636,7 +637,6 @@ public class GlPostingServiceHandlers {
             BigDecimal amount = ledgerAmount(money(value(receipt, "quantityAccepted")).multiply(unitCost));
             inventory.createInventoryItemDetail(Map.of(
                     "inventoryItemId", item.get("inventoryItemId"),
-                    "receiptId", receiptId,
                     "accountingQuantityDiff", value(receipt, "quantityAccepted")));
             String partyId = text(value(shipment, "partyIdFrom"));
             Map<String, Object> debit = entry("D", organization, amount,
@@ -647,7 +647,6 @@ public class GlPostingServiceHandlers {
                 row.put("partyId", partyId);
                 row.put("roleTypeId", "BILL_FROM_VENDOR");
                 row.put("productId", item.get("productId"));
-                row.put("inventoryItemId", item.get("inventoryItemId"));
                 resolveAccount(row, "SHIPMENT_RECEIPT", null);
             }
             Map<String, Object> links = new LinkedHashMap<>();

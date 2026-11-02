@@ -28,10 +28,12 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.MigrationException;
+import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
 import org.apache.ofbiz.migration.common.SequenceService;
 import org.apache.ofbiz.migration.product.ProductPermissions;
 import org.apache.ofbiz.migration.product.adapter.AccountingPort;
 import org.apache.ofbiz.migration.product.simple.InventoryServices;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,6 +49,7 @@ public class ProductInventoryFlow {
     private final AccountingPort accounting;
     private final ProductPermissions permissions;
     private final InventoryServices inventoryServices;
+    private final ObjectProvider<MigrationServiceDispatcher> dispatcher;
 
     public ProductInventoryFlow(
             EntityRegistry entities,
@@ -54,13 +57,14 @@ public class ProductInventoryFlow {
             SequenceService sequences,
             AccountingPort accounting,
             ProductPermissions permissions,
-            InventoryServices inventoryServices) {
+            InventoryServices inventoryServices, ObjectProvider<MigrationServiceDispatcher> dispatcher) {
         this.entities = entities;
         this.entityManager = entityManager;
         this.sequences = sequences;
         this.accounting = accounting;
         this.permissions = permissions;
         this.inventoryServices = inventoryServices;
+        this.dispatcher = dispatcher;
     }
 
     /**
@@ -181,15 +185,13 @@ public class ProductInventoryFlow {
         entities.set(inventoryItem, "ownerPartyId", ownerPartyId);
         entities.set(inventoryItem, "currencyUomId", currencyUomId);
         entities.set(inventoryItem, "unitCost", unitCost);
-        entities.set(inventoryItem, "datetimeReceived", timestamp(input.get("datetimeReceived")));
+        if (input.get("datetimeReceived") != null) entities.set(inventoryItem, "datetimeReceived", timestamp(input.get("datetimeReceived")));
         entityManager.persist(inventoryItem);
         return Map.of("inventoryItemId", inventoryItemId);
     }
 
     /**
-     * Port of ShipmentReceiptServices.groovy:65-193. Inventory balances are
-     * maintained from InventoryItemDetail; accounting and receipt ECAs are
-     * documented no-ops in this migration slice.
+     * Port of ShipmentReceiptServices.groovy:65-193.
      */
     @Transactional
     public Map<String, Object> receiveInventoryProduct(Map<String, Object> input) {
@@ -238,7 +240,7 @@ public class ProductInventoryFlow {
             String currentInventoryItemId = text(input.get("currentInventoryItemId"));
             if (receivedEach.signum() > 0) {
                 if (currentInventoryItemId == null) {
-                    Map<String, Object> created = createInventoryItem(itemInput);
+                    Map<String, Object> created = dispatcher.getObject().execute("product", "createInventoryItem", itemInput);
                     inventoryItemId = text(created.get("inventoryItemId"));
                 } else {
                     requireInventoryItemUpdatePermission();
@@ -257,11 +259,20 @@ public class ProductInventoryFlow {
                     }
                 }
             }
-            String receiptId = sequences.nextId("ShipmentReceipt");
+            Map<String, Object> receiptInput = new LinkedHashMap<>(itemInput);
+            receiptInput.put("inventoryItemId", inventoryItemId);
+            receiptInput.put("quantityAccepted", receivedEach);
+            receiptInput.put("quantityRejected", rejected);
             if (receivedEach.signum() > 0 && !serialized) {
-                createReceiptDetail(itemInput, inventoryItemId, receivedEach, rejected, receiptId);
+                Map<String, Object> detailInput = new LinkedHashMap<>(itemInput);
+                detailInput.put("inventoryItemId", inventoryItemId);
+                detailInput.put("quantityOnHandDiff", receivedEach);
+                detailInput.put("availableToPromiseDiff", receivedEach);
+                Map<String, Object> detail = dispatcher.getObject().execute("product", "createInventoryItemDetail", detailInput);
+                receiptInput.put("inventoryItemDetailSeqId", detail.get("inventoryItemDetailSeqId"));
             }
-            createReceipt(itemInput, inventoryItemId, receivedEach, rejected, receiptId);
+            Map<String, Object> receipt = dispatcher.getObject().execute("product", "createShipmentReceipt", receiptInput);
+            String receiptId = text(receipt.get("receiptId"));
             if (serialized && inventoryItemId != null) {
                 // Mirrors applications/product/entitydef/eecas.xml:52-55.
                 callInventoryService("updateSerializedInventoryTotals",
@@ -281,55 +292,37 @@ public class ProductInventoryFlow {
         result.put("successMessageList", inventoryItemId == null ? java.util.List.of()
                 : java.util.List.of("Received " + receivedEach + " of " + productId
                         + " in inventory item " + inventoryItemId + "."));
-        result.put("sideEffectNotes", "Receipt accounting and receipt SECA/ECA callbacks are no-ops.");
         if (oldOwnerPartyId != null) {
             result.put("oldOwnerPartyId", oldOwnerPartyId);
         }
         return result;
     }
 
-    private void createReceiptDetail(
-            Map<String, Object> input, String inventoryItemId, BigDecimal accepted, BigDecimal rejected, String receiptId) {
-        Object inventoryItem = find("InventoryItem", Map.of("inventoryItemId", inventoryItemId));
-        Object detail = entities.newEntity(entities.entityClass("InventoryItemDetail"));
-        Map<String, Object> parents = Map.of("inventoryItemId", inventoryItemId);
-        entities.set(detail, "inventoryItemId", inventoryItemId);
-        entities.set(detail, "inventoryItemDetailSeqId",
-                sequences.nextSubSequence("InventoryItemDetail", parents, "inventoryItemDetailSeqId"));
-        entities.set(detail, "effectiveDate", new Timestamp(System.currentTimeMillis()));
-        entities.set(detail, "quantityOnHandDiff", accepted);
-        entities.set(detail, "availableToPromiseDiff", accepted);
-        entities.set(detail, "unitCost", entities.get(inventoryItem, "unitCost"));
-        for (String field : Set.of("orderId", "orderItemSeqId", "shipGroupSeqId", "shipmentId",
-                "returnId", "returnItemSeqId", "workEffortId", "reasonEnumId", "description")) {
-            if (input.get(field) != null) {
-                entities.set(detail, field, input.get(field));
-            }
-        }
-        entityManager.persist(detail);
-        BigDecimal oldQoh = decimal(entities.get(inventoryItem, "quantityOnHandTotal"));
-        BigDecimal oldAtp = decimal(entities.get(inventoryItem, "availableToPromiseTotal"));
-        entities.set(inventoryItem, "quantityOnHandTotal", (oldQoh == null ? ZERO : oldQoh).add(accepted));
-        entities.set(inventoryItem, "availableToPromiseTotal", (oldAtp == null ? ZERO : oldAtp).add(accepted));
-        entityManager.flush();
-        entities.set(detail, "receiptId", receiptId);
-    }
-
-    private void createReceipt(
-            Map<String, Object> input, String inventoryItemId, BigDecimal accepted, BigDecimal rejected, String receiptId) {
+    @Transactional
+    public Map<String, Object> createShipmentReceipt(Map<String, Object> input) {
+        String productId = required(input, "productId");
+        Object product = find("Product", Map.of("productId", productId));
+        if (product == null) throw new MigrationException(HttpStatus.NOT_FOUND, "Product not found");
+        String receiptId = sequences.nextId("ShipmentReceipt");
         Object receipt = entities.newEntity(entities.entityClass("ShipmentReceipt"));
         copyKnownFields(receipt, input,
                 Set.of("receiptId", "inventoryItemId", "quantityAccepted", "quantityRejected", "datetimeReceived"));
         entities.set(receipt, "receiptId", receiptId);
-        if (inventoryItemId != null) {
-            entities.set(receipt, "inventoryItemId", inventoryItemId);
-        }
+        entities.set(receipt, "inventoryItemId", input.get("inventoryItemId"));
         entities.set(receipt, "productId", input.get("productId"));
-        entities.set(receipt, "quantityAccepted", accepted);
-        entities.set(receipt, "quantityRejected", rejected);
+        entities.set(receipt, "quantityAccepted", requiredDecimal(input, "quantityAccepted"));
+        entities.set(receipt, "quantityRejected", decimal(input.get("quantityRejected")));
         entities.set(receipt, "datetimeReceived", timestamp(input.get("datetimeReceived")));
         entities.set(receipt, "receivedByUserLoginId", currentUserLoginId());
         entityManager.persist(receipt);
+        if (input.get("inventoryItemDetailSeqId") != null) {
+            Object detail = find("InventoryItemDetail", Map.of("inventoryItemId", input.get("inventoryItemId"),
+                    "inventoryItemDetailSeqId", input.get("inventoryItemDetailSeqId")));
+            if (detail != null) entities.set(detail, "receiptId", receiptId);
+        }
+        boolean affectAccounting = !Set.of("SERVICE_PRODUCT", "ASSET_USAGE_OUT_IN", "AGGREGATEDSERV_CONF")
+                .contains(entities.get(product, "productTypeId"));
+        return Map.of("receiptId", receiptId, "affectAccounting", affectAccounting);
     }
 
     private void requireInventoryItemUpdatePermission() {
