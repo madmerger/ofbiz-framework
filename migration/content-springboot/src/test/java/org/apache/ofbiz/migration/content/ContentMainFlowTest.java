@@ -36,6 +36,33 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 class ContentMainFlowTest extends ContentApiTestSupport {
+    @org.springframework.beans.factory.annotation.Autowired
+    private ContentEntityStore store;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.transaction.PlatformTransactionManager transactions;
+
+    @Test
+    @org.springframework.transaction.annotation.Transactional
+    void contentWithoutExplicitOwnerAssignsAuthenticatedUserParty() throws Exception {
+        new org.springframework.transaction.support.TransactionTemplate(transactions).executeWithoutResult(status -> {
+            store.create("Party", Map.of("partyId", "REVIEW_EDITOR", "partyTypeId", "PERSON"));
+            store.create("UserLogin", Map.of("userLoginId", "editor", "partyId", "REVIEW_EDITOR", "enabled", "Y"));
+        });
+        JsonNode created = body(call("editor", "createContent", Map.of("contentName", "Authenticated owner"))
+                .andExpect(status().isOk()));
+        entities("editor", "ContentRole", Map.of("contentId", created.get("contentId").asText()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$[0].partyId").value("REVIEW_EDITOR"))
+                .andExpect(jsonPath("$[0].roleTypeId").value("OWNER"));
+    }
+
+    @Test
+    void contentCreationWithoutUserPartyMappingDoesNotPoisonTheTransaction() throws Exception {
+        JsonNode created = body(call("creator", "createContent", Map.of("contentName", "Unmapped creator"))
+                .andExpect(status().isOk()));
+        entities("editor", "Content", Map.of("contentId", created.get("contentId").asText()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$[0].contentName").value("Unmapped creator"));
+    }
 
     @Test
     void electronicTextWithoutIdCreatesResourceBeforePersistingText() throws Exception {

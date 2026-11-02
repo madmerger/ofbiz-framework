@@ -35,6 +35,7 @@ public class EcaEngine {
     private final ServiceHandlerRegistry registry;
     private final ObjectProvider<MigrationServiceDispatcher> dispatcher;
     private final ObjectProvider<UserDetailsService> users;
+    private final ObjectProvider<EntityRegistry> entities;
     private final MigrationSecurityProperties security;
     private final TransactionTemplate independent;
     private final TransactionTemplate required;
@@ -42,15 +43,17 @@ public class EcaEngine {
     private final ThreadLocal<Deque<String>> stack = ThreadLocal.withInitial(ArrayDeque::new);
     private final ThreadLocal<Deque<String>> services = ThreadLocal.withInitial(ArrayDeque::new);
     private final ThreadLocal<Deque<Boolean>> ignoredErrors = ThreadLocal.withInitial(ArrayDeque::new);
+    private final ThreadLocal<Map<String, Map<String, Object>>> logins = ThreadLocal.withInitial(LinkedHashMap::new);
     private final Map<String, LongAdder> counters = new ConcurrentHashMap<>();
 
     public EcaEngine(EcaCatalog catalog, ServiceHandlerRegistry registry,
             ObjectProvider<MigrationServiceDispatcher> dispatcher, ObjectProvider<UserDetailsService> users,
-            MigrationSecurityProperties security, PlatformTransactionManager transactions) {
+            MigrationSecurityProperties security, PlatformTransactionManager transactions, ObjectProvider<EntityRegistry> entities) {
         this.catalog = catalog;
         this.registry = registry;
         this.dispatcher = dispatcher;
         this.users = users;
+        this.entities = entities;
         this.security = security;
         independent = new TransactionTemplate(transactions);
         independent.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -79,7 +82,10 @@ public class EcaEngine {
             });
         } finally {
             services.get().pop();
-            if (services.get().isEmpty()) services.remove();
+            if (services.get().isEmpty()) {
+                services.remove();
+                logins.remove();
+            }
             if (stack.get().isEmpty()) stack.remove();
         }
     }
@@ -90,6 +96,12 @@ public class EcaEngine {
             Supplier<Map<String, Object>> invocation) {
         Map<String, Object> result = new LinkedHashMap<>();
         Map<String, Object> context = new LinkedHashMap<>(input);
+        context.remove("userLogin");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()
+                && !(authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken)) {
+            context.put("userLogin", logins.get().computeIfAbsent(authentication.getName(), name -> userLogin(authentication)));
+        }
         event("service", component, service, "", "global-rollback", context, result, null);
         event("service", component, service, "", "global-commit", context, result, null);
         event("service", component, service, "", "auth", context, result, null);
@@ -104,6 +116,21 @@ public class EcaEngine {
         if ("error".equals(result.get("responseMessage"))
                 && (ignoredErrors.get().isEmpty() || !ignoredErrors.get().peek())) rollbackOnly();
         return result;
+    }
+
+    private Map<String, Object> userLogin(Authentication authentication) {
+        Map<String, Object> login = new LinkedHashMap<>();
+        login.put("userLoginId", authentication.getName());
+        Object partyId = null;
+        var principal = new org.springframework.beans.BeanWrapperImpl(authentication.getPrincipal());
+        if (principal.isReadableProperty("partyId")) partyId = principal.getPropertyValue("partyId");
+        EntityRegistry registry = entities.getIfAvailable();
+        if (partyId == null && registry != null) {
+            Object persisted = registry.findByPrimaryKey(registry.entityClass("UserLogin"), Map.of("userLoginId", authentication.getName()));
+            if (persisted != null) partyId = registry.get(persisted, "partyId");
+        }
+        if (partyId != null) login.put("partyId", partyId);
+        return java.util.Collections.unmodifiableMap(login);
     }
 
     private Map<String, Object> invocationWithInput(Map<String, Object> input, Map<String, Object> context,

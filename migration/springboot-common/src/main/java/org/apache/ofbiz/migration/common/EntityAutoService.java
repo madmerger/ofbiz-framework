@@ -51,6 +51,10 @@ public class EntityAutoService {
 
     @Transactional
     public Map<String, Object> execute(ServiceHandlerRegistry.ServiceDefinition definition, Map<String, ?> input) {
+        return executeEca(definition, input);
+    }
+
+    Map<String, Object> executeEca(ServiceHandlerRegistry.ServiceDefinition definition, Map<String, ?> input) {
         validateText(input);
         Class<?> type = entityRegistry.entityClass(definition.entity());
         entityRegistry.requireSensitiveView(type);
@@ -185,6 +189,7 @@ public class EntityAutoService {
                 .filter(param -> "IN".equalsIgnoreCase(param.mode()) || "INOUT".equalsIgnoreCase(param.mode()))
                 .map(ServiceHandlerRegistry.ParamDefinition::name)
                 .collect(java.util.stream.Collectors.toSet());
+        allowed.addAll(List.of("userLogin", "locale", "timeZone"));
         for (String name : input.keySet()) {
             if (!allowed.contains(name)) {
                 throw new MigrationException(HttpStatus.BAD_REQUEST, "Unknown field: " + name);

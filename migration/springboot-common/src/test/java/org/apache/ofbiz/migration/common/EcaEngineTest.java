@@ -40,7 +40,7 @@ class EcaEngineTest {
         ObjectProvider<UserDetailsService> users = mock(ObjectProvider.class);
         when(dispatchers.getObject()).thenReturn(dispatcher);
         return new EcaEngine(new EcaCatalog(catalog), registry, dispatchers, users,
-                new MigrationSecurityProperties(), transactions);
+                new MigrationSecurityProperties(), transactions, mock(ObjectProvider.class));
     }
 
     private EcaEngine engine(String... rules) throws Exception {
@@ -58,6 +58,22 @@ class EcaEngineTest {
 
     private void register(String name) {
         registry.registerHandler("test", name, input -> Map.of());
+    }
+
+    @Test
+    void authenticatedUserLoginIsTrustedAndMissingAnonymousLoginIsNotInvented() throws Exception {
+        var authenticated = new UsernamePasswordAuthenticationToken("signed-in", null, List.of());
+        SecurityContextHolder.getContext().setAuthentication(authenticated);
+        Map<String, Object> input = new LinkedHashMap<>(Map.of("userLogin", Map.of("userLoginId", "forged", "partyId", "forged")));
+        engine().service("test", "root", input, () -> {
+            assertEquals(Map.of("userLoginId", "signed-in"), input.get("userLogin"));
+            return Map.of();
+        });
+        SecurityContextHolder.clearContext();
+        engine().service("test", "root", input, () -> {
+            assertFalse(input.containsKey("userLogin"));
+            return Map.of();
+        });
     }
 
     @Test

@@ -91,6 +91,16 @@ component admin authority, restored in a finally block. Other named users must
 exist in the configured Spring UserDetailsService. A userLogin field is context,
 not authentication, and does not grant permissions.
 
+Service contexts receive a server-derived `userLogin` map for authenticated,
+non-anonymous callers. It contains `userLoginId` and, when available, `partyId`
+from the authenticated principal or its persisted `UserLogin` row. Request-supplied
+identity maps are replaced, and run-as actions resolve the scoped user's identity.
+Standalone Spring users without a party mapping are not assigned a fabricated
+party; owner actions requiring that party cannot create an owner role. Entity-auto
+updates accept the internal `userLogin`, `locale`, and `timeZone` context fields.
+Dispatcher entity-auto calls join the engine's transaction directly so an ignored
+validation error does not independently mark it rollback-only.
+
 Each phase deduplicates successful actions by target service, as OFBiz does.
 Rule ancestry prevents immediate and deferred cycles; nesting is limited to 32.
 The engine exposes per-rule counters for matched/executed, unavailable targets,

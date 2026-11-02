@@ -38,7 +38,7 @@ class EcaInternalInvocationTest {
         var catalog = new EcaCatalog(new ObjectMapper());
         var engine = new EcaEngine(catalog, registry,
                 beans.getBeanProvider(MigrationServiceDispatcher.class), beans.getBeanProvider(UserDetailsService.class),
-                security, transactions);
+                security, transactions, beans.getBeanProvider(EntityRegistry.class));
         var dispatcher = new MigrationServiceDispatcher(registry, mock(EntityAutoService.class),
                 mock(EntityRegistry.class), security, engine);
         beans.registerSingleton("dispatcher", dispatcher);

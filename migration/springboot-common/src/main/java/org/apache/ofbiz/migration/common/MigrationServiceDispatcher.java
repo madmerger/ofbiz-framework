@@ -82,7 +82,7 @@ public class MigrationServiceDispatcher {
         }
         Map<String, Object> values = new LinkedHashMap<>(input);
         Map<String, Object> output = ecas.service(component, serviceName, values, () -> handler == null
-                ? entityAutoService.execute(definition, values)
+                ? entityAutoService.executeEca(definition, values)
                 : handler.handler().execute(values));
         Map<String, Object> response = new LinkedHashMap<>(output);
         response.putIfAbsent("responseMessage", "success");
