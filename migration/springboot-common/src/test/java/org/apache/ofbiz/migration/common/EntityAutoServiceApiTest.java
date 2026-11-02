@@ -78,6 +78,26 @@ class EntityAutoServiceApiTest {
     private ServiceHandlerRegistry serviceRegistry;
 
     @Test
+    void entityAutoCreateRunsOriginalWorkEffortKeywordEeca() throws Exception {
+        var observed = new java.util.concurrent.atomic.AtomicReference<Object>();
+        serviceRegistry.registerCatalog("test", Map.of("createWorkEffortForEecaTest",
+                new ServiceHandlerRegistry.ServiceDefinition("createWorkEffortForEecaTest", "WorkEffort", "create", "CREATE",
+                        List.of(new ServiceHandlerRegistry.ParamDefinition("workEffortId", "INOUT", true, "String"),
+                                new ServiceHandlerRegistry.ParamDefinition("workEffortName", "IN", true, "String")))));
+        serviceRegistry.registerHandler("test", "indexWorkEffortKeywords", "CREATE", input -> {
+            observed.set(input.get("workEffortInstance"));
+            return Map.of();
+        });
+        mockMvc.perform(post("/api/test/services/createWorkEffortForEecaTest")
+                        .with(httpBasic("writer", "writer-password"))
+                        .contentType("application/json")
+                        .content("{\"workEffortId\":\"EECA_WORK\",\"workEffortName\":\"Keyword event\"}"))
+                .andExpect(status().isOk());
+        org.junit.jupiter.api.Assertions.assertNotNull(observed.get());
+        org.junit.jupiter.api.Assertions.assertEquals("WorkEffort", observed.get().getClass().getSimpleName());
+    }
+
+    @Test
     void registersGeneratedCatalogAndCallsEntityAutoServiceOverHttp() throws Exception {
         serviceRegistry.registerCatalog("test", Map.of(
                 "createGeo", ServiceCatalog.find("createGeo").orElseThrow()));

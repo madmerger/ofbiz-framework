@@ -65,6 +65,19 @@ class MainFlowTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
+    void createPersonRunsOriginalDefaultRoleCommitRule() throws Exception {
+        mockMvc.perform(post("/api/party/services/createPerson")
+                        .with(httpBasic("admin", "admin-password"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"partyId\":\"ECA_PERSON\",\"firstName\":\"Equivalence\",\"lastName\":\"Probe\"}"))
+                .andExpect(status().isOk());
+        Object role = entities.findByPrimaryKey(entities.entityClass("PartyRole"),
+                Map.of("partyId", "ECA_PERSON", "roleTypeId", "_NA_"));
+        assertNotNull(role);
+        assertEquals("_NA_", entities.get(role, "roleTypeId"));
+    }
+
+    @Test
     void ac30_partyGroupRelationshipAndContactFlow() throws Exception {
         mockMvc.perform(post("/api/party/services/createPartyGroup")
                         .with(httpBasic("admin", "admin-password"))

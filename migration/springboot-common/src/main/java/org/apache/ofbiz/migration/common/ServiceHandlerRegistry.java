@@ -72,6 +72,13 @@ public class ServiceHandlerRegistry {
         return Optional.ofNullable(handlers.getOrDefault(component, Map.of()).get(name));
     }
 
+    public Optional<String> componentFor(String preferred, String service) {
+        if (find(preferred, service).isPresent() || handler(preferred, service).isPresent()) return Optional.of(preferred);
+        return java.util.stream.Stream.concat(catalogs.keySet().stream(), handlers.keySet().stream())
+                .distinct().sorted().filter(component -> find(component, service).isPresent()
+                        || handler(component, service).isPresent()).findFirst();
+    }
+
     public record ParamDefinition(String name, String mode, boolean optional, String type) { }
     public record ServiceDefinition(
             String name, String entity, String invoke, String permissionMainAction, List<ParamDefinition> params) { }
