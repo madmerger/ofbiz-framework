@@ -257,6 +257,7 @@ public class AcctgTransServiceHandlers {
         }
         entities.set(transaction, "isPosted", "Y");
         entities.set(transaction, "postedDate", Timestamp.from(Instant.now()));
+        updateTransactionLastModified(transaction);
         entityManager.flush();
         return Map.of();
     }

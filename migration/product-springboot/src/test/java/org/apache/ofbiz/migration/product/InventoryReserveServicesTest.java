@@ -105,7 +105,7 @@ class InventoryReserveServicesTest {
     }
 
     @Test
-    void ac01_reservesNonSerializedStockThroughFacilityAliasAndCalculatesPromiseDate() throws Exception {
+    void ac01_reservesNonSerializedStockThroughFacilityAliasWithoutInventingAPromiseDate() throws Exception {
         Scenario scenario = scenario(true, true);
         createInventoryItem(scenario, "NON_SERIAL_INV_ITEM", new BigDecimal("3"));
 
@@ -122,7 +122,7 @@ class InventoryReserveServicesTest {
                     "inventoryItemId", scenario.inventoryItemId());
             assertDecimalEquals("1", entities.get(item, "availableToPromiseTotal"));
             assertDecimalEquals("2", entities.get(reservation, "quantity"));
-            assertEquals(promisedDate(ORDER_DATE, 7), entities.get(reservation, "promisedDatetime"));
+            assertNull(entities.get(reservation, "promisedDatetime"));
             List<?> details = entityManager.createQuery(
                             "select d from InventoryItemDetail d where d.inventoryItemId = :inventoryItemId")
                     .setParameter("inventoryItemId", scenario.inventoryItemId())
@@ -155,7 +155,7 @@ class InventoryReserveServicesTest {
                     "inventoryItemId", scenario.inventoryItemId());
             assertEquals("INV_PROMISED", entities.get(item, "statusId"));
             assertDecimalEquals("1", entities.get(reservation, "quantity"));
-            assertEquals(promisedDate(ORDER_DATE, 7), entities.get(reservation, "promisedDatetime"));
+            assertNull(entities.get(reservation, "promisedDatetime"));
         });
         verify(inventoryServices).execute(
                 eq("updateInventoryItem"),

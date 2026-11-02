@@ -28,6 +28,9 @@ import org.apache.ofbiz.migration.accounting.AccountingEntityQueries;
 import org.apache.ofbiz.migration.accounting.InventoryAccountingPort;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.SequenceService;
+import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
+import org.apache.ofbiz.migration.common.ServiceHandlerRegistry;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,12 +40,17 @@ public class LocalInventoryAccountingAdapter implements InventoryAccountingPort 
     private final EntityRegistry entities;
     private final EntityManager entityManager;
     private final SequenceService sequences;
+    private final ServiceHandlerRegistry registry;
+    private final ObjectProvider<MigrationServiceDispatcher> dispatcher;
 
     public LocalInventoryAccountingAdapter(
-            EntityRegistry entities, EntityManager entityManager, SequenceService sequences) {
+            EntityRegistry entities, EntityManager entityManager, SequenceService sequences,
+            ServiceHandlerRegistry registry, ObjectProvider<MigrationServiceDispatcher> dispatcher) {
         this.entities = entities;
         this.entityManager = entityManager;
         this.sequences = sequences;
+        this.registry = registry;
+        this.dispatcher = dispatcher;
     }
 
     @Override
@@ -103,6 +111,9 @@ public class LocalInventoryAccountingAdapter implements InventoryAccountingPort 
 
     @Override
     public Map<String, Object> createInventoryItemDetail(Map<String, Object> input) {
+        if (registry.componentFor("product", "createInventoryItemDetail").filter("product"::equals).isPresent()) {
+            return dispatcher.getObject().execute("product", "createInventoryItemDetail", input);
+        }
         Object detail = entities.newEntity(entities.entityClass("InventoryItemDetail"));
         Map<String, Object> fields = entities.toMap(detail);
         for (String field : fields.keySet()) {

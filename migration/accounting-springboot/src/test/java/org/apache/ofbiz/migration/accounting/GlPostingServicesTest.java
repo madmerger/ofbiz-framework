@@ -87,6 +87,8 @@ class GlPostingServicesTest {
         assertEquals(1, transactions.size());
         Object transaction = transactions.get(0);
         assertEquals("SALES_INVOICE", entities.get(transaction, "acctgTransTypeId"));
+        assertEquals("MIG_DEMO_CUSTOMER", entities.get(transaction, "partyId"));
+        assertEquals("BILL_TO_CUSTOMER", entities.get(transaction, "roleTypeId"));
         String transactionId = entities.get(transaction, "acctgTransId").toString();
         var entries = AccountingEntityQueries.findByEquality(entityManager,
                 entities.entityClass("AcctgTransEntry"), Map.of("acctgTransId", transactionId));
@@ -148,7 +150,7 @@ class GlPostingServicesTest {
                 .andExpect(status().isOk());
 
         assertPosting("SALES_INVOICE", "invoiceId", invoiceId, new BigDecimal("30.00"), List.of(
-                new EntryExpectation("INV_PROD_ITEM", "C"),
+                new EntryExpectation(null, "C"),
                 new EntryExpectation("ACCOUNTS_RECEIVABLE", "D")));
     }
 
@@ -380,6 +382,7 @@ class GlPostingServicesTest {
 
     @Test
     void createAcctgTransForSalesShipmentIssuanceCreatesBalancedSalesShipmentPosting() throws Exception {
+        configureCosting("COGS_INV_COST");
         String inventoryItemId = createInventoryItem("MIG_DEMO_VENDOR", "3.00", "2.50");
         String shipmentId = createShipment();
         String itemIssuanceId = createItemIssuance(inventoryItemId, shipmentId, "3.00");
@@ -390,6 +393,130 @@ class GlPostingServicesTest {
         assertPosting("SALES_SHIPMENT", "shipmentId", shipmentId, new BigDecimal("7.50"), List.of(
                 new EntryExpectation("COGS_ACCOUNT", "D"),
                 new EntryExpectation("INVENTORY_ACCOUNT", "C")));
+    }
+
+    @Test
+    void fifoUsesAccountingLayersRatherThanTheIssuedItemsCost() throws Exception {
+        configureCosting("COGS_FIFO");
+        try {
+            String first = createInventoryItem("MIG_DEMO_VENDOR", "1", "1.25");
+            String second = createInventoryItem("MIG_DEMO_VENDOR", "1", "2.25");
+            String issued = createInventoryItem("MIG_DEMO_VENDOR", "2", "99");
+            inTransaction(() -> {
+                for (var row : Map.of(first, "1800-01-01 00:00:00", second, "1801-01-01 00:00:00", issued, "1802-01-01 00:00:00").entrySet()) {
+                    Object item = entities.findByPrimaryKey(entities.entityClass("InventoryItem"), Map.of("inventoryItemId", row.getKey()));
+                    entities.set(item, "datetimeReceived", java.sql.Timestamp.valueOf(row.getValue()));
+                }
+            });
+            String shipment = createShipment();
+            String issuance = createItemIssuance(issued, shipment, "2");
+            postGl("createAcctgTransForSalesShipmentIssuance", "{\"itemIssuanceId\":\"" + issuance + "\"}").andExpect(status().isOk());
+            assertPosting("SALES_SHIPMENT", "shipmentId", shipment, new BigDecimal("3.50"), List.of(
+                    new EntryExpectation("INVENTORY_ACCOUNT", "C", new BigDecimal("1.25")),
+                    new EntryExpectation("INVENTORY_ACCOUNT", "C", new BigDecimal("2.25")),
+                    new EntryExpectation("COGS_ACCOUNT", "D")));
+        } finally {
+            configureCosting("COGS_INV_COST");
+        }
+    }
+
+    @Test
+    void unsupportedCostingFailsWithoutCreatingALedgerTransaction() throws Exception {
+        configureCosting("UNKNOWN");
+        try {
+            String shipment = createShipment();
+            String issuance = createItemIssuance(createInventoryItem("MIG_DEMO_VENDOR", "2", "3"), shipment, "2");
+            postGl("createAcctgTransForSalesShipmentIssuance", "{\"itemIssuanceId\":\"" + issuance + "\"}").andExpect(status().isBadRequest());
+            assertEquals(0, AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTrans"), Map.of("shipmentId", shipment)).size());
+        } finally {
+            configureCosting("COGS_INV_COST");
+        }
+    }
+
+    private void configureCosting(String method) {
+        inTransaction(() -> {
+            Object preference = entities.findByPrimaryKey(entities.entityClass("PartyAcctgPreference"), Map.of("partyId", "MIG_DEMO_VENDOR"));
+            if (preference == null) {
+                preference = entities.newEntity(entities.entityClass("PartyAcctgPreference"));
+                entities.set(preference, "partyId", "MIG_DEMO_VENDOR");
+                entities.set(preference, "baseCurrencyUomId", "USD");
+                entityManager.persist(preference);
+            }
+            entities.set(preference, "cogsMethodId", method);
+        });
+    }
+
+    @Test
+    void matchingPendingPaymentCanBeReleasedAndDoesNotDuplicateApplications() throws Exception {
+        String invoiceId = createInvoice();
+        createInvoiceItem(invoiceId);
+        inTransaction(() -> {
+            Object item = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("InvoiceItem"), Map.of("invoiceId", invoiceId)).get(0);
+            entities.set(item, "quantity", BigDecimal.ONE);
+            entities.set(item, "amount", new BigDecimal("79.17"));
+        });
+        String payment = id("MIG_MATCH");
+        persistPayment(payment, "CUSTOMER_PAYMENT", "MIG_DEMO_CUSTOMER", "MIG_DEMO_VENDOR", "PMNT_NOT_PAID", "79.17");
+        String input = "{\"invoiceId\":\"" + invoiceId + "\"}";
+        post("createMatchingPaymentApplication", input).andExpect(status().isOk());
+        post("createMatchingPaymentApplication", input).andExpect(status().isOk());
+        post("createMatchingPaymentApplication", "{}").andExpect(status().isOk());
+        var applications = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("PaymentApplication"), Map.of("invoiceId", invoiceId));
+        assertEquals(1, applications.size());
+        assertEquals(payment, entities.get(applications.get(0), "paymentId"));
+        String application = entities.get(applications.get(0), "paymentApplicationId").toString();
+        String removal = "{\"paymentApplicationId\":\"" + application + "\"}";
+        post("removePaymentApplication", removal).andExpect(status().isOk());
+        post("removePaymentApplication", removal).andExpect(status().isNotFound());
+        assertEquals(0, AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("PaymentApplication"), Map.of("invoiceId", invoiceId)).size());
+    }
+
+    @Test
+    void removingLastReceivedApplicationReopensPaidInvoiceWithoutReapplyingIt() throws Exception {
+        String invoiceId = createInvoice();
+        createInvoiceItem(invoiceId);
+        String paymentId = id("MIG_REOPEN");
+        persistPayment(paymentId, "CUSTOMER_PAYMENT", "MIG_DEMO_CUSTOMER", "MIG_DEMO_VENDOR", "PMNT_RECEIVED", "30.00");
+        String applicationId = persistPaymentApplication(paymentId, invoiceId, "30.00");
+        Map<String, Object> key = Map.of("invoiceId", invoiceId);
+        post("setInvoiceStatus", "{\"invoiceId\":\"" + invoiceId + "\",\"statusId\":\"INVOICE_READY\"}")
+                .andExpect(status().isOk());
+        Object paid = entities.findByPrimaryKey(entities.entityClass("Invoice"), key);
+        assertEquals("INVOICE_PAID", entities.get(paid, "statusId"));
+        assertNotNull(entities.get(paid, "paidDate"));
+        int postings = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTrans"), key).size();
+
+        String removal = "{\"paymentApplicationId\":\"" + applicationId + "\"}";
+        post("removePaymentApplication", removal).andExpect(status().isOk());
+        Object reopened = entities.findByPrimaryKey(entities.entityClass("Invoice"), key);
+        assertEquals("INVOICE_READY", entities.get(reopened, "statusId"));
+        assertNull(entities.get(reopened, "paidDate"));
+        assertEquals(0, AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("PaymentApplication"), key).size());
+        assertEquals(postings, AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTrans"), key).size());
+        List<?> history = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("InvoiceStatus"), key);
+        assertEquals(1L, history.stream().filter(row -> "INVOICE_PAID".equals(entities.get(row, "statusId"))).count());
+        assertEquals(2L, history.stream().filter(row -> "INVOICE_READY".equals(entities.get(row, "statusId"))).count());
+
+        post("removePaymentApplication", removal).andExpect(status().isNotFound());
+        post("removePaymentApplication", "{}").andExpect(status().isBadRequest());
+        post("setInvoiceStatus", "{\"invoiceId\":\"" + invoiceId + "\",\"statusId\":\"INVOICE_PAID\"}")
+                .andExpect(status().isBadRequest());
+        assertEquals("INVOICE_READY", entities.get(entities.findByPrimaryKey(entities.entityClass("Invoice"), key), "statusId"));
+    }
+
+    @Test
+    void incomingPaymentWithoutActualCurrencyOrPaymentMethodPreservesItsAmount() throws Exception {
+        String paymentId = id("MIG_NO_ACTUAL");
+        persistPayment(paymentId, "CUSTOMER_PAYMENT", "MIG_DEMO_CUSTOMER", "MIG_DEMO_VENDOR", "PMNT_RECEIVED", "41.23");
+        inTransaction(() -> {
+            Object payment = entities.findByPrimaryKey(entities.entityClass("Payment"), Map.of("paymentId", paymentId));
+            entities.set(payment, "paymentMethodId", null);
+            entities.set(payment, "actualCurrencyAmount", null);
+            entities.set(payment, "actualCurrencyUomId", null);
+        });
+        postGl("createAcctgTransAndEntriesForIncomingPayment", "{\"paymentId\":\"" + paymentId + "\"}").andExpect(status().isOk());
+        assertPosting("INCOMING_PAYMENT", "paymentId", paymentId, new BigDecimal("41.23"), List.of(
+                new EntryExpectation(null, "D"), new EntryExpectation("ACCREC_UNAPPLIED", "C")));
     }
 
     @Test

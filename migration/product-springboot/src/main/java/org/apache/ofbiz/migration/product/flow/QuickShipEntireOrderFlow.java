@@ -46,7 +46,6 @@ public class QuickShipEntireOrderFlow {
     private final MigrationServiceDispatcher dispatcher;
     private final SequenceService sequences;
     private final IssuanceServices issuance;
-    private final UpdateShipmentFlow updateShipment;
 
     public QuickShipEntireOrderFlow(
             OrderPort orders,
@@ -55,8 +54,7 @@ public class QuickShipEntireOrderFlow {
             EntityManager entityManager,
             MigrationServiceDispatcher dispatcher,
             SequenceService sequences,
-            IssuanceServices issuance,
-            UpdateShipmentFlow updateShipment) {
+            IssuanceServices issuance) {
         this.orders = orders;
         this.entities = entities;
         this.queries = queries;
@@ -64,7 +62,6 @@ public class QuickShipEntireOrderFlow {
         this.dispatcher = dispatcher;
         this.sequences = sequences;
         this.issuance = issuance;
-        this.updateShipment = updateShipment;
     }
 
     /**
@@ -113,6 +110,7 @@ public class QuickShipEntireOrderFlow {
                 createShipment.put("primaryOrderId", orderId);
                 createShipment.put("primaryShipGroupSeqId", shipGroupSeqId);
                 boolean salesOrder = "SALES_ORDER".equals(value(order.get("orderTypeId")));
+                createShipment.put("shipmentTypeId", salesOrder ? "SALES_SHIPMENT" : "PURCHASE_SHIPMENT");
                 createShipment.put("statusId", salesOrder ? "SHIPMENT_INPUT" : "PURCH_SHIP_CREATED");
                 if (salesOrder) {
                     createShipment.put("originFacilityId", facilityId);
@@ -179,11 +177,11 @@ public class QuickShipEntireOrderFlow {
                     packed.put("shipmentId", shipmentId);
                     packed.put("statusId", "SHIPMENT_PACKED");
                     packed.put("eventDate", input.get("eventDate"));
-                    Map<String, Object> packedResult = updateShipment.execute(packed);
+                    Map<String, Object> packedResult = dispatcher.execute("product", "updateShipment", packed);
                     sideEffectNotes.addAll(strings(packedResult.get("sideEffectNotes")));
                     if (!truthy(input.get("setPackedOnly"))) {
                         packed.put("statusId", "SHIPMENT_SHIPPED");
-                        Map<String, Object> shippedResult = updateShipment.execute(packed);
+                        Map<String, Object> shippedResult = dispatcher.execute("product", "updateShipment", packed);
                         sideEffectNotes.addAll(strings(shippedResult.get("sideEffectNotes")));
                     }
                 } else {
@@ -191,7 +189,7 @@ public class QuickShipEntireOrderFlow {
                     shipped.put("shipmentId", shipmentId);
                     shipped.put("statusId", "PURCH_SHIP_SHIPPED");
                     shipped.put("eventDate", input.get("eventDate"));
-                    Map<String, Object> shippedResult = updateShipment.execute(shipped);
+                    Map<String, Object> shippedResult = dispatcher.execute("product", "updateShipment", shipped);
                     sideEffectNotes.addAll(strings(shippedResult.get("sideEffectNotes")));
                 }
                 Map<String, Object> info = new LinkedHashMap<>();

@@ -190,6 +190,7 @@ public class GlPostingServiceHandlers {
             detail.put("productId", value(item, "productId"));
             detail.put("glAccountId", value(item, "overrideGlAccountId"));
             resolveAccount(detail, expectedType, invoiceId);
+            if ("SALES_INVOICE".equals(expectedType)) detail.remove("glAccountTypeId");
             entries.add(detail);
             total = total.add(amount);
         }
@@ -205,7 +206,13 @@ public class GlPostingServiceHandlers {
         balance.put("roleTypeId", purchase ? "BILL_FROM_VENDOR" : "BILL_TO_CUSTOMER");
         resolveAccount(balance, expectedType, invoiceId);
         entries.add(balance);
-        return createTransaction(expectedType, invoice, entries, Map.of("invoiceId", invoiceId));
+        Map<String, Object> header = new LinkedHashMap<>();
+        header.put("invoiceId", invoiceId);
+        if ("SALES_INVOICE".equals(expectedType)) {
+            header.put("partyId", counterparty);
+            header.put("roleTypeId", "BILL_TO_CUSTOMER");
+        }
+        return createTransaction(expectedType, invoice, entries, header);
     }
 
     /** Migrated from applications/accounting/minilang/ledger/GeneralLedgerServices.xml:2189. */
@@ -222,17 +229,20 @@ public class GlPostingServiceHandlers {
         String mappedType = text(value(typeMap, "glAccountTypeId"));
         BigDecimal amount = money(value(payment, "amount")).setScale(4, RoundingMode.HALF_UP);
         String currency = text(value(payment, "currencyUomId"));
-        BigDecimal originalAmount = receipt ? money(value(payment, "actualCurrencyAmount")) : amount;
+        BigDecimal originalAmount = receipt && value(payment, "actualCurrencyAmount") != null
+                ? money(value(payment, "actualCurrencyAmount")) : amount;
         String originalCurrency = receipt
                 ? text(value(payment, "actualCurrencyUomId")) : currency;
         String partner = text(value(payment, receipt ? "partyIdFrom" : "partyIdTo"));
         String role = receipt ? "BILL_TO_CUSTOMER" : "BILL_FROM_VENDOR";
         Map<String, Object> debit = entry("D", organization, amount, currency, receipt ? null : mappedType);
+        debit.put("amount", amount);
         debit.put("origAmount", originalAmount);
         debit.put("origCurrencyUomId", originalCurrency);
         debit.put("paymentId", value(payment, "paymentId"));
         resolveAccount(debit, receipt ? "INCOMING_PAYMENT" : "OUTGOING_PAYMENT", null);
         Map<String, Object> credit = entry("C", organization, amount, currency, receipt ? mappedType : null);
+        credit.put("amount", amount);
         credit.put("origAmount", originalAmount);
         credit.put("origCurrencyUomId", originalCurrency);
         credit.put("paymentId", value(payment, "paymentId"));
@@ -353,6 +363,9 @@ public class GlPostingServiceHandlers {
             if (name.equals("createAcctgTransForSalesShipmentIssuance")
                     && "N".equals(preference.get("enableAccounting"))) {
                 return Map.of();
+            }
+            if (name.equals("createAcctgTransForSalesShipmentIssuance")) {
+                return salesShipmentIssuance(issuance, item, preference);
             }
             BigDecimal quantity = name.equals("createAcctgTransForCanceledSalesShipmentIssuance")
                     ? money(input.get("canceledQuantity")) : money(value(issuance, "quantity"));
@@ -485,6 +498,63 @@ public class GlPostingServiceHandlers {
                     Map.of("workEffortId", input.get("workEffortId")));
         }
         return inventoryDocumentPosting(name, input);
+    }
+
+    private Map<String, Object> salesShipmentIssuance(Object issuance, Map<String, Object> item,
+            Map<String, Object> preference) {
+        String method = text(preference.get("cogsMethodId"));
+        BigDecimal remaining = money(value(issuance, "quantity"));
+        List<Map<String, Object>> costs;
+        if ("COGS_INV_COST".equals(method) || "COGS_AVG_COST".equals(method)) {
+            costs = List.of(item);
+        } else if ("COGS_FIFO".equals(method) || "COGS_LIFO".equals(method)) {
+            java.util.Comparator<Map<String, Object>> order = java.util.Comparator.comparing(
+                    row -> (java.sql.Timestamp) row.get("datetimeReceived"),
+                    java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder()));
+            if ("COGS_LIFO".equals(method)) order = order.reversed();
+            costs = inventory.findProductInventoryItems().stream()
+                    .filter(row -> java.util.Objects.equals(row.get("ownerPartyId"), item.get("ownerPartyId"))
+                            && java.util.Objects.equals(row.get("facilityId"), item.get("facilityId"))
+                            && java.util.Objects.equals(row.get("productId"), item.get("productId"))
+                            && money(row.get("accountingQuantityTotal")).signum() > 0)
+                    .sorted(order).toList();
+        } else {
+            throw badRequest("Unsupported inventory costing method: " + method);
+        }
+        Object customer = value(issuance, "orderId") == null ? null
+                : first("OrderRole", Map.of("orderId", value(issuance, "orderId"), "roleTypeId", "BILL_TO_CUSTOMER"));
+        List<Map<String, Object>> entries = new ArrayList<>();
+        BigDecimal total = BigDecimal.ZERO;
+        for (Map<String, Object> cost : costs) {
+            if (remaining.signum() <= 0) break;
+            boolean layered = "COGS_FIFO".equals(method) || "COGS_LIFO".equals(method);
+            BigDecimal quantity = layered ? remaining.min(money(cost.get("accountingQuantityTotal"))) : remaining;
+            if (layered) inventory.createInventoryItemDetail(Map.of("inventoryItemId", cost.get("inventoryItemId"),
+                    "accountingQuantityDiff", quantity.negate()));
+            BigDecimal unitCost = "COGS_AVG_COST".equals(method) ? inventory.averageCost(item) : money(cost.get("unitCost"));
+            BigDecimal amount = quantity.multiply(unitCost).setScale(4, RoundingMode.HALF_UP);
+            Map<String, Object> credit = entry("C", text(item.get("ownerPartyId")), amount,
+                    text(item.get("currencyUomId")), "INVENTORY_ACCOUNT");
+            credit.put("inventoryItemId", cost.get("inventoryItemId"));
+            entries.add(credit);
+            total = total.add(amount);
+            remaining = remaining.subtract(quantity);
+        }
+        if (remaining.signum() > 0) throw badRequest("Unable to find accounting inventory");
+        entries.add(entry("D", text(item.get("ownerPartyId")), total, text(item.get("currencyUomId")), "COGS_ACCOUNT"));
+        for (Map<String, Object> entry : entries) {
+            entry.put("productId", item.get("productId"));
+            if (customer != null) {
+                entry.put("partyId", value(customer, "partyId"));
+                entry.put("roleTypeId", value(customer, "roleTypeId"));
+            }
+            resolveAccount(entry, "SALES_SHIPMENT", null);
+        }
+        Map<String, Object> header = new LinkedHashMap<>();
+        header.put("inventoryItemId", item.get("inventoryItemId"));
+        putIfPresent(header, "shipmentId", value(issuance, "shipmentId"));
+        putIfPresent(header, "transactionDate", value(issuance, "issuedDateTime"));
+        return createTransaction("SALES_SHIPMENT", issuance, entries, header);
     }
 
     private Map<String, Object> workEffortIssuance(Map<String, Object> input) {
@@ -626,7 +696,8 @@ public class GlPostingServiceHandlers {
             if ("N".equals(preference.get("enableAccounting"))) {
                 return Map.of();
             }
-            Object shipment = one("Shipment", Map.of("shipmentId", value(receipt, "shipmentId")));
+            Object shipment = value(receipt, "shipmentId") == null ? null
+                    : one("Shipment", Map.of("shipmentId", value(receipt, "shipmentId")));
             boolean returned = value(receipt, "returnId") != null;
             String creditType = returned ? "COGS_ACCOUNT" : "UNINVOICED_SHIP_RCPT";
             BigDecimal unitCost = money(item.get("unitCost"));
@@ -636,7 +707,6 @@ public class GlPostingServiceHandlers {
             BigDecimal amount = ledgerAmount(money(value(receipt, "quantityAccepted")).multiply(unitCost));
             inventory.createInventoryItemDetail(Map.of(
                     "inventoryItemId", item.get("inventoryItemId"),
-                    "receiptId", receiptId,
                     "accountingQuantityDiff", value(receipt, "quantityAccepted")));
             String partyId = text(value(shipment, "partyIdFrom"));
             Map<String, Object> debit = entry("D", organization, amount,
@@ -647,7 +717,6 @@ public class GlPostingServiceHandlers {
                 row.put("partyId", partyId);
                 row.put("roleTypeId", "BILL_FROM_VENDOR");
                 row.put("productId", item.get("productId"));
-                row.put("inventoryItemId", item.get("inventoryItemId"));
                 resolveAccount(row, "SHIPMENT_RECEIPT", null);
             }
             Map<String, Object> links = new LinkedHashMap<>();
@@ -675,7 +744,7 @@ public class GlPostingServiceHandlers {
     }
 
     private void resolveAccount(Map<String, Object> entry, String transactionType, Object invoiceId) {
-        if (entry.get("glAccountId") != null || entry.get("glAccountTypeId") == null) {
+        if (entry.get("glAccountId") != null || entry.get("glAccountTypeId") == null && entry.get("paymentId") == null) {
             return;
         }
         Map<String, Object> request = new LinkedHashMap<>();

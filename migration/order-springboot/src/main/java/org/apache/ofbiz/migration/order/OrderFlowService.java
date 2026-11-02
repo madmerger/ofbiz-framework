@@ -29,7 +29,9 @@ import java.util.Optional;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.SequenceService;
 import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
+import org.apache.ofbiz.migration.common.ServiceHandlerRegistry;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +39,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class OrderFlowService {
+    @Value("${migration.order.invoice-per-shipment:Y}")
+    private String invoicePerShipment;
     private final OrderEntitySupport data;
     private final SequenceService sequences;
     private final ProductPricePort productPrices;
@@ -45,6 +49,7 @@ public class OrderFlowService {
     private final OrderStatusService orderStatuses;
     private final OrderItemStatusService itemStatuses;
     private final ObjectProvider<MigrationServiceDispatcher> dispatcher;
+    private final ServiceHandlerRegistry serviceRegistry;
 
     public OrderFlowService(
             OrderEntitySupport data,
@@ -53,7 +58,8 @@ public class OrderFlowService {
             ShipmentPort shipments,
             InvoicePort invoices,
             OrderStatusService orderStatuses,
-            OrderItemStatusService itemStatuses, ObjectProvider<MigrationServiceDispatcher> dispatcher) {
+            OrderItemStatusService itemStatuses, ObjectProvider<MigrationServiceDispatcher> dispatcher,
+            ServiceHandlerRegistry serviceRegistry) {
         this.data = data;
         this.sequences = sequences;
         this.productPrices = productPrices;
@@ -62,6 +68,7 @@ public class OrderFlowService {
         this.orderStatuses = orderStatuses;
         this.itemStatuses = itemStatuses;
         this.dispatcher = dispatcher;
+        this.serviceRegistry = serviceRegistry;
     }
 
     public Map<String, Object> storeOrder(Map<String, Object> input) {
@@ -96,7 +103,18 @@ public class OrderFlowService {
         }
 
         Timestamp now = Timestamp.from(Instant.now());
-        String orderId = sequences.nextId("OrderHeader");
+        String orderId = text(input.get("orderId"));
+        if (orderId == null) {
+            String organization = "SALES_ORDER".equals(orderTypeId) && productStore != null
+                    ? text(data.get(productStore, "payToPartyId")) : text(input.get("billFromVendorPartyId"));
+            if (organization == null) {
+                orderId = sequences.nextId("OrderHeader");
+            } else {
+                Map<String, Object> nextId = new LinkedHashMap<>(input);
+                nextId.put("partyId", organization);
+                orderId = requiredText(dispatcher.getObject().execute("order", "getNextOrderId", nextId), "orderId");
+            }
+        }
         String userLoginId = currentUser();
         Map<String, Object> header = new LinkedHashMap<>();
         header.put("orderId", orderId);
@@ -108,14 +126,27 @@ public class OrderFlowService {
         header.put("createdBy", userLoginId);
         header.put("currencyUom", currencyUom);
         header.put("productStoreId", input.get("productStoreId"));
+        String salesChannel = text(input.get("salesChannelEnumId"));
+        if (salesChannel == null || "UNKNWN_SALES_CHANNEL".equals(salesChannel)) {
+            salesChannel = "SALES_ORDER".equals(orderTypeId) && productStore != null
+                    ? text(data.get(productStore, "defaultSalesChannelEnumId")) : null;
+        }
+        header.put("salesChannelEnumId", salesChannel == null ? "UNKNWN_SALES_CHANNEL" : salesChannel);
+        if (invoicePerShipment != null && !invoicePerShipment.isEmpty()) header.put("invoicePerShipment", invoicePerShipment);
         header.put("grandTotal", grandTotal);
         header.put("remainingSubTotal", grandTotal);
         data.create("OrderHeader", header);
 
         String shipGroupSeqId = "00001";
-        data.create("OrderItemShipGroup", Map.of(
-                "orderId", orderId,
-                "shipGroupSeqId", shipGroupSeqId));
+        List<Map<String, Object>> shipGroupInfo = itemInputs(input.get("orderItemShipGroupInfo"));
+        List<Map<String, Object>> groups = shipGroupInfo.stream().filter(group -> !group.containsKey("orderItemSeqId")).toList();
+        if (groups.isEmpty()) groups = List.of(Map.of("shipGroupSeqId", shipGroupSeqId));
+        for (Map<String, Object> group : groups) {
+            Map<String, Object> values = new LinkedHashMap<>(group);
+            values.put("orderId", orderId);
+            values.putIfAbsent("carrierRoleTypeId", "CARRIER");
+            data.create("OrderItemShipGroup", values);
+        }
         int sequence = 0;
         for (OrderLine line : lines) {
             String orderItemSeqId = String.format("%05d", ++sequence);
@@ -125,30 +156,82 @@ public class OrderFlowService {
             item.put("orderItemTypeId", "PRODUCT_ORDER_ITEM");
             item.put("productId", line.productId());
             item.put("quantity", line.quantity());
-            item.put("cancelQuantity", BigDecimal.ZERO);
+            Map<String, Object> source = items.get(sequence - 1);
+            if (source.get("cancelQuantity") != null) item.put("cancelQuantity", decimal(source.get("cancelQuantity"), "cancelQuantity"));
             item.put("unitPrice", line.unitPrice());
             item.put("unitListPrice", line.unitPrice());
             item.put("itemDescription", line.itemDescription());
             item.put("isPromo", "N");
             item.put("statusId", "ITEM_CREATED");
-            item.put("changeByUserLoginId", userLoginId);
+            item.put("changeByUserLoginId", source.get("changeByUserLoginId"));
+            item.put("reserveAfterDate", source.get("reserveAfterDate"));
             data.create("OrderItem", item);
-            data.create("OrderItemShipGroupAssoc", Map.of(
-                    "orderId", orderId,
-                    "orderItemSeqId", orderItemSeqId,
-                    "shipGroupSeqId", shipGroupSeqId,
-                    "quantity", line.quantity()));
+            List<Map<String, Object>> associations = shipGroupInfo.stream()
+                    .filter(group -> orderItemSeqId.equals(group.get("orderItemSeqId"))).toList();
+            if (associations.isEmpty()) associations = List.of(Map.of("orderItemSeqId", orderItemSeqId,
+                    "shipGroupSeqId", shipGroupSeqId, "quantity", line.quantity()));
+            for (Map<String, Object> association : associations) {
+                Map<String, Object> values = new LinkedHashMap<>(association);
+                values.put("orderId", orderId);
+                data.create("OrderItemShipGroupAssoc", values);
+            }
             orderStatuses.recordInitialStatus(orderId, orderItemSeqId, "ITEM_CREATED");
         }
         orderStatuses.recordInitialStatus(orderId, null, "ORDER_CREATED");
         createOrderRoles(orderId, orderTypeId, partyId, input, productStore);
         createOrderContactMechs(orderId, input.get("orderContactMechs"));
+        if ("SALES_ORDER".equals(orderTypeId) && productStore != null
+                && !"Y".equals(data.get(productStore, "isImmediatelyFulfilled"))
+                && !"Y".equals(data.get(productStore, "allocateInventory"))
+                && serviceRegistry.componentFor("product", "reserveStoreInventory").filter("product"::equals).isPresent()) {
+            for (Object association : data.find("OrderItemShipGroupAssoc", Map.of("orderId", orderId))) {
+                Object group = data.require("OrderItemShipGroup", Map.of("orderId", orderId,
+                        "shipGroupSeqId", data.get(association, "shipGroupSeqId")));
+                if (text(data.get(group, "supplierPartyId")) != null) continue;
+                Object item = data.require("OrderItem", Map.of("orderId", orderId,
+                        "orderItemSeqId", data.get(association, "orderItemSeqId")));
+                Object reserveAfter = data.get(item, "reserveAfterDate");
+                if (reserveAfter instanceof Timestamp date && date.after(now)) continue;
+                if (List.of("ITEM_CANCELLED", "ITEM_REJECTED", "ITEM_COMPLETED").contains(data.get(item, "statusId"))) continue;
+                Map<String, Object> reserve = new LinkedHashMap<>();
+                reserve.put("orderId", orderId);
+                reserve.put("orderItemSeqId", data.get(item, "orderItemSeqId"));
+                reserve.put("shipGroupSeqId", data.get(association, "shipGroupSeqId"));
+                reserve.put("productStoreId", input.get("productStoreId"));
+                reserve.put("productId", data.get(item, "productId"));
+                reserve.put("quantity", data.get(association, "quantity"));
+                reserve.put("facilityId", data.get(group, "facilityId"));
+                dispatcher.getObject().execute("product", "reserveStoreInventory", reserve);
+            }
+        }
 
         Map<String, Object> output = new LinkedHashMap<>();
         output.put("orderId", orderId);
+        output.put("orderTypeId", orderTypeId);
         output.put("grandTotal", grandTotal);
         output.put("statusId", "ORDER_CREATED");
         return output;
+    }
+
+    public Map<String, Object> getNextOrderId(Map<String, Object> input) {
+        String partyId = requiredText(input, "partyId");
+        List<?> preferences = data.find("PartyAcctgPreference", Map.of("partyId", partyId));
+        Object preference = preferences.isEmpty() ? null : preferences.get(0);
+        String temporaryId = text(input.get("orderId"));
+        Object methodId = preference == null ? null : data.get(preference, "orderSeqCustMethId");
+        if (methodId != null) {
+            Object method = data.require("CustomMethod", Map.of("customMethodId", methodId));
+            Map<String, Object> parameters = new LinkedHashMap<>(input);
+            parameters.put("partyAcctgPreference", preference);
+            temporaryId = requiredText(dispatcher.getObject().execute("order",
+                    data.get(method, "customMethodName").toString(), parameters), "orderId");
+        }
+        if (temporaryId == null) temporaryId = sequences.nextId("OrderHeader");
+        Object store = optionalEntity("ProductStore", text(input.get("productStoreId")), "productStoreId");
+        String storePrefix = store == null ? null : text(data.get(store, "orderNumberPrefix"));
+        String organizationPrefix = preference == null ? null : text(data.get(preference, "orderIdPrefix"));
+        return Map.of("orderId", (storePrefix == null ? "" : storePrefix)
+                + (organizationPrefix == null ? "" : organizationPrefix) + temporaryId);
     }
 
     public Map<String, Object> changeOrderStatus(Map<String, Object> input) {
@@ -244,7 +327,8 @@ public class OrderFlowService {
                 continue;
             }
             BigDecimal quantity = decimal(data.get(item, "quantity"), "quantity");
-            BigDecimal alreadyCancelled = decimal(data.get(item, "cancelQuantity"), "cancelQuantity");
+            BigDecimal alreadyCancelled = data.get(item, "cancelQuantity") == null
+                    ? BigDecimal.ZERO : decimal(data.get(item, "cancelQuantity"), "cancelQuantity");
             BigDecimal remaining = quantity.subtract(alreadyCancelled);
             BigDecimal cancelQuantity = requested.orElse(remaining);
             if (cancelQuantity.signum() <= 0 || cancelQuantity.compareTo(remaining) > 0) {
@@ -309,7 +393,7 @@ public class OrderFlowService {
             createRole(orderId, text(input.getOrDefault("billToCustomerPartyId", partyId)), "BILL_TO_CUSTOMER");
             createRole(orderId, text(input.getOrDefault("placingCustomerPartyId", partyId)), "PLACING_CUSTOMER");
             createRole(orderId, text(input.getOrDefault("shipToCustomerPartyId", partyId)), "SHIP_TO_CUSTOMER");
-            createRole(orderId, text(input.getOrDefault("endUserCustomerPartyId", partyId)), "END_USER_CUSTOMER");
+            createRole(orderId, text(input.get("endUserCustomerPartyId")), "END_USER_CUSTOMER");
         }
         String vendorId = text(input.get("billFromVendorPartyId"));
         if (vendorId == null && productStore != null) {

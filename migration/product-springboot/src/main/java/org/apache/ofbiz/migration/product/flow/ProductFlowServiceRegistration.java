@@ -69,6 +69,9 @@ public class ProductFlowServiceRegistration {
         register("receiveInventoryProduct", new ProductServiceMetadata.ServiceMetadata(
                 "services_shipment.xml", "facility", "facilityGenericPermission"),
                 "CREATE", null, productInventory::receiveInventoryProduct);
+        register("createShipmentReceipt", new ProductServiceMetadata.ServiceMetadata(
+                "services_shipment.xml", "facility", "facilityGenericPermission"),
+                "CREATE", null, productInventory::createShipmentReceipt);
         registry.registerHandler("product", "calculateProductPrice", "OFBTOOLS_VIEW", null,
                 calculateProductPrice::execute);
     }

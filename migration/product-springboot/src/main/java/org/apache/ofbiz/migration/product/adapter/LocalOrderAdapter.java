@@ -27,8 +27,12 @@ import java.util.List;
 import java.util.Map;
 import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.MigrationException;
+import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
+import org.apache.ofbiz.migration.common.ServiceHandlerRegistry;
 import org.apache.ofbiz.migration.common.SequenceService;
 import org.apache.ofbiz.migration.product.ProductQueries;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -37,6 +41,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 public class LocalOrderAdapter implements OrderPort {
+    @Autowired
+    private ObjectProvider<ServiceHandlerRegistry> serviceRegistry;
+    @Autowired
+    private ObjectProvider<MigrationServiceDispatcher> serviceDispatcher;
     private final ProductUnportedPort unported;
     private final EntityRegistry entities;
     private final ProductQueries queries;
@@ -59,6 +67,10 @@ public class LocalOrderAdapter implements OrderPort {
     @Override
     public Map<String, Object> invoke(String serviceName, Map<String, Object> input) {
         if ("changeOrderItemStatus".equals(serviceName)) {
+            if (serviceRegistry != null && serviceRegistry.getObject().componentFor("order", serviceName)
+                    .filter("order"::equals).isPresent()) {
+                return serviceDispatcher.getObject().execute("order", serviceName, input);
+            }
             return changeOrderItemStatus(input);
         }
         return unported.execute(serviceName);

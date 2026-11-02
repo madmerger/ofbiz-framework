@@ -119,6 +119,7 @@ public class EntityAutoService {
         if (entityRegistry.findByPrimaryKey(type, entityRegistry.toMap(entity)) != null) {
             throw new MigrationException(HttpStatus.CONFLICT, "ServiceValueFound");
         }
+        applyAuditFields(entity, input, true);
         entityManager.persist(entity);
         return entityRegistry.toMap(entity);
     }
@@ -136,7 +137,35 @@ public class EntityAutoService {
                 entityRegistry.set(entity, param.name(), input.get(param.name()));
             }
         }
+        applyAuditFields(entity, input, false);
         return entityRegistry.toMap(entity);
+    }
+
+    private void applyAuditFields(Object entity, Map<String, ?> input, boolean create) {
+        Set<String> fields = entityRegistry.toMap(entity).keySet();
+        Object actor = input.get("userLogin") instanceof Map<?, ?> login ? login.get("userLoginId") : null;
+        Timestamp timestamp = Timestamp.from(Instant.now());
+        boolean dateTracked = create ? fields.contains("createdDate")
+                : fields.contains("lastModifiedDate") || fields.contains("changedDate");
+        if (dateTracked) {
+            if (create) entityRegistry.set(entity, "createdDate", timestamp);
+            if (fields.contains("lastModifiedDate")) entityRegistry.set(entity, "lastModifiedDate", timestamp);
+            else if (fields.contains("changedDate")) entityRegistry.set(entity, "changedDate", timestamp);
+            if (actor != null && (!create || fields.contains("createdByUserLogin"))) {
+                if (create) entityRegistry.set(entity, "createdByUserLogin", actor);
+                if (fields.contains("lastModifiedByUserLogin")) entityRegistry.set(entity, "lastModifiedByUserLogin", actor);
+                else if (fields.contains("changedByUserLogin")) entityRegistry.set(entity, "changedByUserLogin", actor);
+            }
+        }
+        if (fields.contains("changeByUserLoginId")) {
+            if (actor == null) throw new MigrationException(HttpStatus.BAD_REQUEST, "An authenticated user is required to track activity");
+            boolean status = entity.getClass().getSimpleName().endsWith("Status");
+            if (!create && status) throw new MigrationException(HttpStatus.BAD_REQUEST, "Historical status rows cannot be updated");
+            entityRegistry.set(entity, "changeByUserLoginId", actor);
+            if (create && status && fields.contains("statusDate") && input.get("statusDate") == null) {
+                entityRegistry.set(entity, "statusDate", timestamp);
+            }
+        }
     }
 
     private Map<String, Object> expire(

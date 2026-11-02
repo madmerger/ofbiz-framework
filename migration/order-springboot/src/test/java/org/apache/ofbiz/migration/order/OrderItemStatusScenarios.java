@@ -94,4 +94,62 @@ abstract class OrderItemStatusScenarios {
     private void seed(String id, String status) {
         data.create("OrderHeader", Map.of("orderId", id, "orderTypeId", "SALES_ORDER", "statusId", status));
     }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void headerStatusResponseContainsBusinessStatusRatherThanHistoryPrimaryKey() {
+        seed("GAP_STATUS_OUTPUT", "ORDER_CREATED");
+        Object header = data.require("OrderHeader", Map.of("orderId", "GAP_STATUS_OUTPUT"));
+        data.set(header, "needsInventoryIssuance", "Y");
+        Map<String, Object> result = dispatcher.execute("order", "changeOrderStatus",
+                Map.of("orderId", "GAP_STATUS_OUTPUT", "statusId", "ORDER_APPROVED"));
+        assertEquals("ORDER_APPROVED", result.get("orderStatusId"));
+        assertEquals("Y", result.get("needsInventoryIssuance"));
+        assertEquals("ORDER_CREATED", result.get("oldStatusId"));
+        Map<String, Object> repeated = dispatcher.execute("order", "changeOrderStatus",
+                Map.of("orderId", "GAP_STATUS_OUTPUT", "statusId", "ORDER_APPROVED"));
+        assertEquals(false, repeated.containsKey("orderStatusId"));
+        assertEquals(1, data.find("OrderStatus", Map.of("orderId", "GAP_STATUS_OUTPUT")).size());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void missingHeaderStatusInputsDoNotCreateHistory() {
+        assertThrows(MigrationException.class, () -> dispatcher.execute("order", "changeOrderStatus", Map.of()));
+        assertThrows(MigrationException.class, () -> dispatcher.execute("order", "changeOrderStatus",
+                Map.of("orderId", "GAP_STATUS_MISSING", "statusId", "ORDER_APPROVED")));
+        assertEquals(0, data.find("OrderStatus", Map.of("orderId", "GAP_STATUS_MISSING")).size());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void nextOrderIdHonorsBothOriginalPrefixesAndRejectsMissingOrganization() {
+        data.create("Party", Map.of("partyId", "GAP_PREFIX_ORG", "partyTypeId", "PARTY_GROUP"));
+        data.create("PartyAcctgPreference", Map.of("partyId", "GAP_PREFIX_ORG", "orderIdPrefix", "CO"));
+        data.create("ProductStore", Map.of("productStoreId", "GAP_PREFIX_STORE", "orderNumberPrefix", "WS"));
+        assertEquals("WSCO123", dispatcher.execute("order", "getNextOrderId", Map.of("partyId", "GAP_PREFIX_ORG",
+                "productStoreId", "GAP_PREFIX_STORE", "orderId", "123")).get("orderId"));
+        assertEquals("456", dispatcher.execute("order", "getNextOrderId",
+                Map.of("partyId", "GAP_NO_PREFERENCES", "orderId", "456")).get("orderId"));
+        assertThrows(MigrationException.class, () -> dispatcher.execute("order", "getNextOrderId", Map.of()));
+        assertEquals(0, data.find("OrderHeader", Map.of("orderId", "WSCO123")).size());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void preferenceEntityEcaWritesOnePaymentHistoryAndRejectsMissingReferences() {
+        data.create("OrderHeader", Map.of("orderId", "GAP_PAYMENT_ORDER", "statusId", "ORDER_CREATED", "orderTypeId", "SALES_ORDER"));
+        Map<String, Object> preference = dispatcher.execute("order", "createOrderPaymentPreference", Map.of(
+                "orderId", "GAP_PAYMENT_ORDER", "paymentMethodTypeId", "COMPANY_ACCOUNT", "statusId", "PMNT_NOT_PAID"));
+        Map<String, Object> key = Map.of("orderPaymentPreferenceId", preference.get("orderPaymentPreferenceId"));
+        assertEquals(1, data.find("OrderStatus", key).size());
+        dispatcher.execute("order", "changeOrderPaymentStatus", key);
+        assertEquals(1, data.find("OrderStatus", key).size());
+        assertThrows(MigrationException.class, () -> dispatcher.execute("order", "changeOrderPaymentStatus", Map.of()));
+        assertThrows(MigrationException.class, () -> dispatcher.execute("order", "changeOrderPaymentStatus", Map.of("orderPaymentPreferenceId", "MISSING")));
+    }
 }

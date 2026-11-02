@@ -31,6 +31,10 @@ import org.apache.ofbiz.migration.common.EntityRegistry;
 import org.apache.ofbiz.migration.common.MigrationException;
 import org.apache.ofbiz.migration.common.SequenceService;
 import org.apache.ofbiz.migration.common.ServiceHandlerRegistry;
+import org.apache.ofbiz.migration.common.MigrationServiceDispatcher;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +50,9 @@ public class AccountingServiceHandlers {
     private final OrderPort orders;
     private final ProductPort products;
     private final CommitGlPostingEca glPostingEca;
+    private final ObjectProvider<MigrationServiceDispatcher> dispatcher;
+    @Value("${migration.accounting.payment.salesorder-autocreate:Y}") private String salesPaymentAutoCreate = "Y";
+    @Value("${migration.accounting.payment.purchaseorder-autocreate:Y}") private String purchasePaymentAutoCreate = "Y";
 
     public AccountingServiceHandlers(
             EntityManager entityManager,
@@ -54,7 +61,7 @@ public class AccountingServiceHandlers {
             ServiceHandlerRegistry registry,
             OrderPort orders,
             ProductPort products,
-            CommitGlPostingEca glPostingEca) {
+            CommitGlPostingEca glPostingEca, ObjectProvider<MigrationServiceDispatcher> dispatcher) {
         this.entityManager = entityManager;
         this.entities = entities;
         this.sequences = sequences;
@@ -62,6 +69,7 @@ public class AccountingServiceHandlers {
         this.orders = orders;
         this.products = products;
         this.glPostingEca = glPostingEca;
+        this.dispatcher = dispatcher;
     }
 
     @PostConstruct
@@ -77,6 +85,10 @@ public class AccountingServiceHandlers {
         registry.registerHandler(COMPONENT, "getInvoiceNotApplied", "VIEW", this::getInvoiceNotApplied);
         registry.registerHandler(COMPONENT, "getInvoiceApplied", "VIEW", this::getInvoiceApplied);
         registry.registerHandler(COMPONENT, "createPayment", "CREATE", this::createPayment);
+        registry.registerHandler(COMPONENT, "updatePayment", "UPDATE", this::updatePayment);
+        registry.registerHandler(COMPONENT, "createPaymentFromOrder", "OFBTOOLS_VIEW", this::createPaymentFromOrder);
+        registry.registerHandler(COMPONENT, "createMatchingPaymentApplication", "OFBTOOLS_VIEW", this::createMatchingPaymentApplication);
+        registry.registerHandler(COMPONENT, "removePaymentApplication", "UPDATE", this::removePaymentApplication);
         registry.registerHandler(COMPONENT, "createPaymentApplication", "CREATE", this::createPaymentApplication);
         registry.registerHandler(COMPONENT, "setPaymentStatus", "UPDATE", this::setPaymentStatus);
     }
@@ -105,6 +117,61 @@ public class AccountingServiceHandlers {
         return Map.of("invoiceId", invoiceId);
     }
 
+    private Map<String, Object> createPaymentFromOrder(Map<String, Object> input) {
+        String orderId = required(input, "orderId");
+        Map<String, Object> order = orders.findOrder(orderId);
+        if (order == null) return Map.of();
+        boolean purchase = "PURCHASE_ORDER".equals(order.get("orderTypeId"));
+        if (!"Y".equals(purchase ? purchasePaymentAutoCreate : salesPaymentAutoCreate)) return Map.of();
+        for (Object preference : find("OrderPaymentPreference", Map.of("orderId", orderId))) {
+            if (!"PAYMENT_CANCELLED".equals(value(preference, "statusId"))
+                    && !find("Payment", Map.of("paymentPreferenceId", value(preference, "orderPaymentPreferenceId"))).isEmpty()) return Map.of();
+        }
+        List<Map<String, Object>> roles = orders.findOrderRoles(orderId);
+        String from = roleParty(roles, "BILL_TO_CUSTOMER");
+        String to = roleParty(roles, "BILL_FROM_VENDOR");
+        require(from != null && to != null, "Order billing parties are required");
+        Map<String, Object> parameters = new LinkedHashMap<>();
+        parameters.put("paymentTypeId", purchase ? "VENDOR_PAYMENT" : "CUSTOMER_PAYMENT");
+        parameters.put("partyIdFrom", from);
+        parameters.put("partyIdTo", to);
+        parameters.put("paymentMethodTypeId", "COMPANY_ACCOUNT");
+        parameters.put("statusId", "PMNT_NOT_PAID");
+        parameters.put("amount", order.get("grandTotal"));
+        parameters.put("currencyUomId", order.get("currencyUom"));
+        parameters.put("effectiveDate", input.getOrDefault("effectiveDate", now()));
+        Object accountingPreference = findOne("PartyAcctgPreference", Map.of("partyId", purchase ? from : to));
+        if (accountingPreference != null && java.util.Objects.equals(value(accountingPreference, "baseCurrencyUomId"), order.get("currencyUom"))) {
+            parameters.put("actualCurrencyAmount", order.get("grandTotal"));
+            parameters.put("actualCurrencyUomId", order.get("currencyUom"));
+        }
+        Map<String, Object> payment = dispatcher.getObject().execute("accounting", "createPayment", parameters);
+        parameters.put("orderId", orderId);
+        parameters.put("maxAmount", order.get("grandTotal"));
+        Map<String, Object> preference = dispatcher.getObject().execute("order", "createOrderPaymentPreference", parameters);
+        parameters.put("paymentId", payment.get("paymentId"));
+        parameters.put("paymentPreferenceId", preference.get("orderPaymentPreferenceId"));
+        dispatcher.getObject().execute("accounting", "updatePayment", parameters);
+        return Map.of("paymentId", payment.get("paymentId"));
+    }
+
+    private Map<String, Object> updatePayment(Map<String, Object> input) {
+        Object payment = requireEntity("Payment", "paymentId", input);
+        if (!"PMNT_NOT_PAID".equals(value(payment, "statusId"))) {
+            throw new MigrationException(HttpStatus.NOT_IMPLEMENTED, "Only updates to unpaid payments are ported");
+        }
+        String status = text(value(payment, "statusId"));
+        Map<String, Object> fields = new LinkedHashMap<>();
+        for (String field : entities.toMap(payment).keySet()) {
+            if (input.containsKey(field)) fields.put(field, input.get(field));
+        }
+        assign(payment, fields);
+        set(payment, "statusId", status);
+        setDefault(payment, "effectiveDate", now());
+        if (input.get("statusId") != null && !input.get("statusId").equals(status)) setPaymentStatus(input);
+        return Map.of();
+    }
+
     /**
      * Migrated from applications/accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/InvoiceServicesScript.groovy:234.
      */
@@ -125,7 +192,8 @@ public class AccountingServiceHandlers {
         }
         set(invoice, "statusId", newStatusId);
         addInvoiceStatus(invoice, newStatusId, input.get("statusDate"));
-        if ("INVOICE_READY".equals(newStatusId) && money(invoiceNotApplied(invoice)).signum() == 0) {
+        if ("INVOICE_READY".equals(newStatusId) && !"INVOICE_PAID".equals(oldStatusId)
+                && invoiceTotal(invoice).subtract(invoiceApplied(text(value(invoice, "invoiceId")))).signum() == 0) {
             requireValidChange(newStatusId, "INVOICE_PAID");
             set(invoice, "statusId", "INVOICE_PAID");
             set(invoice, "paidDate", now());
@@ -188,9 +256,25 @@ public class AccountingServiceHandlers {
             BigDecimal quantity = money(item.get("quantity"));
             BigDecimal remaining = quantity.subtract(orders.billedQuantity(orderId, text(item.get("orderItemSeqId"))));
             if (remaining.signum() > 0) {
-                Map<String, Object> row = new LinkedHashMap<>(item);
-                row.put("remainingQuantity", remaining);
-                billable.add(row);
+                if (input.get("billItems") instanceof List<?> issuedItems) {
+                    for (Object raw : issuedItems) {
+                        if (!(raw instanceof Map<?, ?> issue)) throw badRequest("billItems must contain objects");
+                        if (!java.util.Objects.equals(item.get("orderItemSeqId"), issue.get("orderItemSeqId"))) continue;
+                        BigDecimal issuedQuantity = money(issue.get("quantity")).subtract(money(issue.get("cancelQuantity")));
+                        BigDecimal quantityToBill = issuedQuantity.min(remaining);
+                        if (quantityToBill.signum() <= 0) continue;
+                        Map<String, Object> row = new LinkedHashMap<>(item);
+                        row.put("remainingQuantity", quantityToBill);
+                        row.put("itemIssuanceId", issue.get("itemIssuanceId"));
+                        row.put("inventoryItemId", issue.get("inventoryItemId"));
+                        billable.add(row);
+                        remaining = remaining.subtract(quantityToBill);
+                    }
+                } else {
+                    Map<String, Object> row = new LinkedHashMap<>(item);
+                    row.put("remainingQuantity", remaining);
+                    billable.add(row);
+                }
             }
         }
         if (billable.isEmpty()) {
@@ -214,8 +298,32 @@ public class AccountingServiceHandlers {
         invoiceInput.put("statusId", "INVOICE_IN_PROCESS");
         invoiceInput.put("currencyUomId", order.get("currencyUom"));
         invoiceInput.put("invoiceDate", input.getOrDefault("eventDate", now()));
-        Map<String, Object> created = createInvoice(invoiceInput);
+        Map<String, Object> created = dispatcher.getObject().execute("accounting", "createInvoice", invoiceInput);
         String invoiceId = text(created.get("invoiceId"));
+        for (Map<String, Object> role : roles) {
+            dispatcher.getObject().execute("accounting", "createInvoiceRole", Map.of("invoiceId", invoiceId,
+                    "partyId", role.get("partyId"), "roleTypeId", role.get("roleTypeId"), "datetimePerformed", now()));
+        }
+        for (Object contact : find("OrderContactMech", Map.of("orderId", orderId, "contactMechPurposeTypeId", "BILLING_LOCATION"))) {
+            dispatcher.getObject().execute("accounting", "createInvoiceContactMech", Map.of("invoiceId", invoiceId,
+                    "contactMechId", value(contact, "contactMechId"), "contactMechPurposeTypeId", "BILLING_LOCATION"));
+        }
+        Object store = order.get("productStoreId") == null ? null : findOne("ProductStore", Map.of("productStoreId", order.get("productStoreId")));
+        if (store != null && value(store, "payToPartyId") != null) {
+            List<Object> purposes = new ArrayList<>(find("PartyContactMechPurpose", Map.of("partyId", value(store, "payToPartyId"), "contactMechPurposeTypeId", "PAYMENT_LOCATION")));
+            purposes.sort(java.util.Comparator.comparing(row -> (Timestamp) value(row, "fromDate"), java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())));
+            for (Object purpose : purposes) {
+                if (!currentContact(purpose)) continue;
+                boolean active = find("PartyContactMech", Map.of("partyId", value(store, "payToPartyId"), "contactMechId", value(purpose, "contactMechId")))
+                        .stream().anyMatch(this::currentContact);
+                if (!active) continue;
+                if (findOne("PostalAddress", Map.of("contactMechId", value(purpose, "contactMechId"))) != null) {
+                    dispatcher.getObject().execute("accounting", "createInvoiceContactMech", Map.of("invoiceId", invoiceId,
+                            "contactMechId", value(purpose, "contactMechId"), "contactMechPurposeTypeId", "PAYMENT_LOCATION"));
+                }
+                break;
+            }
+        }
         for (Map<String, Object> orderItem : billable) {
             BigDecimal quantity = money(orderItem.get("remainingQuantity"));
             BigDecimal amount = money(orderItem.get("unitPrice"));
@@ -228,7 +336,12 @@ public class AccountingServiceHandlers {
             itemInput.put("quantity", quantity);
             itemInput.put("amount", amount);
             itemInput.put("description", orderItem.get("itemDescription"));
-            Map<String, Object> invoiceItem = createInvoiceItem(itemInput);
+            itemInput.put("inventoryItemId", orderItem.get("inventoryItemId"));
+            itemInput.put("productFeatureId", orderItem.get("productFeatureId"));
+            itemInput.put("overrideGlAccountId", orderItem.get("overrideGlAccountId"));
+            Map<String, Object> product = products.findProduct(text(orderItem.get("productId")));
+            if (product != null) itemInput.put("taxableFlag", product.get("taxable"));
+            Map<String, Object> invoiceItem = dispatcher.getObject().execute("accounting", "createInvoiceItem", itemInput);
             Map<String, Object> billing = new LinkedHashMap<>();
             billing.put("invoiceId", invoiceId);
             billing.put("invoiceItemSeqId", invoiceItem.get("invoiceItemSeqId"));
@@ -236,7 +349,20 @@ public class AccountingServiceHandlers {
             billing.put("orderItemSeqId", orderItem.get("orderItemSeqId"));
             billing.put("quantity", quantity);
             billing.put("amount", amount);
-            orders.createOrderItemBilling(billing);
+            if (orderItem.get("itemIssuanceId") != null) billing.put("itemIssuanceId", orderItem.get("itemIssuanceId"));
+            if (registry.componentFor("order", "createOrderItemBilling").isPresent()) {
+                dispatcher.getObject().execute("order", "createOrderItemBilling", billing);
+            } else {
+                orders.createOrderItemBilling(billing);
+            }
+            if (orderItem.get("itemIssuanceId") != null) {
+                Object issuance = findOne("ItemIssuance", Map.of("itemIssuanceId", orderItem.get("itemIssuanceId")));
+                if (issuance != null && value(issuance, "shipmentId") != null && value(issuance, "shipmentItemSeqId") != null) {
+                    dispatcher.getObject().execute("product", "createShipmentItemBilling", Map.of("invoiceId", invoiceId,
+                            "invoiceItemSeqId", invoiceItem.get("invoiceItemSeqId"), "shipmentId", value(issuance, "shipmentId"),
+                            "shipmentItemSeqId", value(issuance, "shipmentItemSeqId")));
+                }
+            }
         }
         return Map.of("invoiceId", invoiceId);
     }
@@ -247,7 +373,7 @@ public class AccountingServiceHandlers {
     private Map<String, Object> checkInvoicePaymentApplications(Map<String, Object> input) {
         Object invoice = requireEntity("Invoice", "invoiceId", input);
         if ("INVOICE_READY".equals(value(invoice, "statusId"))
-                && money(invoiceNotApplied(invoice)).signum() == 0) {
+                && invoiceTotal(invoice).subtract(invoiceApplied(text(value(invoice, "invoiceId")))).signum() == 0) {
             requireValidChange("INVOICE_READY", "INVOICE_PAID");
             set(invoice, "statusId", "INVOICE_PAID");
             set(invoice, "paidDate", now());
@@ -366,7 +492,7 @@ public class AccountingServiceHandlers {
         glPostingEca.paymentApplicationCreated(text(value(application, "paymentApplicationId")),
                 invoiceId, text(value(payment, "paymentTypeId")));
         if (invoice != null && "INVOICE_READY".equals(value(invoice, "statusId"))
-                && money(invoiceNotApplied(invoice)).signum() == 0) {
+                && invoiceTotal(invoice).subtract(invoiceApplied(invoiceId)).signum() == 0) {
             requireValidChange("INVOICE_READY", "INVOICE_PAID");
             set(invoice, "statusId", "INVOICE_PAID");
             set(invoice, "paidDate", now());
@@ -416,6 +542,56 @@ public class AccountingServiceHandlers {
         return quantity.multiply(money(value(invoiceItem, "amount"))).setScale(2, RoundingMode.HALF_UP);
     }
 
+    private Map<String, Object> createMatchingPaymentApplication(Map<String, Object> input) {
+        Object invoice = input.get("invoiceId") == null ? null : findOne("Invoice", Map.of("invoiceId", input.get("invoiceId")));
+        Object payment = input.get("paymentId") == null ? null : findOne("Payment", Map.of("paymentId", input.get("paymentId")));
+        if (invoice != null) {
+            BigDecimal total = invoiceTotal(invoice);
+            Object invoiceCurrency = value(invoice, "currencyUomId");
+            payment = find("Payment", Map.of("partyIdFrom", value(invoice, "partyId"), "partyIdTo", value(invoice, "partyIdFrom"))).stream()
+                    .filter(row -> !"PMNT_CONFIRMED".equals(value(row, "statusId"))
+                            && money(value(row, "amount")).compareTo(total) == 0
+                            && java.util.Objects.equals(value(row, "currencyUomId"), invoiceCurrency))
+                    .min(java.util.Comparator.comparing(row -> (Timestamp) value(row, "effectiveDate"), java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder())))
+                    .orElse(null);
+            if (payment != null && !find("PaymentApplication", Map.of("paymentId", value(payment, "paymentId"))).isEmpty()) payment = null;
+        } else if (payment != null) {
+            List<Object> invoices = new ArrayList<>(find("Invoice", Map.of("partyId", value(payment, "partyIdFrom"), "partyIdFrom", value(payment, "partyIdTo"))));
+            invoices.sort(java.util.Comparator.comparing(row -> (Timestamp) value(row, "invoiceDate"), java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder())));
+            for (Object candidate : invoices) {
+                if (!List.of("INVOICE_READY", "INVOICE_PAID", "INVOICE_CANCELLED", "INVOICE_WRITEOFF").contains(value(candidate, "statusId"))
+                        && List.of("SALES_INVOICE", "PURCHASE_INVOICE").contains(value(candidate, "invoiceTypeId"))
+                        && invoiceTotal(candidate).compareTo(money(value(payment, "amount"))) == 0
+                        && java.util.Objects.equals(value(candidate, "currencyUomId"), value(payment, "currencyUomId"))) invoice = candidate;
+            }
+            if (invoice != null && !find("PaymentApplication", Map.of("invoiceId", value(invoice, "invoiceId"))).isEmpty()) invoice = null;
+        }
+        if (invoice != null && payment != null) {
+            dispatcher.getObject().execute("accounting", "createPaymentApplication", Map.of("invoiceId", value(invoice, "invoiceId"),
+                    "paymentId", value(payment, "paymentId"), "amountApplied", value(payment, "amount")));
+        }
+        return Map.of();
+    }
+
+    private Map<String, Object> removePaymentApplication(Map<String, Object> input) {
+        Object application = requireEntity("PaymentApplication", "paymentApplicationId", input);
+        for (String field : List.of("paymentId", "toPaymentId")) {
+            if (value(application, field) != null) {
+                Object payment = findOne("Payment", Map.of("paymentId", value(application, field)));
+                require(payment == null || !"PMNT_CONFIRMED".equals(value(payment, "statusId")), "Confirmed payment applications cannot be removed");
+            }
+        }
+        if (value(application, "invoiceId") != null) {
+            Object invoice = findOne("Invoice", Map.of("invoiceId", value(application, "invoiceId")));
+            if (invoice != null && "INVOICE_PAID".equals(value(invoice, "statusId"))) {
+                dispatcher.getObject().execute("accounting", "setInvoiceStatus", Map.of("invoiceId", value(invoice, "invoiceId"), "statusId", "INVOICE_READY"));
+            }
+        }
+        Map<String, Object> fields = entities.toMap(application);
+        entityManager.remove(application);
+        return fields;
+    }
+
     private BigDecimal invoiceApplied(String invoiceId) {
         return find("PaymentApplication", Map.of("invoiceId", invoiceId)).stream()
                 .filter(application -> validInvoiceApplication(application))
@@ -438,8 +614,21 @@ public class AccountingServiceHandlers {
                     && ("VENDOR_PAYMENT".equals(paymentType) || "CUSTOMER_REFUND".equals(paymentType)));
     }
 
+    private boolean currentContact(Object contact) {
+        Timestamp from = (Timestamp) value(contact, "fromDate");
+        Timestamp thru = (Timestamp) value(contact, "thruDate");
+        return (from == null || !from.after(now())) && (thru == null || thru.after(now()));
+    }
+
     private BigDecimal invoiceNotApplied(Object invoice) {
-        return invoiceTotal(invoice).subtract(invoiceApplied(text(value(invoice, "invoiceId"))))
+        BigDecimal allocated = BigDecimal.ZERO;
+        for (Object application : find("PaymentApplication", Map.of("invoiceId", value(invoice, "invoiceId")))) {
+            Object payment = findOne("Payment", Map.of("paymentId", value(application, "paymentId")));
+            if (payment != null && (value(payment, "effectiveDate") == null || !((Timestamp) value(payment, "effectiveDate")).after(now()))) {
+                allocated = allocated.add(money(value(application, "amountApplied")));
+            }
+        }
+        return invoiceTotal(invoice).subtract(allocated)
                 .setScale(2, RoundingMode.HALF_UP);
     }
 
@@ -463,6 +652,8 @@ public class AccountingServiceHandlers {
         set(history, "invoiceId", value(invoice, "invoiceId"));
         set(history, "statusId", statusId);
         setIfWritable(history, "statusDate", statusDate == null ? now() : statusDate);
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) setIfWritable(history, "changeByUserLoginId", authentication.getName());
         entities.primaryKeys(history.getClass()).forEach(key -> {
             if (entities.get(history, key) == null) {
                 throw badRequest("Missing InvoiceStatus primary key: " + key);

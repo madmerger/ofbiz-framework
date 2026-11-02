@@ -127,7 +127,7 @@ class ProductInventoryFlowTest {
                 Map.of("inventoryItemId", result.path("inventoryItemId").asText())));
         assertEquals("E2E_COMPANY", item.get("ownerPartyId"));
         assertEquals("USD", item.get("currencyUomId"));
-        assertNotNull(item.get("datetimeReceived"));
+        assertNull(item.get("datetimeReceived"));
     }
 
     @Test

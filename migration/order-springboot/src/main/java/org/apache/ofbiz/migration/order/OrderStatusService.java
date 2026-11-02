@@ -53,11 +53,10 @@ public class OrderStatusService {
         String oldStatus = text(data.get(order, "statusId"));
         String orderType = text(data.get(order, "orderTypeId"));
         BigDecimal grandTotal = decimal(data.get(order, "grandTotal"));
-        String orderStatusId = null;
         if (!oldStatus.equals(targetStatus)) {
             requireValidChange(oldStatus, targetStatus);
             data.set(order, "statusId", targetStatus);
-            orderStatusId = recordStatus(orderId, null, targetStatus, changeReason);
+            recordStatus(orderId, null, targetStatus, changeReason);
             String itemStatus = switch (targetStatus) {
             case "ORDER_APPROVED" -> "ITEM_APPROVED";
             case "ORDER_COMPLETED" -> "ITEM_COMPLETED";
@@ -70,7 +69,10 @@ public class OrderStatusService {
         }
         Map<String, Object> output = new LinkedHashMap<>();
         output.put("oldStatusId", oldStatus);
-        output.put("orderStatusId", orderStatusId);
+        if (!oldStatus.equals(targetStatus)) {
+            output.put("orderStatusId", targetStatus);
+            output.put("needsInventoryIssuance", data.get(order, "needsInventoryIssuance"));
+        }
         output.put("orderTypeId", orderType);
         output.put("grandTotal", grandTotal);
         output.put("statusId", targetStatus);
