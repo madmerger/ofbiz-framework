@@ -69,6 +69,25 @@ abstract class GlPostingScenarios {
     @Test
     @Transactional
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ACCOUNTING_ADMIN", "ACCTG_ATX_CREATE"})
+    void childOrganizationPostsUsingParentPeriodWithParentRoleOnlyOnParent() {
+        fixture("N");
+        persist("Party", Map.of("partyId", "GAP_CHILD", "partyTypeId", "PARTY_GROUP"));
+        persist("PartyRole", Map.of("partyId", "GAP_CHILD", "roleTypeId", "INTERNAL_ORGANIZATIO"));
+        persist("PartyRelationship", Map.of("partyIdFrom", "GAP_CHILD", "partyIdTo", "GAP_ORG",
+                "roleTypeIdFrom", "ORGANIZATION_UNIT", "roleTypeIdTo", "PARENT_ORGANIZATION",
+                "partyRelationshipTypeId", "GROUP_ROLLUP", "fromDate", "2020-01-01T00:00:00Z"));
+        Map<String, Object> debit = new java.util.LinkedHashMap<>(entry("D"));
+        Map<String, Object> credit = new java.util.LinkedHashMap<>(entry("C"));
+        debit.put("organizationPartyId", "GAP_CHILD");
+        credit.put("organizationPartyId", "GAP_CHILD");
+        Map<String, Object> result = dispatcher.execute("accounting", "createAcctgTransAndEntries",
+                Map.of("transactionDate", "2026-01-15 12:00:00", "acctgTransEntries", List.of(debit, credit)));
+        assertEquals("Y", entities.get(find("AcctgTrans", Map.of("acctgTransId", result.get("acctgTransId"))), "isPosted"));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ACCOUNTING_ADMIN", "ACCTG_ATX_CREATE"})
     void emptyEntriesDoNotCreateATransaction() {
         Map<String, Object> result = dispatcher.execute("accounting", "createAcctgTransAndEntries", Map.of("acctgTransEntries", List.of()));
         assertEquals(Map.of("responseMessage", "success"), result);

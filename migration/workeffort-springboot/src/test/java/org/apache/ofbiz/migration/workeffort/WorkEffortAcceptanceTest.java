@@ -103,6 +103,35 @@ class WorkEffortAcceptanceTest {
 
     @Test
     @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_VIEW", "WORKEFFORTMGR_UPDATE"})
+    void shipmentLinkedDatesCanBeUpdatedWithoutFacilityPermission() {
+        Timestamp old = Timestamp.valueOf("2026-01-01 12:00:00");
+        persistWorkEffort("REVIEW_DATES", "Pickup", old);
+        persistShipmentFixture("Shipment", Map.of("shipmentId", "REVIEW_DATES_SHIP", "estimatedShipWorkEffId", "REVIEW_DATES"));
+        dispatcher.execute("workeffort", "checkAndUpdateWorkEffort", Map.of("shipmentId", "REVIEW_DATES_SHIP",
+                "estimatedShipDate", "2026-02-01T12:00:00Z", "originFacilityId", "REVIEW_FACILITY"));
+        Object event = entities.findByPrimaryKey(entities.entityClass("WorkEffort"), Map.of("workEffortId", "REVIEW_DATES"));
+        assertThat(entities.get(event, "estimatedStartDate")).isEqualTo(Timestamp.valueOf("2026-02-01 12:00:00"));
+        assertThat(entities.get(event, "estimatedCompletionDate")).isEqualTo(Timestamp.valueOf("2026-02-01 12:00:00"));
+        assertThat(entities.get(event, "facilityId")).isEqualTo("REVIEW_FACILITY");
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_VIEW", "FACILITY_UPDATE"})
+    void facilityPermissionDoesNotAuthorizeTheNestedWorkEffortUpdate() {
+        Timestamp old = Timestamp.valueOf("2026-01-01 12:00:00");
+        persistWorkEffort("REVIEW_PERMISSION", "Pickup", old);
+        persistShipmentFixture("Shipment", Map.of("shipmentId", "REVIEW_PERM_SHIP", "estimatedShipWorkEffId", "REVIEW_PERMISSION"));
+        assertThatThrownBy(() -> dispatcher.execute("workeffort", "checkAndUpdateWorkEffort",
+                Map.of("shipmentId", "REVIEW_PERM_SHIP", "estimatedShipDate", "2026-02-01T12:00:00Z")))
+                .isInstanceOfSatisfying(MigrationException.class, exception -> assertThat(exception.getStatus()).isEqualTo(HttpStatus.FORBIDDEN));
+        Object event = entities.findByPrimaryKey(entities.entityClass("WorkEffort"), Map.of("workEffortId", "REVIEW_PERMISSION"));
+        assertThat(entities.get(event, "estimatedStartDate")).isEqualTo(old);
+    }
+
+    @Test
+    @Transactional
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "WORKEFFORTMGR_ADMIN"})
     void unknownShipmentIsRejected() {
         org.junit.jupiter.api.Assertions.assertThrows(org.apache.ofbiz.migration.common.MigrationException.class, () ->

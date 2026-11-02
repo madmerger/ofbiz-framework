@@ -70,6 +70,20 @@ abstract class OrderItemStatusScenarios {
     @Test
     @Transactional
     @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
+    void itemCancellationReasonDoesNotPropagateToTheRolledUpHeader() {
+        seed("GAP_REASON", "ORDER_APPROVED");
+        data.create("OrderItem", Map.of("orderId", "GAP_REASON", "orderItemSeqId", "00001", "statusId", "ITEM_APPROVED"));
+        dispatcher.execute("order", "changeOrderItemStatus", Map.of("orderId", "GAP_REASON",
+                "orderItemSeqId", "00001", "statusId", "ITEM_CANCELLED", "changeReason", "Customer request"));
+        Object itemHistory = data.find("OrderStatus", Map.of("orderId", "GAP_REASON", "statusId", "ITEM_CANCELLED")).get(0);
+        Object headerHistory = data.find("OrderStatus", Map.of("orderId", "GAP_REASON", "statusId", "ORDER_CANCELLED")).get(0);
+        assertEquals("Customer request", data.get(itemHistory, "changeReason"));
+        assertEquals(null, data.get(headerHistory, "changeReason"));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = {"OFBTOOLS_VIEW", "ORDERMGR_ADMIN"})
     void missingOrderIsRejected() {
         assertThrows(MigrationException.class,
                 () -> dispatcher.execute("order", "checkOrderItemStatus", Map.of()));
