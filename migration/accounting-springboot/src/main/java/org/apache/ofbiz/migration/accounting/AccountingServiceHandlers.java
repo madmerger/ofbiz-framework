@@ -192,7 +192,8 @@ public class AccountingServiceHandlers {
         }
         set(invoice, "statusId", newStatusId);
         addInvoiceStatus(invoice, newStatusId, input.get("statusDate"));
-        if ("INVOICE_READY".equals(newStatusId) && invoiceTotal(invoice).subtract(invoiceApplied(text(value(invoice, "invoiceId")))).signum() == 0) {
+        if ("INVOICE_READY".equals(newStatusId) && !"INVOICE_PAID".equals(oldStatusId)
+                && invoiceTotal(invoice).subtract(invoiceApplied(text(value(invoice, "invoiceId")))).signum() == 0) {
             requireValidChange(newStatusId, "INVOICE_PAID");
             set(invoice, "statusId", "INVOICE_PAID");
             set(invoice, "paidDate", now());

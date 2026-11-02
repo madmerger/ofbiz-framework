@@ -472,6 +472,39 @@ class GlPostingServicesTest {
     }
 
     @Test
+    void removingLastReceivedApplicationReopensPaidInvoiceWithoutReapplyingIt() throws Exception {
+        String invoiceId = createInvoice();
+        createInvoiceItem(invoiceId);
+        String paymentId = id("MIG_REOPEN");
+        persistPayment(paymentId, "CUSTOMER_PAYMENT", "MIG_DEMO_CUSTOMER", "MIG_DEMO_VENDOR", "PMNT_RECEIVED", "30.00");
+        String applicationId = persistPaymentApplication(paymentId, invoiceId, "30.00");
+        Map<String, Object> key = Map.of("invoiceId", invoiceId);
+        post("setInvoiceStatus", "{\"invoiceId\":\"" + invoiceId + "\",\"statusId\":\"INVOICE_READY\"}")
+                .andExpect(status().isOk());
+        Object paid = entities.findByPrimaryKey(entities.entityClass("Invoice"), key);
+        assertEquals("INVOICE_PAID", entities.get(paid, "statusId"));
+        assertNotNull(entities.get(paid, "paidDate"));
+        int postings = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTrans"), key).size();
+
+        String removal = "{\"paymentApplicationId\":\"" + applicationId + "\"}";
+        post("removePaymentApplication", removal).andExpect(status().isOk());
+        Object reopened = entities.findByPrimaryKey(entities.entityClass("Invoice"), key);
+        assertEquals("INVOICE_READY", entities.get(reopened, "statusId"));
+        assertNull(entities.get(reopened, "paidDate"));
+        assertEquals(0, AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("PaymentApplication"), key).size());
+        assertEquals(postings, AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("AcctgTrans"), key).size());
+        List<?> history = AccountingEntityQueries.findByEquality(entityManager, entities.entityClass("InvoiceStatus"), key);
+        assertEquals(1L, history.stream().filter(row -> "INVOICE_PAID".equals(entities.get(row, "statusId"))).count());
+        assertEquals(2L, history.stream().filter(row -> "INVOICE_READY".equals(entities.get(row, "statusId"))).count());
+
+        post("removePaymentApplication", removal).andExpect(status().isNotFound());
+        post("removePaymentApplication", "{}").andExpect(status().isBadRequest());
+        post("setInvoiceStatus", "{\"invoiceId\":\"" + invoiceId + "\",\"statusId\":\"INVOICE_PAID\"}")
+                .andExpect(status().isBadRequest());
+        assertEquals("INVOICE_READY", entities.get(entities.findByPrimaryKey(entities.entityClass("Invoice"), key), "statusId"));
+    }
+
+    @Test
     void incomingPaymentWithoutActualCurrencyOrPaymentMethodPreservesItsAmount() throws Exception {
         String paymentId = id("MIG_NO_ACTUAL");
         persistPayment(paymentId, "CUSTOMER_PAYMENT", "MIG_DEMO_CUSTOMER", "MIG_DEMO_VENDOR", "PMNT_RECEIVED", "41.23");
