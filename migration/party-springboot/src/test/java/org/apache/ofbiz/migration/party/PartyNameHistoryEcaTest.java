@@ -18,6 +18,7 @@
 package org.apache.ofbiz.migration.party;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Map;
@@ -38,6 +39,38 @@ import org.springframework.transaction.annotation.Transactional;
 class PartyNameHistoryEcaTest {
     @Autowired private MigrationServiceDispatcher dispatcher;
     @Autowired private EntityRegistry entities;
+
+    @Test
+    void personAndGroupCreationRecordAuthenticatedActorAndInitialStatus() {
+        assertCreationMetadata(call("createPerson", Map.of("firstName", "Audit", "lastName", "Person")));
+        assertCreationMetadata(call("createPartyGroup", Map.of("groupName", "Audit Group")));
+    }
+
+    @Test
+    void emptyPersonCreationStillRecordsInitialEnabledStatus() {
+        assertCreationMetadata(call("createPerson", Map.of()));
+    }
+
+    @Test
+    void duplicatePersonDoesNotAddASecondInitialStatus() {
+        Object id = call("createPerson", Map.of("firstName", "Existing", "lastName", "Person")).get("partyId");
+        assertThrows(MigrationException.class, () -> call("createPerson", Map.of("partyId", id)));
+        assertEquals(1, entities.findByEquality(entities.entityClass("PartyStatus"), Map.of("partyId", id)).size());
+    }
+
+    private void assertCreationMetadata(Map<String, Object> result) {
+        Object id = result.get("partyId");
+        Object party = entities.findByPrimaryKey(entities.entityClass("Party"), Map.of("partyId", id));
+        assertNotNull(entities.get(party, "createdDate"));
+        assertEquals(entities.get(party, "createdDate"), entities.get(party, "lastModifiedDate"));
+        assertEquals("user", entities.get(party, "createdByUserLogin"));
+        assertEquals("user", entities.get(party, "lastModifiedByUserLogin"));
+        var statuses = entities.findByEquality(entities.entityClass("PartyStatus"), Map.of("partyId", id));
+        assertEquals(1, statuses.size());
+        assertEquals("PARTY_ENABLED", entities.get(statuses.get(0), "statusId"));
+        assertEquals("user", entities.get(statuses.get(0), "changeByUserLoginId"));
+        assertEquals(entities.get(party, "createdDate"), entities.get(statuses.get(0), "statusDate"));
+    }
 
     @Test
     void personInvokeRuleCapturesPreviousNameAndLeavesUnchangedNamesAlone() {

@@ -147,7 +147,7 @@ public class PartyServiceHandlers {
             partyFields.put("partyTypeId", "PERSON");
             partyFields.put("statusId", value(input, "statusId", "PARTY_ENABLED"));
             copy(input, partyFields, "description", "preferredCurrencyUomId", "externalId");
-            create("Party", partyFields);
+            createPartyWithStatus(partyFields, input);
         }
         Map<String, Object> personFields = new LinkedHashMap<>();
         personFields.put("partyId", partyId);
@@ -175,7 +175,7 @@ public class PartyServiceHandlers {
         partyFields.put("partyTypeId", "PARTY_GROUP");
         partyFields.put("statusId", value(input, "statusId", "PARTY_ENABLED"));
         copy(input, partyFields, "description", "preferredCurrencyUomId", "externalId");
-        create("Party", partyFields);
+        createPartyWithStatus(partyFields, input);
         Map<String, Object> group = new LinkedHashMap<>();
         group.put("partyId", partyId);
         copy(input, group, "groupName", "officeSiteName", "annualRevenue", "numEmployees", "tickerSymbol",
@@ -186,6 +186,23 @@ public class PartyServiceHandlers {
 
     private Map<String, Object> updatePartyGroup(Map<String, Object> input) {
         return update("PartyGroup", input);
+    }
+
+    private void createPartyWithStatus(Map<String, Object> fields, Map<String, Object> input) {
+        Timestamp timestamp = now();
+        fields.put("createdDate", timestamp);
+        fields.put("lastModifiedDate", timestamp);
+        Map<String, Object> status = new LinkedHashMap<>();
+        status.put("partyId", fields.get("partyId"));
+        status.put("statusId", fields.get("statusId"));
+        status.put("statusDate", timestamp);
+        if (input.get("userLogin") instanceof Map<?, ?> login && login.get("userLoginId") != null) {
+            fields.put("createdByUserLogin", login.get("userLoginId"));
+            fields.put("lastModifiedByUserLogin", login.get("userLoginId"));
+            status.put("changeByUserLoginId", login.get("userLoginId"));
+        }
+        create("Party", fields);
+        create("PartyStatus", status);
     }
 
     private Map<String, Object> savePartyNameChange(Map<String, Object> input) {
