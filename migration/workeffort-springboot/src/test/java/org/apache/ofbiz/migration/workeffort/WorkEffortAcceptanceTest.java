@@ -108,6 +108,8 @@ class WorkEffortAcceptanceTest {
         assertThat(entities.get(arrive, "facilityId")).isEqualTo("GAP_DEST");
         assertThat(entities.findByEquality(entities.entityClass("WorkEffortPartyAssignment"), Map.of("workEffortId", "GAP_SHIP"))).hasSize(1);
         assertThat(entities.findByEquality(entities.entityClass("WorkEffortStatus"), Map.of("workEffortId", "GAP_SHIP"))).hasSize(1);
+        Object history = entities.findByEquality(entities.entityClass("WorkEffortStatus"), Map.of("workEffortId", "GAP_SHIP")).get(0);
+        assertThat(entities.get(history, "setByUserLogin")).isEqualTo("user");
     }
 
     @Test

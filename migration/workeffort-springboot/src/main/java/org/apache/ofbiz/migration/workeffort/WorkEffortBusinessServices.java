@@ -269,6 +269,7 @@ public final class WorkEffortBusinessServices {
             status.put("workEffortId", id);
             status.put("statusId", nextStatus);
             status.put("statusDatetime", Timestamp.from(Instant.now()));
+            status.put("setByUserLogin", userLoginId(input));
             createIfEntityExists("WorkEffortStatus", status);
             setIfPresent(workEffort, "lastStatusUpdate", Timestamp.from(Instant.now()));
         }
